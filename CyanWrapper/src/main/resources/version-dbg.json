@@ -1,0 +1,35 @@
+{
+	"id": "${mcver}-cyan-${cyanver}-dbg",
+	"inheritsFrom": "${mcver}",
+	"time": "${timeStartDev}",
+	"releaseTime": "${timeRelease}",
+	"type": "${type}",
+	"libraries": ${librariesRemSelf}
+	"mainClass": "${group}.${classwrapperclient}",
+	"minimumLauncherVersion": "21",
+	"logging": {
+		"client": {
+			"argument": "-Dlog4j.configurationFile=\${path}",
+			"type": "log4j2-xml",
+			"file": {
+				"id": "cyanclient-${cyanver}.xml",
+				"sha1": "${logsha}",
+				"size": ${logsize},
+				"url": "${logurl}"
+			}
+		}
+	},
+	"arguments": {
+		"game": [],
+		"jvm": [
+			"-Djdk.attach.allowAttachSelf=true",
+			"-DcyanAgentJar=${agentjar}",
+			"-Xdebug",
+			"-Xnoagent",
+			"-Djava.compiler=NONE",
+			"-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=3251",
+			"-cp",
+	        "\${classpath}:${resources}:${projbins}"
+		]
+	}
+}

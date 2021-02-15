@@ -1,0 +1,10 @@
+rootProject.name = 'Cyan'
+include('CyanWrapper')
+include('Fluid')
+include('CCFG')
+include('CyanComponents')
+include('CyanCore')
+include('CyanUtil')
+include('CyanLoader')
+include('MixinSupport')
+include('MTK')

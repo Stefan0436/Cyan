@@ -1,0 +1,107 @@
+plugins {
+    id 'java'
+	id 'maven-publish'
+}
+
+apply from: '../asf.mvn.publish.gradle'
+apply plugin: 'eclipse'
+buildDir = '../build/Fluid'
+
+group="org.asf.cyan"
+def authorname="AerialWorks Software Foundation"
+
+configurePublish {
+	pretty_name "Fluid Runtime Modification Engine"
+	description "Fluid allows for modifications to Minecraft, inspired by sponge mixin"
+	page "https://aerialworks.ddns.net/maven"
+	address "https://aerialworks.ddns.net/maven"
+	
+	author {
+		name "$authorname"
+		id "ASF"
+	}
+	
+	license {
+		name "GNU General Public License v2.0"
+		url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
+	}
+}
+
+version="1.0.0.A1"
+jar.dependsOn('processResources')
+
+repositories {
+    mavenCentral()
+    jcenter()
+	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
+}
+
+dependencies {
+    implementation 'org.reflections:reflections:0.9.12'
+    implementation 'org.javassist:javassist:3.15.0-GA'
+	
+	implementation project(':CCFG')
+	implementation project(':CyanComponents')
+	
+    implementation 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.1'
+    
+    testImplementation 'junit:junit:4.12'
+}
+
+jar {
+	destinationDirectory = file('../build/Fluid/Jars')
+	manifest {
+		attributes([
+			"Specification-Title": project.name,
+			"Specification-Vendor": "${authorname}",
+			"Specification-Version": project.version,
+			"Implementation-Title": project.name,
+			"Implementation-Version": project.version,
+			"Implementation-Vendor" :"${authorname}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+			"Agent-Class": "org.asf.cyan.fluid.FluidAgent"
+		])
+	}
+	exclude "**/extra/**"
+	exclude "**/tests/**"
+	includeEmptyDirs = false
+}
+
+task javaDocs(type: Javadoc) {
+	classpath = sourceSets.main.runtimeClasspath
+	source = sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: 'javaDocs') {
+	from javadoc
+	classifier = 'javadoc'
+	exclude "**/extra/**"
+	destinationDirectory = file('../build/Fluid/Javadocs')
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+	exclude "**/extra/**"
+	destinationDirectory = file('../build/Fluid/Source jars')
+}
+
+artifacts {
+	archives sourcesJar
+	archives javadocJar
+}
+
+test {
+    include "**/**Test**"
+    exclude "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}
+
+task specialTest (type: Test, dependsOn: test) {
+    include "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}
+
+initializeASFMVNPublish()

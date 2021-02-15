@@ -1,0 +1,110 @@
+plugins {
+    id 'java'
+	id 'maven-publish'
+}
+apply from: '../asf.mvn.publish.gradle'
+apply from: '../config.gradle'
+apply plugin: 'eclipse'
+buildDir = '../build/CyanLoader'
+
+group="org.asf.cyan"
+def authorname="AerialWorks Software Foundation"
+configurePublish {
+	pretty_name "CyanLoader"
+	description "Cyan main startup system - called from the wrappers\nAlso contains forge/fabric compatibility mappings"
+	page "https://aerialworks.ddns.net/maven"
+	address "https://aerialworks.ddns.net/maven"
+	
+	author {
+		name "$authorname"
+		id "ASF"
+	}
+	
+	license {
+		name "GNU General Public License v2.0"
+		url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
+	}
+	
+	resource "/log4j2.xml"
+}
+
+version="1.0.0.A1"
+jar.dependsOn('processResources')
+
+repositories {
+    mavenCentral()
+    jcenter()
+	maven { url = 'https://repo.spongepowered.org/maven' }
+	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
+}
+
+dependencies {
+	implementation project(':CyanComponents')
+	implementation project(':CyanCore')
+	implementation project(':MTK')
+	implementation project(':Fluid')
+	implementation project(':CyanUtil')
+	implementation project(':CCFG')
+	
+	implementation 'org.javassist:javassist:3.15.0-GA'
+	
+	implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
+    testImplementation 'junit:junit:4.12'
+}
+
+jar {
+	destinationDirectory = file('../build/CyanLoader/Jars')
+	manifest {
+		attributes([
+			"Specification-Title": project.name,
+			"Specification-Vendor": "${authorname}",
+			"Specification-Version": project.version,
+			"Implementation-Title": project.name,
+			"Implementation-Version": project.version,
+			"Implementation-Vendor" :"${authorname}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+	exclude "**/extra/**"
+	exclude "**/tests/**"
+	includeEmptyDirs = false
+}
+
+task javaDocs(type: Javadoc) {
+	classpath = sourceSets.main.runtimeClasspath
+	source = sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: 'javaDocs') {
+	from javadoc
+	classifier = 'javadoc'
+	exclude "**/extra/**"
+	destinationDirectory = file('../build/CyanLoader/Javadocs')
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+	exclude "**/extra/**"
+	destinationDirectory = file('../build/CyanLoader/Source jars')
+}
+
+artifacts {
+	archives sourcesJar
+	archives javadocJar
+}
+
+test {
+    include "**/**Test**"
+    exclude "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}
+
+task specialTest (type: Test, dependsOn: test) {
+    include "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}
+
+initializeASFMVNPublish()

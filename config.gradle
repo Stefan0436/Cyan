@@ -1,0 +1,49 @@
+// Main configuration file, shared across projects
+ext.minecraft="1.16.5"
+
+ext.minmixin="0.7.10"
+ext.mixinversion="0.8.2"
+
+ext.versionType="release"
+ext.timeStartDev="2021-02-07T16:41:37+01:00"
+
+ext.cyanversion="1.0.0.A2"
+
+ext.timeRelease=OffsetDateTime.now().withNano(0).toString()
+
+gradle.allprojects {
+	
+	if (project.hasProperty("overrideGameVersion")) {
+		ext.minecraft=project.getProperty("overrideGameVersion")
+	}
+    ext.minecraftreal=minecraft
+	if (project.hasProperty("setModLoader")) {
+		ext.minecraft=project.getProperty("setModLoader")
+	}
+	if (project.hasProperty("overrideReleaseType")) {
+		ext.versionType=project.getProperty("overrideReleaseType")
+	}
+	if (project.hasProperty("overrideMixinVersion")) {
+		ext.mixinversion=project.getProperty("overrideMixinVersion")
+	}
+	if (project.hasProperty("overrideMinMixinVersion")) {
+		ext.minmixin=project.getProperty("overrideMinMixinVersion")
+	}
+	
+	
+	// Taken from our legacy gradle cornflower plugin, the original cyan project (Cornflower will be re-implemented later, was not that long ago, only a few months)
+	ext.getCacheRoot = { ->
+		return getGradle().getGradleUserHomeDir().listFiles(new FilenameFilter() {
+	
+			@Override
+			public boolean accept(File file, String name) {
+				if (name.equals("caches"))
+					return true;
+				return false;
+			}
+	
+		})[0].getCanonicalFile();
+	}
+	
+    
+}

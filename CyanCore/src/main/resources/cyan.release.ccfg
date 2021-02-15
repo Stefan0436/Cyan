@@ -1,0 +1,6 @@
+minecraftCyanVersion> '${mcver_vanilla}-cyan-${cyanver}'
+minecraftVersion> '${mcver_vanilla}'
+devStartDate> '${timeStartDev}'
+releaseDate> '${timeRelease}'
+version> '${cyanver}'
+actualVersion> '${mcver}-cyan-${cyanver}'

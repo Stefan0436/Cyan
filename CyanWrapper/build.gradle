@@ -1,0 +1,489 @@
+plugins {
+    id 'java'
+	id 'maven-publish'
+}
+apply from: '../asf.mvn.publish.gradle'
+apply from: '../config.gradle'
+
+apply plugin: 'eclipse'
+import sun.security.ec.point.ProjectivePoint
+
+import java.time.OffsetDateTime
+import java.nio.file.*
+import java.security.MessageDigest
+import java.math.BigInteger
+buildDir = '../build/Wrapper'
+
+group="org.asf.cyan"
+def fallback_url="https://aerialworks.ddns.net/maven"
+def cyanloader_logconf_version="1.0.0.A1"
+def cyanloader_package="org.asf.cyan.CyanLoader"
+def authorname="AerialWorks Software Foundation"
+
+configurePublish {
+	pretty_name "Cyan Launch Wrappers"
+	description "Cyan launch wrappers, allows cyan to be launched from the minecraft launcher"
+	page "$fallback_url"
+	address "$fallback_url"
+	
+	author {
+		name "$authorname"
+		id "ASF"
+	}
+	
+	license {
+		name "GNU General Public License v2.0"
+		url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
+	}
+}
+
+def classWrapperClient="CyanClientWrapper"
+def classWrapperServer="CyanServerWrapper"
+
+if (project.hasProperty("overrideLaunchWrapperClient")) {
+	classWrapperClient=project.getProperty("overrideLaunchWrapperClient")
+}
+
+if (System.hasProperty("overrideLaunchWrapperServer")) {
+	classWrapperServer=project.getProperty("overrideLaunchWrapperServer")
+}
+
+version="1.0.0.A1"
+
+def getServerConnection = { ->
+	try {
+		URL u = new URL(fallback_url);
+		URLConnection uc = u.openConnection();
+		uc.connect();
+		return true;
+	} catch (MalformedURLException e) {
+		return false;
+	} catch (IOException e) {
+		return false;
+	}
+}
+
+
+def timeStartHuman=OffsetDateTime.parse("${timeStartDev}").withNano(0).toLocalDate().toString()+" at "+OffsetDateTime.parse("${timeStartDev}").withNano(0).toLocalTime().toString();
+def timeReleaseHuman=OffsetDateTime.parse("${timeRelease}").withNano(0).toLocalDate().toString()+" at "+OffsetDateTime.parse("${timeRelease}").withNano(0).toLocalTime().toString();
+
+cyanloader_package = cyanloader_package.replaceAll("\\.","/")
+
+println "CYAN FOR MINECRAFT VERSION ${minecraft}, CYAN ${cyanversion}"
+println "Development initiated date: ${timeStartHuman}"
+println "Release date: ${timeReleaseHuman}"
+println ""
+
+jar.dependsOn('processResources')
+
+repositories {
+    mavenCentral()
+    jcenter()
+	maven { url = 'https://repo.spongepowered.org/maven' }
+	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
+}
+
+configurations {
+	wrapper
+}
+
+dependencies {
+	wrapper 'org.reflections:reflections:0.9.12'
+    implementation 'org.reflections:reflections:0.9.12'
+    
+    testImplementation 'junit:junit:4.12'
+    
+    //wrapper "org.spongepowered:mixin:${mixinversion}"
+    //implementation "org.spongepowered:mixin:${mixinversion}"
+	
+	wrapper 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.1'
+    implementation 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.1'
+    
+    wrapper 'org.ow2.asm:asm:7.0'
+    implementation 'org.ow2.asm:asm:7.0'
+    
+    wrapper 'org.ow2.asm:asm-tree:9.1'
+    implementation 'org.ow2.asm:asm-tree:9.1'
+    
+    wrapper 'org.javassist:javassist:3.15.0-GA'    
+    
+	wrapper group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
+	wrapper group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
+	
+	wrapper project(":CCFG")
+	implementation project(":CCFG")
+	
+	wrapper project(':Fluid')
+	implementation project(':Fluid')
+	
+	wrapper project(":CyanComponents")
+	implementation project(":CyanComponents")
+	
+	wrapper project(":CyanCore")
+	implementation project(":CyanCore")
+	
+	wrapper project(":CyanUtil")
+	implementation project(":CyanUtil")
+	
+	wrapper project(":CyanLoader")
+	implementation project(":CyanLoader")
+	
+	wrapper project(":MTK")
+	implementation project(":MTK")
+	
+	wrapper group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
+	implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
+	
+	// Disabled in favor of Fluid, will be enabled in the future (also caused a crash if running without debugger)
+	//wrapper project(":MixinSupport")
+	//implementation project(":MixinSupport")
+}
+
+jar {
+	destinationDirectory = file('../build/Wrapper/Jars')
+	manifest {
+		attributes([
+			"Specification-Title": project.name,
+			"Specification-Vendor": "${authorname}",
+			"Specification-Version": project.version,
+			"Implementation-Title": project.name,
+			"Implementation-Version": project.version,
+			"Implementation-Vendor" :"${authorname}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+	exclude "**/extra/**"
+	exclude "**/tests/**"
+	exclude "**/version.json"
+	exclude "**/version-dbg.json"
+	includeEmptyDirs = false
+}
+
+task javaDocs(type: Javadoc) {
+	classpath = sourceSets.main.runtimeClasspath
+	source = sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: 'javaDocs') {
+	from javadoc
+	classifier = 'javadoc'
+	exclude "**/extra/**"
+	destinationDirectory = file('../build/Wrapper/Javadocs')
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+	exclude "**/extra/**"
+	destinationDirectory = file('../build/Wrapper/Source jars')
+}
+
+task cyanSourceZip {
+	def p1 = 'git rev-list HEAD | wc -l | tr -d " "'.execute()
+	p1.waitFor()
+}
+
+artifacts {
+	archives sourcesJar
+	archives javadocJar
+}
+
+initializeASFMVNPublish()
+
+test {
+    include "**/**Test**"
+    exclude "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}
+task specialTest (type: Test, dependsOn: test) {
+    include "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}
+
+def libraries = [
+	(project.group+":"+project.name+":"+project.version): tasks.jar.archivePath
+]
+
+File cyanCache = new File(getCacheRoot(), "cyan-wrapper-project");
+if (!cyanCache.exists()) cyanCache.mkdirs();
+
+if (!fallback_url.endsWith("/")) fallback_url+="/"
+
+def librarysources = [
+	(project.group+":"+project.name+":"+project.version): fallback_url
+]
+File libSourceCache = new File(cyanCache, "libraries.sources");
+if (libSourceCache.exists()) {
+	for (String line : Files.readAllLines(libSourceCache.toPath())) {
+		def key = line.substring(0, line.indexOf(" = "));
+		def url = line.substring(line.indexOf(" = ")+3);
+		configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each { dep ->
+			def lpath = (!dep.moduleGroup.isEmpty() ? dep.moduleGroup+":" : "")+dep.moduleName+(!dep.moduleVersion.isEmpty() ? ":"+dep.moduleVersion : "")
+			if (lpath.equals(key)) { 
+				librarysources.put(key, url)
+				println "Loaded source url "+url+" from cache, library: "+key
+			}
+		}
+	}
+}
+
+for (def repo : project.repositories) {
+	configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each { dep ->
+		def lpath = (!dep.moduleGroup.isEmpty() ? dep.moduleGroup+":" : "")+dep.moduleName+(!dep.moduleVersion.isEmpty() ? ":"+dep.moduleVersion : "")
+		if (!librarysources.containsKey(lpath)) {
+			def path = (!dep.moduleGroup.isEmpty() ? dep.moduleGroup.replaceAll("\\.", "/")+"/" : "")+dep.moduleName+(!dep.moduleVersion.isEmpty() ? "/"+dep.moduleVersion : "")+"/"+dep.getModuleArtifacts()[0].file.getName()
+			def url = repo.getUrl().toString()+"/"+path
+			try {
+				URL u = new URL(url);
+				HttpURLConnection connection = (HttpURLConnection)u.openConnection()
+				connection.setRequestMethod("GET");
+				connection.connect()
+				if (connection.responseCode == 200) {
+					url=repo.getUrl().toString()
+					if (!url.endsWith("/")) url+="/"
+					
+					println "Cached source url: "+url+", library: "+lpath
+					librarysources.put(lpath, url)
+					connection.disconnect()
+				}
+				connection.disconnect()
+			} catch (Exception e) {
+				println e
+			}
+		}
+	}
+}
+configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each { dep ->
+	def lpath = (!dep.moduleGroup.isEmpty() ? dep.moduleGroup+":" : "")+dep.moduleName+(!dep.moduleVersion.isEmpty() ? ":"+dep.moduleVersion : "")
+	if (!librarysources.containsKey(lpath)) {
+		librarysources.put(lpath, fallback_url)
+		println "Cached source url: "+fallback_url+", library: "+lpath
+	}
+}
+String file = "";
+librarysources.each { k, v ->		
+	file += k+" = "+v+System.lineSeparator();
+}
+Files.writeString(libSourceCache.toPath(), file)
+
+def index=0
+configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each { dep ->
+	def path = (!dep.moduleGroup.isEmpty() ? dep.moduleGroup+":" : "")+dep.moduleName+(!dep.moduleVersion.isEmpty() ? ":"+dep.moduleVersion : "")
+	libraries.put path, dep.getModuleArtifacts()[0].file
+	index++
+}
+
+def template="\t\t{"+System.lineSeparator()+
+			"\t\t\t"+'"name": "%lib%",'+System.lineSeparator()+
+			"\t\t\t"+'"url": "%url%"'+System.lineSeparator()+
+		"\t\t}"
+
+processResources {
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+		
+	def logSha = "Unknown"
+	def logSize = "0"
+	def url = fallback_url+"/"+cyanloader_package+"/"+cyanloader_logconf_version+"/CyanLoader-${cyanloader_logconf_version}-log4j2.xml"
+	
+	File logShaFile = new File(cyanCache, "logsha.info")
+	File logSizeFile = new File(cyanCache, "logsize.info")
+	
+	if (!project.hasProperty("noDownload")) {
+		if (getServerConnection()) {
+			println "Downloading CyanLoader logging context..."
+			URL xml = new URL(url)
+			URL sha = new URL(url+".sha1")
+						
+			BufferedInputStream strm = new BufferedInputStream(xml.openStream())
+			logSize = strm.readAllBytes().length.toString() 
+			
+			Scanner scanner = new Scanner(sha.openStream())
+			StringBuilder builder = new StringBuilder()
+			while (scanner.hasNext())
+				builder.append(scanner.next())
+			
+			logSha = builder.toString()
+			scanner.close()
+			builder = null
+			
+			println "Saving information to cache..."
+			Files.writeString(logShaFile.toPath(), logSha)
+			Files.writeString(logSizeFile.toPath(), logSize)
+		} else {
+			if (logShaFile.exists() && logSizeFile.exists() ) {
+				logSha = Files.readString(logShaFile.toPath())
+				logSize = Files.readString(logSizeFile.toPath())
+			} else {
+				throw new IOException("No connection to the fallback url, cannot download logging information, it is not stored in cache either!")
+			}
+		}
+	}
+	println ""
+	println "Logging file size: "+logSize
+	println "Logging file SHA1: "+logSha
+	println ""
+		
+    inputs.property "mcver", "${minecraft}"
+    inputs.property "logsha", "${logSha}"
+    inputs.property "logsize", "${logSize}"
+    inputs.property "logurl", "${url}"
+    inputs.property "mcver-vanilla", "${minecraftreal}"
+    inputs.property "cyanver", cyanversion
+    inputs.property "timeStartDev", "${timeStartDev}"
+    inputs.property "type", "${versionType}"
+    inputs.property "group", project.group
+    inputs.property "root", project.file(".").getPath()
+    inputs.property "classwrapperclient", "${classWrapperClient}"
+    inputs.property "minmixin", "${minmixin}"
+	inputs.property "agentjar", project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
+
+	def projbins = ""
+	def resources = ""
+	def libs="["+System.lineSeparator()
+	libraries.each { k, v ->		
+		if (libs.equals("["+System.lineSeparator()))
+			libs += template.replaceAll("\\%lib\\%", k).replaceAll("\\%url\\%", librarysources.get(k))
+		else
+			libs += ","+System.lineSeparator()+template.replaceAll("\\%lib\\%", k).replaceAll("\\%url\\%", librarysources.get(k))
+	}
+	libs+=System.lineSeparator()+"\t],"
+	
+	def libsNoSelf = "["+System.lineSeparator()
+	libraries.each { k, v ->		
+		def add = true
+		project(":").childProjects.each { proj ->
+			if (k.equals(proj.value.group+":"+proj.value.name+":"+proj.value.version) && proj.value.file('bin/main').exists() && proj.value.hasProperty("sourceSets")) {
+				add = false
+			}
+		}
+		
+		if (add) {
+			if (libsNoSelf.equals("["+System.lineSeparator()))
+				libsNoSelf += template.replaceAll("\\%lib\\%", k).replaceAll("\\%url\\%", librarysources.get(k))
+			else
+				libsNoSelf += ","+System.lineSeparator()+template.replaceAll("\\%lib\\%", k).replaceAll("\\%url\\%", librarysources.get(k))
+		}
+	}
+	
+	libraries.each { k, v ->
+		for (def proj : project(":").childProjects) {
+			if (k.equals(proj.value.group+":"+proj.value.name+":"+proj.value.version) && proj.value.file('bin/main').exists()) {
+				if (projbins.isEmpty()) projbins=proj.value.file('bin/main').getCanonicalPath();
+				else projbins += ":"+proj.value.file('bin/main').getCanonicalPath();
+				
+				if (!proj.value.hasProperty("sourceSets")) continue;
+				if (resources.isEmpty()) resources = proj.value.sourceSets.main.output.resourcesDir.getCanonicalPath();
+				else resources += ":" + proj.value.sourceSets.main.output.resourcesDir.getCanonicalPath();
+			}
+		}
+	}
+	
+	libsNoSelf+=System.lineSeparator()+"\t],"
+    inputs.property "projbins", "${projbins}"
+    inputs.property "libsNoSelf", "${libsNoSelf}"
+    inputs.property "resources", "${resources}"
+
+    from(sourceSets.main.resources.srcDirs) {
+        expand(
+        	"mcver": "${minecraft}",
+        	"mcver_vanilla": "${minecraftreal}",
+        	"minmixin": "${minmixin}",
+        	"cyanver": cyanversion,
+        	"timeStartDev": "${timeStartDev}",
+        	"timeRelease": "${timeRelease}",
+        	"type": "${versionType}",
+			"logsha": "${logSha}",
+			"logsize": "${logSize}",
+			"logurl": "${url}",
+        	"group": project.group,
+        	"projname": project.name,
+			"projbins": "${projbins}",
+        	"root": project.file(".").getCanonicalPath(),
+        	"agentjar": project(':Fluid').tasks.jar.archivePath.getCanonicalPath(),
+        	"resources": "${resources}",
+        	"libraries": "${libs}",
+        	"librariesRemSelf": "${libsNoSelf}",
+        	"groupslashed": project.group.replaceAll("\\.", "/"),
+        	"classwrapperclient": "${classWrapperClient}"
+        )
+    }
+}
+
+def versionFiles = [
+	("${minecraft}-cyan-"+cyanversion+".json"): new File(sourceSets.main.output.resourcesDir, "version.json")
+]
+
+def versionFilesDbg = [
+	("${minecraft}-cyan-"+cyanversion+"-dbg.json"): new File(sourceSets.main.output.resourcesDir, "version-dbg.json")
+]
+
+task gameData () {
+	doLast {
+		println "Generating client folders..."
+		def versions = new File("${buildDir}", project.version+"/.minecraft/versions/${minecraft}-cyan-"+cyanversion)
+		versions.mkdirs()
+		def libs = new File("${buildDir}", project.version+"/.minecraft/libraries/")
+		libs.mkdirs()
+		
+		println " | Installing library files..."
+		libraries.forEach { k, v ->
+			println " +-- Installing library: "+k+", file: "+v.name+"..."
+			def information = k.split(":")
+			def group = ""
+			def name = information[0]
+			def version = ""
+			
+			if (information.length == 3) {
+			    group = information[0]
+			    name = information[1]
+			    version = information[2]
+			} else if (information.length >= 2) {
+			    name = information[0]
+			    version = information[1]
+			}
+			
+			def dest = new File(libs, group.replaceAll("\\.", "/")+"/"+name+"/"+version)
+			dest.mkdirs()
+			copy {
+				from v.getParent()
+				into dest
+				include v.getName()
+				rename v.getName(), name+"-"+version+".jar"
+			}
+		}
+		println " |"
+		println " | Installing version files..."
+		versionFiles.forEach { k, v ->
+			println " +-- Installing into: "+k+", file: "+v.name+"..."			
+			copy {
+				from v.getParent()
+				into versions
+				include v.getName()
+				rename v.getName(), k
+			}
+		}
+		println " | Installing debug version files..."
+		versions = new File("${buildDir}", project.version+"/.minecraft/versions/${minecraft}-cyan-"+cyanversion+"-dbg")
+		versions.mkdirs()
+		versionFilesDbg.forEach { k, v ->
+			println " +-- Installing into: "+k+", file: "+v.name+"..."			
+			copy {
+				from v.getParent()
+				into versions
+				include v.getName()
+				rename v.getName(), k
+			}
+		}		
+	}
+}
+gameData.dependsOn processResources
+
+task mixinVersion {
+	doLast {
+		System.setProperty("mixinversion", mixinversion)
+	}
+}

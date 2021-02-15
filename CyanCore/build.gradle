@@ -1,0 +1,132 @@
+plugins {
+    id 'java'
+	id 'maven-publish'
+}
+apply from: '../config.gradle'
+apply plugin: 'eclipse'
+apply from: '../asf.mvn.publish.gradle'
+buildDir = '../build/CyanCore'
+
+group="org.asf.cyan"
+def authorname="AerialWorks Software Foundation"
+configurePublish {
+	pretty_name "CyanCore"
+	description "CyanCore"
+	page "https://aerialworks.ddns.net/maven"
+	address "https://aerialworks.ddns.net/maven"
+	
+	author {
+		name "$authorname"
+		id "ASF"
+	}
+	
+	license {
+		name "GNU General Public License v2.0"
+		url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
+	}
+}
+
+version="1.0.0.A1"
+jar.dependsOn('processResources')
+
+repositories {
+    mavenCentral()
+    jcenter()
+	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
+}
+
+dependencies {
+	implementation project(':Fluid')
+	implementation project(':CyanUtil')
+	implementation project(':CCFG')
+	implementation project(':CyanComponents')
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
+    implementation 'org.reflections:reflections:0.9.12'
+    testImplementation 'junit:junit:4.12'
+}
+
+jar {
+	destinationDirectory = file('../build/CyanCore/Jars')
+	manifest {
+		attributes([
+			"Specification-Title": project.name,
+			"Specification-Vendor": "${authorname}",
+			"Specification-Version": project.version,
+			"Implementation-Title": project.name,
+			"Implementation-Version": project.version,
+			"Implementation-Vendor" :"${authorname}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+	exclude "**/extra/**"
+	exclude "**/tests/**"
+	includeEmptyDirs = false
+}
+
+processResources {
+	inputs.property "mcver", "${minecraft}"
+    inputs.property "mcver-vanilla", "${minecraftreal}"
+	inputs.property "cyanver", cyanversion
+	inputs.property "timeStartDev", "${timeStartDev}"
+	inputs.property "type", "${versionType}"
+	inputs.property "group", project.group
+	inputs.property "root", project.file(".").getPath()
+	inputs.property "minmixin", "${minmixin}"
+
+	from(sourceSets.main.resources.srcDirs) {
+		expand(
+			"mcver": "${minecraft}",
+        	"mcver_vanilla": "${minecraftreal}",
+			"minmixin": "${minmixin}",
+			"cyanver": cyanversion,
+			"timeStartDev": "${timeStartDev}",
+			"timeRelease": "${timeRelease}",
+			"type": "${versionType}",
+			"group": project.group,
+			"projname": project.name,
+			"groupslashed": project.group.replaceAll("\\.", "/")
+		)
+	}
+}
+
+version=project.version+"-"+minecraftreal
+
+task javaDocs(type: Javadoc) {
+	classpath = sourceSets.main.runtimeClasspath
+	source = sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: 'javaDocs') {
+	from javadoc
+	classifier = 'javadoc'
+	exclude "**/extra/**"
+	destinationDirectory = file('../build/CyanCore/Javadocs')
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+	exclude "**/extra/**"
+	destinationDirectory = file('../build/CyanCore/Source jars')
+}
+
+artifacts {
+	archives sourcesJar
+	archives javadocJar
+}
+
+test {
+    include "**/**Test**"
+    exclude "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}
+
+task specialTest (type: Test, dependsOn: test) {
+    include "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}
+
+initializeASFMVNPublish()

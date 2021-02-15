@@ -1,0 +1,97 @@
+plugins {
+    id 'java'
+}
+apply from: '../config.gradle'
+apply plugin: 'eclipse'
+buildDir = '../build/MixinSupport'
+
+group="org.asf.cyan"
+def author="AerialWorks Software Foundation"
+
+version="1.0.0.A1"
+jar.dependsOn('processResources')
+
+repositories {
+    mavenCentral()
+    jcenter()
+	maven { url = 'https://repo.spongepowered.org/maven' }
+	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
+}
+
+dependencies {
+	implementation project(':CyanCore')
+	implementation project(':CyanComponents')
+	implementation project(':CyanUtil')
+    implementation "org.spongepowered:mixin:${mixinversion}"
+    testImplementation 'junit:junit:4.12'
+	
+	annotationProcessor("org.spongepowered:mixin:${mixinversion}:processor")
+}
+
+jar {
+	destinationDirectory = file('../build/MixinSupport/Jars')
+	manifest {
+		attributes([
+			"Specification-Title": project.name,
+			"Specification-Vendor": "${author}",
+			"Specification-Version": project.version,
+			"Implementation-Title": project.name,
+			"Implementation-Version": project.version,
+			"Implementation-Vendor" :"${author}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+			"Export-Package": "org.asf.cyan.common.CyanMixinService"
+		])
+	}
+	exclude "**/extra/**"
+	exclude "**/tests/**"
+	includeEmptyDirs = false
+}
+
+task javaDocs(type: Javadoc) {
+	classpath = sourceSets.main.runtimeClasspath
+	source = sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: 'javaDocs') {
+	from javadoc
+	classifier = 'javadoc'
+	exclude "**/extra/**"
+	destinationDirectory = file('../build/MixinSupport/Javadocs')
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+	exclude "**/extra/**"
+	destinationDirectory = file('../build/MixinSupport/Source jars')
+}
+
+processResources {
+	inputs.property "group", project.group
+	inputs.property "minmixin", "${minmixin}"
+
+	from(sourceSets.main.resources.srcDirs) {
+		expand(
+			"minmixin": "${minmixin}",
+			"group": project.group
+		)
+	}
+}
+
+artifacts {
+	archives sourcesJar
+	archives javadocJar
+}
+
+test {
+    include "**/**Test**"
+    exclude "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}
+
+task specialTest (type: Test, dependsOn: test) {
+    include "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}

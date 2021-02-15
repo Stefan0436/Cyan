@@ -1,0 +1,430 @@
+/*
+ * 
+ * Cyan Cornflower Project - Copyright(c) 2021 AerialWorks Software Foundation - LGPLv3.0
+ * This project uses sardine, Copyright 2013 Jon Scott Stevens, github: https://github.com/lookfirst/sardine
+ * 
+ */
+
+class PublishingConfiguration {
+	def project = null
+	public def includeshadow = false
+	public def norecurse = false
+	public def single_resources = []
+
+	public def pretty_name = ""
+	public def address = ""
+	public def fallback_desc = ""
+	public def fallback_page=""
+	public def fallback_authors=new HashMap<String, String[]>()
+	public def fallback_licenses=new HashMap<String, String>()
+	public def fallback_desc_automatic = new HashMap<String, String>()
+
+	class author {
+		public def name = null
+		public def id = null
+		public def email = null
+
+		public def name(def name) {
+			this.name=name;
+		}
+
+		public def id(def id) {
+			this.id=id;
+		}
+
+		public def email(def email) {
+			this.email=email;
+		}
+	}
+
+	class nameurl {
+		public def name = null
+		public def url = null
+
+		public def name(def name) {
+			this.name=name;
+		}
+
+		public def url(def url) {
+			this.url=url;
+		}
+	}
+
+	class artifact {
+		public def description = null
+		public def page = null
+		public def name = null
+		public def pretty_name = null
+		public def group = null
+		public def version = null
+		public def classifiers = new HashMap<String, String>()
+		public def extensions = new HashMap<String, String>()
+		public def authors = new HashMap<String, String[]>()
+		public def licenses = new HashMap<String, String>()
+		public def tasks = []
+		public def single_resources = []
+
+		class taskclosure {
+			public def task
+			public def extension
+			public def classifier
+
+			public def artifact(def task) {
+				this.task = task;
+			}
+
+			public def classifier(def classifier) {
+				this.classifier = classifier;
+			}
+
+			public def extension(def extension) {
+				this.extension = extension;
+			}
+		}
+
+		public def author(Closure author) {
+			author = author.clone()
+			def output = new author()
+			author.delegate = output
+			author()
+			authors.put(output.name, [output.id, output.email])
+			return output
+		}
+
+		public def license(Closure license) {
+			license = license.clone()
+			def output = new nameurl()
+			license.delegate = output
+			license()
+			licenses.put(output.name, output.url)
+			return output
+		}
+
+		public def page(def page) {
+			this.page = page;
+			return page
+		}
+
+		public def name(def name) {
+			this.name = name
+			return name
+		}
+
+		public def pretty_name(def name) {
+			this.pretty_name = name
+			return name
+		}
+
+		public def group(def group) {
+			this.group = group
+			return group
+		}
+
+		public def version(def version) {
+			this.version = version
+			return version
+		}
+
+		public def description(def description) {
+			this.description = description
+			return description
+		}
+
+		public def taskclosure(Closure task) {
+			task = task.clone()
+			def output = new taskclosure()
+			task.delegate = output
+			task()
+			if (output.classifier == null) output.classifier = output.task.archiveClassifier.get()
+			if (output.extension == null) output.extension = output.task.archiveExtension.get()
+			
+			tasks.add(output.task)
+			if (name == null) name = project.name+(output.task.archiveClassifier.get() == null || output.task.archiveClassifier.get().equals("") ? "" : "-"+output.task.archiveClassifier.get())
+			if (version == null) version = output.task.archiveVersion.get()
+			if (!classifiers.containsKey(output.task.name)) classifiers.put(output.task.name, output.classifier)
+			if (!extensions.containsKey(output.task.name)) extensions.put(output.task.name, output.extension)
+			return output
+		}
+		
+		public def resource(String path) {
+			single_resources.add path
+		}
+	
+		public def task(def task) {
+			if (task instanceof Closure) {
+				return taskclosure(task)
+			}
+			tasks.add(task)
+			if (name == null) name = project.name+"-"+task.archiveClassifier.get()
+			if (version == null) version = task.archiveVersion.get()
+			if (!classifiers.containsKey(task.name)) classifiers.put(task.name, task.archiveClassifier.get())
+			if (!extensions.containsKey(task.name)) extensions.put(task.name, task.archiveExtension.get())
+			return task
+		}
+	}
+
+	public def artifacts = new ArrayList<artifact>()
+
+	public def run(Closure closure, def project) {
+		this.project = project
+		closure = closure.clone()
+		closure.delegate = this
+		closure()
+		return this
+	}
+
+	public def artifact(Closure artifact) {
+		artifact = artifact.clone()
+		def output = new artifact()
+		artifact.delegate = output
+		artifact()
+		artifacts.add(output)
+		return output
+	}
+
+	public def pretty_name(def name) {
+		pretty_name = name
+		return name
+	}
+
+	public def description(def description) {
+		fallback_desc = description
+		return description
+	}
+
+	public def description(def profile, def description) {
+		fallback_desc_automatic.put(profile, description)
+		return description
+	}
+
+	public def address(def address) {
+		this.address = address;
+		return address
+	}
+
+	public def page(def page) {
+		this.fallback_page = page;
+		return page
+	}
+
+	public def author(Closure author) {
+		author = author.clone()
+		def output = new author()
+		author.delegate = output
+		author()
+		fallback_authors.put(output.name, [output.id, output.email])
+		return output
+	}
+
+	public def license(Closure license) {
+		license = license.clone()
+		def output = new nameurl()
+		license.delegate = output
+		license()
+		fallback_licenses.put(output.name, output.url)
+		return output
+	}
+	
+	public def resource(String path) {
+		single_resources.add path
+	}
+
+	public def includeShadowJar() {
+		includeshadow = true
+	}
+
+	public def noRecurese() {
+		norecurse = true
+	}
+
+	public void process() {
+		if (!artifacts.stream().anyMatch( { t -> t.name.equalsIgnoreCase(project.name) } )) {
+			def artifact = artifact {
+				name project.name
+				task project.tasks.jar
+				if (project.configurations.archives.artifacts.buildDependencies.getDependencies().stream().anyMatch({it.name.equalsIgnoreCase("javadocjar")})) task project.configurations.archives.artifacts.buildDependencies.getDependencies().stream().filter({it.name.equalsIgnoreCase("javadocjar")}).findFirst().get()
+				if (project.configurations.archives.artifacts.buildDependencies.getDependencies().stream().anyMatch({it.name.equalsIgnoreCase("sourcesjar")})) task project.configurations.archives.artifacts.buildDependencies.getDependencies().stream().filter({it.name.equalsIgnoreCase("sourcesjar")}).findFirst().get()
+			}
+			artifact.pretty_name = pretty_name
+			if (single_resources.size() != 0) {
+				artifact.single_resources = single_resources
+			}
+		}
+
+		if (!norecurse) {
+			for (def tsk : project.configurations.archives.artifacts.buildDependencies.getDependencies()) {
+				if ((tsk.getClass().getTypeName().startsWith("com.github.jengelman.gradle.plugins.shadow") && !includeshadow) || artifacts.stream().anyMatch({ e -> e.tasks.stream().anyMatch({ e2 ->	 e2.name.equals(tsk.name)})}))
+					continue
+				
+				artifact {
+					name project.name+"-"+tsk.archiveClassifier.get()
+					task {
+						artifact tsk
+						classifier ""
+					}
+				}
+			}
+		}
+
+		for (def a : artifacts) {			
+			if (a.description == null && !fallback_desc_automatic.containsKey(a.name)) a.description = fallback_desc;
+			else if (a.description == null && fallback_desc_automatic.containsKey(a.name)) a.description = fallback_desc_automatic[a.name];
+			if (a.page == null) a.page = fallback_page;
+			if (a.group == null) a.group = project.group
+			if (a.version == null) a.group = project.version
+			if (a.authors.size() == 0) a.authors = fallback_authors.clone()
+			if (a.licenses.size() == 0) a.authors = fallback_licenses.clone()
+			if (a.pretty_name == null) a.pretty_name = a.name
+			
+			project.logger.lifecycle "[ASF-Maven-Publish] Added artifact:"
+			project.logger.lifecycle "  Name: "+a.pretty_name
+			project.logger.lifecycle "  Description: "+a.description.replaceAll("\n", "\n  ").replaceAll("\r\n", "\r\n  ")
+			project.logger.lifecycle "  Group: "+a.group
+			project.logger.lifecycle "  Version: "+a.version
+			project.logger.lifecycle "  Page: "+a.page
+			project.logger.lifecycle ""
+		}
+	}
+}
+
+public def doConfigurePublish(def args) {
+    ext.publishconf = new PublishingConfiguration().run(args, project)
+}
+gradle.allprojects {
+    ext.configurePublish = {
+        doConfigurePublish(it)
+    }
+    ext.initializeASFMVNPublish = {
+        doInitializeASFMVNPublish(project)
+    }
+}
+
+def doInitializeASFMVNPublish(def proj) {
+	if (!proj.hasProperty("publishconf")) return
+    ext.publishconf.process()
+
+	configurations {
+		antDep
+	}
+
+	dependencies {
+		antDep 'com.github.lookfirst:sardine:5.10'
+	}
+
+	ant.taskdef(name: 'sardine', classname: 'com.github.sardine.ant.SardineTask', classpath: configurations.antDep.asPath)
+
+	proj.publishing {
+		publications {
+			def ind = 0
+			
+			for (def artifactdata : proj.ext.publishconf.artifacts) {
+				def resourceArtifacts = []	
+				if (artifactdata.single_resources.size() != 0) {
+					for (def resource : artifactdata.single_resources)  {
+						def artifactFile = new File(sourceSets.main.output.resourcesDir, resource)
+						def theArtifact = artifacts.add('archives', artifactFile) {
+							type artifactFile.getName().substring(0, artifactFile.getName().lastIndexOf("."))
+							builtBy 'processResources'
+						}
+						theArtifact.classifier = artifactFile.getName().substring(0, artifactFile.getName().lastIndexOf("."))
+						resourceArtifacts.add theArtifact
+					}
+				}
+							
+				publishing.publications.create("mavenJava"+ind++, MavenPublication) {
+					artifactId = artifactdata.name
+					groupId = artifactdata.group
+					version = artifactdata.version
+					
+					for (def resource : resourceArtifacts)
+						artifact resource
+					
+					for (def tsk : artifactdata.tasks) {
+						artifact(tsk) {
+							classifier artifactdata.classifiers[tsk.name]
+							extension artifactdata.extensions[tsk.name]
+						}
+					}
+
+					pom {
+						name = artifactdata.pretty_name
+						description = artifactdata.description
+						url = artifactdata.page
+						licenses {
+							for (def licensedata : artifactdata.licenses.keySet()) {
+								license {
+									name = "${licensedata}"
+									url = artifactdata.licenses[licensedata]
+								}
+							}
+						}
+						developers {
+							for (def authordata : artifactdata.authors.keySet()) {
+								developer {
+									name = "${authordata}"
+									id = artifactdata.authors[authordata][0]
+									if (artifactdata.authors[authordata][1] != null)
+										email = artifactdata.authors[authordata][0]
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		repositories {
+			maven {
+				url "file:///${buildDir}/maven"
+			}
+		}
+	}
+	
+	if (proj.hasProperty("mavenusername") && proj.hasProperty("mavenpassword")) {
+		publishing.repositories.maven {
+			url proj.ext.publishconf.address
+			credentials {
+				username = "${mavenusername}"
+				password = "${mavenpassword}"
+			}
+		}
+		
+		def ind = 0
+		for (def artifact : proj.ext.publishconf.artifacts) {
+			if (artifact.single_resources.size() != 0) publish.dependsOn processResources
+			def id = ind++
+			def artifact2 = artifact
+			tasks.create("prePublishMavenJava${id}") {
+				doFirst {
+					for (def tsk : artifact2.tasks) {
+						ant.sardine(username: "${mavenusername}", password: "${mavenpassword}") {
+							def cpath = ""
+							for (def folder : artifact2.group.split("\\.")) {
+								exists(url: proj.ext.publishconf.address+"/"+cpath+folder.toString(), property: "exists-"+cpath+folder)
+								cpath += folder+"/"
+							}
+							exists(url: proj.ext.publishconf.address+"/"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name, property: "exists-"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name)
+							exists(url: proj.ext.publishconf.address+"/"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name+"/"+artifact2.version, property: "exists-"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name+"/"+artifact2.version)
+						}
+						ant.sardine(username: "${mavenusername}", password: "${mavenpassword}") {
+							def cpath = ""
+							for (def folder : artifact2.group.split("\\.")) {
+								if (!ant.properties["exists-"+cpath+folder].equals("true")) createDirectory(url: proj.ext.publishconf.address+"/"+cpath+folder)
+								cpath += folder+"/"
+							}
+							if (!ant.properties["exists-"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name].equals("true")) createDirectory(url: proj.ext.publishconf.address+"/"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name)
+							if (!ant.properties["exists-"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name+"/"+artifact2.version].equals("true")) createDirectory(url: proj.ext.publishconf.address+"/"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name+"/"+artifact2.version)
+						}
+					}
+				}
+			}
+			tasks.getByPath(":"+proj.name+":publishMavenJava${id}PublicationToMaven2Repository").dependsOn "prePublishMavenJava${id}"
+		}
+	}
+}
+task checkAsfMVNPublish {
+	doLast {
+		if (!project.hasProperty("publishconf"))
+			logger.warn('ASF-Maven-Publish: Hmmm, looks like you have applied this plugin without a configuration,\nplease add a configurePublish code block.')
+	}
+}
+publish.finalizedBy checkAsfMVNPublish
