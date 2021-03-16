@@ -20,7 +20,7 @@ AerialWorks Maven Server: https://aerialworks.ddns.net/maven
 | CyanCore              | GPL v2              | CyanCore - Implementation of the CyanComponents system - also bootstraps the game and loader. | Copyright (c) 2021<br/>AerialWorks Software Foundation | Alpha Stage                    |
 | CCFG                  | LGPL v3             | Cyan Serializing Configuration API - Main configuration system for Cyan and its mods.         | Copyright (c) 2021<br/>AerialWorks Software Foundation | Alpha Stage                    |
 | MTK                   | LGPL v3             | Minecraft Toolkit - A set of libraries to help with modding, can interface with FLUID.        | Copyright (c) 2021<br/>AerialWorks Software Foundation | Alpha Stage                    |
-| MixinSupport          | LGPL v3             | Mixin Support for CYAN - Soon-to-become-library-mod                                           | Copyright (c) 2021<br/>AerialWorks Software Foundation | STALE                          |
+| MixinSupport          | LGPL v3             | Mixin Support for CYAN - Soon-to-become-library-mod                                           | Copyright (c) 2021<br/>AerialWorks Software Foundation | INACTIVE                       |
 | Cornflower            | GPL v2              | Cornflower Gradle Plugin - Upcoming gradle plugin for building CYAN mods, contains APIs.      | Copyright (c) 2021<br/>AerialWorks Software Foundation | Alpha Stage                    |
 | Cyan API              | LGPL v3             | Cyan Modding API - Version-shared api for creating mods.                                      | Copyright (c) 2021<br/>AerialWorks Software Foundation | DEVELOPMENT NOT YET STARTED    |
 
