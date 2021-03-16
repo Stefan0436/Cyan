@@ -1,5 +1,5 @@
 # NOTICE
-The github repository mirrors to https://aerialworks.ddns.net/ASF/Cyan.git, please use that url instead of github if you wish to contribute.
+The github repository mirrors to https://aerialworks.ddns.net/ASF/Cyan.git, please use that repo instead of github if you wish to contribute.
 
 # Cyan Mod Loader -- The Compatible Modloader
 Cyan is an upcoming modloader geared towards compatibility,<br/>
