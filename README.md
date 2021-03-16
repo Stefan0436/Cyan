@@ -22,6 +22,7 @@ AerialWorks Maven Server: https://aerialworks.ddns.net/maven
 | MTK                   | LGPL v3             | Minecraft Toolkit - A set of libraries to help with modding, can interface with FLUID.        | Copyright (c) 2021<br/>AerialWorks Software Foundation | Alpha Stage                    |
 | MixinSupport          | LGPL v3             | Mixin Support for CYAN - Soon-to-become-library-mod                                           | Copyright (c) 2021<br/>AerialWorks Software Foundation | STALE                          |
 | Cornflower            | GPL v2              | Cornflower Gradle Plugin - Upcoming gradle plugin for building CYAN mods, contains APIs.      | Copyright (c) 2021<br/>AerialWorks Software Foundation | Alpha Stage                    |
+| Cyan API              | LGPL v3             | Cyan Modding API - Version-shared api for creating mods.                                      | Copyright (c) 2021<br/>AerialWorks Software Foundation | DEVELOPMENT NOT YET STARTED    |
 
 # Projects used
 Please note that not a single project is actually distributed, the mappings are being generated (downloaded and re-formatted) by CYAN on launch, only version information is used.
