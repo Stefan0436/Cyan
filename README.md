@@ -33,4 +33,4 @@ Please note that not a single project is actually distributed, the mappings are 
 | Fabric-Loader                   | Apache 2.0          | Copyright (c) 2021 FabricMC and contributors.          | https://github.com/FabricMC/fabric-loader/blob/master/LICENSE            |
 | Fabric YARN                     | CC0-1.0             | Copyright (c) 2021 FabricMC and contributors.          | https://github.com/FabricMC/yarn/blob/21w10a/LICENSE                     |
 | Spigot BuildData                | Unknown             | Copyright (c) 2014-2020 SpigotMC Pty. Ltd.             | https://hub.spigotmc.org/stash/projects/SPIGOT/repos/builddata           |
-| Minecraft Obfuscation Mappings  | Unknown             | Copyright (c) 2020 Microsoft Corporation               |                                                                          |
+| Minecraft Obfuscation Mappings  | Unknown             | Copyright (c) 2020 Microsoft Corporation               | https://launcher.mojang.com/v1/objects/374c6b789574afbdc901371207155661e0509e17/client.txt |
