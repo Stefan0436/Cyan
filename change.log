@@ -14,7 +14,7 @@ Upcoming Cyan Update: Alpha 11, changes:
  - Cyan can now be debugged straight from the IDE
  - Partially implemented local variable support in FLUID A14 (Fully implemented as of FLUID A15)
  - FLUID-based class writer, when using COMPUTE_FRAMES, it will use a FLUID class pool instead of a class loader (FLUID A14)
- - Implemented partial local variable support in the FLUID class pool, broken variable names are automatically regenerated (FLUID A14)
+ - Implemented partial local variable support in the FLUID class pool, broken variable names are automatically regenerated (FLUID A14, Fully implemented as of version A15)
  - Title screen modification stating CYAN version (Loader 03/09/2021)
  - Added server Eclipse launches (CyanWrapper A5)
  - Implemented the MTK Rifter Toolkit (MTK A14, use SimpleRiftBuilder as it is far easier than calling rift manually)
