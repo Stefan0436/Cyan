@@ -10,7 +10,7 @@ Because we are writing a modloader, we have set up a maven server, here is the u
 AerialWorks Maven Server: https://aerialworks.ddns.net/maven
 
 # Licensing
-| Project               | License             | Project page or acronym meaning                                                               | Copyright Notice                                       | Build Status                   |
+| Project               | License             | Project description or acronym meaning                                                        | Copyright Notice                                       | Build Status                   |
 | :-------------------: | :-----------------: | :-------------------------------------------------------------------------------------------: | :----------------------------------------------------: | :----------------------------: |
 | CyanWrapper           | GPL v2              | CyanWrapper - Launch wrappers for the client and server, starts the modloader                 | Copyright (c) 2021<br/>AerialWorks Software Foundation | Alpha Stage                    |
 | CyanLoader            | GPL v2              | CyanLoader - Main mod loading system                                                          | Copyright (c) 2021<br/>AerialWorks Software Foundation | Alpha Stage                    |
