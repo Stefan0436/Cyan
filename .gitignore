@@ -11,4 +11,4 @@ build
 bin/
 .workspace/
 .egradle/
-
+logs/
