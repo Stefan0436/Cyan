@@ -16,7 +16,7 @@ Upcoming Cyan Update: Alpha 11, changes:
  - FLUID-based class writer, when using COMPUTE_FRAMES, it will use a FLUID class pool instead of a class loader (FLUID A14)
  - Implemented partial local variable support in the FLUID class pool, broken variable names are automatically regenerated (FLUID A14)
  - Title screen modification stating CYAN version (Loader 03/09/2021)
- - Added server Eclipse launches (CyanWrapper A5) -- TODO
+ - Added server Eclipse launches (CyanWrapper A5)
  - Implemented the MTK Rifter Toolkit (MTK A14, use SimpleRiftBuilder as it is far easier than calling rift manually)
  - Implemented exception handling for FLUID transformers (FLUID A15) -- TODO
  - Implemented transformer detection based on minecraft versions for the CyanLoader (CyanLoader 03/14/2021) -- TODO
