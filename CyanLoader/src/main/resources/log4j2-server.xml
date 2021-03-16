@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" packages="com.mojang.util">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout
+				pattern="[%d{HH:mm:ss} %5level] - %highlight{%msg%n%throwable}" />
+		</Console>
+		<Queue name="ServerGuiConsole">
+			<!-- Server GUI logger -->
+			<PatternLayout
+				pattern="[%d{HH:mm} %5level] - %msg%n%throwable" />
+		</Queue>
+		<Routing name="Logfile">
+			<Routes pattern="$${sd:type}">
+				<Route>
+					<RollingFile name="LOG" fileName="logs/latest.log"
+						filePattern="logs/%d{YYYY-MM-DD}-%i.log.gz">
+						<PatternLayout
+							pattern="[%d{HH:mm:ss}] [%-5level] [%t] [%c{1}%notEmpty{/%markerSimpleName}] - %msg%n%throwable" />
+						<Policies>
+							<OnStartupTriggeringPolicy />
+						</Policies>
+					</RollingFile>
+				</Route>
+				<Route ref="Console" key="Audit" />
+			</Routes>
+		</Routing>
+		<Routing name="Debuglogfile">
+			<Routes pattern="$${sd:type}">
+				<Route>
+					<RollingFile name="LOGDEBUG" fileName="logs/debug.log"
+						filePattern="logs/debug-%d{YYYY-MM-DD}-%i.log.gz">
+						<PatternLayout
+							pattern="[%d{HH:mm:ss}] [%-5level] [%t] [%c{1}%notEmpty{/%markerSimpleName}] - %msg%n%throwable" />
+						<Policies>
+							<OnStartupTriggeringPolicy />
+						</Policies>
+					</RollingFile>
+				</Route>
+				<Route ref="Console" key="Audit" />
+			</Routes>
+		</Routing>
+	</Appenders>
+
+	<!-- Copyright(C) MinecraftForge, the following filters are added to prevent 
+		an insane amount of logs being dumped in info when using forge, taken from 
+		forge log XML -->
+	<filters>
+		<ThresholdFilter level="WARN" onMatch="ACCEPT"
+			onMismatch="NEUTRAL" />
+		<MarkerFilter marker="NETWORK_PACKETS"
+			onMatch="${sys:forge.logging.marker.networking:-DENY}"
+			onMismatch="NEUTRAL" />
+		<MarkerFilter marker="CLASSLOADING"
+			onMatch="${sys:forge.logging.marker.classloading:-DENY}"
+			onMismatch="NEUTRAL" />
+		<MarkerFilter marker="LAUNCHPLUGIN"
+			onMatch="${sys:forge.logging.marker.launchplugin:-DENY}"
+			onMismatch="NEUTRAL" />
+		<MarkerFilter marker="CLASSDUMP"
+			onMatch="${sys:forge.logging.marker.classdump:-DENY}"
+			onMismatch="NEUTRAL" />
+		<MarkerFilter marker="AXFORM"
+			onMatch="${sys:forge.logging.marker.axform:-DENY}"
+			onMismatch="NEUTRAL" />
+		<MarkerFilter marker="EVENTBUS"
+			onMatch="${sys:forge.logging.marker.eventbus:-DENY}"
+			onMismatch="NEUTRAL" />
+		<MarkerFilter marker="DISTXFORM"
+			onMatch="${sys:forge.logging.marker.distxform:-DENY}"
+			onMismatch="NEUTRAL" />
+		<MarkerFilter marker="SCAN"
+			onMatch="${sys:forge.logging.marker.scan:-DENY}" onMismatch="NEUTRAL" />
+		<MarkerFilter marker="REGISTRIES"
+			onMatch="${sys:forge.logging.marker.registries:-DENY}"
+			onMismatch="NEUTRAL" />
+		<MarkerFilter marker="REGISTRYDUMP"
+			onMatch="${sys:forge.logging.marker.registrydump:-DENY}"
+			onMismatch="NEUTRAL" />
+		<MarkerFilter marker="SPLASH"
+			onMatch="${sys:forge.logging.marker.splash:-DENY}"
+			onMismatch="NEUTRAL" />
+		<MarkerFilter marker="FORGEMOD"
+			onMatch="${sys:forge.logging.marker.forgemod:-ACCEPT}"
+			onMismatch="NEUTRAL" />
+		<MarkerFilter marker="LOADING"
+			onMatch="${sys:forge.logging.marker.loading:-ACCEPT}"
+			onMismatch="NEUTRAL" />
+		<MarkerFilter marker="CORE"
+			onMatch="${sys:forge.logging.marker.core:-ACCEPT}"
+			onMismatch="NEUTRAL" />
+	</filters>
+
+
+	<!-- My loggers now -->
+	<Loggers>
+		<Root level="all">
+			<AppenderRef ref="Console" level="info" />
+			<AppenderRef ref="ServerGuiConsole" level="info" />
+			<AppenderRef ref="Debuglogfile" level="debug" />
+			<AppenderRef ref="Logfile" level="info" />
+		</Root>
+	</Loggers>
+</Configuration>

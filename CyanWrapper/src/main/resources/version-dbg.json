@@ -1,6 +1,6 @@
 {
-	"id": "${mcver}-cyan-${cyanver}-dbg",
-	"inheritsFrom": "${mcver}",
+	"id": "${gameexact}-cyan-${cyanver}-dbg",
+	"inheritsFrom": "${gameexact}",
 	"time": "${timeStartDev}",
 	"releaseTime": "${timeRelease}",
 	"type": "${type}",
@@ -23,6 +23,7 @@
 		"game": [],
 		"jvm": [
 			"-Djdk.attach.allowAttachSelf=true",
+			"-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source=${CyanCore.resources}",
 			"-DcyanAgentJar=${agentjar}",
 			"-Xdebug",
 			"-Xnoagent",

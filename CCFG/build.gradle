@@ -7,8 +7,11 @@ apply from: '../asf.mvn.publish.gradle'
 apply plugin: 'eclipse'
 buildDir = '../build/CCFG'
 
+sourceCompatibility = '1.9'
+targetCompatibility = '1.9'
+
 group="org.asf.cyan"
-version="1.0.0.A2"
+version="1.0.0.A3"
 
 def authorname="AerialWorks Software Foundation"
 

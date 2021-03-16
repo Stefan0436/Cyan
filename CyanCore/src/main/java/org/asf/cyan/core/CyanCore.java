@@ -13,18 +13,102 @@ import java.util.Set;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
-import org.asf.cyan.api.cyanloader.CyanLoadPhase;
-import org.asf.cyan.api.cyanloader.CyanSide;
-import org.asf.cyan.api.classloading.DynamicURLClassLoader;
+import org.asf.cyan.api.classloading.DynamicClassLoader;
 import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.cyan.api.common.CyanComponent;
+import org.asf.cyan.api.modloader.Modloader;
+import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.api.modloader.information.modloader.LoadPhase;
 import org.asf.cyan.fluid.Fluid;
+import org.asf.cyan.fluid.FluidAgent;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
 
+/**
+ * CyanCore - Implementation of the CyanComponents system (and Cyan's core
+ * bootstrap system)<br/>
+ * <br/>
+ * Use <code>CyanCore.addAllowedPackage(package)</code> to load packages for
+ * automatic detection. (this is to prevent startup lag)
+ * 
+ * @author Stefan0436 - AerialWorks Software Foundation
+ *
+ */
 @CYAN_COMPONENT
 public class CyanCore extends CyanComponent {
 	static ArrayList<Runnable> preLoadHooks = new ArrayList<Runnable>();
+	static ArrayList<String> allowedPackages = new ArrayList<String>();
+	private static ArrayList<Class<?>> additionalClasses = new ArrayList<Class<?>>();
+	static boolean disableAgent = false;
+	static boolean cornflowerSupport = false;
+	private static String entryMethod = "Generic Launcher";
+
+	/**
+	 * Register a package for loading CyanComponents. (can only be done during or before coreload)
+	 * 
+	 * @param packageName Package name (such as org.asf.cyan, subpackages are
+	 *                    included)
+	 */
+	public static void addAllowedPackage(String packageName) {
+		if (loadPhase.equals(LoadPhase.NOT_READY) || loadPhase.equals(LoadPhase.CORELOAD))
+			allowedPackages.add(packageName);
+		else
+			throw new IllegalStateException("CyanCore is already past CORELOAD");
+	}
+
+	/**
+	 * Add a class for the findClasses method. (can only be done during or before coreload)
+	 * 
+	 * @param cls Class to add
+	 */
+	public static void addAdditionalClass(Class<?> cls) {
+		if (loadPhase.equals(LoadPhase.NOT_READY) || loadPhase.equals(LoadPhase.CORELOAD))
+			additionalClasses.add(cls);
+		else
+			throw new IllegalStateException("CyanCore is already past CORELOAD");
+	}
+
+	/**
+	 * Set the name of the program/method used to start cyan, can only be set ONCE
+	 * 
+	 * @param method Method name
+	 */
+	public static void setEntryMethod(String method) {
+		if (!entryMethod.equals("Generic Launcher"))
+			throw new IllegalStateException("Entry method already set!");
+
+		entryMethod = method;
+	}
+
+	static void infoLog(String msg) {
+		info(msg);
+	}
+
+	static void debugLog(String msg) {
+		debug(msg);
+	}
+
+	static void warnLog(String msg) {
+		warn(msg);
+	}
+
+	/**
+	 * Enable cornflower execution support, changes a bit of the loading sequence to
+	 * allow gradle to run MTK and CyanComponents
+	 */
+	public static void enableCornflowerSupport() {
+		cornflowerSupport = true;
+	}
+
+	/**
+	 * Disables the FLUID agent<br/>
+	 * <b>NOTE: You WILL need to manually load the agent to use cyan if you run
+	 * this,<br/>
+	 * calling this will only deactivate the Fluid.loadAgent call</b>
+	 */
+	public static void disableAgent() {
+		disableAgent = true;
+	}
 
 	/**
 	 * Register a hook that is called BEFORE all cyan components are loaded, can
@@ -44,8 +128,8 @@ public class CyanCore extends CyanComponent {
 	public static void trackLevel(Level lv) {
 		HashMap<Level, HashMap<String, Level>> mp;
 		HashMap<String, Level> lst;
-		if (itms.containsKey(KDebug.getCallerClass())) {
-			mp = itms.get(KDebug.getCallerClass());
+		if (itms.containsKey(CallTrace.traceCall())) {
+			mp = itms.get(CallTrace.traceCall());
 			lst = mp.values().iterator().next();
 			mp.remove(mp.keySet().iterator().next());
 		} else {
@@ -54,7 +138,7 @@ public class CyanCore extends CyanComponent {
 		}
 
 		mp.put(lv, lst);
-		itms.put(KDebug.getCallerClass(), mp);
+		itms.put(CallTrace.traceCall(), mp);
 	}
 
 	/**
@@ -63,10 +147,10 @@ public class CyanCore extends CyanComponent {
 	 * @return List of error and warning log messages
 	 */
 	public static HashMap<String, Level> stopTracking() {
-		if (!itms.containsKey(KDebug.getCallerClass()))
+		if (!itms.containsKey(CallTrace.traceCall()))
 			return null;
 		else
-			return itms.remove(KDebug.getCallerClass()).values().iterator().next();
+			return itms.remove(CallTrace.traceCall()).values().iterator().next();
 	}
 
 	/**
@@ -75,7 +159,7 @@ public class CyanCore extends CyanComponent {
 	public static void setDebugLog() {
 		if (LOG == null)
 			initLogger();
-		trace(KDebug.getCallerClassName() + " set the log level to DEBUG.");
+		trace(CallTrace.traceCallName() + " set the log level to DEBUG.");
 		Configurator.setLevel("CYAN", Level.DEBUG);
 	}
 
@@ -85,7 +169,7 @@ public class CyanCore extends CyanComponent {
 	public static void setTraceLog() {
 		if (LOG == null)
 			initLogger();
-		trace(KDebug.getCallerClassName() + " set the log level to TRACE.");
+		trace(CallTrace.traceCallName() + " set the log level to TRACE.");
 		Configurator.setLevel("CYAN", Level.TRACE);
 	}
 
@@ -95,7 +179,7 @@ public class CyanCore extends CyanComponent {
 	public static void disableLog() {
 		if (LOG == null)
 			initLogger();
-		trace(KDebug.getCallerClassName() + " set the log level to WARN.");
+		trace(CallTrace.traceCallName() + " set the log level to WARN.");
 		Configurator.setLevel("CYAN", Level.WARN);
 	}
 
@@ -105,7 +189,7 @@ public class CyanCore extends CyanComponent {
 	public static void disableWarnLog() {
 		if (LOG == null)
 			initLogger();
-		trace(KDebug.getCallerClassName() + " set the log level to ERROR.");
+		trace(CallTrace.traceCallName() + " set the log level to ERROR.");
 		Configurator.setLevel("CYAN", Level.ERROR);
 	}
 
@@ -115,7 +199,7 @@ public class CyanCore extends CyanComponent {
 	public static void disableError() {
 		if (LOG == null)
 			initLogger();
-		trace(KDebug.getCallerClassName() + " set the log level to FATAL.");
+		trace(CallTrace.traceCallName() + " set the log level to FATAL.");
 		Configurator.setLevel("CYAN", Level.FATAL);
 	}
 
@@ -125,7 +209,7 @@ public class CyanCore extends CyanComponent {
 	public static void disableAllLog() {
 		if (LOG == null)
 			initLogger();
-		trace(KDebug.getCallerClassName() + " disabled logging.");
+		trace(CallTrace.traceCallName() + " disabled logging.");
 		Configurator.setLevel("CYAN", Level.OFF);
 	}
 
@@ -135,100 +219,166 @@ public class CyanCore extends CyanComponent {
 	public static void enableLog() {
 		if (LOG == null)
 			initLogger();
-		trace(KDebug.getCallerClassName() + " set the log level to INFO.");
+		trace(CallTrace.traceCallName() + " set the log level to INFO.");
 		Configurator.setLevel("CYAN", Level.INFO);
 	}
+
+	@Override
+	protected void setupComponents() {
+		if (cyancoreInitialized)
+			throw new IllegalStateException("Cyan components have already been initialized.");
+		if (LOG == null)
+			initLogger();
+	}
+
+	@Override
+	protected void preInitAllComponents() {
+		trace("OPEN FluidAPI Mappings Loader, caller: " + CallTrace.traceCallName());
+		try {
+			debug("Opening FLUID API...");
+			Fluid.openFluidLoader();
+		} catch (IllegalStateException e) {
+			error("Failed to open FLUID!", e);
+		}
+		setPhase(LoadPhase.CORELOAD);
+
+		trace("INITIALIZE all components, caller: " + CallTrace.traceCallName());
+		trace("CREATE ConfigurationBuilder instance, caller: " + CallTrace.traceCallName());
+
+		if (loader == null)
+			initLoader();
+
+		debug("Loading pre-load hooks...");
+		trace("EXECUTE pre-load hooks, caller: " + CallTrace.traceCallName());
+		for (Runnable hook : preLoadHooks) {
+			hook.run();
+		}
+	}
+
+	@Override
+	protected void finalizeComponents() {
+		trace("CLOSE FluidAPI Transformer and Mappings loader, caller: " + CallTrace.traceCallName());
+		Fluid.closeFluidLoader();
+		trace("SECURE Core Class Loader, caller: " + CallTrace.traceCallName());
+		loader.secure();
+		debug("Class loader secured, preparing to start...");
+		setPhase(LoadPhase.PRELOAD);
+	}
+
+	@Override
+	protected Class<?>[] getComponentClasses() {
+		if (reflections == null) {
+			initReflections();
+		}
+		info("Searching for Cyan Components in loaded jars...");
+		trace("FIND all classes annotated with CYAN_COMPONENT, caller: " + CallTrace.traceCallName());
+		Set<Class<?>> classes = reflections.getTypesAnnotatedWith(CYAN_COMPONENT.class);
+		for (Class<?> cls : classes) {
+			String tName = cls.getTypeName();
+			if (!tName.startsWith("org.asf.cyan.") && !tName.equals("org.asf.cyan.")
+					&& !allowedPackages.stream().anyMatch(t -> t.equals(tName) || t.startsWith(tName + "."))) {
+				classes.remove(cls);
+			}
+		}
+
+		trace("LOOP through found classes, caller: " + CallTrace.traceCallName());
+		return classes.toArray(t -> new Class<?>[t]);
+	}
+
+	private void initReflections() {
+		ClassLoader cl = CyanCore.class.getClassLoader();
+		ConfigurationBuilder conf = ConfigurationBuilder.build(loader);
+		if (cornflowerSupport) {
+			conf = ConfigurationBuilder.build();
+			trace("CORNFLOWER support active, using workaround loading method");
+			trace("COPY config URL list, caller: " + CallTrace.traceCallName());
+			Set<URL> urls = conf.getUrls();
+			trace("CLEAR URL list, caller: " + CallTrace.traceCallName());
+			urls.clear();
+			trace("SET config URL list, caller: " + CallTrace.traceCallName());
+			conf.setUrls(urls);
+			trace("ADD Cyan Source Location to URL list, caller: " + CallTrace.traceCallName());
+			conf.addUrls(CyanCore.class.getProtectionDomain().getCodeSource().getLocation());
+			try {
+				conf.addUrls(Class.forName("org.asf.cyan.minecraft.toolkits.mtk.MinecraftToolkit").getProtectionDomain()
+						.getCodeSource().getLocation());
+			} catch (ClassNotFoundException e) {
+			}
+			trace("SET setExpandSuperTypes to false, caller: " + CallTrace.traceCallName());
+			conf = conf.setExpandSuperTypes(false);
+		} else {
+			for (Package p : cl.getDefinedPackages()) {
+				String rname = p.getName().replace(".", "/");
+				try {
+					Enumeration<URL> roots = cl.getResources(rname);
+					for (URL i : Collections.list(roots)) {
+						if (rname.startsWith("org/asf/cyan/") || rname.equals("org/asf/cyan")
+								|| allowedPackages.stream().anyMatch(t -> t.equals(rname.replaceAll("/", "."))
+										|| t.startsWith(rname.replaceAll("/", ".") + "."))) {
+							if (!conf.getUrls().contains(i)) {
+								debug("Added URL for component scan. URL: " + i.toString());
+								conf.addUrls(i);
+							}
+						}
+					}
+				} catch (IOException ex) {
+					error("Failed to load the " + rname + " package.", ex);
+				}
+			}
+			for (Package p : loader.getDefinedPackages()) {
+				String rname = p.getName().replace(".", "/");
+				try {
+					Enumeration<URL> roots = loader.getResources(rname);
+					for (URL i : Collections.list(roots)) {
+						if (!conf.getUrls().contains(i))
+							conf.addUrls(i);
+					}
+				} catch (IOException ex) {
+					error("Failed to load the " + rname + " package.", ex);
+				}
+			}
+		}
+
+		trace("CREATE Reflections instance, caller: " + CallTrace.traceCallName());
+		reflections = new Reflections(conf);
+	}
+
+	private Reflections reflections;
+
+	private static CyanCore core;
 
 	/**
 	 * Initialize all CYAN components (required)
 	 * 
-	 * @throws UnsupportedOperationException If the component is already initialized
+	 * @throws IllegalStateException If the component is already initialized
 	 */
-	public static void initializeComponents() throws UnsupportedOperationException {
-		if (cyancoreInitialized)
-			throw new UnsupportedOperationException("Cyan components have already been initialized.");
-		if (LOG == null)
-			initLogger();
-		
-		phase = CyanLoadPhase.CORELOAD;
-		Fluid.openFluidLoader();
-		
-		trace("INITIALIZE all components, caller: " + KDebug.getCallerClassName());
-		trace("CREATE ConfigurationBuilder instance, caller: " + KDebug.getCallerClassName());
+	public static void initializeComponents() throws IllegalStateException {
+		if (core == null)
+			simpleInit();
 
-		ClassLoader cl = ClassLoader.getSystemClassLoader();
-		if (loader == null) initLoader();
-
-		trace("EXECUTE pre-load hooks, caller: " + KDebug.getCallerClassName());
-		for (Runnable hook : preLoadHooks) {
-			hook.run();
-		}
-
-		ConfigurationBuilder conf = ConfigurationBuilder.build(loader);
-		for (Package p : cl.getDefinedPackages()) {
-			String rname = p.getName().replace(".", "/");
-			try {
-				Enumeration<URL> roots = cl.getResources(rname);
-				for (URL i : Collections.list(roots)) {
-					conf.addUrls(i);
-				}
-			} catch (IOException ex) {
-				error("Failed to load the " + rname + " package.", ex);
-			}
-		}
-		for (Package p : loader.getDefinedPackages()) {
-			String rname = p.getName().replace(".", "/");
-			try {
-				Enumeration<URL> roots = cl.getResources(rname);
-				for (URL i : Collections.list(roots)) {
-					conf.addUrls(i);
-				}
-			} catch (IOException ex) {
-				error("Failed to load the " + rname + " package.", ex);
-			}
-		}
-
-		trace("CREATE Reflections instance, caller: " + KDebug.getCallerClassName());
-		Reflections reflections = new Reflections(conf);
-
-		trace("FIND all classes annotated with CYAN_COMPONENT, caller: " + KDebug.getCallerClassName());
-		Set<Class<?>> classes = reflections.getTypesAnnotatedWith(CYAN_COMPONENT.class);
-
-		trace("LOOP through found classes, caller: " + KDebug.getCallerClassName());
-		for (Class<?> c2 : classes) {
-			trace("GET and INVOKE init method of the " + c2.getName() + " class, caller: "
-					+ KDebug.getCallerClassName());
-			try {
-				Method m = c2.getDeclaredMethod("initComponent");
-				m.setAccessible(true);
-				m.invoke(null);
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException
-					| NoSuchMethodException e) {
-				error("Failed to initialize component, class name: " + c2.getSimpleName(), e);
-			}
-		}
+		core.initializeComponentClasses();
 	}
 
 	/**
 	 * Pre-initialize the Cyan Core Loader
 	 */
 	public static void initLoader() {
-		if (loader == null) loader = new DynamicURLClassLoader("CyanCore Internal Class Loader");
-		else throw new IllegalStateException("CyanCore Class Loader is already registered!");
+		if (loader == null) {
+			loader = new DynamicClassLoader("CyanCore Internal Class Loader", CyanCore.class.getClassLoader());
+			loader.setOptions(DynamicClassLoader.OPTION_PREVENT_AUTOSECURE);
+		} else
+			throw new IllegalStateException("CyanCore Class Loader is already registered!");
 	}
 
-	/**
-	 * Initialize the component, gets called from initializeComponents()
-	 */
-	public static void initComponent() {
-		trace("INITIALIZE Main CYAN Component, caller: " + KDebug.getCallerClassName());
-		trace("CREATE DynamicURLClassLoaders, caller: " + KDebug.getCallerClassName());
-		openloader = new DynamicURLClassLoader("Cyan Class Loader");
+	protected static void initComponent() {
+		trace("INITIALIZE Main CYAN Component, caller: " + CallTrace.traceCallName());
+		trace("CREATE DynamicURLClassLoaders, caller: " + CallTrace.traceCallName());
+		openloader = new DynamicClassLoader("Cyan Mod Class Loader");
+		openloader.setOptions(DynamicClassLoader.OPTION_PREVENT_AUTOSECURE);
+		openloader.apply();
+		openloader.setOptions(DynamicClassLoader.OPTION_DENY_ADD_RUNTIME);
 		agentloader = loader;
 		cyancoreInitialized = true;
-		trace("CLOSE FluidAPI Mappings Loader, caller: " + KDebug.getCallerClassName());
-		Fluid.closeFluidLoader();
-		phase = CyanLoadPhase.PRELOAD;
 	}
 
 	static boolean cyancoreInitialized = false;
@@ -242,13 +392,13 @@ public class CyanCore extends CyanComponent {
 		return cyancoreInitialized;
 	}
 
-	static DynamicURLClassLoader loader = null;
-	static DynamicURLClassLoader openloader = null;
+	static DynamicClassLoader loader = null;
+	static DynamicClassLoader openloader = null;
 
 	/**
 	 * Gets the core class loader
 	 * 
-	 * @return Core DynamicURLClassLoader, try to avoid usage
+	 * @return Core DynamicClassLoader, try to avoid usage
 	 */
 	public static URLClassLoader getCoreClassLoader() {
 		return loader;
@@ -257,10 +407,32 @@ public class CyanCore extends CyanComponent {
 	/**
 	 * Gets the userland class loader (for mods and such)
 	 * 
-	 * @return Userland DynamicURLClassLoader
+	 * @return Userland DynamicClassLoader
 	 */
-	public static DynamicURLClassLoader getClassLoader() {
+	public static DynamicClassLoader getClassLoader() {
 		return openloader;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	protected <T> Class<T>[] findClassesInternal(Class<T> interfaceOrSupertype) {
+		if (reflections == null) {
+			initReflections();
+		}
+
+		if (LOG == null)
+			initLogger();
+
+		ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
+		classes.addAll(reflections.getSubTypesOf(interfaceOrSupertype));
+		
+		for (Class<?> cls : additionalClasses) {
+			if (interfaceOrSupertype.isAssignableFrom(cls)) {
+				classes.add(cls);
+			}
+		}
+		
+		return classes.toArray(t -> new Class[t]);
 	}
 
 	/**
@@ -281,35 +453,64 @@ public class CyanCore extends CyanComponent {
 			IllegalArgumentException, InvocationTargetException, IOException {
 		if (!isInitialized())
 			throw new UnsupportedOperationException("Cyan is not initialized!");
-		Fluid.loadAgent();
-		Thread.currentThread().setContextClassLoader(loader);
+		if (!disableAgent)
+			Fluid.loadAgent();
+		else
+			FluidAgent.initialize();
 
-		// TODO: Load mods
-		
-		info("Welcome to CYAN!");
+		Thread.currentThread().setContextClassLoader(loader);
 		info("Loading CYAN information container...");
 		CyanInfo.getDevStartDate();
 
-		phase = CyanLoadPhase.INIT;
+		// TODO: Load mods
+		info("Cyan launch method: " + entryMethod);
+		info("Cyan launch platform: " + Modloader.getModloaderLaunchPlatform().toString());
+		info("");
+		String loaderStr = "";
+		String modloaderStr = "";
+
+		if (Modloader.getModloader().getChildren().length != 0) {
+			loaderStr = Modloader.getModloader().getChildren()[0].getName() + "-"
+					+ Modloader.getModloader().getChildren()[0].getVersion();
+			modloaderStr = ", Modloader: " + loaderStr;
+		}
+
+		info("Welcome to CYAN!");
+		info("Cyan version: " + Modloader.getModloaderVersion() + ", Minecraft " + CyanInfo.getMinecraftVersion()
+				+ modloaderStr);
+		info("Full version: " + CyanInfo.getMinecraftVersion()
+				+ (loaderStr.isEmpty() ? "" : "-" + loaderStr.toLowerCase()) + "-cyan-" + CyanInfo.getCyanVersion());
+		info("");
+
+		setPhase(LoadPhase.INIT);
 		// TODO: Initialize mods and check dependencies etc
-		
+
+		debug("Securing mod classloader...");
+		openloader.secure();
+
 		info("Loading class " + game + "...");
 		Class<?> clas = loader.loadClass(game);
-		
-		phase = CyanLoadPhase.POSTINIT;
+
+		setPhase(LoadPhase.POSTINIT);
 		// TODO: Post-initialize mods
+
+		Method meth = clas.getMethod("main", String[].class);
+		Modloader.getModloader().dispatchEvent("game.beforestart", new Object[] { game, args });
 		
 		info("Starting minecraft...");
-		
-		phase = CyanLoadPhase.RUNTIME;
-		// TODO: Call gameStart events for mods
-		
-		Method meth = clas.getMethod("main", String[].class);
+		setPhase(LoadPhase.RUNTIME);
+
 		meth.invoke(null, new Object[] { args });
 	}
 
-	private static CyanSide side = null;
-	private static CyanLoadPhase phase = CyanLoadPhase.NOT_READY;
+	private static GameSide side = null;
+	private static LoadPhase loadPhase = LoadPhase.NOT_READY;
+
+	private static void setPhase(LoadPhase phase) {
+		loadPhase = phase;
+		if (Modloader.getModloader() != null)
+			Modloader.getModloader().dispatchEvent("phase.changed", phase);
+	}
 
 	/**
 	 * Set the current side name (CLIENT/SERVER), can only be set ONCE
@@ -317,8 +518,10 @@ public class CyanCore extends CyanComponent {
 	 * @param side Side name
 	 */
 	public static void setSide(String side) {
-		if (CyanCore.side == null) CyanCore.side = CyanSide.valueOf(side);
-		else throw new IllegalStateException("This field cannot be changed after it has been assigned!");
+		if (CyanCore.side == null)
+			CyanCore.side = GameSide.valueOf(side);
+		else
+			throw new IllegalStateException("This field cannot be changed after it has been assigned!");
 	}
 
 	/**
@@ -326,15 +529,65 @@ public class CyanCore extends CyanComponent {
 	 * 
 	 * @return Side name
 	 */
-	public static CyanSide getSide() {
+	public static GameSide getSide() {
 		return side;
 	}
-	
+
 	/**
 	 * Get the current loading phase
+	 * 
 	 * @return CyanLoadPhase object representing the loading phase
 	 */
-	public static CyanLoadPhase getCurrentPhase() {
-		return phase;
+	public static LoadPhase getCurrentPhase() {
+		return loadPhase;
+	}
+
+	/**
+	 * Add a url to the core url class loader, can only be done from CORELOAD or
+	 * before
+	 * 
+	 * @param url The url to add
+	 */
+	public static void addCoreUrl(URL url) {
+		if (loadPhase.equals(LoadPhase.NOT_READY) || loadPhase.equals(LoadPhase.CORELOAD)) {
+			if (loader == null)
+				initLoader();
+			loader.addUrl(url);
+		} else
+			throw new IllegalStateException("CyanCore is already past CORELOAD");
+	}
+
+	/**
+	 * Add a url to the userland url class loader, can only be done after or during
+	 * PRELOAD and before POSTINIT.
+	 * 
+	 * @param url The url to add
+	 */
+	public static void addUrl(URL url) {
+		if (!loadPhase.ge(LoadPhase.PRELOAD) && loadPhase.lt(LoadPhase.POSTINIT)) {
+			openloader.addUrl(url);
+		} else
+			throw new IllegalStateException("CyanCore has not yet reached PRELOAD or is past INIT");
+	}
+
+	/**
+	 * Get the entry method used to start cyan
+	 * 
+	 * @return Entry method name
+	 */
+	public static String getEntryMethod() {
+		return entryMethod;
+	}
+
+	/**
+	 * Simple init, no component loading, only assigns CyanCore as the main
+	 * CyanComponents implementation.
+	 */
+	public static void simpleInit() {
+		if (core != null)
+			return;
+
+		core = new CyanCore();
+		core.assignImplementation();
 	}
 }

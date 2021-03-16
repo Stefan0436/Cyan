@@ -2,8 +2,10 @@ package org.asf.cyan;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.util.Scanner;
 
-import org.asf.cyan.api.cyanloader.CyanSide;
+import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.core.CyanCore;
 
 public class CyanFabricClientWrapper {
@@ -20,9 +22,17 @@ public class CyanFabricClientWrapper {
 	 * @throws IOException If closing the class loader fails
 	 */
 	public static void main(String[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException, IOException {
-		CyanLoader.disableDeobfuscator();
-		CyanLoader.addCompatibilityMappings(CyanLoader.getFabricCompatibilityMappings(CyanSide.CLIENT));
+		URL info = CyanClientWrapper.class.getResource("/wrapper.info");
+		StringBuilder builder = new StringBuilder();
+		Scanner sc = new Scanner(info.openStream());
+		while (sc.hasNext())
+			builder.append(sc.nextLine());
+		sc.close();
+		CyanCore.setEntryMethod("CyanFabricWrapper Version " + builder.toString().trim());
+		CyanLoader.disableVanillaMappings();
+		CyanLoader.addCompatibilityMappings(CyanLoader.getFabricCompatibilityMappings(GameSide.CLIENT));
 		CyanLoader.initializeGame("CLIENT");
-		CyanCore.startGame("net.fabricmc.loader.launch.knot.KnotClient", args);
+		String wrapper = System.getProperty("cyan.launcher.client.wrapper", "net.fabricmc.loader.launch.knot.KnotClient");
+		CyanCore.startGame(wrapper, args);
 	}
 }

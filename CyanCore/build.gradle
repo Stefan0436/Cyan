@@ -7,6 +7,15 @@ apply plugin: 'eclipse'
 apply from: '../asf.mvn.publish.gradle'
 buildDir = '../build/CyanCore'
 
+def fallback_url="https://aerialworks.ddns.net/maven"
+def backup_url = fallback_url
+if (project.hasProperty("overrideCyanLibraryURL")) {
+	fallback_url=project.getProperty("overrideCyanLibraryURL")
+}
+
+sourceCompatibility = '1.9'
+targetCompatibility = '1.9'
+
 group="org.asf.cyan"
 def authorname="AerialWorks Software Foundation"
 configurePublish {
@@ -26,7 +35,7 @@ configurePublish {
 	}
 }
 
-version="1.0.0.A1"
+version="1.0.0.A7"
 jar.dependsOn('processResources')
 
 repositories {
@@ -40,6 +49,7 @@ dependencies {
 	implementation project(':CyanUtil')
 	implementation project(':CCFG')
 	implementation project(':CyanComponents')
+    implementation 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.1'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
     implementation 'org.reflections:reflections:0.9.12'
@@ -65,19 +75,24 @@ jar {
 }
 
 processResources {
+	def useurl = fallback_url
+	if (fallback_url.equals(""))
+		useurl = backup_url
+	
 	inputs.property "mcver", "${minecraft}"
-    inputs.property "mcver-vanilla", "${minecraftreal}"
+    inputs.property "modloader", "${modloader}"
 	inputs.property "cyanver", cyanversion
 	inputs.property "timeStartDev", "${timeStartDev}"
 	inputs.property "type", "${versionType}"
 	inputs.property "group", project.group
 	inputs.property "root", project.file(".").getPath()
 	inputs.property "minmixin", "${minmixin}"
+	inputs.property "updateserver", useurl
 
 	from(sourceSets.main.resources.srcDirs) {
 		expand(
 			"mcver": "${minecraft}",
-        	"mcver_vanilla": "${minecraftreal}",
+        	"modloader": "${modloader}",
 			"minmixin": "${minmixin}",
 			"cyanver": cyanversion,
 			"timeStartDev": "${timeStartDev}",
@@ -85,12 +100,13 @@ processResources {
 			"type": "${versionType}",
 			"group": project.group,
 			"projname": project.name,
-			"groupslashed": project.group.replaceAll("\\.", "/")
+			"groupslashed": project.group.replaceAll("\\.", "/"),
+			"maven": useurl
 		)
 	}
 }
 
-version=project.version+"-"+minecraftreal
+version=project.version+"-"+exactgameversion+"-"+cyanversion
 
 task javaDocs(type: Javadoc) {
 	classpath = sourceSets.main.runtimeClasspath

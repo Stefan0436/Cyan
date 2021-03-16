@@ -1,19 +1,23 @@
 package org.asf.cyan.fluid;
 
-import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.stream.Stream;
 
 import org.asf.cyan.api.common.CyanComponent;
+import org.asf.cyan.fluid.Transformer.AnnotationInfo;
 import org.asf.cyan.fluid.api.ClassLoadHook;
-
-import javassist.CannotCompileException;
-import javassist.ClassClassPath;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.NotFoundException;
+import org.asf.cyan.fluid.api.transforming.TargetClass;
+import org.asf.cyan.fluid.bytecode.FluidClassPool;
+import org.asf.cyan.fluid.bytecode.sources.LoaderClassSourceProvider;
+import org.asf.cyan.fluid.remapping.Mapping;
+import org.objectweb.asm.tree.ClassNode;
 
 /**
  * Fluid Agent Class, without this, Fluid won't work
@@ -22,14 +26,39 @@ import javassist.NotFoundException;
  *
  */
 public class FluidAgent extends CyanComponent {
+
 	/**
-	 * Main agent startup method
+	 * Main premain startup method
 	 * 
 	 * @param args Arguments
 	 * @param inst Java instrumentation
 	 */
-	public static void agentmain(final String args, final Instrumentation inst) {
-		ArrayList<ClassLoadHook> hooks = new ArrayList<ClassLoadHook>();
+	public static void premain(final String args, final Instrumentation inst) {
+		agentmain(args, inst);
+	}
+
+	public static String getMarker() {
+		return "Agent";
+	}
+
+	private static FluidClassPool pool;
+	private static ArrayList<URL> knownLocations = new ArrayList<URL>();
+	private static ArrayList<ClassLoader> knownLoaders = new ArrayList<ClassLoader>();
+	private static ArrayList<ClassLoadHook> hooks = new ArrayList<ClassLoadHook>();
+	private static HashMap<String, String> transformerOwners = new HashMap<String, String>();
+	private static HashMap<String, ArrayList<ClassNode>> transformers = new HashMap<String, ArrayList<ClassNode>>();
+	private static ArrayList<String> transformedClasses = new ArrayList<String>();
+	private static boolean initialized = false;
+	private static boolean loaded = false;
+	
+	public static void addChildAgent() {
+		
+	}
+
+	public static void initialize() {
+		if (initialized)
+			throw new IllegalStateException("Cannot re-initialize FLUID!");
+
 		for (ClassLoadHook hook : Fluid.getHooks()) {
 			String target = Fluid.mapClass(hook.targetPath());
 			hook.build();
@@ -37,45 +66,195 @@ public class FluidAgent extends CyanComponent {
 			hooks.add(hook);
 		}
 
+		int index = 0;
+		for (String transformer : Fluid.getTransformers()) {
+			ClassNode transformerNode;
+			try {
+				transformerNode = Fluid.getTransformerPool().getClassNode(transformer);
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+
+			String target = null;
+			for (AnnotationInfo anno : AnnotationInfo.create(transformerNode)) {
+				if (anno.is(TargetClass.class)) {
+					target = anno.get("target");
+				}
+			}
+			if (target != null) {
+				target = Fluid.mapClass(target);
+				ArrayList<ClassNode> trs = transformers.getOrDefault(target.replaceAll("\\.", "/"),
+						new ArrayList<ClassNode>());
+				trs.add(transformerNode);
+				transformers.put(target.replaceAll("\\.", "/"), trs);
+				transformerOwners.put(transformerNode.name, Fluid.getTransformerOwners()[index]);
+			}
+			index++;
+		}
+
+		pool = FluidClassPool.create();
+
+		for (URL u : Fluid.getTransformerPool().getURLSources()) {
+			if (!Stream.of(pool.getURLSources()).anyMatch(t -> t.toString().equals(u.toString()))) {
+				pool.addSource(u);
+			}
+		}
+
+		initialized = true;
+		
+		for (Runnable hook : Fluid.getPostInitHooks()) {
+			hook.run();
+		}
+	}
+
+	static boolean ranHooks = false;
+	private static boolean loadedAgents = false;
+	
+	/**
+	 * Main agent startup method
+	 * 
+	 * @param args Arguments
+	 * @param inst Java instrumentation
+	 */
+	public static void agentmain(final String args, final Instrumentation inst) {
+		if (loaded)
+			return;
+		
+		loaded = true;
+		ClassLoader ld = FluidAgent.class.getClassLoader();
+		
 		inst.addTransformer(new ClassFileTransformer() {
 			@Override
-			public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
+			public synchronized byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 					ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-
 				try {
-					boolean match = false;
-
-					if (hooks.stream().anyMatch(t -> t.getTarget().equals(className))) {
-						match = true;
+					if (pool == null)
+						return null;
+					
+					if (!loadedAgents) {
+						loadedAgents = true;
+						Fluid.getAgents().forEach((cls, meth) -> {
+							try {
+								Class<?> agent = ld.loadClass(cls);
+								if (meth != null) {
+									Method mth = agent.getMethod(meth, String.class, Instrumentation.class);
+									mth.invoke(null, args, inst);
+								}
+							} catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+							}
+						});
+					}
+					
+					if (loader != null && !knownLoaders.contains(loader)) {
+						knownLoaders.add(loader);
+						pool.addSource(new LoaderClassSourceProvider(loader));
 					}
 
-					// TODO: transformer match checking
+					URL loc = null;
+					if (protectionDomain != null && protectionDomain.getCodeSource() != null
+							&& protectionDomain.getCodeSource().getLocation() != null)
+						loc = protectionDomain.getCodeSource().getLocation();
 
-					if (!match)
-						return null;
-
-					String newPath = className.replaceAll("/", ".");
-					ClassPool cp = ClassPool.getDefault();
-					cp.insertClassPath(new ClassClassPath(FluidAgent.class));
-					CtClass cc = cp.get(newPath);
-
-					for (ClassLoadHook hook : hooks.stream().filter(t -> t.getTarget().equals(className))
-							.toArray(t -> new ClassLoadHook[t])) {
-						try {
-							debug("Applying hook " + hook.getClass().getTypeName() + " to class " + className);
-							cc = hook.apply(cc, cp, loader, classBeingRedefined, protectionDomain, classfileBuffer);
-						} catch (NotFoundException | CannotCompileException e) {
-							error("FLUID hook apply failed, hook type: " + hook.getClass().getTypeName(), e);
+					if (classBeingRedefined != null) {
+						if (classBeingRedefined.getProtectionDomain() != null
+								&& classBeingRedefined.getProtectionDomain().getCodeSource() != null) {
+							loc = classBeingRedefined.getProtectionDomain().getCodeSource().getLocation();
 						}
 					}
+					if (loc != null) {
+						if (loc.toString().startsWith("jar:")) {
+							String file = loc.getFile();
+							if (file.contains("!/"))
+								file = file.substring(0, file.lastIndexOf("!/"));
+							loc = new URL(file);
+						}
+						if (!knownLocations.contains(loc)) {
+							pool.addSource(loc);
+							knownLocations.add(loc);
+						}
+					}
+					boolean match = false;
+					boolean transformerMatch = false;
+					if (hooks.stream().anyMatch(t -> {
+						String target = t.getTarget();
+						if (target.equals("@ANY"))
+							return true;
+						return target.equals(className);
+					})) {
+						match = true;
+					}
+					if (transformers.keySet().stream().anyMatch(t -> t.equals(className))) {
+						transformerMatch = true;
+					}
 
-					// TODO: Transformers
+					if (!match && !transformerMatch) {
+						pool.readClass(className, classfileBuffer);
+						return null;
+					}
 
-					byte[] byteCode = cc.toBytecode();
-					cc.detach();
-					return byteCode;
-				} catch (NotFoundException | IOException | CannotCompileException e) {
-					error("FLUID transformation failed", e);
+					byte[] bytecode = null;
+					if (match) {
+						ClassNode cc = pool.readClass(className, classfileBuffer);
+
+						for (ClassLoadHook hook : hooks.stream().filter(t -> {
+							String target = t.getTarget();
+							if (target.equals("@ANY"))
+								return true;
+							return target.equals(className);
+						}).toArray(t -> new ClassLoadHook[t])) {
+							try {
+								if (!hook.isSilent())
+									debug("Applying hook " + hook.getClass().getTypeName() + " to class " + className);
+								else {
+									trace("Applying hook " + hook.getClass().getTypeName() + " to class " + className);
+								}
+								
+								hook.apply(cc, pool, loader, classBeingRedefined, protectionDomain, classfileBuffer);
+							} catch (ClassNotFoundException e) {
+								error("FLUID hook apply failed, hook type: " + hook.getClass().getTypeName(), e);
+							}
+						}
+
+						bytecode = pool.getByteCode(cc.name);
+					}
+					if (transformerMatch) {
+						String clName = className.replaceAll("/", ".");
+						for (Mapping<?> map : Fluid.getMappings()) {
+							boolean found = false;
+							for (Mapping<?> mp : map.mappings) {
+								if (mp.obfuscated.equals(clName)) {
+									clName = mp.name;
+									found = true;
+									break;
+								}
+							}
+							if (found)
+								break;
+						}
+
+						ClassNode cls = null;
+						if (bytecode != null) {
+							cls = pool.readClass(className, bytecode);
+						} else {
+							cls = pool.readClass(className, classfileBuffer);
+						}
+
+						if (!transformedClasses.contains(cls.name)) {
+							Transformer.transform(cls, transformerOwners, transformers, clName, className, pool,
+									Fluid.getTransformerPool(), loader);
+							transformedClasses.add(cls.name);
+						}
+						bytecode = pool.getByteCode(cls.name);
+					} else {
+						if (bytecode != null) {
+							pool.readClass(className, bytecode);
+						} else {
+							pool.readClass(className, classfileBuffer);
+						}
+					}
+					return bytecode;
+				} catch (Exception e) {
+					error("FLUID transformation failed, class: " + className, e);
 				}
 
 				return null;

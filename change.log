@@ -1,0 +1,46 @@
+Upcoming Cyan Update: Alpha 11, changes:
+ - Implemented Cornflower Eclipse Launch Generation
+ - Implemented MTK Deobfuscation
+ - Implemented MinecraftInstallationToolkit, MSA support is WIP
+ - Implemented changelogs
+ - Created publish.sh script (Linux only, windows is todo)
+ - Created buildlocal.sh script (Linux only, windows is todo)
+ - Implemented FLUID Transformer API (nearly complete, mostly usable as of FLUID A15)
+ - Migrated modifications to FLUID Transformers
+ - ASM Support Layer for FLUID
+ - Implemented MTK Source Jar Creation (buggy)
+ - Moved FLUID Transforming code to its own class so that it can be used (in theory) by another system.
+ - Made sure projects are added to source lookup on eclipse launch generation (Cornflower A21)
+ - Cyan can now be debugged straight from the IDE
+ - Partially implemented local variable support in FLUID A14 (Fully implemented as of FLUID A15)
+ - FLUID-based class writer, when using COMPUTE_FRAMES, it will use a FLUID class pool instead of a class loader (FLUID A14)
+ - Implemented partial local variable support in the FLUID class pool, broken variable names are automatically regenerated (FLUID A14)
+ - Title screen modification stating CYAN version (Loader 03/09/2021)
+ - Added server Eclipse launches (CyanWrapper A5) -- TODO
+ - Implemented the MTK Rifter Toolkit (MTK A14, use SimpleRiftBuilder as it is far easier than calling rift manually)
+ - Implemented exception handling for FLUID transformers (FLUID A15) -- TODO
+ - Implemented transformer detection based on minecraft versions for the CyanLoader (CyanLoader 03/14/2021) -- TODO
+ - Created an extended API artifact container for Cornflower (Cornflower A26)
+ - Fixed the FLUID transformer targetCall parsing (FLUID A15)
+ - Made CyanComponents an API and CyanCore an implementation of it (CyanComponents A3, CyanCore A7)
+ - FLUID Transformer is now an API, when using CyanComponents, CyanTransformer will automatically be used. (FLUID A15) -- TODO: finish up; make the transform method a call chain with an extensive API
+ - Fixed MTK Rifter Toolkit target generation, updated it to FLUID specification A15, also implemented superclasses (MTK A15)
+ - Paper Support (CyanLoader 03/16/2021, CyanWrapper A5, MTK A14)
+ - Added the SimpleMappings class for FLUID (FLUID A15)
+ - Fixed FLUID local variable indexes (FLUID A15)
+ - Transformer backtrace on crash, also saves modifications made to .cyan-data/transformer-backtrace/classes (FLUID A15) -- TODO
+ - Implemented lambda support (FLUID A15)
+ - Created a FLUID transformer metadata API (FLUID A15, the crash report uses this)
+ - Implemented IINC support (and fixed arrays by doing so) (FLUID A15)
+ - Versioning API (CyanUtil A3) -- TODO
+ - Forge mappings are no loger downloaded on 1.16.5+ (as it uses the same mappings as CYAN)
+ - PseudoCode Bytecode Exporter API (FLUID A15)
+ - Reporting API (CyanUtil A3)
+ - SideOnly, PlatformOnly, PlatformExclude and VersionRegex annotations for FLUID transformers (CyanUtil A3) -- TODO
+ - CyanUtil now delivers a modloader API, CyanLoader is such an implementation (CyanUtil A3)
+ - Fixed target calls (FLUID A15, fixed forge support in the process)
+ - FLUID now searches superclasses and interfaces for method injection, if possible (FLUID A15)
+ - FLUID Class Hooks now use ASM instead of Javassist, javassist has been removed. (FLUID A15)
+ - FLUID Class Pool now works with the new IClassSourceProvider system instead of URLs only. (FLUID A15)
+ - New EventBus system (CyanUtil A3, CyanLoader 03/14/2021)
+ - Mostly finished the MixinSupport project, though it will NOT be added to the CyanWrapper, instead, it is going to be a mod.

@@ -12,7 +12,7 @@ def authorname="AerialWorks Software Foundation"
 
 configurePublish {
 	pretty_name "Minecraft Toolkit (MTK)"
-	description "The Minecraft Toolkit is a set of libraries to help with modding, intitially part of the Cyan Cornflower project that is currently abandoned."
+	description "The Minecraft Toolkit is a set of libraries to help with modding."
 	page "https://aerialworks.ddns.net/maven"
 	address "https://aerialworks.ddns.net/maven"
 	
@@ -27,7 +27,10 @@ configurePublish {
 	}
 }
 
-version="1.0.0.A1"
+sourceCompatibility = '1.9'
+targetCompatibility = '1.9'
+
+version="1.0.0.A14"
 jar.dependsOn('processResources')
 
 repositories {
@@ -43,7 +46,18 @@ dependencies {
 	implementation project(':CyanUtil')
 	implementation project(':CCFG')
 	implementation project(':Fluid')
+	
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
 	implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
+	implementation 'org.ow2.asm:asm:9.1'
+	implementation 'org.ow2.asm:asm-tree:9.1'
+	implementation 'org.ow2.asm:asm-commons:9.1'
+	
+    implementation 'org.javassist:javassist:3.27.1-ASF-SNAPSHOT-5'
+	implementation 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.1'
+	implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
+	
     testImplementation 'junit:junit:4.12'
 }
 
@@ -100,6 +114,14 @@ task specialTest (type: Test, dependsOn: test) {
     include "**/**SpecialTest**"
     minHeapSize = "128m"
   	maxHeapSize = "2G"
+}
+
+processResources  {
+	inputs.property "version", project.version
+	
+	from(sourceSets.main.resources.srcDirs) {
+		expand "version": project.version
+	}
 }
 
 initializeASFMVNPublish()

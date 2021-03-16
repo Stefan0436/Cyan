@@ -1,0 +1,479 @@
+buildscript {
+	repositories {
+		jcenter()
+		mavenCentral()
+	}
+}
+plugins {
+	id 'com.github.johnrengelman.shadow' version '6.1.0'
+	id 'maven-publish'
+	id 'java'
+}
+apply plugin: 'eclipse'
+apply from: '../asf.mvn.publish.gradle'
+
+import java.io.InputStream
+import java.util.jar.JarInputStream
+import java.util.jar.Manifest
+
+sourceCompatibility = '1.9'
+targetCompatibility = '1.9'
+
+group="org.asf.cyan.cornflower"
+
+def pluginid=group
+def classname="Cornflower"
+def projname="Cornflower"
+def display="Cornflower Gradle Plugin"
+def authorname="AerialWorks Software Foundation"
+def plugindescription="Cyan Cornflower - Gradle plugin to help with Cyan modding"
+def versiontype="ALPHA"
+version="1.0.0.A26"
+
+sourceSets {
+	main {
+		java {
+			srcDirs = ['src/main/java']
+		}
+		resources {
+			srcDirs = ['src/main/resources']
+		}
+	}
+}
+
+buildDir = '../build/Cornflower'
+
+task javaDocs(type: Javadoc) {
+	classpath = sourceSets.main.runtimeClasspath
+	source = sourceSets.main.allJava
+}
+
+repositories {
+	mavenCentral()
+	jcenter()
+	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
+	maven { 
+		url 'https://repo.gradle.org/gradle/libs-releases-local/'
+	}
+}
+
+dependencies {
+	implementation group: 'org.gradle', name: 'gradle-core', version: '6.1.1'
+	implementation group: 'org.gradle', name: 'gradle-wrapper', version: '6.1.1'
+	implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.7'
+	implementation group: 'org.gradle', name: 'gradle-tooling-api', version: '6.1.1'
+	implementation group: 'org.gradle', name: 'gradle-logging', version: '4.3'
+	implementation group: 'org.gradle', name: 'gradle-core-api', version: '6.1.1'
+	implementation group: 'org.gradle', name: 'gradle-model-core', version: '6.1.1'
+	implementation group: 'org.gradle', name: 'gradle-base-services', version: '6.1.1'
+	implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.0-alpha1'
+	
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
+	implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
+	implementation group: 'org.reflections', name: 'reflections', version: '0.9.12'
+	implementation group: 'org.ow2.asm', name: 'asm', version: '9.1'
+	implementation group: 'org.ow2.asm', name: 'asm-util', version: '9.1'
+	implementation group: 'org.ow2.asm', name: 'asm-tree', version: '9.1'
+	implementation group: 'org.ow2.asm', name: 'asm-commons', version: '9.1'
+	implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
+	
+	implementation 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.1'
+	
+	implementation project(":MTK")
+	implementation project(":CyanCore")
+	implementation project(":CyanComponents")
+	implementation project(":CyanUtil")
+	implementation project(":Fluid")
+	implementation project(":CCFG")
+	
+	mavendependency group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.7'
+	mavendependency group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
+	mavendependency group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
+	mavendependency group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
+	mavendependency group: 'org.reflections', name: 'reflections', version: '0.9.12'
+	mavendependency group: 'org.ow2.asm', name: 'asm', version: '9.1'
+	mavendependency group: 'org.ow2.asm', name: 'asm-util', version: '9.1'
+	mavendependency group: 'org.ow2.asm', name: 'asm-tree', version: '9.1'
+	mavendependency group: 'org.ow2.asm', name: 'asm-commons', version: '9.1'
+	mavendependency group: 'org.ow2.asm', name: 'asm-analysis', version: '9.1'
+	mavendependency 'org.javassist:javassist:3.27.1-ASF-SNAPSHOT-5'
+	
+	mavendependency group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
+	mavendependency group: 'org.jboss.windup.decompiler.fernflower', name: 'windup-fernflower', version: '1.0.0.20171018'
+	mavendependency group: 'org.jboss.windup.decompiler', name: 'decompiler-api', version: '5.1.2.Final'
+	mavendependency group: 'org.jboss.windup.utils', name: 'windup-utils', version: '5.1.2.Final'
+	
+	mavendependency 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.1'
+	
+	mavendependency project(":MTK")
+	mavendependency project(":CyanCore")
+	mavendependency project(":CyanComponents")
+	mavendependency project(":CyanUtil")
+	mavendependency project(":Fluid")
+	mavendependency project(":CCFG")
+}
+
+jar {
+	manifest {
+		attributes([
+			"Specification-Title": project.name,
+			"Specification-Vendor": "${authorname}",
+			"Specification-Version": project.version,
+			"Implementation-Title": "${pluginid}",
+			"Implementation-Version": project.version,
+			"Implementation-Vendor" :"${authorname}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+	exclude "**/tests/**"
+	includeEmptyDirs = false
+}
+
+task compileAgent(type: Jar, dependsOn: classes) {
+	classifier = 'agent'
+	archiveFileName = "Agent.jar"
+	from sourceSets.main.output
+	includeEmptyDirs = false
+	include "**/tests/**"
+	destinationDirectory = buildDirectory.dir("Interactive test agent")
+	manifest {
+		attributes([
+			"Specification-Title": project.name,
+			"Specification-Vendor": "${authorname}",
+			"Specification-Version": project.version,
+			"Implementation-Title": "${pluginid}",
+			"Implementation-Version": project.version,
+			"Implementation-Vendor" :"${authorname}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+			"Agent-Class": "org.asf.cyan.tests.Agent"
+		])
+	}
+}
+classes.finalizedBy('compileAgent')
+
+shadowJar {
+	archiveClassifier.set('full')
+	destinationDirectory = libsDirectory.dir("Fat Jars")
+	from javadoc
+	from sourceSets.main.allJava
+	from sourceSets.main.output
+	exclude "**/tests/**"
+	exclude "**/org/gradle/**"
+	exclude "**/groovy/**"
+	exclude "**/groovyjar**/**"
+	exclude "**/gradle-*.properties"
+}
+
+shadowJar.dependsOn('processResources')
+jar.dependsOn('processResources')
+shadowJar.dependsOn('javaDocs')
+configurations.compile.dependencies.remove dependencies.gradleApi()
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+	destinationDirectory = libsDirectory.dir("Source Jars")
+}
+
+task javadocJar(type: Jar, dependsOn: 'javaDocs') {
+	from javadoc
+	classifier = 'javadoc'
+	destinationDirectory = libsDirectory.dir("Javadocs")
+	exclude "**/org/asf/cyan/tests/**"
+}
+
+
+task cornflowerMTKJar(type: Jar, dependsOn: jar) {
+	from sourceSets.main.output
+	classifier = 'MTK'
+	
+	manifest {
+		attributes([
+			"Specification-Title": project.name+"-Utilities",
+			"Specification-Vendor": "${authorname}",
+			"Specification-Version": project.version,
+			"Implementation-Title": "${pluginid}",
+			"Implementation-Version": project.version,
+			"Implementation-Vendor" :"${authorname}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+	
+	exclude "**/tests/**"
+	exclude "**/gradle/tasks/**"
+	exclude "**/gradle/flowerinternal/**"
+	exclude "**/gradle/flowerutil/**"
+	
+	includeEmptyDirs = false
+}
+
+task cornflowerMTKJavadocJar(type: Jar, dependsOn: 'javaDocs') {
+	from javadoc
+	classifier = 'MTK-javadoc'
+	destinationDirectory = libsDirectory.dir("Javadocs")
+	exclude "**/org/asf/cyan/tests/**"
+	exclude "**/org/asf/cyan/cornflower/gradle/tasks/**"
+	exclude "**/org/asf/cyan/cornflower/gradle/flowerinternal/**"
+	exclude "**/org/asf/cyan/cornflower/gradle/flowerutil/**"
+	includeEmptyDirs = false
+}
+cornflowerMTKJavadocJar.dependsOn cornflowerMTKJar
+
+task cornflowerMTKSourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'MTK-sources'
+	from sourceSets.main.allSource
+	
+	exclude "**/tests/**"
+	exclude "**/gradle/tasks/**"
+	exclude "**/gradle/flowerinternal/**"
+	exclude "**/gradle/flowerutil/**"
+	
+	destinationDirectory = libsDirectory.dir("Source Jars")
+	includeEmptyDirs = false
+}
+cornflowerMTKSourcesJar.dependsOn cornflowerMTKJar
+
+
+task cornflowerAPIJar(type: Jar, dependsOn: jar) {
+	from sourceSets.main.output
+	classifier = 'API'
+	
+	manifest {
+		attributes([
+			"Specification-Title": project.name,
+			"Specification-Vendor": "${authorname}",
+			"Specification-Version": project.version,
+			"Implementation-Title": "${pluginid}",
+			"Implementation-Version": project.version,
+			"Implementation-Vendor" :"${authorname}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+
+	include "**/utilities/**"
+	include "**/log4j2.xml"
+	includeEmptyDirs = false
+}
+
+task cornflowerAPIJavadocJar(type: Jar, dependsOn: 'javaDocs') {
+	from javadoc
+	classifier = 'API-javadoc'
+	destinationDirectory = libsDirectory.dir("Javadocs")
+	include "**/utilities/**"
+	includeEmptyDirs = false
+}
+cornflowerAPIJavadocJar.dependsOn cornflowerAPIJar
+
+task cornflowerAPISourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'API-sources'
+	from sourceSets.main.allSource
+	include "**/utilities/**"
+	destinationDirectory = libsDirectory.dir("Source Jars")
+	includeEmptyDirs = false
+}
+cornflowerAPISourcesJar.dependsOn cornflowerAPIJar
+
+
+task cornflowerExtAPIJar(type: Jar, dependsOn: jar) {
+	from sourceSets.main.output
+	classifier = 'API'
+	
+	manifest {
+		attributes([
+			"Specification-Title": project.name,
+			"Specification-Vendor": "${authorname}",
+			"Specification-Version": project.version,
+			"Implementation-Title": "${pluginid}",
+			"Implementation-Version": project.version,
+			"Implementation-Vendor" :"${authorname}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+	
+	include "**/flowerutil/**"
+	include "**/utilities/**"
+	include "**/log4j2.xml"
+	includeEmptyDirs = false
+}
+
+task cornflowerExtAPIJavadocJar(type: Jar, dependsOn: 'javaDocs') {
+	from javadoc
+	classifier = 'EXT-API-javadoc'
+	destinationDirectory = libsDirectory.dir("Javadocs")
+	include "**/utilities/**"
+	includeEmptyDirs = false
+}
+cornflowerExtAPIJavadocJar.dependsOn cornflowerExtAPIJar
+
+task cornflowerExtAPISourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'EXT-API-sources'
+	from sourceSets.main.allSource
+	include "**/utilities/**"
+	destinationDirectory = libsDirectory.dir("Source Jars")
+	includeEmptyDirs = false
+}
+cornflowerExtAPISourcesJar.dependsOn cornflowerExtAPIJar
+
+
+configurePublish {
+	pretty_name "$display"
+	description "$plugindescription"
+	page "https://aerialworks.ddns.net/maven"
+	address "https://aerialworks.ddns.net/maven"
+	
+	license {
+		license_name "GNU General Public License v2.0"
+		license_url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
+	}
+	
+	author {
+		name "$authorname"
+		id "ASF"
+	}
+	
+	artifact {
+		artifact_description "Cornflower API, only contains the gradle utilities"
+		
+		task {
+			artifact tasks.cornflowerAPIJar
+			classifier ""
+		}
+		task {
+			artifact tasks.cornflowerAPIJavadocJar
+			classifier "javadoc"
+		}
+		task {
+			artifact tasks.cornflowerAPISourcesJar
+			classifier "sources"
+		}
+		
+		artifact_license {
+			license_name "GNU Lesser General Public License v3.0"
+			license_url "https://www.gnu.org/licenses/lgpl-3.0.txt"
+		}
+	}
+	
+	artifact {
+		artifact_description "Cornflower MTK, without any tasks, only the MTK"
+		
+		task {
+			artifact tasks.cornflowerMTKJar
+			classifier ""
+		}
+		task {
+			artifact tasks.cornflowerMTKJavadocJar
+			classifier "javadoc"
+		}
+		task {
+			artifact tasks.cornflowerMTKSourcesJar
+			classifier "sources"
+		}
+		
+		artifact_license {
+			license_name "GNU General Public License v2.0"
+			license_url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
+		}
+	}
+	
+	artifact {
+		artifact_description "Cornflower API, with the Modloader Utilities included"
+		
+		task {
+			artifact tasks.cornflowerExtAPIJar
+			classifier ""
+		}
+		task {
+			artifact tasks.cornflowerExtAPIJavadocJar
+			classifier "javadoc"
+		}
+		task {
+			artifact tasks.cornflowerExtAPISourcesJar
+			classifier "sources"
+		}
+		
+		artifact_license {
+			license_name "GNU General Public License v2.0"
+			license_url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
+		}
+	}
+}
+
+artifacts {
+	archives sourcesJar
+	archives javadocJar
+	archives shadowJar
+}
+
+processResources {
+	inputs.property "version", project.version
+	inputs.property "author", "${authorname}".toString()
+	inputs.property "description", "${plugindescription}".toString()
+	inputs.property "group", project.group
+	inputs.property "classname", "${classname}".toString()
+	inputs.property "display", "${display}".toString()
+	inputs.property "id", "${pluginid}".toString()
+	inputs.property "projname", "${projname}".toString()
+	inputs.property "versiontype", "${versiontype}".toString()
+
+	from(sourceSets.main.resources.srcDirs) {
+		expand 'version': project.version, 'versiontype': "${versiontype}", 'id': "${pluginid}", 'display': "${display}".toString(), 'author': "${authorname}".toString(), 'projname': "${projname}".toString(), 'description': "${plugindescription}".toString(), 'group': project.group, 'classname': "${classname}".toString()
+	}
+}
+
+
+
+task copyEclipseConfig {
+	onlyIf { return !file(".settings/org.eclipse.jdt.apt.core.prefs").exists() }
+	copy {
+		from "config presets"
+		into ".settings"
+		include "org.eclipse.jdt.apt.core.prefs"
+	}
+}
+eclipseClasspath.dependsOn copyEclipseConfig
+
+cleanEclipse {
+	delete ".settings"
+	delete "bin"
+	delete fileTree("$projectDir") {
+		include '*.launch'
+	}
+}
+
+task cleanAll (type: Delete) {
+	delete ".factorypath"
+}
+cleanAll.dependsOn cleanEclipse
+cleanAll.finalizedBy clean
+
+task testProj(type: Copy) {
+	doFirst {
+		if (!file("TestProj").exists()) mkdir "TestProj"
+	}
+	from "TestPreset"
+	into "TestProj"
+	include "**/**"
+}
+eclipseClasspath.finalizedBy testProj
+
+task cpLibs {
+	doLast {
+		configurations.mavendependency.resolvedConfiguration.firstLevelModuleDependencies.each { dep ->
+			if (dep.getModuleArtifacts().size() != 0 && !dep.getModuleArtifacts()[0].file.getCanonicalPath().contains("gradle-")) {
+				copy {
+					String version = dep.moduleVersion;
+					from (dep.getModuleArtifacts()[0].file.getParent() )
+					into ( libsDirectory.dir("Required Libraries"))
+					include "**/"+dep.getModuleArtifacts()[0].file.getName()
+					rename { fileName ->
+						fileName = dep.moduleName+".jar"
+					}
+				}
+			}
+		}
+	}
+}
+classes.finalizedBy('cpLibs')
+
+initializeASFMVNPublish()

@@ -70,4 +70,9 @@ public class MinecraftVersionInfo {
 	public String toString() {
 		return getVersion();
 	}
+	
+	@Override
+	public boolean equals(Object b) {
+		return b.toString().equals(toString());
+	}
 }

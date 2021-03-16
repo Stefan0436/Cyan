@@ -1,0 +1,72 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=0x00007f071744afa3, pid=1163519, tid=1163536
+#
+# JRE version: OpenJDK Runtime Environment (15.0.2+7) (build 15.0.2+7)
+# Java VM: OpenJDK 64-Bit Server VM (15.0.2+7, mixed mode, tiered, compressed oops, g1 gc, linux-amd64)
+# Problematic frame:
+# C  [libjimage.so+0x2fa3]
+#
+# Core dump will be written. Default location: Core dumps may be processed with "/usr/lib/systemd/systemd-coredump %P %u %g %s %t %c %h" (or dumping to /run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/MTK/core.1163519)
+#
+# If you would like to submit a bug report, please visit:
+#   https://bugreport.java.com/bugreport/crash.jsp
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: -XX:+ShowCodeDetailsInExceptionMessages -agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:33045 -ea -javaagent:/home/stefan/eclipse/java-2020-09/eclipse/configuration/org.eclipse.osgi/949/0/.cp/lib/javaagent-shaded.jar -Dfile.encoding=UTF-8 org.eclipse.jdt.internal.junit.runner.RemoteTestRunner -version 3 -port 34631 -testLoaderClass org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader -loaderpluginname org.eclipse.jdt.junit4.runtime -test org.asf.cyan.minecraft.toolkits.mtk.MinecraftRifterToolkitSpecialTest:generateCyanForgeRiftTargetsTest
+
+Host: AMD FX(tm)-6300 Six-Core Processor, 6 cores, 15G, Manjaro Linux
+Time: Tue Mar 16 19:56:47 2021 CET elapsed time: 777.014582 seconds (0d 0h 12m 57s)
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x00007f07102160f0):  JavaThread "Signal Dispatcher" daemon [_thread_in_vm, id=1163536, stack(0x00007f06e1037000,0x00007f06e1138000)]
+
+Stack: [0x00007f06e1037000,0x00007f06e1138000],  sp=0x00007f06e1135110,  free space=1016k
+Native frames: (J=compiled Java code, A=aot compiled Java code, j=interpreted, Vv=VM code, C=native code)
+C  [libjimage.so+0x2fa3]
+C  [libjimage.so+0x3b2e]
+C  [libjimage.so+0x4034]  JIMAGE_FindResource+0x104
+V  [libjvm.so+0x509e01]
+V  [libjvm.so+0x50e4a3]
+V  [libjvm.so+0xd5a8f1]
+V  [libjvm.so+0xd5976b]
+V  [libjvm.so+0xd5b85e]
+V  [libjvm.so+0x578e89]
+V  [libjvm.so+0x78f233]
+j  jdk.internal.misc.Signal.dispatch(I)V+25 java.base@15.0.2
+v  ~StubRoutines::call_stub
+V  [libjvm.so+0x796559]
+V  [libjvm.so+0x79695d]
+V  [libjvm.so+0xb636ae]
+V  [libjvm.so+0xda3f95]
+V  [libjvm.so+0xda8f50]
+V  [libjvm.so+0xb731ca]
+
+Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
+j  jdk.internal.misc.Signal.dispatch(I)V+25 java.base@15.0.2
+v  ~StubRoutines::call_stub
+
+siginfo: si_signo: 11 (SIGSEGV), si_code: 1 (SEGV_MAPERR), si_addr: 0x00007f0707bb5d98
+
+Register to memory mapping:
+
+RAX=0x00007f071744fb68: <offset 0x0000000000007b68> in /usr/lib/jvm/java-15-openjdk/lib/libjimage.so at 0x00007f0717448000
+RBX=0x00007f06e11351c1 is pointing into the stack for thread: 0x00007f07102160f0
+RCX=0x00007f06e11351e3 is pointing into the stack for thread: 0x00007f07102160f0
+RDX=0x000000000000775f is an unknown value
+RSP=0x00007f06e1135110 is pointing into the stack for thread: 0x00007f07102160f0
+RBP=0x00007f06e1135130 is pointing into the stack for thread: 0x00007f07102160f0
+RSI=0x00007f0707b9801c is an unknown value
+RDI=0x00007f0717450030: <offset 0x0000000000008030> in /usr/lib/jvm/java-15-openjdk/lib/libjimage.so at 0x00007f0717448000
+R8 =0x00000000000040c1 is an unknown value
+R9 =0x65746e692f6b646a is an unknown value
+R10=0x73696d2f6c616e72 is an unknown value
+R11=0x6c616e6769532f63 is an unknown value
+R12=0x0000000000007f35 is an unknown value
+R13=0x00007f06e11351c0 is pointing into the stack for thread: 0x00007f07102160f0
+R14=0x0 is NULL
+R15=0x00007f0710216650 points into unknown readable memory: 0x65746e692f6b646a | 6a 64 6b 2f 69 6e 74

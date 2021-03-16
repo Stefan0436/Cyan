@@ -6,51 +6,7 @@
  */
 
 class PublishingConfiguration {
-	def project = null
-	public def includeshadow = false
-	public def norecurse = false
-	public def single_resources = []
-
-	public def pretty_name = ""
-	public def address = ""
-	public def fallback_desc = ""
-	public def fallback_page=""
-	public def fallback_authors=new HashMap<String, String[]>()
-	public def fallback_licenses=new HashMap<String, String>()
-	public def fallback_desc_automatic = new HashMap<String, String>()
-
-	class author {
-		public def name = null
-		public def id = null
-		public def email = null
-
-		public def name(def name) {
-			this.name=name;
-		}
-
-		public def id(def id) {
-			this.id=id;
-		}
-
-		public def email(def email) {
-			this.email=email;
-		}
-	}
-
-	class nameurl {
-		public def name = null
-		public def url = null
-
-		public def name(def name) {
-			this.name=name;
-		}
-
-		public def url(def url) {
-			this.url=url;
-		}
-	}
-
-	class artifact {
+	class PublishingArtifact {
 		public def description = null
 		public def page = null
 		public def name = null
@@ -61,75 +17,76 @@ class PublishingConfiguration {
 		public def extensions = new HashMap<String, String>()
 		public def authors = new HashMap<String, String[]>()
 		public def licenses = new HashMap<String, String>()
+		public def specific_resources = new HashMap<String, String>()
 		public def tasks = []
 		public def single_resources = []
-
+	
 		class taskclosure {
 			public def task
 			public def extension
 			public def classifier
-
+	
 			public def artifact(def task) {
 				this.task = task;
 			}
-
+	
 			public def classifier(def classifier) {
 				this.classifier = classifier;
 			}
-
+	
 			public def extension(def extension) {
 				this.extension = extension;
 			}
 		}
-
-		public def author(Closure author) {
+	
+		public def artifact_author(Closure author) {
 			author = author.clone()
-			def output = new author()
+			def output = new Author()
 			author.delegate = output
 			author()
 			authors.put(output.name, [output.id, output.email])
 			return output
 		}
-
-		public def license(Closure license) {
+	
+		public def artifact_license(Closure license) {
 			license = license.clone()
-			def output = new nameurl()
+			def output = new NameURL()
 			license.delegate = output
 			license()
 			licenses.put(output.name, output.url)
 			return output
 		}
-
-		public def page(def page) {
+	
+		public def artifact_page(def page) {
 			this.page = page;
 			return page
 		}
-
+	
 		public def name(def name) {
 			this.name = name
 			return name
 		}
-
+	
 		public def pretty_name(def name) {
 			this.pretty_name = name
 			return name
 		}
-
+	
 		public def group(def group) {
 			this.group = group
 			return group
 		}
-
-		public def version(def version) {
+	
+		public def artifact_version(def version) {
 			this.version = version
 			return version
 		}
-
-		public def description(def description) {
+	
+		public def artifact_description(def description) {
 			this.description = description
 			return description
 		}
-
+	
 		public def taskclosure(Closure task) {
 			task = task.clone()
 			def output = new taskclosure()
@@ -137,17 +94,27 @@ class PublishingConfiguration {
 			task()
 			if (output.classifier == null) output.classifier = output.task.archiveClassifier.get()
 			if (output.extension == null) output.extension = output.task.archiveExtension.get()
-			
+	
 			tasks.add(output.task)
 			if (name == null) name = project.name+(output.task.archiveClassifier.get() == null || output.task.archiveClassifier.get().equals("") ? "" : "-"+output.task.archiveClassifier.get())
-			if (version == null) version = output.task.archiveVersion.get()
+			if (version == null) {
+				try {
+					version = output.task.archiveVersion.get()
+				} catch (Exception ex) {
+					version = project.version
+				}
+			}
 			if (!classifiers.containsKey(output.task.name)) classifiers.put(output.task.name, output.classifier)
 			if (!extensions.containsKey(output.task.name)) extensions.put(output.task.name, output.extension)
 			return output
 		}
-		
-		public def resource(String path) {
+	
+		public def artifact_resource(String path) {
 			single_resources.add path
+		}
+	
+		public def artifact_resource(String path, String outputName) {
+			specific_resources.put path, outputName
 		}
 	
 		public def task(def task) {
@@ -156,14 +123,77 @@ class PublishingConfiguration {
 			}
 			tasks.add(task)
 			if (name == null) name = project.name+"-"+task.archiveClassifier.get()
-			if (version == null) version = task.archiveVersion.get()
+			if (version == null) {
+				try {
+					version = task.archiveVersion.get()
+				} catch (Exception ex) {
+					version = project.version
+				}
+			}
 			if (!classifiers.containsKey(task.name)) classifiers.put(task.name, task.archiveClassifier.get())
 			if (!extensions.containsKey(task.name)) extensions.put(task.name, task.archiveExtension.get())
 			return task
 		}
 	}
+	
+	class Author {
+		public def name = null
+		public def id = null
+		public def email = null
+	
+		public def name(def name) {
+			this.name=name;
+		}
+		
+		public def author_name(def name) {
+			this.name=name;
+		}
+	
+		public def id(def id) {
+			this.id=id;
+		}
+	
+		public def email(def email) {
+			this.email=email;
+		}
+	}
+	
+	class NameURL {
+		public def name = null
+		public def url = null
+	
+		public def name(def name) {
+			this.name=name;
+		}
+	
+		public def url(def url) {
+			this.url=url;
+		}
+		
+		public def license_name(def name) {
+			this.name=name;
+		}
+	
+		public def license_url(def url) {
+			this.url=url;
+		}
+	}
 
-	public def artifacts = new ArrayList<artifact>()
+	def project = null
+	public def includeshadow = false
+	public def norecurse = false
+	public def single_resources = []
+	public def specific_resources = new HashMap<String, String>()
+
+	public def pretty_name = ""
+	public def address = ""
+	public def fallback_desc = ""
+	public def fallback_page=""
+	public def fallback_authors=new HashMap<String, String[]>()
+	public def fallback_licenses=new HashMap<String, String>()
+	public def fallback_desc_automatic = new HashMap<String, String>()
+
+	public def artifacts = new ArrayList<PublishingArtifact>()
 
 	public def run(Closure closure, def project) {
 		this.project = project
@@ -175,7 +205,7 @@ class PublishingConfiguration {
 
 	public def artifact(Closure artifact) {
 		artifact = artifact.clone()
-		def output = new artifact()
+		def output = new PublishingArtifact()
 		artifact.delegate = output
 		artifact()
 		artifacts.add(output)
@@ -209,7 +239,7 @@ class PublishingConfiguration {
 
 	public def author(Closure author) {
 		author = author.clone()
-		def output = new author()
+		def output = new Author()
 		author.delegate = output
 		author()
 		fallback_authors.put(output.name, [output.id, output.email])
@@ -218,15 +248,19 @@ class PublishingConfiguration {
 
 	public def license(Closure license) {
 		license = license.clone()
-		def output = new nameurl()
+		def output = new NameURL()
 		license.delegate = output
 		license()
 		fallback_licenses.put(output.name, output.url)
 		return output
 	}
-	
+
 	public def resource(String path) {
 		single_resources.add path
+	}
+
+	public def resource(String path, String outputName) {
+		specific_resources.put path, outputName
 	}
 
 	public def includeShadowJar() {
@@ -249,13 +283,16 @@ class PublishingConfiguration {
 			if (single_resources.size() != 0) {
 				artifact.single_resources = single_resources
 			}
+			if (specific_resources.size() != 0) {
+				artifact.specific_resources = specific_resources
+			}
 		}
 
 		if (!norecurse) {
 			for (def tsk : project.configurations.archives.artifacts.buildDependencies.getDependencies()) {
 				if ((tsk.getClass().getTypeName().startsWith("com.github.jengelman.gradle.plugins.shadow") && !includeshadow) || artifacts.stream().anyMatch({ e -> e.tasks.stream().anyMatch({ e2 ->	 e2.name.equals(tsk.name)})}))
 					continue
-				
+
 				artifact {
 					name project.name+"-"+tsk.archiveClassifier.get()
 					task {
@@ -266,19 +303,19 @@ class PublishingConfiguration {
 			}
 		}
 
-		for (def a : artifacts) {			
+		for (def a : artifacts) {
 			if (a.description == null && !fallback_desc_automatic.containsKey(a.name)) a.description = fallback_desc;
 			else if (a.description == null && fallback_desc_automatic.containsKey(a.name)) a.description = fallback_desc_automatic[a.name];
 			if (a.page == null) a.page = fallback_page;
 			if (a.group == null) a.group = project.group
-			if (a.version == null) a.group = project.version
+			if (a.version == null) a.version = project.version
 			if (a.authors.size() == 0) a.authors = fallback_authors.clone()
-			if (a.licenses.size() == 0) a.authors = fallback_licenses.clone()
+			if (a.licenses.size() == 0) a.licenses = fallback_licenses.clone()
 			if (a.pretty_name == null) a.pretty_name = a.name
-			
+
 			project.logger.lifecycle "[ASF-Maven-Publish] Added artifact:"
 			project.logger.lifecycle "  Name: "+a.pretty_name
-			project.logger.lifecycle "  Description: "+a.description.replaceAll("\n", "\n  ").replaceAll("\r\n", "\r\n  ")
+			project.logger.lifecycle "  Description: "+a.description.replaceAll("\n", "\n  ")
 			project.logger.lifecycle "  Group: "+a.group
 			project.logger.lifecycle "  Version: "+a.version
 			project.logger.lifecycle "  Page: "+a.page
@@ -288,20 +325,24 @@ class PublishingConfiguration {
 }
 
 public def doConfigurePublish(def args) {
-    ext.publishconf = new PublishingConfiguration().run(args, project)
+	ext.publishconf = new PublishingConfiguration().run(args, project)
 }
+
 gradle.allprojects {
-    ext.configurePublish = {
-        doConfigurePublish(it)
-    }
-    ext.initializeASFMVNPublish = {
-        doInitializeASFMVNPublish(project)
-    }
+	configurations {
+		mavendependency
+	}
+	ext.configurePublish = {
+		doConfigurePublish(it)
+	}
+	ext.initializeASFMVNPublish = {
+		doInitializeASFMVNPublish(project)
+	}
 }
 
 def doInitializeASFMVNPublish(def proj) {
 	if (!proj.hasProperty("publishconf")) return
-    ext.publishconf.process()
+	ext.publishconf.process()
 
 	configurations {
 		antDep
@@ -316,9 +357,9 @@ def doInitializeASFMVNPublish(def proj) {
 	proj.publishing {
 		publications {
 			def ind = 0
-			
+
 			for (def artifactdata : proj.ext.publishconf.artifacts) {
-				def resourceArtifacts = []	
+				def resourceArtifacts = []
 				if (artifactdata.single_resources.size() != 0) {
 					for (def resource : artifactdata.single_resources)  {
 						def artifactFile = new File(sourceSets.main.output.resourcesDir, resource)
@@ -330,15 +371,27 @@ def doInitializeASFMVNPublish(def proj) {
 						resourceArtifacts.add theArtifact
 					}
 				}
-							
+				if (artifactdata.specific_resources.size() != 0) {
+					for (def resource : artifactdata.specific_resources.keySet()) {
+						def newName = new File(artifactdata.specific_resources.get(resource)).getName()
+						def artifactFile = new File(sourceSets.main.output.resourcesDir, resource)
+						def theArtifact = artifacts.add('archives', artifactFile) {
+							type newName.substring(0, newName.lastIndexOf("."))
+							builtBy 'processResources'
+						}
+						theArtifact.classifier = newName.substring(0, newName.lastIndexOf("."))
+						resourceArtifacts.add theArtifact
+					}
+				}
+
 				publishing.publications.create("mavenJava"+ind++, MavenPublication) {
 					artifactId = artifactdata.name
 					groupId = artifactdata.group
 					version = artifactdata.version
-					
+
 					for (def resource : resourceArtifacts)
-						artifact resource
-					
+					artifact resource
+
 					for (def tsk : artifactdata.tasks) {
 						artifact(tsk) {
 							classifier artifactdata.classifiers[tsk.name]
@@ -362,10 +415,21 @@ def doInitializeASFMVNPublish(def proj) {
 							for (def authordata : artifactdata.authors.keySet()) {
 								developer {
 									name = "${authordata}"
-									id = artifactdata.authors[authordata][0]
-									if (artifactdata.authors[authordata][1] != null)
-										email = artifactdata.authors[authordata][0]
+									id = artifactdata.authors.get(authordata)[0]
+									if (artifactdata.authors.get(authordata)[1] != null)
+									email = artifactdata.authors[authordata][0]
 								}
+							}
+						}
+						
+						withXml {
+  							def dependencies  = asNode().appendNode('dependencies')
+							  
+							configurations.mavendependency.allDependencies.each {  dep ->
+								def dependency = dependencies.appendNode('dependency')
+								dependency.appendNode('groupId', dep.group)
+								dependency.appendNode('artifactId', dep.name)
+								dependency.appendNode('version', dep.version)
 							}
 						}
 					}
@@ -378,7 +442,7 @@ def doInitializeASFMVNPublish(def proj) {
 			}
 		}
 	}
-	
+
 	if (proj.hasProperty("mavenusername") && proj.hasProperty("mavenpassword")) {
 		publishing.repositories.maven {
 			url proj.ext.publishconf.address
@@ -387,7 +451,7 @@ def doInitializeASFMVNPublish(def proj) {
 				password = "${mavenpassword}"
 			}
 		}
-		
+
 		def ind = 0
 		for (def artifact : proj.ext.publishconf.artifacts) {
 			if (artifact.single_resources.size() != 0) publish.dependsOn processResources
@@ -424,7 +488,7 @@ def doInitializeASFMVNPublish(def proj) {
 task checkAsfMVNPublish {
 	doLast {
 		if (!project.hasProperty("publishconf"))
-			logger.warn('ASF-Maven-Publish: Hmmm, looks like you have applied this plugin without a configuration,\nplease add a configurePublish code block.')
+		logger.warn('ASF-Maven-Publish: Hmmm, looks like you have applied this plugin without a configuration,\nplease add a configurePublish code block.')
 	}
 }
 publish.finalizedBy checkAsfMVNPublish

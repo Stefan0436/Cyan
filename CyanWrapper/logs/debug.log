@@ -1,0 +1,652 @@
+[14:52:54] [INFO ] [main] [CYAN/LOADER] - Starting CYAN in: /run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/CyanWrapper/.cyan-data
+[14:52:55] [DEBUG] [main] [CYAN/MINECRAFT] - Resetted server connection state
+[14:52:55] [INFO ] [main] [CYAN/CORE] - Connecting to https://aerialworks.ddns.net/maven, downloading version information...
+[14:52:55] [DEBUG] [main] [CYAN/CORE] - Scanning version information... Using URL: https://aerialworks.ddns.net/maven/org/asf/cyan/CyanVersionHolder/generic/CyanVersionHolder-generic-versions.ccfg
+[14:52:55] [DEBUG] [main] [CYAN/CORE] - Opening connection...
+[14:52:55] [DEBUG] [main] [CYAN/CORE] - Reading all content...
+[14:52:55] [DEBUG] [main] [CYAN/CORE] - Parsing response into CCFG object...
+[14:52:55] [DEBUG] [main] [CYAN/CORE] - Processing version information...
+[14:52:55] [INFO ] [main] [CYAN/CORE] - Received version suffix: Latest ALPHA
+[14:52:55] [INFO ] [main] [CYAN/MAPPINGS] - Loading 1.16.5 VANILLA CLIENT mappings...
+[14:53:04] [INFO ] [main] [CYAN/LOADER] - Starting CyanCore...
+[14:53:04] [INFO ] [main] [CYAN/LOADER] - Loading FLUID mappings...
+[14:53:04] [INFO ] [main] [CYAN/LOADER] - Loading FLUID class load hooks...
+[14:53:04] [INFO ] [main] [CYAN/FLUID] - Loading class hook TitleModification, target class: com.mojang.blaze3d.platform.Window
+[14:53:04] [INFO ] [main] [CYAN/FLUID] - Loading class hook BrandModification, target class: net.minecraft.client.ClientBrandRetriever
+[14:53:04] [INFO ] [main] [CYAN/FLUID] - Loading class hook MinecraftServerModification, target class: net.minecraft.server.MinecraftServer
+[14:53:04] [INFO ] [main] [CYAN/LOADER] - Loading FLUID transformers...
+[14:53:04] [INFO ] [main] [CYAN/LOADER] - Loading Cyan Coremods...
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/CyanCore/bin/main/org/asf/cyan/core
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/CCFG/bin/main/org/asf/cyan/api/config
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/CCFG/bin/test/org/asf/cyan/api/config
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/MTK/bin/main/org/asf/cyan/minecraft/toolkits/mtk/versioninfo
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/Fluid/bin/main/org/asf/cyan/fluid/deobfuscation
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/Cornflower/bin/main/org/asf/cyan/cornflower/gradle/utilities
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/CyanUtil/bin/main/org/asf/cyan/api/classloading
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/CyanLoader/bin/main/org/asf/cyan/modifications
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/Fluid/bin/main/org/asf/cyan/fluid/api
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/CCFG/bin/main/org/asf/cyan/api/config/serializing/internal
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/Fluid/bin/main/org/asf/cyan/fluid/remapping
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/CCFG/bin/main/org/asf/cyan/api/config/serializing
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/CCFG/bin/test/org/asf/cyan/api/config/serializing
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/MTK/bin/main/org/asf/cyan/minecraft/toolkits/mtk
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/MTK/bin/test/org/asf/cyan/minecraft/toolkits/mtk
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/CCFG/bin/main/org/asf/cyan/api/config/annotations
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/CyanUtil/bin/main/org/asf/cyan/api/cyanloader
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/CyanComponents/bin/main/org/asf/cyan/api/common
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/Fluid/bin/main/org/asf/cyan/fluid
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/Fluid/bin/test/org/asf/cyan/fluid
+[14:53:04] [DEBUG] [main] [CYAN/CORE] - Added URL for component scan. URL: file:/run/media/stefan/Externe%20HDD/AerialWorks%20Software%20Foundation/Development/Cyan%20Mod%20Framework/MTK/bin/main/org/asf/cyan/minecraft/toolkits/mtk/auth
+[14:53:04] [INFO ] [main] [CYAN/CORE] - Searching for Cyan Components in loaded jars...
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Resetted server connection state
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Resetted server connection state
+[14:53:04] [INFO ] [main] [CYAN/MINECRAFT] - Downloading manifest from https://launchermeta.mojang.com/mc/game/version_manifest.json...
+[14:53:04] [INFO ] [main] [CYAN/MINECRAFT] - Parsing manifest to json...
+[14:53:04] [INFO ] [main] [CYAN/MINECRAFT] - Reading manifest...
+[14:53:04] [INFO ] [main] [CYAN/MINECRAFT] - Adding versions...
+[14:53:04] [INFO ] [main] [CYAN/MINECRAFT] - Received latest snapshot version: 21w08b
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 21w08b, release type: SNAPSHOT, release date: 25-02-2021 11:46. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 21w08a, release type: SNAPSHOT, release date: 24-02-2021 14:38. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 21w07a, release type: SNAPSHOT, release date: 17-02-2021 16:35. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 21w06a, release type: SNAPSHOT, release date: 10-02-2021 17:13. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 21w05b, release type: SNAPSHOT, release date: 04-02-2021 15:09. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 21w05a, release type: SNAPSHOT, release date: 03-02-2021 15:56. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 21w03a, release type: SNAPSHOT, release date: 20-01-2021 14:56. The item has been registered.
+[14:53:04] [INFO ] [main] [CYAN/MINECRAFT] - Received latest release version: 1.16.5
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16.5, release type: RELEASE, release date: 14-01-2021 16:05. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16.5-rc1, release type: SNAPSHOT, release date: 13-01-2021 15:58. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w51a, release type: SNAPSHOT, release date: 16-12-2020 16:27. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w49a, release type: SNAPSHOT, release date: 02-12-2020 16:47. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w48a, release type: SNAPSHOT, release date: 25-11-2020 15:42. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w46a, release type: SNAPSHOT, release date: 11-11-2020 15:30. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w45a, release type: SNAPSHOT, release date: 04-11-2020 16:42. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16.4, release type: RELEASE, release date: 29-10-2020 15:49. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16.4-rc1, release type: SNAPSHOT, release date: 27-10-2020 16:31. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16.4-pre2, release type: SNAPSHOT, release date: 22-10-2020 15:32. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16.4-pre1, release type: SNAPSHOT, release date: 13-10-2020 14:36. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16.3, release type: RELEASE, release date: 10-09-2020 13:42. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16.3-rc1, release type: SNAPSHOT, release date: 07-09-2020 12:34. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16.2, release type: RELEASE, release date: 11-08-2020 10:13. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16.2-rc2, release type: SNAPSHOT, release date: 10-08-2020 11:43. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16.2-rc1, release type: SNAPSHOT, release date: 07-08-2020 14:35. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16.2-pre3, release type: SNAPSHOT, release date: 06-08-2020 16:44. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16.2-pre2, release type: SNAPSHOT, release date: 05-08-2020 15:30. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16.2-pre1, release type: SNAPSHOT, release date: 29-07-2020 13:19. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w30a, release type: SNAPSHOT, release date: 22-07-2020 15:05. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w29a, release type: SNAPSHOT, release date: 15-07-2020 14:13. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w28a, release type: SNAPSHOT, release date: 08-07-2020 15:10. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w27a, release type: SNAPSHOT, release date: 01-07-2020 15:07. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16.1, release type: RELEASE, release date: 24-06-2020 10:31. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16, release type: RELEASE, release date: 23-06-2020 16:20. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16-rc1, release type: SNAPSHOT, release date: 18-06-2020 12:49. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16-pre8, release type: SNAPSHOT, release date: 17-06-2020 14:45. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16-pre7, release type: SNAPSHOT, release date: 16-06-2020 15:31. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16-pre6, release type: SNAPSHOT, release date: 15-06-2020 16:57. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16-pre5, release type: SNAPSHOT, release date: 12-06-2020 14:33. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16-pre4, release type: SNAPSHOT, release date: 11-06-2020 15:45. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16-pre3, release type: SNAPSHOT, release date: 10-06-2020 14:57. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16-pre2, release type: SNAPSHOT, release date: 05-06-2020 10:47. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.16-pre1, release type: SNAPSHOT, release date: 04-06-2020 18:17. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w22a, release type: SNAPSHOT, release date: 29-05-2020 11:25. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w21a, release type: SNAPSHOT, release date: 20-05-2020 12:07. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w20b, release type: SNAPSHOT, release date: 14-05-2020 08:16. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w20a, release type: SNAPSHOT, release date: 13-05-2020 15:11. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w19a, release type: SNAPSHOT, release date: 06-05-2020 16:23. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w18a, release type: SNAPSHOT, release date: 29-04-2020 15:16. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w17a, release type: SNAPSHOT, release date: 22-04-2020 13:47. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w16a, release type: SNAPSHOT, release date: 15-04-2020 14:13. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w15a, release type: SNAPSHOT, release date: 08-04-2020 12:29. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w14a, release type: SNAPSHOT, release date: 02-04-2020 14:28. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w14infinite, release type: SNAPSHOT, release date: 01-04-2020 12:47. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w13b, release type: SNAPSHOT, release date: 26-03-2020 13:00. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w13a, release type: SNAPSHOT, release date: 25-03-2020 17:05. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w12a, release type: SNAPSHOT, release date: 18-03-2020 16:42. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w11a, release type: SNAPSHOT, release date: 11-03-2020 16:28. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w10a, release type: SNAPSHOT, release date: 04-03-2020 16:21. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w09a, release type: SNAPSHOT, release date: 26-02-2020 16:43. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w08a, release type: SNAPSHOT, release date: 19-02-2020 13:30. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w07a, release type: SNAPSHOT, release date: 14-02-2020 13:20. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 20w06a, release type: SNAPSHOT, release date: 05-02-2020 16:05. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.15.2, release type: RELEASE, release date: 17-01-2020 10:03. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.15.2-pre2, release type: SNAPSHOT, release date: 16-01-2020 12:35. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.15.2-pre1, release type: SNAPSHOT, release date: 14-01-2020 16:19. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.15.1, release type: RELEASE, release date: 16-12-2019 10:29. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.15.1-pre1, release type: SNAPSHOT, release date: 12-12-2019 14:02. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.15, release type: RELEASE, release date: 09-12-2019 13:13. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.15-pre7, release type: SNAPSHOT, release date: 09-12-2019 12:14. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.15-pre6, release type: SNAPSHOT, release date: 06-12-2019 12:04. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.15-pre5, release type: SNAPSHOT, release date: 05-12-2019 13:20. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.15-pre4, release type: SNAPSHOT, release date: 03-12-2019 12:24. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.15-pre3, release type: SNAPSHOT, release date: 28-11-2019 17:17. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.15-pre2, release type: SNAPSHOT, release date: 25-11-2019 18:09. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.15-pre1, release type: SNAPSHOT, release date: 21-11-2019 17:01. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w46b, release type: SNAPSHOT, release date: 14-11-2019 13:29. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w46a, release type: SNAPSHOT, release date: 13-11-2019 16:37. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w45b, release type: SNAPSHOT, release date: 08-11-2019 12:42. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w45a, release type: SNAPSHOT, release date: 07-11-2019 16:19. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w44a, release type: SNAPSHOT, release date: 30-10-2019 15:31. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w42a, release type: SNAPSHOT, release date: 16-10-2019 15:30. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w41a, release type: SNAPSHOT, release date: 09-10-2019 15:21. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w40a, release type: SNAPSHOT, release date: 02-10-2019 13:40. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w39a, release type: SNAPSHOT, release date: 27-09-2019 10:13. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w38b, release type: SNAPSHOT, release date: 18-09-2019 14:59. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w38a, release type: SNAPSHOT, release date: 18-09-2019 10:03. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w37a, release type: SNAPSHOT, release date: 11-09-2019 11:46. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w36a, release type: SNAPSHOT, release date: 04-09-2019 11:19. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w35a, release type: SNAPSHOT, release date: 28-08-2019 15:01. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w34a, release type: SNAPSHOT, release date: 22-08-2019 12:06. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.4, release type: RELEASE, release date: 19-07-2019 09:25. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.4-pre7, release type: SNAPSHOT, release date: 18-07-2019 11:32. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.4-pre6, release type: SNAPSHOT, release date: 15-07-2019 12:39. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.4-pre5, release type: SNAPSHOT, release date: 11-07-2019 10:52. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.4-pre4, release type: SNAPSHOT, release date: 10-07-2019 12:53. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.4-pre3, release type: SNAPSHOT, release date: 08-07-2019 11:21. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.4-pre2, release type: SNAPSHOT, release date: 04-07-2019 14:41. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.4-pre1, release type: SNAPSHOT, release date: 03-07-2019 13:01. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.3, release type: RELEASE, release date: 24-06-2019 12:52. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.3-pre4, release type: SNAPSHOT, release date: 19-06-2019 11:44. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.3-pre3, release type: SNAPSHOT, release date: 14-06-2019 08:03. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.3-pre2, release type: SNAPSHOT, release date: 07-06-2019 09:11. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.3-pre1, release type: SNAPSHOT, release date: 03-06-2019 14:34. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.2, release type: RELEASE, release date: 27-05-2019 11:48. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.2 Pre-Release 4, release type: SNAPSHOT, release date: 27-05-2019 07:21. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.2 Pre-Release 3, release type: SNAPSHOT, release date: 22-05-2019 13:12. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.2 Pre-Release 2, release type: SNAPSHOT, release date: 17-05-2019 12:21. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.2 Pre-Release 1, release type: SNAPSHOT, release date: 16-05-2019 15:40. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.1, release type: RELEASE, release date: 13-05-2019 11:10. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.1 Pre-Release 2, release type: SNAPSHOT, release date: 09-05-2019 14:01. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14.1 Pre-Release 1, release type: SNAPSHOT, release date: 07-05-2019 14:44. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14, release type: RELEASE, release date: 23-04-2019 14:52. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14 Pre-Release 5, release type: SNAPSHOT, release date: 18-04-2019 11:05. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14 Pre-Release 4, release type: SNAPSHOT, release date: 17-04-2019 15:31. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14 Pre-Release 3, release type: SNAPSHOT, release date: 16-04-2019 13:57. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14 Pre-Release 2, release type: SNAPSHOT, release date: 12-04-2019 11:38. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.14 Pre-Release 1, release type: SNAPSHOT, release date: 10-04-2019 14:24. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w14b, release type: SNAPSHOT, release date: 05-04-2019 10:33. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w14a, release type: SNAPSHOT, release date: 03-04-2019 13:45. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 3D Shareware v1.34, release type: SNAPSHOT, release date: 01-04-2019 11:18. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w13b, release type: SNAPSHOT, release date: 29-03-2019 16:53. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w13a, release type: SNAPSHOT, release date: 27-03-2019 15:15. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w12b, release type: SNAPSHOT, release date: 21-03-2019 15:20. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w12a, release type: SNAPSHOT, release date: 20-03-2019 16:47. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w11b, release type: SNAPSHOT, release date: 14-03-2019 14:26. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w11a, release type: SNAPSHOT, release date: 13-03-2019 13:59. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w09a, release type: SNAPSHOT, release date: 27-02-2019 14:44. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w08b, release type: SNAPSHOT, release date: 21-02-2019 13:38. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w08a, release type: SNAPSHOT, release date: 20-02-2019 14:56. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w07a, release type: SNAPSHOT, release date: 13-02-2019 16:12. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w06a, release type: SNAPSHOT, release date: 06-02-2019 16:24. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w05a, release type: SNAPSHOT, release date: 30-01-2019 15:16. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w04b, release type: SNAPSHOT, release date: 25-01-2019 12:20. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w04a, release type: SNAPSHOT, release date: 24-01-2019 15:31. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w03c, release type: SNAPSHOT, release date: 18-01-2019 11:27. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w03b, release type: SNAPSHOT, release date: 17-01-2019 16:43. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w03a, release type: SNAPSHOT, release date: 16-01-2019 16:45. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 19w02a, release type: SNAPSHOT, release date: 09-01-2019 15:52. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w50a, release type: SNAPSHOT, release date: 12-12-2018 14:58. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w49a, release type: SNAPSHOT, release date: 05-12-2018 12:24. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w48b, release type: SNAPSHOT, release date: 30-11-2018 10:37. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w48a, release type: SNAPSHOT, release date: 29-11-2018 13:11. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w47b, release type: SNAPSHOT, release date: 23-11-2018 10:46. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w47a, release type: SNAPSHOT, release date: 21-11-2018 15:45. The item has been registered.
+[14:53:04] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w46a, release type: SNAPSHOT, release date: 15-11-2018 13:43. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w45a, release type: SNAPSHOT, release date: 07-11-2018 14:40. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w44a, release type: SNAPSHOT, release date: 31-10-2018 15:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w43c, release type: SNAPSHOT, release date: 26-10-2018 08:40. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w43b, release type: SNAPSHOT, release date: 24-10-2018 15:02. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w43a, release type: SNAPSHOT, release date: 24-10-2018 10:52. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13.2, release type: RELEASE, release date: 22-10-2018 11:41. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13.2-pre2, release type: SNAPSHOT, release date: 18-10-2018 14:46. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13.2-pre1, release type: SNAPSHOT, release date: 16-10-2018 13:40. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13.1, release type: RELEASE, release date: 22-08-2018 14:03. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13.1-pre2, release type: SNAPSHOT, release date: 20-08-2018 13:52. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13.1-pre1, release type: SNAPSHOT, release date: 16-08-2018 13:08. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w33a, release type: SNAPSHOT, release date: 15-08-2018 14:28. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w32a, release type: SNAPSHOT, release date: 08-08-2018 13:16. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w31a, release type: SNAPSHOT, release date: 01-08-2018 12:54. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w30b, release type: SNAPSHOT, release date: 26-07-2018 16:06. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w30a, release type: SNAPSHOT, release date: 25-07-2018 14:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13, release type: RELEASE, release date: 18-07-2018 15:11. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13-pre10, release type: SNAPSHOT, release date: 17-07-2018 14:48. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13-pre9, release type: SNAPSHOT, release date: 16-07-2018 14:17. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13-pre8, release type: SNAPSHOT, release date: 13-07-2018 11:45. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13-pre7, release type: SNAPSHOT, release date: 10-07-2018 14:21. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13-pre6, release type: SNAPSHOT, release date: 04-07-2018 12:36. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13-pre5, release type: SNAPSHOT, release date: 28-06-2018 13:58. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13-pre4, release type: SNAPSHOT, release date: 26-06-2018 13:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13-pre3, release type: SNAPSHOT, release date: 21-06-2018 12:57. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13-pre2, release type: SNAPSHOT, release date: 15-06-2018 09:20. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.13-pre1, release type: SNAPSHOT, release date: 04-06-2018 15:17. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w22c, release type: SNAPSHOT, release date: 31-05-2018 13:53. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w22b, release type: SNAPSHOT, release date: 30-05-2018 13:48. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w22a, release type: SNAPSHOT, release date: 29-05-2018 13:23. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w21b, release type: SNAPSHOT, release date: 25-05-2018 10:09. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w21a, release type: SNAPSHOT, release date: 23-05-2018 13:11. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w20c, release type: SNAPSHOT, release date: 17-05-2018 14:06. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w20b, release type: SNAPSHOT, release date: 16-05-2018 14:35. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w20a, release type: SNAPSHOT, release date: 15-05-2018 14:02. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w19b, release type: SNAPSHOT, release date: 09-05-2018 10:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w19a, release type: SNAPSHOT, release date: 08-05-2018 13:05. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w16a, release type: SNAPSHOT, release date: 19-04-2018 14:46. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w15a, release type: SNAPSHOT, release date: 11-04-2018 14:54. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w14b, release type: SNAPSHOT, release date: 05-04-2018 14:44. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w14a, release type: SNAPSHOT, release date: 04-04-2018 14:36. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w11a, release type: SNAPSHOT, release date: 13-03-2018 15:10. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w10d, release type: SNAPSHOT, release date: 09-03-2018 15:19. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w10c, release type: SNAPSHOT, release date: 08-03-2018 15:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w10b, release type: SNAPSHOT, release date: 07-03-2018 15:56. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w10a, release type: SNAPSHOT, release date: 06-03-2018 15:54. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w09a, release type: SNAPSHOT, release date: 01-03-2018 14:15. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w08b, release type: SNAPSHOT, release date: 22-02-2018 15:44. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w08a, release type: SNAPSHOT, release date: 21-02-2018 14:59. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w07c, release type: SNAPSHOT, release date: 16-02-2018 13:23. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w07b, release type: SNAPSHOT, release date: 15-02-2018 14:28. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w07a, release type: SNAPSHOT, release date: 14-02-2018 17:34. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w06a, release type: SNAPSHOT, release date: 09-02-2018 12:09. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w05a, release type: SNAPSHOT, release date: 31-01-2018 13:32. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w03b, release type: SNAPSHOT, release date: 17-01-2018 15:09. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w03a, release type: SNAPSHOT, release date: 17-01-2018 14:25. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w02a, release type: SNAPSHOT, release date: 10-01-2018 11:54. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 18w01a, release type: SNAPSHOT, release date: 03-01-2018 13:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w50a, release type: SNAPSHOT, release date: 11-12-2017 15:28. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w49b, release type: SNAPSHOT, release date: 07-12-2017 15:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w49a, release type: SNAPSHOT, release date: 06-12-2017 14:24. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w48a, release type: SNAPSHOT, release date: 27-11-2017 15:36. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w47b, release type: SNAPSHOT, release date: 23-11-2017 15:30. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w47a, release type: SNAPSHOT, release date: 22-11-2017 12:40. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w46a, release type: SNAPSHOT, release date: 15-11-2017 15:21. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w45b, release type: SNAPSHOT, release date: 10-11-2017 10:07. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w45a, release type: SNAPSHOT, release date: 08-11-2017 15:48. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w43b, release type: SNAPSHOT, release date: 26-10-2017 13:36. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w43a, release type: SNAPSHOT, release date: 25-10-2017 14:43. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.12.2, release type: RELEASE, release date: 18-09-2017 08:39. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.12.2-pre2, release type: SNAPSHOT, release date: 15-09-2017 08:21. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.12.2-pre1, release type: SNAPSHOT, release date: 13-09-2017 13:33. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.12.1, release type: RELEASE, release date: 03-08-2017 12:40. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.12.1-pre1, release type: SNAPSHOT, release date: 02-08-2017 10:53. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w31a, release type: SNAPSHOT, release date: 01-08-2017 09:41. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.12, release type: RELEASE, release date: 02-06-2017 13:50. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.12-pre7, release type: SNAPSHOT, release date: 31-05-2017 10:56. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.12-pre6, release type: SNAPSHOT, release date: 29-05-2017 11:45. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.12-pre5, release type: SNAPSHOT, release date: 19-05-2017 07:43. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.12-pre4, release type: SNAPSHOT, release date: 18-05-2017 12:28. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.12-pre3, release type: SNAPSHOT, release date: 17-05-2017 14:09. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.12-pre2, release type: SNAPSHOT, release date: 11-05-2017 12:11. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.12-pre1, release type: SNAPSHOT, release date: 10-05-2017 11:37. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w18b, release type: SNAPSHOT, release date: 04-05-2017 13:40. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w18a, release type: SNAPSHOT, release date: 03-05-2017 14:50. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w17b, release type: SNAPSHOT, release date: 27-04-2017 13:24. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w17a, release type: SNAPSHOT, release date: 26-04-2017 13:48. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w16b, release type: SNAPSHOT, release date: 21-04-2017 12:02. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w16a, release type: SNAPSHOT, release date: 20-04-2017 13:58. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w15a, release type: SNAPSHOT, release date: 12-04-2017 09:30. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w14a, release type: SNAPSHOT, release date: 05-04-2017 13:58. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w13b, release type: SNAPSHOT, release date: 31-03-2017 11:06. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w13a, release type: SNAPSHOT, release date: 30-03-2017 09:32. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 17w06a, release type: SNAPSHOT, release date: 08-02-2017 13:16. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.11.2, release type: RELEASE, release date: 21-12-2016 09:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.11.1, release type: RELEASE, release date: 20-12-2016 14:05. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w50a, release type: SNAPSHOT, release date: 15-12-2016 14:38. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.11, release type: RELEASE, release date: 14-11-2016 14:34. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.11-pre1, release type: SNAPSHOT, release date: 08-11-2016 13:42. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w44a, release type: SNAPSHOT, release date: 03-11-2016 14:17. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w43a, release type: SNAPSHOT, release date: 27-10-2016 09:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w42a, release type: SNAPSHOT, release date: 19-10-2016 11:17. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w41a, release type: SNAPSHOT, release date: 13-10-2016 14:28. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w40a, release type: SNAPSHOT, release date: 06-10-2016 13:57. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w39c, release type: SNAPSHOT, release date: 30-09-2016 14:11. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w39b, release type: SNAPSHOT, release date: 29-09-2016 14:39. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w39a, release type: SNAPSHOT, release date: 28-09-2016 13:32. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w38a, release type: SNAPSHOT, release date: 20-09-2016 12:40. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w36a, release type: SNAPSHOT, release date: 08-09-2016 14:55. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w35a, release type: SNAPSHOT, release date: 01-09-2016 13:13. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w33a, release type: SNAPSHOT, release date: 17-08-2016 12:48. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w32b, release type: SNAPSHOT, release date: 11-08-2016 14:34. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w32a, release type: SNAPSHOT, release date: 10-08-2016 12:30. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.10.2, release type: RELEASE, release date: 23-06-2016 09:17. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.10.1, release type: RELEASE, release date: 22-06-2016 10:13. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.10, release type: RELEASE, release date: 08-06-2016 13:06. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.10-pre2, release type: SNAPSHOT, release date: 07-06-2016 14:56. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.10-pre1, release type: SNAPSHOT, release date: 02-06-2016 14:45. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w21b, release type: SNAPSHOT, release date: 26-05-2016 12:47. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w21a, release type: SNAPSHOT, release date: 25-05-2016 13:12. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w20a, release type: SNAPSHOT, release date: 18-05-2016 12:45. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.9.4, release type: RELEASE, release date: 10-05-2016 10:17. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.9.3, release type: RELEASE, release date: 10-05-2016 08:33. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.9.3-pre3, release type: SNAPSHOT, release date: 03-05-2016 09:28. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.9.3-pre2, release type: SNAPSHOT, release date: 27-04-2016 13:33. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.9.3-pre1, release type: SNAPSHOT, release date: 21-04-2016 12:41. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w15b, release type: SNAPSHOT, release date: 13-04-2016 13:56. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w15a, release type: SNAPSHOT, release date: 11-04-2016 14:38. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w14a, release type: SNAPSHOT, release date: 07-04-2016 12:47. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.RV-Pre1, release type: SNAPSHOT, release date: 31-03-2016 16:18. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.9.2, release type: RELEASE, release date: 30-03-2016 15:23. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.9.1, release type: RELEASE, release date: 30-03-2016 13:43. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.9.1-pre3, release type: SNAPSHOT, release date: 11-03-2016 09:20. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.9.1-pre2, release type: SNAPSHOT, release date: 10-03-2016 15:06. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.9.1-pre1, release type: SNAPSHOT, release date: 09-03-2016 16:27. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.9, release type: RELEASE, release date: 29-02-2016 13:49. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.9-pre4, release type: SNAPSHOT, release date: 26-02-2016 15:21. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.9-pre3, release type: SNAPSHOT, release date: 24-02-2016 15:52. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.9-pre2, release type: SNAPSHOT, release date: 18-02-2016 17:41. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.9-pre1, release type: SNAPSHOT, release date: 17-02-2016 15:23. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w07b, release type: SNAPSHOT, release date: 16-02-2016 15:22. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w07a, release type: SNAPSHOT, release date: 15-02-2016 15:48. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w06a, release type: SNAPSHOT, release date: 10-02-2016 15:06. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w05b, release type: SNAPSHOT, release date: 04-02-2016 15:28. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w05a, release type: SNAPSHOT, release date: 03-02-2016 15:48. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w04a, release type: SNAPSHOT, release date: 28-01-2016 15:37. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w03a, release type: SNAPSHOT, release date: 20-01-2016 14:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 16w02a, release type: SNAPSHOT, release date: 13-01-2016 15:15. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w51b, release type: SNAPSHOT, release date: 17-12-2015 15:30. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w51a, release type: SNAPSHOT, release date: 17-12-2015 14:02. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w50a, release type: SNAPSHOT, release date: 09-12-2015 15:35. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w49b, release type: SNAPSHOT, release date: 03-12-2015 15:23. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.9, release type: RELEASE, release date: 03-12-2015 09:24. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w49a, release type: SNAPSHOT, release date: 02-12-2015 15:09. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w47c, release type: SNAPSHOT, release date: 20-11-2015 12:46. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w47b, release type: SNAPSHOT, release date: 19-11-2015 14:48. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w47a, release type: SNAPSHOT, release date: 18-11-2015 15:53. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w46a, release type: SNAPSHOT, release date: 12-11-2015 12:11. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w45a, release type: SNAPSHOT, release date: 05-11-2015 13:04. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w44b, release type: SNAPSHOT, release date: 30-10-2015 11:23. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w44a, release type: SNAPSHOT, release date: 28-10-2015 15:09. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w43c, release type: SNAPSHOT, release date: 23-10-2015 15:35. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w43b, release type: SNAPSHOT, release date: 22-10-2015 14:11. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w43a, release type: SNAPSHOT, release date: 21-10-2015 15:28. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w42a, release type: SNAPSHOT, release date: 14-10-2015 13:25. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w41b, release type: SNAPSHOT, release date: 07-10-2015 14:07. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w41a, release type: SNAPSHOT, release date: 07-10-2015 13:19. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w40b, release type: SNAPSHOT, release date: 30-09-2015 14:13. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w40a, release type: SNAPSHOT, release date: 30-09-2015 13:13. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w39c, release type: SNAPSHOT, release date: 23-09-2015 13:13. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w39b, release type: SNAPSHOT, release date: 21-09-2015 15:09. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w39a, release type: SNAPSHOT, release date: 21-09-2015 13:16. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w38b, release type: SNAPSHOT, release date: 17-09-2015 14:22. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w38a, release type: SNAPSHOT, release date: 16-09-2015 14:22. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w37a, release type: SNAPSHOT, release date: 10-09-2015 14:22. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w36d, release type: SNAPSHOT, release date: 04-09-2015 14:22. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w36c, release type: SNAPSHOT, release date: 02-09-2015 16:07. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w36b, release type: SNAPSHOT, release date: 02-09-2015 15:36. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w36a, release type: SNAPSHOT, release date: 02-09-2015 14:46. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w35e, release type: SNAPSHOT, release date: 28-08-2015 18:14. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w35d, release type: SNAPSHOT, release date: 28-08-2015 16:25. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w35c, release type: SNAPSHOT, release date: 28-08-2015 11:21. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w35b, release type: SNAPSHOT, release date: 24-08-2015 15:39. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w35a, release type: SNAPSHOT, release date: 24-08-2015 14:19. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w34d, release type: SNAPSHOT, release date: 21-08-2015 15:27. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w34c, release type: SNAPSHOT, release date: 21-08-2015 12:45. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w34b, release type: SNAPSHOT, release date: 20-08-2015 14:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w34a, release type: SNAPSHOT, release date: 19-08-2015 12:56. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w33c, release type: SNAPSHOT, release date: 14-08-2015 13:10. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w33b, release type: SNAPSHOT, release date: 12-08-2015 15:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w33a, release type: SNAPSHOT, release date: 12-08-2015 14:05. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w32c, release type: SNAPSHOT, release date: 07-08-2015 14:08. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w32b, release type: SNAPSHOT, release date: 06-08-2015 13:51. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w32a, release type: SNAPSHOT, release date: 05-08-2015 12:22. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w31c, release type: SNAPSHOT, release date: 31-07-2015 13:45. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w31b, release type: SNAPSHOT, release date: 30-07-2015 13:38. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w31a, release type: SNAPSHOT, release date: 29-07-2015 13:24. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.8, release type: RELEASE, release date: 27-07-2015 10:31. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.7, release type: RELEASE, release date: 05-06-2015 10:10. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.6, release type: RELEASE, release date: 25-05-2015 10:31. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.5, release type: RELEASE, release date: 22-05-2015 11:15. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.4, release type: RELEASE, release date: 17-04-2015 11:37. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 15w14a, release type: SNAPSHOT, release date: 01-04-2015 07:08. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.3, release type: RELEASE, release date: 20-02-2015 14:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.2, release type: RELEASE, release date: 19-02-2015 15:47. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.2-pre7, release type: SNAPSHOT, release date: 16-02-2015 13:01. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.2-pre6, release type: SNAPSHOT, release date: 30-01-2015 11:58. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.2-pre5, release type: SNAPSHOT, release date: 26-01-2015 15:03. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.2-pre4, release type: SNAPSHOT, release date: 16-01-2015 14:19. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.2-pre3, release type: SNAPSHOT, release date: 15-01-2015 16:44. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.2-pre2, release type: SNAPSHOT, release date: 15-01-2015 15:07. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.2-pre1, release type: SNAPSHOT, release date: 18-12-2014 11:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.1, release type: RELEASE, release date: 24-11-2014 14:13. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.1-pre5, release type: SNAPSHOT, release date: 19-11-2014 14:30. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.1-pre4, release type: SNAPSHOT, release date: 06-11-2014 14:10. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.1-pre3, release type: SNAPSHOT, release date: 23-10-2014 12:59. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.1-pre2, release type: SNAPSHOT, release date: 16-10-2014 14:19. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8.1-pre1, release type: SNAPSHOT, release date: 15-10-2014 13:25. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8, release type: RELEASE, release date: 02-09-2014 08:24. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8-pre3, release type: SNAPSHOT, release date: 28-08-2014 09:40. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8-pre2, release type: SNAPSHOT, release date: 25-08-2014 14:52. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.8-pre1, release type: SNAPSHOT, release date: 21-08-2014 13:56. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w34d, release type: SNAPSHOT, release date: 20-08-2014 12:46. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w34c, release type: SNAPSHOT, release date: 19-08-2014 15:31. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w34b, release type: SNAPSHOT, release date: 18-08-2014 15:14. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w34a, release type: SNAPSHOT, release date: 18-08-2014 14:14. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w33c, release type: SNAPSHOT, release date: 15-08-2014 18:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w33b, release type: SNAPSHOT, release date: 15-08-2014 16:23. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w33a, release type: SNAPSHOT, release date: 13-08-2014 15:08. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w32d, release type: SNAPSHOT, release date: 08-08-2014 15:13. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w32c, release type: SNAPSHOT, release date: 08-08-2014 14:11. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w32b, release type: SNAPSHOT, release date: 07-08-2014 14:45. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w32a, release type: SNAPSHOT, release date: 06-08-2014 14:01. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w31a, release type: SNAPSHOT, release date: 30-07-2014 15:38. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w30c, release type: SNAPSHOT, release date: 24-07-2014 14:39. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w30b, release type: SNAPSHOT, release date: 23-07-2014 15:03. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w30a, release type: SNAPSHOT, release date: 23-07-2014 13:15. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w29b, release type: SNAPSHOT, release date: 16-07-2014 17:27. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w29a, release type: SNAPSHOT, release date: 16-07-2014 15:18. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w28b, release type: SNAPSHOT, release date: 10-07-2014 14:28. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w28a, release type: SNAPSHOT, release date: 09-07-2014 15:42. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w27b, release type: SNAPSHOT, release date: 02-07-2014 18:34. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w27a, release type: SNAPSHOT, release date: 02-07-2014 16:07. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w26c, release type: SNAPSHOT, release date: 26-06-2014 15:05. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w26b, release type: SNAPSHOT, release date: 25-06-2014 15:08. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w26a, release type: SNAPSHOT, release date: 25-06-2014 13:59. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w25b, release type: SNAPSHOT, release date: 19-06-2014 12:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w25a, release type: SNAPSHOT, release date: 18-06-2014 15:52. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w21b, release type: SNAPSHOT, release date: 22-05-2014 15:17. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w21a, release type: SNAPSHOT, release date: 22-05-2014 14:44. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w20b, release type: SNAPSHOT, release date: 15-05-2014 16:47. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w20a, release type: SNAPSHOT, release date: 15-05-2014 14:01. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.10, release type: RELEASE, release date: 14-05-2014 17:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.10-pre4, release type: SNAPSHOT, release date: 14-05-2014 16:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.10-pre3, release type: SNAPSHOT, release date: 14-05-2014 15:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.10-pre2, release type: SNAPSHOT, release date: 14-05-2014 14:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.10-pre1, release type: SNAPSHOT, release date: 14-05-2014 13:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w19a, release type: SNAPSHOT, release date: 08-05-2014 14:24. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w18b, release type: SNAPSHOT, release date: 02-05-2014 11:38. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w18a, release type: SNAPSHOT, release date: 30-04-2014 10:25. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w17a, release type: SNAPSHOT, release date: 24-04-2014 15:44. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w11b, release type: SNAPSHOT, release date: 14-04-2014 14:36. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.9, release type: RELEASE, release date: 14-04-2014 13:29. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.8, release type: RELEASE, release date: 09-04-2014 07:58. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.7, release type: RELEASE, release date: 09-04-2014 07:52. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.6, release type: RELEASE, release date: 09-04-2014 07:52. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w11a, release type: SNAPSHOT, release date: 13-03-2014 14:02. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.6-pre2, release type: SNAPSHOT, release date: 08-03-2014 11:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.6-pre1, release type: SNAPSHOT, release date: 08-03-2014 11:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w10c, release type: SNAPSHOT, release date: 07-03-2014 13:49. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w10b, release type: SNAPSHOT, release date: 06-03-2014 16:25. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w10a, release type: SNAPSHOT, release date: 06-03-2014 14:23. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w08a, release type: SNAPSHOT, release date: 26-02-2014 17:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.5, release type: RELEASE, release date: 26-02-2014 09:22. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w07a, release type: SNAPSHOT, release date: 14-02-2014 11:05. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w06b, release type: SNAPSHOT, release date: 06-02-2014 17:30. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w06a, release type: SNAPSHOT, release date: 06-02-2014 14:30. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w05b, release type: SNAPSHOT, release date: 31-01-2014 14:05. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w05a, release type: SNAPSHOT, release date: 30-01-2014 15:32. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w04b, release type: SNAPSHOT, release date: 24-01-2014 15:48. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w04a, release type: SNAPSHOT, release date: 23-01-2014 15:26. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w03b, release type: SNAPSHOT, release date: 16-01-2014 16:36. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w03a, release type: SNAPSHOT, release date: 16-01-2014 14:45. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w02c, release type: SNAPSHOT, release date: 10-01-2014 15:42. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w02b, release type: SNAPSHOT, release date: 09-01-2014 15:45. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 14w02a, release type: SNAPSHOT, release date: 09-01-2014 14:44. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.4, release type: RELEASE, release date: 09-12-2013 12:28. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.3, release type: RELEASE, release date: 06-12-2013 13:55. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w49a, release type: SNAPSHOT, release date: 05-12-2013 14:34. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w48b, release type: SNAPSHOT, release date: 26-11-2013 18:36. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w48a, release type: SNAPSHOT, release date: 25-11-2013 16:53. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w47e, release type: SNAPSHOT, release date: 22-11-2013 15:16. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w47d, release type: SNAPSHOT, release date: 22-11-2013 13:51. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w47c, release type: SNAPSHOT, release date: 21-11-2013 17:10. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w47b, release type: SNAPSHOT, release date: 21-11-2013 16:57. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w47a, release type: SNAPSHOT, release date: 21-11-2013 15:59. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.2, release type: RELEASE, release date: 25-10-2013 13:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7.1, release type: SNAPSHOT, release date: 23-10-2013 12:01. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.7, release type: SNAPSHOT, release date: 22-10-2013 15:04. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w43a, release type: SNAPSHOT, release date: 21-10-2013 16:34. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w42b, release type: SNAPSHOT, release date: 18-10-2013 16:34. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w42a, release type: SNAPSHOT, release date: 17-10-2013 18:33. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w41b, release type: SNAPSHOT, release date: 11-10-2013 15:09. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w41a, release type: SNAPSHOT, release date: 10-10-2013 14:21. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w39b, release type: SNAPSHOT, release date: 27-09-2013 12:15. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w39a, release type: SNAPSHOT, release date: 26-09-2013 15:11. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w38c, release type: SNAPSHOT, release date: 20-09-2013 15:11. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w38b, release type: SNAPSHOT, release date: 20-09-2013 13:45. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w38a, release type: SNAPSHOT, release date: 19-09-2013 16:34. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.6.4, release type: RELEASE, release date: 19-09-2013 15:52. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w37b, release type: SNAPSHOT, release date: 13-09-2013 10:54. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.6.3, release type: SNAPSHOT, release date: 13-09-2013 10:54. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w37a, release type: SNAPSHOT, release date: 12-09-2013 14:23. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w36b, release type: SNAPSHOT, release date: 06-09-2013 12:31. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w36a, release type: SNAPSHOT, release date: 05-09-2013 13:05. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.6.2, release type: RELEASE, release date: 05-07-2013 13:09. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.6.1, release type: RELEASE, release date: 28-06-2013 14:48. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.6, release type: SNAPSHOT, release date: 25-06-2013 13:08. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w26a, release type: SNAPSHOT, release date: 24-06-2013 16:06. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w25c, release type: SNAPSHOT, release date: 20-06-2013 15:23. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w25b, release type: SNAPSHOT, release date: 18-06-2013 15:13. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w25a, release type: SNAPSHOT, release date: 17-06-2013 14:08. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w24b, release type: SNAPSHOT, release date: 14-06-2013 12:19. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w24a, release type: SNAPSHOT, release date: 13-06-2013 15:32. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w23b, release type: SNAPSHOT, release date: 08-06-2013 00:32. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w23a, release type: SNAPSHOT, release date: 07-06-2013 16:04. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w22a, release type: SNAPSHOT, release date: 30-05-2013 14:38. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w21b, release type: SNAPSHOT, release date: 27-05-2013 08:50. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w21a, release type: SNAPSHOT, release date: 23-05-2013 15:38. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w19a, release type: SNAPSHOT, release date: 10-05-2013 14:48. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w18c, release type: SNAPSHOT, release date: 03-05-2013 09:19. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w18b, release type: SNAPSHOT, release date: 02-05-2013 17:12. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w18a, release type: SNAPSHOT, release date: 02-05-2013 15:45. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w17a, release type: SNAPSHOT, release date: 25-04-2013 15:50. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.5.2, release type: RELEASE, release date: 25-04-2013 15:45. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w16b, release type: SNAPSHOT, release date: 23-04-2013 21:51. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 13w16a, release type: SNAPSHOT, release date: 21-04-2013 12:49. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.5.1, release type: RELEASE, release date: 20-03-2013 10:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.5, release type: SNAPSHOT, release date: 06-03-2013 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.4.7, release type: RELEASE, release date: 27-12-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.4.5, release type: RELEASE, release date: 19-12-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.4.6, release type: RELEASE, release date: 19-12-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.4.4, release type: RELEASE, release date: 13-12-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.4.3, release type: SNAPSHOT, release date: 30-11-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.4.2, release type: RELEASE, release date: 24-11-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.4.1, release type: SNAPSHOT, release date: 22-11-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.4, release type: SNAPSHOT, release date: 18-11-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.3.2, release type: RELEASE, release date: 15-08-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.3.1, release type: RELEASE, release date: 31-07-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.3, release type: SNAPSHOT, release date: 25-07-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.2.5, release type: RELEASE, release date: 29-03-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.2.4, release type: RELEASE, release date: 21-03-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.2.3, release type: RELEASE, release date: 01-03-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.2.2, release type: RELEASE, release date: 29-02-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.2.1, release type: RELEASE, release date: 29-02-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.1, release type: RELEASE, release date: 11-01-2012 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: 1.0, release type: RELEASE, release date: 17-11-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.8.1, release type: UNSUPPORTED_BETA, release date: 18-09-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.8, release type: UNSUPPORTED_BETA, release date: 14-09-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.7.3, release type: UNSUPPORTED_BETA, release date: 07-07-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.7.2, release type: UNSUPPORTED_BETA, release date: 30-06-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.7, release type: UNSUPPORTED_BETA, release date: 29-06-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.6.6, release type: UNSUPPORTED_BETA, release date: 30-05-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.6.5, release type: UNSUPPORTED_BETA, release date: 27-05-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.6.4, release type: UNSUPPORTED_BETA, release date: 25-05-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.6.3, release type: UNSUPPORTED_BETA, release date: 25-05-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.6.2, release type: UNSUPPORTED_BETA, release date: 25-05-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.6.1, release type: UNSUPPORTED_BETA, release date: 25-05-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.6, release type: UNSUPPORTED_BETA, release date: 25-05-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.5_01, release type: UNSUPPORTED_BETA, release date: 19-04-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.5, release type: UNSUPPORTED_BETA, release date: 18-04-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.4_01, release type: UNSUPPORTED_BETA, release date: 04-04-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.4, release type: UNSUPPORTED_BETA, release date: 30-03-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.3_01, release type: UNSUPPORTED_BETA, release date: 22-02-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.3b, release type: UNSUPPORTED_BETA, release date: 21-02-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.2_02, release type: UNSUPPORTED_BETA, release date: 20-01-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.2_01, release type: UNSUPPORTED_BETA, release date: 13-01-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.2, release type: UNSUPPORTED_BETA, release date: 12-01-2011 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.1_02, release type: UNSUPPORTED_BETA, release date: 21-12-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.1_01, release type: UNSUPPORTED_BETA, release date: 21-12-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.0.2, release type: UNSUPPORTED_BETA, release date: 20-12-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.0_01, release type: UNSUPPORTED_BETA, release date: 19-12-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: b1.0, release type: UNSUPPORTED_BETA, release date: 19-12-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.2.6, release type: UNSUPPORTED_ALPHA, release date: 02-12-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.2.5, release type: UNSUPPORTED_ALPHA, release date: 30-11-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.2.4_01, release type: UNSUPPORTED_ALPHA, release date: 29-11-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.2.3_04, release type: UNSUPPORTED_ALPHA, release date: 25-11-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.2.3_02, release type: UNSUPPORTED_ALPHA, release date: 24-11-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.2.3_01, release type: UNSUPPORTED_ALPHA, release date: 23-11-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.2.3, release type: UNSUPPORTED_ALPHA, release date: 23-11-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.2.2b, release type: UNSUPPORTED_ALPHA, release date: 09-11-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.2.2a, release type: UNSUPPORTED_ALPHA, release date: 09-11-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.2.1_01, release type: UNSUPPORTED_ALPHA, release date: 04-11-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.2.1, release type: UNSUPPORTED_ALPHA, release date: 04-11-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.2.0_02, release type: UNSUPPORTED_ALPHA, release date: 03-11-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.2.0_01, release type: UNSUPPORTED_ALPHA, release date: 30-10-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.2.0, release type: UNSUPPORTED_ALPHA, release date: 29-10-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.1.2_01, release type: UNSUPPORTED_ALPHA, release date: 22-09-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.1.2, release type: UNSUPPORTED_ALPHA, release date: 19-09-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.1.0, release type: UNSUPPORTED_ALPHA, release date: 12-09-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.0.17_04, release type: UNSUPPORTED_ALPHA, release date: 22-08-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.0.17_02, release type: UNSUPPORTED_ALPHA, release date: 19-08-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.0.16, release type: UNSUPPORTED_ALPHA, release date: 11-08-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.0.15, release type: UNSUPPORTED_ALPHA, release date: 03-08-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.0.14, release type: UNSUPPORTED_ALPHA, release date: 29-07-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.0.11, release type: UNSUPPORTED_ALPHA, release date: 22-07-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.0.5_01, release type: UNSUPPORTED_ALPHA, release date: 12-07-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: a1.0.4, release type: UNSUPPORTED_ALPHA, release date: 08-07-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: inf-20100618, release type: UNSUPPORTED_ALPHA, release date: 15-06-2010 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: c0.30_01c, release type: UNSUPPORTED_ALPHA, release date: 21-12-2009 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: c0.0.13a, release type: UNSUPPORTED_ALPHA, release date: 30-05-2009 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: c0.0.13a_03, release type: UNSUPPORTED_ALPHA, release date: 21-05-2009 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: c0.0.11a, release type: UNSUPPORTED_ALPHA, release date: 16-05-2009 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: rd-161348, release type: UNSUPPORTED_ALPHA, release date: 16-05-2009 11:48. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: rd-160052, release type: UNSUPPORTED_ALPHA, release date: 15-05-2009 22:52. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: rd-20090515, release type: UNSUPPORTED_ALPHA, release date: 14-05-2009 22:00. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: rd-132328, release type: UNSUPPORTED_ALPHA, release date: 13-05-2009 21:28. The item has been registered.
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Added version information object. Version: rd-132211, release type: UNSUPPORTED_ALPHA, release date: 13-05-2009 20:11. The item has been registered.
+[14:53:05] [INFO ] [main] [CYAN/MINECRAFT] - Download completed, added/updated 562 versions
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Resetted server connection state
+[14:53:05] [DEBUG] [main] [CYAN/MINECRAFT] - Resetted server connection state
+[14:53:05] [INFO ] [main] [CYAN/INSTALLATION] - Downloading version manifest from https://launchermeta.mojang.com/v1/packages/436877ffaef948954053e1a78a366b8b7c204a91/1.16.5.json...
+[14:53:05] [INFO ] [main] [CYAN/INSTALLATION] - Parsing manifest to json...
+[14:53:05] [INFO ] [main] [CYAN/INSTALLATION] - Generating 1.16.5 JVM arguments...
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: --username
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: ${auth_player_name}
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: --version
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: ${version_name}
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: --gameDir
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: ${game_directory}
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: --assetsDir
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: ${assets_root}
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: --assetIndex
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: ${assets_index_name}
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: --uuid
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: ${auth_uuid}
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: --accessToken
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: ${auth_access_token}
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: --userType
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: ${user_type}
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: --versionType
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Adding argument: ${version_type}
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: --username
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: stefan0436
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: --version
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: 1.16.5
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: --gameDir
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: /run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/CyanWrapper
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: --assetsDir
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: /run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/CyanWrapper/.cyan-data/caches/assets
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: --assetIndex
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: 1.16
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: --uuid
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: a8f143aeacd84adb94451d5d826d7529
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: --accessToken
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3MjM2MjA4NDI1ZTc0ZTg5ODE4OTg5YzhkMDNjNDA3ZCIsInlnZ3QiOiI4ZDhhODg3NDJiYmM0ZTgwYWIwZGRhODE5ODM3ODliMSIsInNwciI6ImE4ZjE0M2FlYWNkODRhZGI5NDQ1MWQ1ZDgyNmQ3NTI5IiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MTQ4NjU4MTUsImlhdCI6MTYxNDY5MzAxNX0.zkC2zbvr4GkazfoZEsUweRutLHbahcTRLI5mqBrIivU
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: --userType
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: mojang
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: --versionType
+[14:53:05] [DEBUG] [main] [CYAN/INSTALLATION] - Processing argument: release

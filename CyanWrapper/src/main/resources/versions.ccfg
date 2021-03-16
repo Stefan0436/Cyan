@@ -1,0 +1,21 @@
+# Latest version
+latestStableVersion> '${lateststable}'
+latestPreviewVersion> '${latestpreview}'
+latestBetaVersion> '${latestbeta}'
+latestAlphaVersion> '${latestalpha}'
+
+# Long-term support version array
+longTermSupportVersions> [ ${lts}]
+
+# Upgrade required, such as exploits or dangerous bugs
+requiredUpgrade> [ ${unsupportedcyan}]
+
+# Map of all versions with their type
+allVersions> {
+${allcyan}
+}
+
+# Map of all versions with their changelogs
+changelogs> {
+${allcyanchangelog}
+}

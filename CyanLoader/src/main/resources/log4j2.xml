@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
-	<Properties>
-		<Property name="filename">target/test.log</Property>
-	</Properties>
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
-			<LegacyXMLLayout /> <!-- For the launcher -->
+			<!-- For the launcher -->
+			<LegacyXMLLayout />
 		</Console>
 		<Routing name="Logfile">
 			<Routes pattern="$${sd:type}">
@@ -13,7 +11,7 @@
 					<RollingFile name="LOG" fileName="logs/latest.log"
 						filePattern="logs/%d{YYYY-MM-DD}-%i.log.gz">
 						<PatternLayout
-							pattern="[%d{HH:mm:ss}] [%level] [%t] [%c{1}%notEmpty{/%markerSimpleName}] - %msg%n%throwable" />
+							pattern="[%d{HH:mm:ss}] [%-5level] [%t] [%c{1}%notEmpty{/%markerSimpleName}] - %msg%n%throwable" />
 						<Policies>
 							<OnStartupTriggeringPolicy />
 						</Policies>
@@ -28,7 +26,7 @@
 					<RollingFile name="LOGDEBUG" fileName="logs/debug.log"
 						filePattern="logs/debug-%d{YYYY-MM-DD}-%i.log.gz">
 						<PatternLayout
-							pattern="[%d{HH:mm:ss}] [%level] [%t] [%c{1}%notEmpty{/%markerSimpleName}] - %msg%n%throwable" />
+							pattern="[%d{HH:mm:ss}] [%-5level] [%t] [%c{1}%notEmpty{/%markerSimpleName}] - %msg%n%throwable" />
 						<Policies>
 							<OnStartupTriggeringPolicy />
 						</Policies>

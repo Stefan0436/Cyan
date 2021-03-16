@@ -1,9 +1,12 @@
 plugins {
-    id 'java'
+	id 'java'
 }
 apply from: '../config.gradle'
 apply plugin: 'eclipse'
 buildDir = '../build/MixinSupport'
+
+sourceCompatibility = '1.9'
+targetCompatibility = '1.9'
 
 group="org.asf.cyan"
 def author="AerialWorks Software Foundation"
@@ -12,8 +15,8 @@ version="1.0.0.A1"
 jar.dependsOn('processResources')
 
 repositories {
-    mavenCentral()
-    jcenter()
+	mavenCentral()
+	jcenter()
 	maven { url = 'https://repo.spongepowered.org/maven' }
 	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
 }
@@ -22,10 +25,18 @@ dependencies {
 	implementation project(':CyanCore')
 	implementation project(':CyanComponents')
 	implementation project(':CyanUtil')
-    implementation "org.spongepowered:mixin:${mixinversion}"
-    testImplementation 'junit:junit:4.12'
-	
-	annotationProcessor("org.spongepowered:mixin:${mixinversion}:processor")
+	implementation project(':Fluid')
+
+	implementation group: 'org.ow2.asm', name: 'asm', version: '9.1'
+	implementation group: 'org.ow2.asm', name: 'asm-util', version: '9.1'
+	implementation group: 'org.ow2.asm', name: 'asm-tree', version: '9.1'
+	implementation group: 'org.ow2.asm', name: 'asm-commons', version: '9.1'
+	implementation group: 'org.ow2.asm', name: 'asm-analysis', version: '9.1'
+
+	implementation group: 'com.google.guava', name: 'guava', version: '30.1-jre'
+
+	implementation "org.spongepowered:mixin:${mixinversion}"
+	testImplementation 'junit:junit:4.12'
 }
 
 jar {
@@ -45,6 +56,8 @@ jar {
 	exclude "**/extra/**"
 	exclude "**/tests/**"
 	includeEmptyDirs = false
+
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 task javaDocs(type: Javadoc) {
@@ -57,6 +70,7 @@ task javadocJar(type: Jar, dependsOn: 'javaDocs') {
 	classifier = 'javadoc'
 	exclude "**/extra/**"
 	destinationDirectory = file('../build/MixinSupport/Javadocs')
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -64,6 +78,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 	from sourceSets.main.allSource
 	exclude "**/extra/**"
 	destinationDirectory = file('../build/MixinSupport/Source jars')
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 processResources {
@@ -72,10 +87,12 @@ processResources {
 
 	from(sourceSets.main.resources.srcDirs) {
 		expand(
-			"minmixin": "${minmixin}",
-			"group": project.group
-		)
+				"minmixin": "${minmixin}",
+				"group": project.group
+				)
 	}
+
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 artifacts {
@@ -84,14 +101,14 @@ artifacts {
 }
 
 test {
-    include "**/**Test**"
-    exclude "**/**SpecialTest**"
-    minHeapSize = "128m"
-  	maxHeapSize = "2G"
+	include "**/**Test**"
+	exclude "**/**SpecialTest**"
+	minHeapSize = "128m"
+	maxHeapSize = "2G"
 }
 
 task specialTest (type: Test, dependsOn: test) {
-    include "**/**SpecialTest**"
-    minHeapSize = "128m"
-  	maxHeapSize = "2G"
+	include "**/**SpecialTest**"
+	minHeapSize = "128m"
+	maxHeapSize = "2G"
 }

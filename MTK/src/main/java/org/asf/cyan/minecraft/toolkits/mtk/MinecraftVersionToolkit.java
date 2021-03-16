@@ -35,7 +35,7 @@ public class MinecraftVersionToolkit extends CyanComponent {
 	 * Initialize the toolkit, gets called from CyanCore.initializeComponents()
 	 */
 	protected static void initComponent() {
-		trace("INITIALIZE Minecraft Version Toolkit, caller: " + KDebug.getCallerClassName());
+		trace("INITIALIZE Minecraft Version Toolkit, caller: " + CallTrace.traceCallName());
 	}
 	
 	/**
@@ -48,6 +48,23 @@ public class MinecraftVersionToolkit extends CyanComponent {
 	 */
 	public static MinecraftVersionInfo createVersionInfo(String mc_version, MinecraftVersionType version_type, URL manifest_url, OffsetDateTime release_date)
 	{
+		MinecraftVersionInfo i = new MinecraftVersionInfo(mc_version.toLowerCase(), version_type, manifest_url, release_date);
+		MinecraftToolkit.available_versions.put(mc_version.toLowerCase(), i);
+		return i;
+	}
+
+	/**
+	 * Create a Minecraft version info object and add it to the list of available versions.
+	 * @param mc_version The Minecraft version string.
+	 * @param version_type The Minecraft version type.
+	 * @param manifest_url The Minecraft version manifest url.
+	 * @param release_date The Minecraft version release date.
+	 * @return New MinecraftVersionInfo object
+	 */
+	public static MinecraftVersionInfo createOrGetVersion(String mc_version, MinecraftVersionType version_type, URL manifest_url, OffsetDateTime release_date)
+	{
+		if (MinecraftToolkit.available_versions.containsKey(mc_version.toLowerCase())) return MinecraftToolkit.available_versions.get(mc_version);
+		
 		MinecraftVersionInfo i = new MinecraftVersionInfo(mc_version.toLowerCase(), version_type, manifest_url, release_date);
 		MinecraftToolkit.available_versions.put(mc_version.toLowerCase(), i);
 		return i;

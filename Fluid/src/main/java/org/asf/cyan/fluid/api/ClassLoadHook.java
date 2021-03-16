@@ -8,14 +8,11 @@ import java.util.HashMap;
 import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.fluid.Fluid;
-
-import javassist.CannotCompileException;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.NotFoundException;
+import org.asf.cyan.fluid.bytecode.FluidClassPool;
+import org.objectweb.asm.tree.ClassNode;
 
 /**
- * Low-level fluid loading hooks
+ * Low-level fluid loading hooks, based on ASM.
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
  */
@@ -27,6 +24,10 @@ public abstract class ClassLoadHook extends CyanComponent {
 	private ArrayList<String> mapProps = new ArrayList<String>();
 	private ArrayList<String[]> mapMeths = new ArrayList<String[]>();
 
+	public boolean isSilent() {
+		return false;
+	}
+	
 	/**
 	 * Add a property to be mapped, should only be called from build
 	 * 
@@ -68,7 +69,8 @@ public abstract class ClassLoadHook extends CyanComponent {
 	protected String mapMethod(String name, String... arguments) {
 		String[] target = ArrayUtil.buildArray(name, "", arguments);
 		for (String[] method : mappedMethods.keySet()) {
-			if (Arrays.equals(method, target)) return mappedMethods.get(method);
+			if (Arrays.equals(method, target))
+				return mappedMethods.get(method);
 		}
 		return null;
 	}
@@ -82,17 +84,24 @@ public abstract class ClassLoadHook extends CyanComponent {
 	 */
 	public void intialize(String target) {
 		if (this.target != "")
-			throw new IllegalStateException("Target cannot be set twice");
+			throw new IllegalStateException("This hook is already initialized");
+
 		this.target = target;
 
+		debug("Initializing class hook " + this.getClass().getSimpleName() + "... target: " + targetPath()
+				+ ", mapped target: " + target);
 		for (String prop : mapProps) {
-			mappedProperties.put(prop, Fluid.mapProperty(targetPath(), prop));
+			String pOut = Fluid.mapProperty(targetPath(), prop);
+			debug("Mapped property: " + prop + ", output: " + pOut);
+			mappedProperties.put(prop, pOut);
 		}
 
 		for (String[] method : mapMeths) {
 			String name = method[0];
 			String[] arguments = Arrays.copyOfRange(method, 2, method.length);
-			mappedMethods.put(method, Fluid.mapMethod(targetPath(), name, arguments));
+			String mOut = Fluid.mapMethod(targetPath(), name, arguments);
+			debug("Mapped method: " + name + ", output: " + mOut);
+			mappedMethods.put(method, mOut);
 		}
 	}
 
@@ -126,9 +135,8 @@ public abstract class ClassLoadHook extends CyanComponent {
 	 * @param classBeingRedefined
 	 * @param protectionDomain
 	 * @param classfileBuffer
-	 * @throws NotFoundException      If applying fails
-	 * @throws CannotCompileException If applying fails
+	 * @throws ClassNotFoundException If applying fails
 	 */
-	public abstract CtClass apply(CtClass cc, ClassPool cp, ClassLoader loader, Class<?> classBeingRedefined,
-			ProtectionDomain protectionDomain, byte[] classfileBuffer) throws NotFoundException, CannotCompileException;
+	public abstract void apply(ClassNode cc, FluidClassPool cp, ClassLoader loader, Class<?> classBeingRedefined,
+			ProtectionDomain protectionDomain, byte[] classfileBuffer) throws ClassNotFoundException;
 }

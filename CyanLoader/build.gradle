@@ -1,3 +1,17 @@
+buildscript {
+	repositories {
+		jcenter()
+		mavenCentral()
+		maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
+	}
+	dependencies {
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A25'
+		classpath 'org.asf.cyan:CCFG:1.0.0.A2'
+		classpath 'com.google.code.gson:gson:2.8.6'
+		classpath group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
+	}
+}
+
 plugins {
     id 'java'
 	id 'maven-publish'
@@ -9,9 +23,20 @@ buildDir = '../build/CyanLoader'
 
 group="org.asf.cyan"
 def authorname="AerialWorks Software Foundation"
+version=cyanversion
+
+sourceCompatibility = '1.9'
+targetCompatibility = '1.9'
+
+task createCyanSourceZip(type: Zip, dependsOn: 'prepareSourceZip') {
+	from file(buildDir.getCanonicalPath()+"/git-output")
+	destinationDirectory = file('../build/CyanLoader/Zips')
+	classifier 'FULL-SOURCES'
+}
+
 configurePublish {
 	pretty_name "CyanLoader"
-	description "Cyan main startup system - called from the wrappers\nAlso contains forge/fabric compatibility mappings"
+	description "Cyan main startup system - called from the wrappers"
 	page "https://aerialworks.ddns.net/maven"
 	address "https://aerialworks.ddns.net/maven"
 	
@@ -25,10 +50,20 @@ configurePublish {
 		url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
 	}
 	
+	artifact {
+		name 'CyanLoader-Sources'
+		artifact_description 'Source artifact for the Cyan project, contains the entire source tree'
+		artifact_version project.version
+		
+		task {
+			artifact tasks.createCyanSourceZip
+			classifier 'full'
+		}		
+	}
+	
 	resource "/log4j2.xml"
 }
 
-version="1.0.0.A1"
 jar.dependsOn('processResources')
 
 repositories {
@@ -46,7 +81,10 @@ dependencies {
 	implementation project(':CyanUtil')
 	implementation project(':CCFG')
 	
-	implementation 'org.javassist:javassist:3.15.0-GA'
+	implementation 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.1'
+	
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
 	
 	implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
     testImplementation 'junit:junit:4.12'
@@ -89,9 +127,61 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 	destinationDirectory = file('../build/CyanLoader/Source jars')
 }
 
+task prepareSourceZip {
+	doLast {
+		if (!file("../.git").exists()) {
+			def gitcmd = [ 'git', 'init', '-b', 'main' ].execute(null, file(".."))
+			gitcmd.waitFor()
+			def errorg = gitcmd.errorStream.text.trim()
+			if (gitcmd.exitValue() != 0) throw new Exception("Git command failed to execute: "+errorg)
+				
+			gitcmd = [ 'git', 'add', '-A' ].execute(null, file(".."))
+			gitcmd.waitFor()
+			errorg = gitcmd.errorStream.text.trim()
+			if (gitcmd.exitValue() != 0) throw new Exception("Git command failed to execute: "+errorg)
+			
+			gitcmd = [ 'git', 'commit', '-m', 'Automated intial commit by Cyan Init for maven zip' ].execute(null, file(".."))
+			gitcmd.waitFor()
+			errorg = gitcmd.errorStream.text.trim()
+			if (gitcmd.exitValue() != 0) throw new Exception("Git command failed to execute: "+errorg)
+		}
+		def git = [ 'git', 'status', '--porcelain' ].execute(null, file(".."))
+		git.waitFor()
+		def error = git.errorStream.text.trim()
+		if (git.exitValue() != 0) throw new Exception("Git command failed to execute: "+error)
+		def commited = git.text.trim().equals("")
+		
+		if (!commited) {
+			git = [ 'git', 'add', '-A' ].execute(null, file(".."))
+			git.waitFor()
+			error = git.errorStream.text.trim()
+			if (git.exitValue() != 0) throw new Exception("Git command failed to execute: "+error)
+			
+			git = [ 'git', 'commit', '-m', 'Automated commit by Cyan Publish' ].execute(null, file(".."))
+			git.waitFor()
+			error = git.errorStream.text.trim()
+			if (git.exitValue() != 0) throw new Exception("Git command failed to execute: "+error)
+		}
+		
+		if (file(buildDir.getCanonicalPath()+"/git-output").exists()) delete file(buildDir.getCanonicalPath()+"/git-output")
+		git = ['git', 'clone', file("..").getCanonicalPath(), file(buildDir.getCanonicalPath()+"/git-output").getCanonicalPath()].execute()
+		git.waitFor()
+		error = git.errorStream.text.trim()
+		if (git.exitValue() != 0) throw new Exception("Git command failed to execute: "+error)
+		
+		if (!commited) {
+			git = [ 'git', 'reset', 'HEAD^' ].execute(null, file(".."))
+			git.waitFor()
+			error = git.errorStream.text.trim()
+			if (git.exitValue() != 0) throw new Exception("Git command failed to execute: "+error)
+		}
+	}
+}
+
 artifacts {
 	archives sourcesJar
 	archives javadocJar
+	archives createCyanSourceZip
 }
 
 test {

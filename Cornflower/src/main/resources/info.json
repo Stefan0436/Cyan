@@ -1,0 +1,6 @@
+{
+  "version": "${versiontype}-${version}",
+  "display": "${display}",
+  "id": "${id}",
+  "group": "${group}"
+}
