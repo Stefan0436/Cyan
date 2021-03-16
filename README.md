@@ -7,7 +7,7 @@ Currently, we are writing compatibility for Forge, Fabric and Paper.
 
 # AerialWorks Maven Server
 Because we are writing a modloader, we have set up a maven server, here is the url:<br />
-AerialWorks Maven Server: https://aerialworks.ddns.net
+AerialWorks Maven Server: https://aerialworks.ddns.net/maven
 
 # Licensing
 | Project               | License             | Project page or acronym meaning                                                               | Copyright Notice                                       | Build Status                   |
