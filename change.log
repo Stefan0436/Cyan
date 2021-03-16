@@ -18,7 +18,7 @@ Upcoming Cyan Update: Alpha 11, changes:
  - Title screen modification stating CYAN version (Loader 03/09/2021)
  - Added server Eclipse launches (CyanWrapper A5)
  - Implemented the MTK Rifter Toolkit (MTK A14, use SimpleRiftBuilder as it is far easier than calling rift manually)
- - Implemented transformer detection based on minecraft versions for the CyanLoader (CyanLoader 03/14/2021) -- TODO
+ - Implemented transformer detection based on minecraft versions for the CyanLoader (CyanLoader 03/18/2021) -- TODO
  - Created an extended API artifact container for Cornflower (Cornflower A26)
  - Fixed the FLUID transformer targetCall parsing (FLUID A15)
  - Made CyanComponents an API and CyanCore an implementation of it (CyanComponents A3, CyanCore A7)
