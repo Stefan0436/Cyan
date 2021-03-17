@@ -198,7 +198,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 		trace("CREATE StringBuilder for holding the YARN mappings, caller: " + CallTrace.traceCallName());
 		StringBuilder mappings_text = new StringBuilder();
 
-		trace("CREATE ZipInputStream with InputStream connection to URL " + url + ", caller: "
+		trace("CREATE GZIPInputStream with InputStream connection to URL " + url + ", caller: "
 				+ CallTrace.traceCallName());
 		GZIPInputStream strm = new GZIPInputStream(new URL(url).openStream());
 		trace("CREATE scanner for MAPPINGS, caller: " + CallTrace.traceCallName());
