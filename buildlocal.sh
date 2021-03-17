@@ -49,30 +49,12 @@ if [ "$modloader" != "" ]; then
     case $modloader in
         forge)
         if [ "$modloaderversion" == "" ]; then forgeversion="$(curl https://files.minecraftforge.net/maven/net/minecraftforge/forge/promotions_slim.json -s --output - | jq ".promos.\"$gameversion-latest\"" -r)"
-        else 
-        	1>&2 echo
-        	1>&2 echo
-        	1>&2 echo WARNING! Setting the FORGE version is unsafe and can cause world damage.
-        	1>&2 echo Make sure the mappings are correct before launching the server!
-        	1>&2 echo
-        	1>&2 echo
-        	sleep 3
-        	forgeversion=$modloaderversion
-        fi
+        else forgeversion=$modloaderversion; fi
         extraargs+=" -PoverrideLaunchWrapperClient=CyanForgeClientWrapper -PoverrideLaunchWrapperServer=CyanForgeServerWrapper -PsetModLoader=\"forge-$forgeversion\" -PsetInheritsFromVersion=\"$gameversion-forge-$forgeversion\""
         ;;
         fabric)
-        if [ "$modloaderversion" == "" ]; then fabricversion="$(curl "https://meta.fabricmc.net/v2/versions/loader/$gameversion" -s --output - | jq ".[0].loader.version" -r)"
-        else
-        	1>&2 echo
-        	1>&2 echo
-        	1>&2 echo WARNING! Setting the FABRIC version is unsafe and can cause world damage.
-        	1>&2 echo Make sure the mappings are correct before launching the server!
-        	1>&2 echo
-        	1>&2 echo
-        	sleep 3
-        	fabricversion=$modloaderversion        	
-        fi
+        if [ "$modloaderversion" == "" ]; then fabricversion="$(curl "https://meta.fabricmc.net/v2/versions/ /$gameversion" -s --output - | jq ".[0].loader.version" -r)"
+        else fabricversion=$modloaderversion; fi
         extraargs+=" -PoverrideLaunchWrapperClient=CyanFabricClientWrapper -PoverrideLaunchWrapperServer=CyanFabricServerWrapper -PsetModLoader=\"fabric-loader-$fabricversion\" -PsetInheritsFromVersion=\"fabric-loader-$fabricversion-$gameversion\""
         ;;
         paper)

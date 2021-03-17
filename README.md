@@ -6,11 +6,12 @@ Cyan is an upcoming modloader geared towards compatibility,<br/>
 Currently, we are writing compatibility for Forge, Fabric and Paper.
 
 # Project setup
-Use `gradle createEclipseLaunches eclipse` to setup the environment.
+Use `gradle createEclipseLaunches` to setup the environment. (gradlew.bat on windows, ./gradlew for linux users without a gradle installation)
 
 # Compiling
 Use `./buildlocal.sh` on linux to quickly build the project, argument `--version` can be used to specify game version,
-please note that CYAN is 1.15.2+ but that it has not been tested, we cannot support <1.14 because of mapping issues.
+please note that CYAN is 1.15.2+ but that it has not been tested, we cannot support < 1.15 because of mapping issues.<br />
+We do not have a windows script yet. See [BUILDING](BUILDING.md) for more info.
 
 # AerialWorks Maven Server
 Because we are writing a modloader, we have set up a maven server, here is the url:<br />
