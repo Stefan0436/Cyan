@@ -1,0 +1,9 @@
+#!/bin/bash
+libs=$(find /usr/lib/ccfg-cq-libs -name '*.jar' -exec echo -n :{} \;)
+libs=${libs:1}
+
+java -cp "$libs" org.asf.cyan.api.config.CqMain $@
+exitcode=$?
+echo
+
+exit $exitcode
