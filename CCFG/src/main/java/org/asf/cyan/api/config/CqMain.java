@@ -134,22 +134,59 @@ public class CqMain {
 
 			boolean array = false;
 			boolean map = false;
+
 			Object arr = null;
 			Map<?, ?> mp = null;
 
-			int index = 0;
-
 			String entryPrefix = "";
-			String[] pathEntries = Splitter.split(path, '.');
+			ArrayList<String> pathEntries = new ArrayList<String>();
 			if (getSelf) {
-				pathEntries = new String[] { "" };
+				pathEntries.add("");
+			} else {
+				boolean escape = false;
+				boolean quote = false;
+				
+				StringBuilder buffer = new StringBuilder();
+				for (char ch : path.toCharArray()) {
+					if (!escape) {
+						if (ch == '\\') {
+							escape = true;
+							continue;
+						} else if (ch == '\"') {
+							quote = !quote;
+							continue;
+						}
+						
+						if (!quote) {
+							if (ch == '.') {
+								pathEntries.add(buffer.toString());
+								buffer = new StringBuilder();
+							} else {
+								buffer.append(ch);
+							}
+						} else {
+							buffer.append(ch);
+						}
+					} else {
+						buffer.append(ch);
+						escape = false;
+					}
+				}
+				
+				if (!buffer.toString().isEmpty()) {
+					pathEntries.add(buffer.toString());					
+				}
 			}
-			int length = pathEntries.length;
+			
+			int index = 0;
+			int length = pathEntries.size();
 			for (String pathEntry : pathEntries) {
 				if (pathEntry.endsWith("\\")) {
 					entryPrefix += pathEntry.substring(0, pathEntry.length() - 1) + ".";
 					length--;
 					continue;
+				} else if (pathEntry.startsWith("\"")) {
+					
 				}
 
 				pathEntry = entryPrefix + pathEntry;
