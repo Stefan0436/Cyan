@@ -738,10 +738,6 @@ if (!modloader.equals("")) {
 		
 		if (!serverFolder.exists()) {
 			println "Installing forge server for dependencies..."
-			if (new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server.tmp").exists()) {
-				println "Deleting failed installation..."
-				delete new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server.tmp")
-			}
 			javaexec {
 				workingDir cyanCache
 				classpath files(forgeInstaller)
