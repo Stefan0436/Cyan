@@ -56,7 +56,8 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 					vers = verNode.substring(versionTemplate.replaceAll("\\%version\\%", version.toString()).length());
 				} else if (versionTemplateAux != null
 						&& verNode.startsWith(versionTemplateAux.replaceAll("\\%version\\%", version.toString()))) {
-					vers = verNode.substring(versionTemplateAux.replaceAll("\\%version\\%", version.toString()).length());
+					vers = verNode
+							.substring(versionTemplateAux.replaceAll("\\%version\\%", version.toString()).length());
 				}
 			}
 
