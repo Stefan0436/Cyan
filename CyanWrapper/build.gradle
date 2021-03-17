@@ -8,7 +8,7 @@ buildscript {
 	}
 	dependencies {
 		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A25'
-		classpath 'org.asf.cyan:CCFG:1.0.0.A2'
+		classpath 'org.asf.cyan:CCFG:1.0.0.A3'
 		classpath 'com.google.code.gson:gson:2.8.6'
 		classpath group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
 	}
@@ -71,10 +71,13 @@ import java.time.OffsetDateTime
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
+import java.util.zip.ZipInputStream
 
 import java.nio.file.*
 import java.security.MessageDigest
 import java.math.BigInteger
+import java.util.jar.Manifest;
+import java.util.jar.Attributes;
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 import com.google.gson.JsonElement
@@ -689,6 +692,260 @@ createEclipseLaunches.finalizedBy createDeobfServerLaunch
 createEclipseLaunches.finalizedBy createObfusLaunch
 createEclipseLaunches.finalizedBy createDeobfLaunch
 
+def mappingsVersion=minecraft
+
+if (!modloader.equals("")) {
+	if (modloader.startsWith("forge-")) {
+		def forgeversion = modloader.substring("forge-".length())
+		File forgeInstaller = new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-installer.jar")
+		File downloadmarker = new File(cyanCache, forgeInstaller.getName()+".lck")
+		File serverFolder = new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server")
+		URL url = new URL(forgeurltemplate.replaceAll("\\%game\\%", minecraft).replaceAll("\\%forgeversion\\%", forgeversion))
+		if (!forgeInstaller.exists() || downloadmarker.exists()) {
+			if (!forgeInstaller.getParentFile().exists())
+			forgeInstaller.getParentFile().mkdirs()
+			if (downloadmarker.exists()) downloadmarker.delete()
+			downloadmarker.createNewFile()
+
+			println "Downloading forge installer to cache..."
+			if (forgeInstaller.exists()) forgeInstaller.delete()
+			FileOutputStream strm = new FileOutputStream(forgeInstaller);
+			InputStream inp = url.openStream()
+			inp.transferTo(strm)
+			strm.close()
+			inp.close()
+			downloadmarker.delete()
+		}
+		
+		println "Searching for MCP version in forge jar..."
+		String mcpVersion = "";
+		ZipFile installerZip = new ZipFile(forgeInstaller);
+		ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + minecraft + "-" + forgeversion + "/forge-" + minecraft + "-" + forgeversion + ".jar");
+		ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
+		while (forgeStrm.available() != 0) {
+			ZipEntry entry = forgeStrm.getNextEntry();
+			if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+				Manifest manifest = new Manifest(forgeStrm);
+				Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+				mcpVersion = MCP.getValue("Implementation-Version");
+				break;
+			}
+		}
+		forgeStrm.close();
+		installerZip.close();
+		mappingsVersion = mcpVersion;
+		println "MCP Version: " + mappingsVersion
+		
+		if (!serverFolder.exists()) {
+			println "Installing forge server for dependencies..."
+			if (new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server.tmp").exists()) {
+				println "Deleting failed installation..."
+				delete new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server.tmp")
+			}
+			javaexec {
+				workingDir cyanCache
+				classpath files(forgeInstaller)
+				args '--installServer', new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server.tmp").getAbsolutePath()
+			}
+			Files.move(new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server.tmp").toPath(), serverFolder.toPath())
+		}
+		println "Processing forge server dependencies..."
+		HashMap<String, File> filecollection = scanFiles(new File(serverFolder, "libraries"), "libraries/", "jar", "jar.cache")
+		filecollection.forEach { str, f ->
+			String[] information = str.split("/")
+			String group = ""
+			String name = ""
+			String version = ""
+
+			for (int i = information.length - 2; i >= 1 ; i--) {
+				if (version.isEmpty()) version = information[i]
+				else if (name.isEmpty()) name = information[i]
+				else {
+					if (group.isEmpty()) group = information[i]
+					else group = information[i] + "." + group
+				}
+			}
+
+			String groupstr = group.replaceAll("\\.", "/")
+			if (!groupstr.isEmpty()) groupstr += "/"
+			boolean newer = false
+			for (String libfile : filecollection.keySet())  {
+				if (libfile.startsWith("libraries/"+groupstr+name+"/")) {
+					String newversion = libfile.substring(("libraries/"+groupstr+name+"/").length());
+					newversion = newversion.substring(0, newversion.indexOf("/"));
+					if (!version.equals(newversion)) {
+						newversion = newversion.replaceAll("[^0-9.]", "")
+						String oldver = version.replaceAll("[^0-9.]", "")
+						int ind = 0
+						String[] old = oldver.split("\\.")
+						for (String vn : newversion.split("\\.")) {
+							if (ind < old.length) {
+								String vnold = old[ind]
+								if (Integer.valueOf(vn) > Integer.valueOf(vnold)) {
+									newer = true
+									break
+								} else if (Integer.valueOf(vn) < Integer.valueOf(vnold)) {
+									break
+								}
+								ind++;
+							} else break
+						}
+						if (newer) break
+					}
+				}
+			}
+
+			if (!newer) {
+				String[] libs = filecollection.keySet().stream().filter({it.startsWith("libraries/"+groupstr+name+"/"+version+"/"+name+"-"+version)}).toArray({new String[it]})
+
+				if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) })) {
+					for (String lib : libs)  {
+						if (lib.endsWith(".jar")) cyanclasspath += " "+lib
+						filepaths.put(lib, filecollection.get(lib).toPath())
+					}
+					libnames.add(group+"."+name)
+				}
+			}
+		}
+	} else if (modloader.startsWith("fabric-loader-")) {
+		println "Resolving fabric dependencies..."
+		def fabricversion = modloader.substring("fabric-loader-".length())
+		URL mdataURL = new URL("https://meta.fabricmc.net/v2/versions/loader/"+minecraft+"/"+fabricversion)
+		InputStreamReader rd = new InputStreamReader(mdataURL.openStream())
+		JsonObject metadata = JsonParser.parseReader(rd)
+		rd.close()
+
+		for (JsonElement dependency : metadata.get("launcherMeta").getAsJsonObject().get("libraries").getAsJsonObject().get("common").getAsJsonArray()) {
+			JsonObject obj = dependency.getAsJsonObject()
+			String[] information = obj.get("name").getAsString().split(":")
+			String url = obj.get("url").getAsString()
+
+			String group = ""
+			String name = information[0]
+			String versionstr = ""
+
+			if (information.length == 3) {
+				group = information[0]
+				name = information[1]
+				versionstr = information[2]
+			} else if (information.length >= 2) {
+				name = information[0]
+				versionstr = information[1]
+			}
+
+			url = url + "/"+group.replaceAll("\\.", "/")+"/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
+			if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) })) {
+				if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
+				libnames.add(group+"."+name)
+
+				def lib = "libraries/"+group.replaceAll("\\.", "/")
+
+				if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
+				lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
+				remotelibs.put(lib, new URL(url))
+
+				cyanclasspath += lib
+			}
+		}
+
+		for (JsonElement dependency : metadata.get("launcherMeta").getAsJsonObject().get("libraries").getAsJsonObject().get("server").getAsJsonArray()) {
+			JsonObject obj = dependency.getAsJsonObject()
+			String[] information = obj.get("name").getAsString().split(":")
+			String url = obj.get("url").getAsString()
+
+			String group = ""
+			String name = information[0]
+			String versionstr = ""
+
+			if (information.length == 3) {
+				group = information[0]
+				name = information[1]
+				versionstr = information[2]
+			} else if (information.length >= 2) {
+				name = information[0]
+				versionstr = information[1]
+			}
+
+			url = url + "/"+group.replaceAll("\\.", "/")+"/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
+			if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) })) {
+				if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
+				libnames.add(group+"."+name)
+
+				def lib = "libraries/"+group.replaceAll("\\.", "/")
+
+				if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
+				lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
+				remotelibs.put(lib, new URL(url))
+
+				cyanclasspath += lib
+			}
+		}
+
+		String[] information = metadata.get("loader").getAsJsonObject().get("maven").getAsString().split(":")
+		String url = "https://maven.fabricmc.net/"
+
+		String group = ""
+		String name = information[0]
+		String versionstr = ""
+
+		if (information.length == 3) {
+			group = information[0]
+			name = information[1]
+			versionstr = information[2]
+		} else if (information.length >= 2) {
+			name = information[0]
+			versionstr = information[1]
+		}
+
+		url = url + "/"+group.replaceAll("\\.", "/")+"/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
+		if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) })) {
+			if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
+			libnames.add(group+"."+name)
+
+			def lib = "libraries/"+group.replaceAll("\\.", "/")
+
+			if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
+			lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
+			remotelibs.put(lib, new URL(url))
+
+			cyanclasspath += lib
+			ext.fabricloader = lib
+		}
+
+		information = metadata.get("intermediary").getAsJsonObject().get("maven").getAsString().split(":")
+		url = "https://maven.fabricmc.net/"
+
+		group = ""
+		name = information[0]
+		versionstr = ""
+
+		if (information.length == 3) {
+			group = information[0]
+			name = information[1]
+			versionstr = information[2]
+		} else if (information.length >= 2) {
+			name = information[0]
+			versionstr = information[1]
+		}
+
+		url = url + "/"+group.replaceAll("\\.", "/")+"/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
+		if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) })) {
+			if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
+			libnames.add(group+"."+name)
+
+			def lib = "libraries/"+group.replaceAll("\\.", "/")
+
+			if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
+			lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
+			remotelibs.put(lib, new URL(url))
+
+			ext.fabricintermediary = lib
+		}
+
+		println "Done."
+	}
+}
+
 processResources {
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
@@ -775,7 +1032,7 @@ processResources {
 		latestalpha = info.latestAlphaVersion
 		latestbeta = info.latestBetaVersion
 		latestpreview = info.latestPreviewVersion
-
+		
 		for (String key : info.allVersions.keySet()) {
 			def val = info.allVersions.get(key)
 			if (!cyanversion.toString().equals(key)) {
@@ -784,7 +1041,7 @@ processResources {
 		}
 
 		for (String key : info.changelogs.keySet()) {
-			def val = info.changelogs.get(key)
+			def val = info.changelogs.get(key).replaceAll("\n", "\n    ")
 			if (!cyanversion.toString().equals(key)) {
 				allcyanchangelog += "    $key> '${val}'\n"
 			}
@@ -829,7 +1086,7 @@ processResources {
 			if (!value.equals("")) value += "\n    "
 			value += line
 		}
-
+		value = value.replaceAll("\n", "\n    ")
 		allcyanchangelog += "    ${cyanversion}> '${value}'"
 	} else if (!allcyanchangelog.equals("")) allcyanchangelog = allcyanchangelog.substring(0, allcyanchangelog.length() - 1)
 
@@ -961,7 +1218,8 @@ processResources {
 		"librariesRemSelf": "${libsNoSelf}",
 		"groupslashed": project.group.replaceAll("\\.", "/"),
 		"classwrapperclient": "${classWrapperClient}",
-		"allcyanchangelog": "${allcyanchangelog}"
+		"allcyanchangelog": "${allcyanchangelog}",
+		"mappingsVersion": "${mappingsVersion}"
 	]
 
 	for (def proj : project(":").childProjects) {
@@ -1153,238 +1411,6 @@ task serverJar (type: Jar, dependsOn: build) {
 		}
 	}
 
-	if (!modloader.equals("")) {
-		if (modloader.startsWith("forge-")) {
-			def forgeversion = modloader.substring("forge-".length())
-			File forgeInstaller = new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-installer.jar")
-			File downloadmarker = new File(cyanCache, forgeInstaller.getName()+".lck")
-			File serverFolder = new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server")
-			URL url = new URL(forgeurltemplate.replaceAll("\\%game\\%", minecraft).replaceAll("\\%forgeversion\\%", forgeversion))
-			if (!forgeInstaller.exists() || downloadmarker.exists()) {
-				if (!forgeInstaller.getParentFile().exists())
-				forgeInstaller.getParentFile().mkdirs()
-				if (downloadmarker.exists()) downloadmarker.delete()
-				downloadmarker.createNewFile()
-
-				println "Downloading forge installer to cache..."
-				if (forgeInstaller.exists()) forgeInstaller.delete()
-				FileOutputStream strm = new FileOutputStream(forgeInstaller);
-				InputStream inp = url.openStream()
-				inp.transferTo(strm)
-				strm.close()
-				inp.close()
-				downloadmarker.delete()
-			}
-			if (!serverFolder.exists()) {
-				println "Installing forge server for dependencies..."
-				if (new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server.tmp").exists()) {
-					println "Deleting failed installation..."
-					delete new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server.tmp")
-				}
-				javaexec {
-					workingDir cyanCache
-					classpath files(forgeInstaller)
-					args '--installServer', new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server.tmp").getAbsolutePath()
-				}
-				Files.move(new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server.tmp").toPath(), serverFolder.toPath())
-			}
-			println "Processing forge server dependencies..."
-			HashMap<String, File> filecollection = scanFiles(new File(serverFolder, "libraries"), "libraries/", "jar", "jar.cache")
-			filecollection.forEach { str, f ->
-				String[] information = str.split("/")
-				String group = ""
-				String name = ""
-				String version = ""
-
-				for (int i = information.length - 2; i >= 1 ; i--) {
-					if (version.isEmpty()) version = information[i]
-					else if (name.isEmpty()) name = information[i]
-					else {
-						if (group.isEmpty()) group = information[i]
-						else group = information[i] + "." + group
-					}
-				}
-
-				String groupstr = group.replaceAll("\\.", "/")
-				if (!groupstr.isEmpty()) groupstr += "/"
-				boolean newer = false
-				for (String libfile : filecollection.keySet())  {
-					if (libfile.startsWith("libraries/"+groupstr+name+"/")) {
-						String newversion = libfile.substring(("libraries/"+groupstr+name+"/").length());
-						newversion = newversion.substring(0, newversion.indexOf("/"));
-						if (!version.equals(newversion)) {
-							newversion = newversion.replaceAll("[^0-9.]", "")
-							String oldver = version.replaceAll("[^0-9.]", "")
-							int ind = 0
-							String[] old = oldver.split("\\.")
-							for (String vn : newversion.split("\\.")) {
-								if (ind < old.length) {
-									String vnold = old[ind]
-									if (Integer.valueOf(vn) > Integer.valueOf(vnold)) {
-										newer = true
-										break
-									} else if (Integer.valueOf(vn) < Integer.valueOf(vnold)) {
-										break
-									}
-									ind++;
-								} else break
-							}
-							if (newer) break
-						}
-					}
-				}
-
-				if (!newer) {
-					String[] libs = filecollection.keySet().stream().filter({it.startsWith("libraries/"+groupstr+name+"/"+version+"/"+name+"-"+version)}).toArray({new String[it]})
-
-					if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) })) {
-						for (String lib : libs)  {
-							if (lib.endsWith(".jar")) cyanclasspath += " "+lib
-							filepaths.put(lib, filecollection.get(lib).toPath())
-						}
-						libnames.add(group+"."+name)
-					}
-				}
-			}
-		} else if (modloader.startsWith("fabric-loader-")) {
-			println "Resolving fabric dependencies..."
-			def fabricversion = modloader.substring("fabric-loader-".length())
-			URL mdataURL = new URL("https://meta.fabricmc.net/v2/versions/loader/"+minecraft+"/"+fabricversion)
-			InputStreamReader rd = new InputStreamReader(mdataURL.openStream())
-			JsonObject metadata = JsonParser.parseReader(rd)
-			rd.close()
-
-			for (JsonElement dependency : metadata.get("launcherMeta").getAsJsonObject().get("libraries").getAsJsonObject().get("common").getAsJsonArray()) {
-				JsonObject obj = dependency.getAsJsonObject()
-				String[] information = obj.get("name").getAsString().split(":")
-				String url = obj.get("url").getAsString()
-
-				String group = ""
-				String name = information[0]
-				String versionstr = ""
-
-				if (information.length == 3) {
-					group = information[0]
-					name = information[1]
-					versionstr = information[2]
-				} else if (information.length >= 2) {
-					name = information[0]
-					versionstr = information[1]
-				}
-
-				url = url + "/"+group.replaceAll("\\.", "/")+"/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
-				if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) })) {
-					if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
-					libnames.add(group+"."+name)
-
-					def lib = "libraries/"+group.replaceAll("\\.", "/")
-
-					if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
-					lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
-					remotelibs.put(lib, new URL(url))
-
-					cyanclasspath += lib
-				}
-			}
-
-			for (JsonElement dependency : metadata.get("launcherMeta").getAsJsonObject().get("libraries").getAsJsonObject().get("server").getAsJsonArray()) {
-				JsonObject obj = dependency.getAsJsonObject()
-				String[] information = obj.get("name").getAsString().split(":")
-				String url = obj.get("url").getAsString()
-
-				String group = ""
-				String name = information[0]
-				String versionstr = ""
-
-				if (information.length == 3) {
-					group = information[0]
-					name = information[1]
-					versionstr = information[2]
-				} else if (information.length >= 2) {
-					name = information[0]
-					versionstr = information[1]
-				}
-
-				url = url + "/"+group.replaceAll("\\.", "/")+"/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
-				if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) })) {
-					if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
-					libnames.add(group+"."+name)
-
-					def lib = "libraries/"+group.replaceAll("\\.", "/")
-
-					if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
-					lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
-					remotelibs.put(lib, new URL(url))
-
-					cyanclasspath += lib
-				}
-			}
-
-			String[] information = metadata.get("loader").getAsJsonObject().get("maven").getAsString().split(":")
-			String url = "https://maven.fabricmc.net/"
-
-			String group = ""
-			String name = information[0]
-			String versionstr = ""
-
-			if (information.length == 3) {
-				group = information[0]
-				name = information[1]
-				versionstr = information[2]
-			} else if (information.length >= 2) {
-				name = information[0]
-				versionstr = information[1]
-			}
-
-			url = url + "/"+group.replaceAll("\\.", "/")+"/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
-			if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) })) {
-				if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
-				libnames.add(group+"."+name)
-
-				def lib = "libraries/"+group.replaceAll("\\.", "/")
-
-				if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
-				lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
-				remotelibs.put(lib, new URL(url))
-
-				cyanclasspath += lib
-				ext.fabricloader = lib
-			}
-
-			information = metadata.get("intermediary").getAsJsonObject().get("maven").getAsString().split(":")
-			url = "https://maven.fabricmc.net/"
-
-			group = ""
-			name = information[0]
-			versionstr = ""
-
-			if (information.length == 3) {
-				group = information[0]
-				name = information[1]
-				versionstr = information[2]
-			} else if (information.length >= 2) {
-				name = information[0]
-				versionstr = information[1]
-			}
-
-			url = url + "/"+group.replaceAll("\\.", "/")+"/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
-			if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) })) {
-				if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
-				libnames.add(group+"."+name)
-
-				def lib = "libraries/"+group.replaceAll("\\.", "/")
-
-				if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
-				lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
-				remotelibs.put(lib, new URL(url))
-
-				ext.fabricintermediary = lib
-			}
-
-			println "Done."
-		}
-	}
-	
 	if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
 	cyanclasspath+="vanilla-server.jar"
 	if (!modloader.isEmpty() && modloader.startsWith("paper-")) {

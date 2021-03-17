@@ -43,4 +43,4 @@ Upcoming Cyan Update: Alpha 11, changes:
  - New EventBus system (CyanUtil A3, CyanLoader 03/14/2021)
  - Mostly finished the MixinSupport project, though it will NOT be added to the CyanWrapper, instead, it is going to be a mod.
  - Fixed forge MCP mappings, implemented TSRG version 2 (MTK A14)
- - Made Forge and Fabric mappings version-based -- TODO
+ - Forge now uses specific MCP version provided by the CyanWrapper build file. (CyanWrapper A5)
