@@ -11,13 +11,13 @@ sourceCompatibility = '1.9'
 targetCompatibility = '1.9'
 
 group="org.asf.cyan"
-version="1.0.0.A3"
+version="1.0.0.A4"
 
 def authorname="AerialWorks Software Foundation"
 
 configurePublish {
-	pretty_name "CCFG Serializing Configuration API, Alpha Version 2"
-	description "Cyan Configuration API, now with a great big performance patch!"
+	pretty_name "CCFG Serializing Configuration API, Alpha Version 4"
+	description "Cyan Configuration API, introducing CQ command line parser!"
 	page "https://aerialworks.ddns.net/maven"
 	address "https://aerialworks.ddns.net/maven"
 	

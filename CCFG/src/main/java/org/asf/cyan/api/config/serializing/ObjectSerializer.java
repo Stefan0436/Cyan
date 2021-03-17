@@ -158,10 +158,10 @@ public class ObjectSerializer {
 						}
 					}
 					meth.setAccessible(true);
-					Configuration<?> outp = (Configuration<?>)meth.invoke(null, cls);
-					return (T)outp.readAll(input);
-				} catch (IllegalAccessException | IllegalArgumentException
-						| InvocationTargetException | SecurityException e) {
+					Configuration<?> outp = (Configuration<?>) meth.invoke(null, cls);
+					return (T) outp.readAll(input);
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+						| SecurityException e) {
 					throw new IOException("Could not instanciate the configuration", e);
 				}
 			} else if (PrimitiveClassUtil.isSupportedWrapper(cls)) {
@@ -175,14 +175,15 @@ public class ObjectSerializer {
 				}
 			} else if (cls.isEnum()) {
 				final String info = input;
-				if (Stream.of(cls.getFields()).anyMatch(t->t.getName().equals(info))) {
+				if (Stream.of(cls.getFields()).anyMatch(t -> t.getName().equals(info))) {
 					try {
-						return (T)Stream.of(cls.getFields()).filter(t->t.getName().equals(info)).findFirst().get().get(null);
+						return (T) Stream.of(cls.getFields()).filter(t -> t.getName().equals(info)).findFirst().get()
+								.get(null);
 					} catch (IllegalArgumentException | IllegalAccessException | SecurityException e) {
 						throw new IOException(e);
 					}
-				} else 
-					throw new IOException("No ENUM value "+input+" in class "+cls.getTypeName());
+				} else
+					throw new IOException("No ENUM value " + input + " in class " + cls.getTypeName());
 			} else if (cls.isArray()) {
 				input = Replacer.removeChar(input, '\r');
 				ArrayList<String> inputLst = new ArrayList<String>();
@@ -227,7 +228,8 @@ public class ObjectSerializer {
 					case '{':
 						if (str == null)
 							str = new StringBuilder();
-						if (brquote != 0) str.append(character);
+						if (brquote != 0)
+							str.append(character);
 						if (!quote) {
 							brquote++;
 							indent = true;
@@ -240,13 +242,14 @@ public class ObjectSerializer {
 							brquote--;
 						} else if (brquote == 0 && !quote)
 							indent = false;
-						
-						if (brquote != 0) str.append(character);
+
+						if (brquote != 0)
+							str.append(character);
 						break;
 					case '[':
 						if (str == null)
 							str = new StringBuilder();
-						
+
 						str.append(character);
 						if (brquote == 0 && !quote) {
 							arrayc++;
@@ -258,7 +261,8 @@ public class ObjectSerializer {
 						if (brquote == 0 && !quote && arrayc != 0) {
 							arrayc--;
 						}
-						if (arrayc != 0 || brquote != 0 || quote) str.append(character);
+						if (arrayc != 0 || brquote != 0 || quote)
+							str.append(character);
 						break;
 					case '\n':
 						if (indent) {
@@ -305,14 +309,18 @@ public class ObjectSerializer {
 	public static <T> T deserialize(String input, Field field, Object accessor) throws IOException {
 		if (Map.class.isAssignableFrom(field.getType())) {
 			try {
-				MapPutPropAction a = new MapPutPropAction(field.get(accessor).getClass(),
-						(ParameterizedType) field.getGenericType());
+				Class<?> type = field.getType();
+				try {
+					type = field.get(accessor).getClass();
+				} catch (Exception e) {
+				}
+				MapPutPropAction a = new MapPutPropAction(type, (ParameterizedType) field.getGenericType());
 				parse(input, a);
 				for (IOException ex : a.exs) {
 					throw ex;
 				}
 				return (T) a.mp;
-			} catch (IllegalArgumentException | IllegalAccessException | IOException e) {
+			} catch (IllegalArgumentException | IOException e) {
 			}
 		}
 		return (T) deserialize(input, field.getType());
@@ -361,8 +369,7 @@ public class ObjectSerializer {
 					if (first) {
 						builder.append(indent).append(line);
 						first = false;
-					}
-					else 
+					} else
 						builder.append(System.lineSeparator()).append(indent).append(line);
 				}
 				return builder.toString();
@@ -376,22 +383,22 @@ public class ObjectSerializer {
 				StringBuilder arrayTxt = new StringBuilder();
 				arrayTxt.append(" ");
 				int l = Array.getLength(input);
-				
+
 				String prefix = "";
 				String suffix = "";
-				
+
 				if (String.class.isAssignableFrom(cls.getComponentType())) {
 					prefix = "'";
 					suffix = prefix;
 				} else if (isMapLike) {
 					prefix = "{" + System.lineSeparator();
-					suffix = System.lineSeparator()+indent+"}";
+					suffix = System.lineSeparator() + indent + "}";
 					indent += "    ";
 				}
-				
+
 				for (int i = 0; i < l; i++)
 					arrayTxt.append(prefix).append(serialize(Array.get(input, i), indent)).append(suffix).append(" ");
-				
+
 				String out = arrayTxt.toString();
 				if (out.equals(" "))
 					out = "";
@@ -540,7 +547,8 @@ public class ObjectSerializer {
 
 						break;
 					case '[':
-						if (array != 0 || quote) txt.append(ch);
+						if (array != 0 || quote || brquote != 0)
+							txt.append(ch);
 						if (brquote == 0 && !quote) {
 							array++;
 						}
@@ -548,8 +556,9 @@ public class ObjectSerializer {
 					case ']':
 						if (brquote == 0 && !quote && array != 0) {
 							array--;
-						} 
-						if (array != 0 || quote) txt.append(ch);
+						}
+						if (array != 0 || quote || brquote != 0)
+							txt.append(ch);
 						break;
 					case ' ':
 						if (brquote == 0 && !quote && array == 0) {
@@ -603,13 +612,13 @@ public class ObjectSerializer {
 		String output = action.processPrefix(null);
 		String pref = action.getLinePrefix();
 		StringBuilder builder = new StringBuilder();
-		
+
 		if (output == null)
 			output = "";
 		else {
 			for (String line : Splitter.split(Replacer.removeChar(output, '\r'), '\n'))
 				builder.append(pref).append(line).append(System.lineSeparator());
-			
+
 			builder.append(System.lineSeparator());
 		}
 		boolean first = true;
@@ -621,15 +630,15 @@ public class ObjectSerializer {
 				if (first) {
 					builder.append(pref).append(toCCFGEntry(key, v, d.getClass(), action));
 					first = false;
-				}
-				else
-					builder.append(System.lineSeparator()).append(pref).append(toCCFGEntry(key, v, d.getClass(), action));
+				} else
+					builder.append(System.lineSeparator()).append(pref)
+							.append(toCCFGEntry(key, v, d.getClass(), action));
 				action.onAdd(key, v);
 			} catch (IOException e) {
 				action.error(e);
 			}
 		}
-		
+
 		String aSuffix = action.processSuffix(null);
 		if (aSuffix != null) {
 			String newOut = "";
@@ -684,7 +693,7 @@ public class ObjectSerializer {
 				suffix += aSuffix;
 			} else if (Configuration.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type)) {
 				prefix = "{" + System.lineSeparator();
-				suffix = "}" + aSuffix + System.lineSeparator();
+				suffix = System.lineSeparator() + "}" + aSuffix;
 				indent = true;
 			} else if (type.isArray()) {
 				prefix = "[";

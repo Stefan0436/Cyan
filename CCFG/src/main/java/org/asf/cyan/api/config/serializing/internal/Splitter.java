@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 public class Splitter {
 	public static String[] split(String input, char delim) {
+		if (input.isEmpty())
+			return new String[0];
 		int c = (int) input.chars().filter(t -> t == delim).count();
 		String[] output = new String[c + 1];
 		StringBuilder cbuilder = new StringBuilder();
@@ -39,7 +41,7 @@ public class Splitter {
 		String[] output = new String[c + 1];
 		StringBuilder cbuilder = new StringBuilder();
 		boolean busy = false;
-		
+
 		for (int i = 0; i < output.length; i++)
 			output[i] = "";
 
@@ -76,14 +78,14 @@ public class Splitter {
 				}
 				if (!busy)
 					busy = true;
-				
+
 				cbuilder.append(ch);
 			}
 		}
 
 		if (busy)
 			output[ind] = cbuilder.toString();
-		
+
 		return output;
 	}
 
