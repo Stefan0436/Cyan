@@ -70,6 +70,6 @@ To help, we have a graph for selecting the right launch wrappers.
 [base-command] -PresetLibSourceCache build gameData serverJar
 ```
 
-4. Replace [extra-task] with gameData if the client wrapper is supported, else remove it.
+4. Replace [extra-task] with gameData if the client wrapper is supported, remove it otherwise.
 5. Run the commands
 
