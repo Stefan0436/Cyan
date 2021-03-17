@@ -9,8 +9,8 @@ Currently, we are writing compatibility for Forge, Fabric and Paper.
 Use `gradle createEclipseLaunches eclipse` to setup the environment.
 
 # Compiling
-Use `./buildlocal.sh` on linux to quickly build the project, argument `--version` can be used to specify game version,<br/>
-Note that CYAN is 1.15.2+ but that it has not been tested, we cannot support <1.14 because of mapping issues.
+Use `./buildlocal.sh` on linux to quickly build the project, argument `--version` can be used to specify game version,
+please note that CYAN is 1.15.2+ but that it has not been tested, we cannot support <1.14 because of mapping issues.
 
 # AerialWorks Maven Server
 Because we are writing a modloader, we have set up a maven server, here is the url:<br />
