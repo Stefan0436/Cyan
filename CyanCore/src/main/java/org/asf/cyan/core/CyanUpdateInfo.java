@@ -4,7 +4,14 @@ import java.util.HashMap;
 
 import org.asf.cyan.api.config.Configuration;
 
-class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
+/**
+ * 
+ * Cyan update information holder.
+ * 
+ * @author Stefan0436 - AerialWorks Software Foundation
+ *
+ */
+public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 	public String latestStableVersion;
 	public String latestAlphaVersion;
 	public String latestBetaVersion;
@@ -18,6 +25,9 @@ class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 	
 	public CyanUpdateInfo(String content) {
 		readAll(content);
+	}
+	
+	public CyanUpdateInfo() {		
 	}
 
 	@Override

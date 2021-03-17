@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -98,9 +99,17 @@ public class CqMain {
 			}
 
 			URLClassLoader clloader = new URLClassLoader(urls.toArray(t -> new URL[t]), CqMain.class.getClassLoader());
+			Class<?> ccfgcls = Class.forName(cls, true, clloader);
 
-			Configuration<?> ccfg = Configuration
-					.instanciateFromSerialzer((Class<? extends Configuration>) Class.forName(cls, true, clloader));
+			Configuration<?> ccfg;
+			try {
+				Method mth = ccfgcls.getDeclaredMethod("instanciateFromSerialzer", Class.class);
+				mth.setAccessible(true);
+				ccfg = (Configuration<?>) mth.invoke(null, (Class<? extends Configuration>) ccfgcls);
+			} catch (Exception e) {
+				ccfg = Configuration.instanciateFromSerialzer((Class<? extends Configuration>) ccfgcls);
+			}
+
 			ccfg = ccfg.readAll(input);
 
 			boolean getSelf = false;
@@ -151,7 +160,7 @@ public class CqMain {
 					}
 					String outputTxt = serialize(value, raw, 0);
 					if (output.equals("-")) {
-						if (!raw) {
+						if (raw) {
 							System.out.print(outputTxt);
 						} else {
 							System.out.println(outputTxt);

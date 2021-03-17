@@ -2,6 +2,7 @@ package org.asf.cyan.core;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.time.OffsetDateTime;
 import java.util.Scanner;
@@ -25,6 +26,11 @@ public class CyanInfo extends Configuration<CyanInfo> {
 	static CyanInfoProvider provider;
 	public static final String infoPath = "/org/asf/cyan/CyanVersionHolder/generic/CyanVersionHolder-generic-versions.ccfg";
 
+	@SuppressWarnings("unchecked")
+	protected static <T extends Configuration<T>> T instanciateFromSerialzer(Class<T> input) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		return (T) new CyanInfo();
+	}
+	
 	private CyanInfo() {
 		super();
 		readAll(readCCFG());
