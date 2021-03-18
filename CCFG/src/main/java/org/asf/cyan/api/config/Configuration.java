@@ -31,7 +31,7 @@ public abstract class Configuration<T extends Configuration<T>> {
 	 * The configuration base directory
 	 */
 	@Exclude
-	public static String baseDir = "";
+	public static String baseDir = ".";
 
 	boolean enableSave = false;
 	static ArrayList<Configuration<?>> configStore = new ArrayList<Configuration<?>>();
@@ -40,13 +40,22 @@ public abstract class Configuration<T extends Configuration<T>> {
 	File conf = null;
 	HashMap<String, String> propertiesMemory = new HashMap<String, String>();
 
+	public File getFile() {
+		return conf;
+	}
+
 	/**
 	 * Save all known configuration files
 	 */
 	public static void saveAllConfigurations() {
 		for (Configuration<?> config : configStore) {
-			if (config.enableSave)
-				config.writeAll();
+			if (config.enableSave) {
+				try {
+					config.writeAll();
+				} catch (IOException e) {
+					// TODO: log error
+				}
+			}
 		}
 	}
 
@@ -100,25 +109,27 @@ public abstract class Configuration<T extends Configuration<T>> {
 			base.mkdirs();
 
 		if (conf.exists())
-			return readAll(Files.readString(conf.toPath()), true);
+			return readAll(Files.readString(conf.toPath()), true, false);
 		else
 			writeAll(true);
 
 		return (T) this;
 	}
-	
+
 	/**
 	 * Check if the configuration file exists
+	 * 
 	 * @return True if the file exists, false otherwise
 	 */
 	public boolean exists() {
 		if (filename() != null && folder() != null) {
 			return conf.exists();
-		} else return false;
+		} else
+			return false;
 	}
 
 	@SuppressWarnings("unchecked")
-	T readAll(String content, boolean allowWrite) {
+	protected T readAll(String content, boolean allowWrite, boolean newfile) {
 		if (allowWrite)
 			enableSave = true;
 
@@ -134,15 +145,19 @@ public abstract class Configuration<T extends Configuration<T>> {
 				} catch (IllegalArgumentException | IOException e) {
 					// TODO: Write error to logs
 				}
-			}			
+			}
 		});
 
-		if (hasChanges() && allowWrite)
-			writeAll();
+		if (hasChanges() && allowWrite) {
+			try {
+				writeAll();
+			} catch (IOException e) {
+			}
+		}
 
 		return (T) this;
 	}
-	
+
 	/**
 	 * Read the configuration file from a content string.
 	 * 
@@ -150,38 +165,93 @@ public abstract class Configuration<T extends Configuration<T>> {
 	 * @return Self
 	 */
 	public T readAll(String content) {
-		return readAll(content, false);
+		return readAll(content, false, false);
 	}
 
 	/**
-	 * Save the configuration to its file (not yet implemented, read only api for now)
+	 * Save the configuration to its file.
+	 * 
+	 * @throws IOException If writing fails.
 	 */
-	@Deprecated
-	public void writeAll() {
+	public void writeAll() throws IOException {
 		writeAll(!exists());
 		enableSave = true;
 	}
 
 	/**
-	 * Not yet implemented, read only api for now
+	 * Save the configuration to its file.
+	 * 
+	 * @param newfile True if the file is new (will generate all keys), false
+	 *                otherwise.
+	 * 
+	 * @throws IOException If writing fails.
 	 */
-	@Deprecated
-	void writeAll(boolean newfile) {
-		// TODO
+	protected void writeAll(boolean newfile) throws IOException {
+		String oldcontent = null;
+		if (!newfile && exists()) {
+			oldcontent = Files.readString(conf.toPath()).replaceAll("\r", "");
+			if (oldcontent.endsWith("\n")) {
+				oldcontent = oldcontent.substring(0, oldcontent.length() - 1);
+			}
+		}
+		if (hasChanges() && !hasChanges(false)) { // FIXME: change when value overwriting is implemented
+			oldcontent += System.lineSeparator();
+		}
+		String ccfg = toString(newfile, oldcontent) + System.lineSeparator();
+		if (!conf.getParentFile().exists())
+			conf.getParentFile().mkdirs();
+
+		Files.writeString(conf.toPath(), ccfg);
 	}
 
 	/**
-	 * Not yet implemented, read only api for now
+	 * 
+	 * Generates the CCFG string.
+	 * 
+	 * @return CCFG String
 	 */
-	@Deprecated
 	@Override
 	public String toString() {
-		return toString(true);
+		return toString(true, null);
 	}
 
-	private String toString(boolean newfile) {
-		// TODO
-		return "";
+	/**
+	 * 
+	 * Generates the CCFG string.
+	 * 
+	 * @param newfile    True if the file is new (will generate all keys), false
+	 *                   otherwise.
+	 * @param oldContent Old (unchanged) content.
+	 * 
+	 * @return CCFG String
+	 */
+	protected String toString(boolean newfile, String oldContent) {
+		if (!hasChanges() && !newfile) {
+			return oldContent;
+		}
+		
+		if (!newfile && hasChanges() && hasChanges(false)) { // FIXME: change when value overwriting is implemented
+			return toString(true, null);
+		}
+		String value = ObjectSerializer.getCCFGString(this, new CCFGConfigGenerator<T>(this, newfile, oldContent));
+		if (!newfile) {
+			if (!value.isEmpty())
+				value = oldContent + System.lineSeparator() + value;
+			else
+				value = oldContent;
+		}
+		for (Field f : getClass().getFields()) {
+			try {
+				if (!isExcluded(f)) {
+					Object val = f.get(this);
+					if (val != null)
+						propertiesMemory.put(f.getName(), ObjectSerializer.serialize(val));
+				}
+			} catch (IllegalArgumentException | IllegalAccessException | IOException e) {
+				// TODO: log error
+			}
+		}
+		return value;
 	}
 
 	/**
@@ -190,9 +260,20 @@ public abstract class Configuration<T extends Configuration<T>> {
 	 * @return True if changes are present, false otherwise
 	 */
 	public boolean hasChanges() {
+		return hasChanges(true);
+	}
+
+	/**
+	 * Check if the configuration has changes
+	 * 
+	 * @param checkIfPresent True to check if the key is present in memory storage,
+	 *                       false otherwise.
+	 * @return True if changes are present, false otherwise
+	 */
+	public boolean hasChanges(boolean checkIfPresent) {
 		for (Field f : getClass().getFields()) {
 			f.setAccessible(true);
-			if (hasChanged(f, getProp(f)) && !isExcluded(f))
+			if (!isExcluded(f) && hasChanged(f, getProp(f), checkIfPresent))
 				return true;
 		}
 		return false;
@@ -200,10 +281,11 @@ public abstract class Configuration<T extends Configuration<T>> {
 
 	/**
 	 * Check if a key is optional (internal)
+	 * 
 	 * @param key Input field
 	 * @return True if optional, false otherwise
 	 */
-	boolean isOptional(Field key) {
+	protected boolean isOptional(Field key) {
 		try {
 			return Stream.of(key.getAnnotations())
 					.anyMatch(t -> t.annotationType().getTypeName().equals(OptionalEntry.class.getTypeName()));
@@ -214,10 +296,11 @@ public abstract class Configuration<T extends Configuration<T>> {
 
 	/**
 	 * Check if a field is excluded (internal)
+	 * 
 	 * @param key Input field
 	 * @return True if excluded, false otherwise
 	 */
-	boolean isExcluded(Field key) {
+	protected boolean isExcluded(Field key) {
 		try {
 			return Stream.of(key.getAnnotations())
 					.anyMatch(t -> t.annotationType().getTypeName().equals(Exclude.class.getTypeName()));
@@ -226,7 +309,7 @@ public abstract class Configuration<T extends Configuration<T>> {
 		}
 	}
 
-	private String getComment(Annotation[] annotations, boolean header) {
+	protected String getComment(Annotation[] annotations, boolean header) {
 		if (Stream.of(annotations).anyMatch(t -> t.annotationType().getTypeName().equals(Comment.class.getTypeName())
 				&& !((Comment) t).afterValue()) == header) {
 			String comment = "";
@@ -310,15 +393,16 @@ public abstract class Configuration<T extends Configuration<T>> {
 
 	/**
 	 * Get the CCFG-serialized value of a field
+	 * 
 	 * @param key Input field
 	 * @return Output CCFG string
 	 */
-	String getProp(Field key) {
+	protected String getProp(Field key) {
 		try {
 			if (isExcluded(key))
 				throw new SecurityException("This property is excluded.");
-			Object v =key.get(this);
-			if (v == null) 
+			Object v = key.get(this);
+			if (v == null)
 				return null;
 			return ObjectSerializer.serialize(v);
 		} catch (SecurityException | IllegalArgumentException | IllegalAccessException | IOException e) {
@@ -326,7 +410,7 @@ public abstract class Configuration<T extends Configuration<T>> {
 		}
 	}
 
-	private void setProp(Field key, String value, boolean setToStore) throws IOException {
+	protected void setProp(Field key, String value, boolean setToStore) throws IOException {
 		try {
 			if (isExcluded(key))
 				throw new SecurityException("This property is excluded.");
@@ -340,34 +424,49 @@ public abstract class Configuration<T extends Configuration<T>> {
 
 	/**
 	 * Check if a field has changed (internal)
-	 * @param key Field to check
-	 * @param comparison Comparison CCFG-serialized string
+	 * 
+	 * @param key            Field to check
+	 * @param comparison     Comparison CCFG-serialized string
+	 * @param checkIfPresent True to check if the field is present in property
+	 *                       storage.
 	 * @return True if the field has changed or is new, false otherwise
 	 */
-	boolean hasChanged(Field key, String comparison) {
-		if (!reqIsPresent(key))
+	protected boolean hasChanged(Field key, String comparison, boolean checkIfPresent) {
+		Object value = null;
+		try {
+			value = key.get(this);
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+		}
+		if (checkIfPresent && !reqIsPresent(key) && value != null)
 			return true;
+		else if (!checkIfPresent && (!reqIsPresent(key) || value == null)) {
+			return false;
+		}
 		String in = propertiesMemory.get(key.getName());
-		if (in == null) return in == comparison;
+		if (in == null)
+			return comparison != null;
 		boolean changed = !propertiesMemory.get(key.getName()).equals(comparison);
 		return changed;
 	}
 
 	/**
 	 * Check if a field is present (internal)
+	 * 
 	 * @param key Field to check
 	 * @return True if the field is present, false otherwise
 	 */
-	boolean isPresent(Field key) {
+	protected boolean isPresent(Field key) {
 		return propertiesMemory.containsKey(key.getName());
 	}
 
 	/**
-	 * Check if a field is present, returns true if optional and not present (internal)
+	 * Check if a field is present, returns true if optional and not present
+	 * (internal)
+	 * 
 	 * @param key Field to check
 	 * @return True if the field is present, false otherwise
 	 */
-	boolean reqIsPresent(Field key) {
+	protected boolean reqIsPresent(Field key) {
 		if (isPresent(key))
 			return true;
 		else if (isOptional(key))
@@ -375,8 +474,10 @@ public abstract class Configuration<T extends Configuration<T>> {
 		else
 			return false;
 	}
-	
-	protected static <T extends Configuration<T>> T instanciateFromSerialzer(Class<T> input) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-		return (T)input.getConstructor().newInstance();
+
+	protected static <T extends Configuration<T>> T instanciateFromSerialzer(Class<T> input)
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+			NoSuchMethodException, SecurityException {
+		return (T) input.getConstructor().newInstance();
 	}
 }

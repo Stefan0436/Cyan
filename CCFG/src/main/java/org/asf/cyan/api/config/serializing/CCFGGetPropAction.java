@@ -11,6 +11,7 @@ import java.io.IOException;
  */
 public abstract class CCFGGetPropAction<T> {
 	public Object[] data;
+	
 	/**
 	 * Create a new instance of the CCFGGetPropAction class
 	 * @param data Data to pass to the 'data' variable inside the actions

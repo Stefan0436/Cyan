@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URL;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -20,8 +21,6 @@ import org.asf.cyan.api.config.serializing.internal.Replacer;
 import org.asf.cyan.api.config.serializing.internal.Splitter;
 
 import java.util.ArrayList;
-
-// FIXME: null keyword support (FIX ASAP!)
 
 /**
  * 
@@ -58,8 +57,7 @@ public class ObjectSerializer {
 
 		public Object[] processEntry(String line) {
 			Object[] data = new Object[6]; // 0 = key, 1 = line out, 2(int) = brquote, 3(boolean) = wasBrQuote,
-											// 4(boolean)
-											// = indent, 5(boolean) = skip_current
+											// 4(boolean) = indent, 5(boolean) = skip_current
 
 			Matcher m = Pattern.compile("^([^\r\n\t'{}\\[\\]]*)> (.|\\R)*( *)$").matcher(line);
 			m.matches();
@@ -118,6 +116,8 @@ public class ObjectSerializer {
 			input = input.replaceAll("([^\\\\])\\\\r", "$1\r");
 			input = input.replaceAll("\\\\r", "\\r");
 			return (T) input;
+		case "java.net.URL":
+			return (T) new URL(input);
 		case "java.lang.Boolean":
 			switch (input.toLowerCase()) {
 			case "true":
@@ -327,8 +327,7 @@ public class ObjectSerializer {
 	}
 
 	/**
-	 * Serialize an object into a CCFG-formatted element string (FIXME:
-	 * configurations cannot be serialized as of yet)
+	 * Serialize an object into a CCFG-formatted element string.
 	 * 
 	 * @param <T>   Input type
 	 * @param input Input object
@@ -339,7 +338,6 @@ public class ObjectSerializer {
 		return serialize(input, "");
 	}
 
-	@SuppressWarnings("deprecation")
 	static <T> String serialize(T input, String indent) throws IOException {
 		Class<?> cls = input.getClass();
 
@@ -352,6 +350,8 @@ public class ObjectSerializer {
 			output = output.replaceAll("\\\\\\\\r", "\\\\\\\\\\\\r");
 			output = output.replaceAll("\r", "\\\\r");
 			return output;
+		case "java.net.URL":
+			return input.toString();
 		case "java.lang.Boolean":
 			return input.toString().toLowerCase();
 		case "java.lang.Character":
@@ -621,18 +621,30 @@ public class ObjectSerializer {
 
 			builder.append(System.lineSeparator());
 		}
+		boolean wascommented = false;
 		boolean first = true;
+		boolean wasemtpy = false;
 		String[] keys = action.keys();
 		for (String key : keys) {
 			try {
 				Object d = action.getProp(key);
 				String v = serialize(d);
+				int length = Splitter.split(v, '\n').length;
 				if (first) {
-					builder.append(pref).append(toCCFGEntry(key, v, d.getClass(), action));
+					builder.append(pref).append(toCCFGEntry(key, v, d.getClass(), action, true, wascommented, wasemtpy));
 					first = false;
 				} else
 					builder.append(System.lineSeparator()).append(pref)
-							.append(toCCFGEntry(key, v, d.getClass(), action));
+							.append(toCCFGEntry(key, v, d.getClass(), action, false, wascommented, wasemtpy));
+				String prefix = action.processPrefix(key);
+				String suffix = action.processSuffix(key);
+				wascommented = (prefix != null && !prefix.isEmpty()) || (suffix != null && !suffix.isEmpty());
+				wasemtpy = false;
+				
+				if (Map.class.isAssignableFrom(d.getClass()) || Configuration.class.isAssignableFrom(d.getClass())) {
+					wasemtpy = length == 0;
+				}
+				
 				action.onAdd(key, v);
 			} catch (IOException e) {
 				action.error(e);
@@ -653,16 +665,20 @@ public class ObjectSerializer {
 	/**
 	 * Generate a CCFG entry
 	 * 
-	 * @param <T>    Input type
-	 * @param key    Key name
-	 * @param value  CCFG-serialized property value
-	 * @param type   Property type
-	 * @param action Property processing action
+	 * @param <T>              Input type
+	 * @param key              Key name
+	 * @param value            CCFG-serialized property value
+	 * @param type             Property type
+	 * @param action           Property processing action
+	 * @param firstEntry       If the entry is the first entry
+	 * @param lastWasCommented If the last entry was not commented
 	 * @return CCFG-formatted entry string
 	 */
-	public static <T> String toCCFGEntry(String key, String value, Class<?> type, CCFGGetPropAction<T> action) {
+	public static <T> String toCCFGEntry(String key, String value, Class<?> type, CCFGGetPropAction<T> action,
+			boolean firstEntry, boolean lastWasCommented, boolean lastWasEmptyMap) {
 		if (PrimitiveClassUtil.isSupportedPrimitive(type)) {
-			return toCCFGEntry(key, value, PrimitiveClassUtil.getWrapper(type), action);
+			return toCCFGEntry(key, value, PrimitiveClassUtil.getWrapper(type), action, firstEntry, lastWasCommented,
+					lastWasEmptyMap);
 		}
 		value = Replacer.removeChar(value, '\r');
 		String output = "";
@@ -674,12 +690,16 @@ public class ObjectSerializer {
 		String prefix = "";
 		String suffix = "";
 		if (aPrefix != null && !aPrefix.isEmpty()) {
-			prefix = aPrefix + System.lineSeparator();
+			output = (!firstEntry && !lastWasCommented ? System.lineSeparator() : "") + aPrefix + System.lineSeparator() + output;
+		} else if (!firstEntry && !lastWasCommented
+				&& (Map.class.isAssignableFrom(type) || Configuration.class.isAssignableFrom(type))) {
+			output = System.lineSeparator() + output;
 		}
+
 		if (aSuffix == null)
 			aSuffix = "";
 		else
-			aSuffix = " " + aSuffix + System.lineSeparator();
+			aSuffix = " " + aSuffix;
 
 		boolean indent = false;
 
@@ -700,6 +720,10 @@ public class ObjectSerializer {
 				suffix = "]" + aSuffix;
 			}
 		}
+		
+		if (aPrefix != null && !aPrefix.isEmpty()) {
+			suffix += System.lineSeparator();
+		}
 
 		output += prefix;
 		boolean first = true;
@@ -715,6 +739,13 @@ public class ObjectSerializer {
 				builder.append(pref).append(line);
 		}
 		output = builder.toString();
+		if (values.length == 0 && (Map.class.isAssignableFrom(type) || Configuration.class.isAssignableFrom(type))) {
+			output = output.substring(0, output.length() - 1);
+			suffix = suffix.substring(1);
+			if (lastWasEmptyMap && !lastWasCommented && (aPrefix == null || aPrefix.isEmpty())) {
+				output = output.substring(1);
+			}
+		}
 		output += suffix;
 
 		output = action.postProcess(okey, output);

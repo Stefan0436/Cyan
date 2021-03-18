@@ -33,6 +33,9 @@ public class TestingConfig extends Configuration<TestingConfig> {
 	@Comment("Test integer")
 	public int test4 = 0;
 	
+	@Comment("Should only be added if it has a value")
+	public String defaultEmpty = null;
+	
 	public HashMap<String,String> testMap1 = new HashMap<String,String>();
 	public HashMap<String,Integer> testMap2 = new HashMap<String,Integer>();
 }

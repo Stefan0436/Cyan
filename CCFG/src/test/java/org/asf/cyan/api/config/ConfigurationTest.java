@@ -25,6 +25,44 @@ public class ConfigurationTest {
 		}
 		return val;
 	}
+	
+	@Test
+	public void testWriteNew() throws IOException {
+		TestingConfig.baseDir = "bin/test";
+		TestingConfig test = new TestingConfig();
+		if (test.exists())
+			test.getFile().delete();
+		
+		test.writeAll();
+		assertTrue(test.exists());
+	}
+//
+//	@Test
+//	public void testWriteNewSetValue() throws IOException {
+//		TestingConfig.baseDir = "bin/test";
+//		TestingConfig test = new TestingConfig();
+//		if (test.exists())
+//			test.getFile().delete();
+//		
+//		test.writeAll();
+//		
+//		assertTrue(test.exists());
+//		
+//		test.defaultEmpty = "Hello";
+//		test.writeAll();
+//		
+//		assertTrue(test.exists());
+//		
+//		test.defaultEmpty = "Hi";
+//		test.writeAll();
+//		
+//		assertTrue(test.exists());
+//		
+//		test.defaultEmpty = "Hi";
+//		test.writeAll();
+//		
+//		assertTrue(test.exists());
+//	}
 
 	@Test
 	public void testReadAll() throws IOException {
