@@ -8,7 +8,7 @@ apply from: '../asf.mvn.publish.gradle'
 buildDir = '../build/CyanComponents'
 
 group="org.asf.cyan"
-version="1.0.0.A3"
+version="1.0.0.A4"
 def authorname = "AerialWorks Software Foundation"
 
 sourceCompatibility = '1.9'
