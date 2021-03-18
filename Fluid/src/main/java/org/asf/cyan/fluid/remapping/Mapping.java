@@ -9,10 +9,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
-import org.asf.cyan.api.config.CCFGConfigGenerator;
 import org.asf.cyan.api.config.Configuration;
 import org.asf.cyan.api.config.annotations.OptionalEntry;
-import org.asf.cyan.api.config.serializing.ObjectSerializer;
 import org.asf.cyan.fluid.Fluid;
 
 public class Mapping<T extends Configuration<T>> extends Configuration<T> {
@@ -62,18 +60,6 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 
 	public MAPTYPE getMappingType() {
 		return mappingType;
-	}
-
-	/**
-	 * Temporary CCFG Generator for the FLUID API, until the CCFG API is properly
-	 * implemented, use this (FIXME)
-	 * 
-	 * @return CCFG-configuration
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public String toString() {
-		return ObjectSerializer.getCCFGString(this, new CCFGConfigGenerator<T>((T) this, true));
 	}
 
 	/**

@@ -153,11 +153,6 @@ public class CyanIDEWrapper {
 		public String login = "";
 
 		@Override
-		public String toString() {
-			return ObjectSerializer.getCCFGString(this, new CCFGConfigGenerator<AuthStorage>(this, true)); // FIXME
-		}
-
-		@Override
 		public String filename() {
 			return null;
 		}

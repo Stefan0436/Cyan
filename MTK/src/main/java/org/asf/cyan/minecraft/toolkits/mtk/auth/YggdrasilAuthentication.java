@@ -43,11 +43,6 @@ public class YggdrasilAuthentication {
 		public String userName;
 
 		@Override
-		public String toString() {
-			return ObjectSerializer.getCCFGString(this, new CCFGConfigGenerator<AuthHolder>(this, true)); // FIXME
-		}
-
-		@Override
 		public String filename() {
 			return null;
 		}
