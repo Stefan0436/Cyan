@@ -481,7 +481,7 @@ def doInitializeASFMVNPublish(def proj) {
 					}
 				}
 			}
-			tasks.getByPath(":"+proj.name+":publishMavenJava${id}PublicationToMaven2Repository").dependsOn "prePublishMavenJava${id}"
+			tasks.getByPath(":" + proj.name + ":publishMavenJava${id}PublicationToMaven2Repository").dependsOn "prePublishMavenJava${id}"
 		}
 	}
 }
