@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-import org.asf.cyan.api.config.serializing.internal.Splitter;
-
 /**
  * 
  * CQ - CCFG Interface for the command line
@@ -260,7 +258,7 @@ public class CqMain {
 	private static String serialize(Object value, boolean raw, int indent, boolean view) {
 		String outputTxt = "";
 		if (value instanceof Configuration<?>) {
-			CCFGConfigGenerator serializer = new CCFGConfigGenerator((Configuration) value, true);
+			CCFGConfigGenerator serializer = new CCFGConfigGenerator((Configuration) value, true, null);
 			StringBuilder out = new StringBuilder();
 			if (!raw) {
 				out.append("{");
