@@ -22,6 +22,11 @@ public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 	
 	public HashMap<String, String> changelogs = new HashMap<String, String>();
 	public HashMap<String, String> allVersions = new HashMap<String, String>();
+	public HashMap<String, String> byGameVersions = new HashMap<String, String>();
+	
+	public HashMap<String, String> forgeSupport = new HashMap<String, String>();
+	public HashMap<String, String> fabricSupport = new HashMap<String, String>();
+	public HashMap<String, String> paperSupport = new HashMap<String, String>();
 	
 	public CyanUpdateInfo(String content) {
 		readAll(content);
