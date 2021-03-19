@@ -19,3 +19,15 @@ ${allcyan}
 changelogs> {
 ${allcyanchangelog}
 }
+
+byGameVersions> {
+${cyangameversions}}
+
+forgeSupport> {
+${cyanforgesupportversions}}
+
+fabricSupport> {
+${cyanfabricsupportversions}}
+
+paperSupport> {
+${cyanpapersupportversions}}

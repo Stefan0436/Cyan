@@ -47,7 +47,12 @@ public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 
 	public HashMap<String, String> changelogs = new HashMap<String, String>();
 	public HashMap<String, String> allVersions = new HashMap<String, String>();
-
+	public HashMap<String, String> byGameVersions = new HashMap<String, String>();
+	
+	public HashMap<String, String> forgeSupport = new HashMap<String, String>();
+	public HashMap<String, String> fabricSupport = new HashMap<String, String>();
+	public HashMap<String, String> paperSupport = new HashMap<String, String>();
+	
 	public CyanUpdateInfo(String content) {
 		readAll(content);
 	}
@@ -82,6 +87,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonParser
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import com.google.gson.JsonArray
 
 import org.asf.cyan.cornflower.gradle.Cornflower
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftModdingToolkit
@@ -693,6 +699,13 @@ createEclipseLaunches.finalizedBy createObfusLaunch
 createEclipseLaunches.finalizedBy createDeobfLaunch
 
 def mappingsVersion=minecraft
+def bootlibs = ["javassist", "reflections"]
+def libnames = []
+def remotelibs = new HashMap<String, URL>()
+def filepaths = new HashMap<String, Path>()
+
+String cyanclasspath = ""
+String bootclasspath = ""
 
 if (!modloader.equals("")) {
 	if (modloader.startsWith("forge-")) {
@@ -1009,12 +1022,21 @@ processResources {
 	def lts = ""
 	def allcyan = ""
 	def allcyanchangelog = ""
-
+	def byGameVersions = ""
+	def cyanforgesupportversions = ""
+	def cyanfabricsupportversions = ""
+	def cyanpapersupportversions = ""
+	
 	def lateststable = ""
 	def latestalpha = ""
 	def latestbeta = ""
 	def latestpreview = ""
-
+	
+	HashMap<String, String> gameVersions = new HashMap<String, String>(); 
+	HashMap<String, String> forgeSupportVersions = new HashMap<String, String>();
+	HashMap<String, String> fabricSupportVersions = new HashMap<String, String>();
+	HashMap<String, String> paperSupportVersions = new HashMap<String, String>(); 
+	
 	try {
 		StringBuilder conf = new StringBuilder();
 		URL u = new URL(useurl + infoPath);
@@ -1042,6 +1064,26 @@ processResources {
 				allcyanchangelog += "    $key> '${val}'\n"
 			}
 		}
+		
+		for (String key : info.byGameVersions.keySet()) {
+			def val = info.byGameVersions.get(key).replaceAll("\n", "\n    ")
+			gameVersions.put(key, val)
+		}
+		
+		for (String key : info.forgeSupport.keySet()) {
+			def val = info.forgeSupport.get(key).replaceAll("\n", "\n    ")
+			forgeSupportVersions.put(key, val)
+		}
+		
+		for (String key : info.fabricSupport.keySet()) {
+			def val = info.fabricSupport.get(key).replaceAll("\n", "\n    ")
+			fabricSupportVersions.put(key, val)
+		}
+		
+		for (String key : info.paperSupport.keySet()) {
+			def val = info.paperSupport.get(key).replaceAll("\n", "\n    ")
+			paperSupportVersions.put(key, val)
+		}
 
 		for (def ltsver : info.longTermSupportVersions) {
 			if (ltsver.equals(cyanversion)) continue
@@ -1055,6 +1097,206 @@ processResources {
 	} catch (IOException e) {
 		logger.warn("WARNING: Failed to download update information file from: "+useurl + infoPath)
 		logger.warn("You will be missing CYAN version information entries!")
+	}	
+	
+	def paper = null
+	def paperURL = new URL("https://papermc.io/api/v2/projects/paper/versions/" + minecraft + "/")
+	
+	try {
+		InputStreamReader rd = new InputStreamReader(paperURL.openStream())
+		JsonObject data = JsonParser.parseReader(rd)
+		JsonArray builds = data.get("builds").getAsJsonArray()
+		paper = builds.get(builds.size() - 1).getAsString()
+		rd.close()
+	} catch (Exception e) {
+		logger.warn("WARNING: Failed to download update paper information from: " + paperURL)
+		logger.warn("You will be missing IMPORTANT CYAN version information entries!")		
+	}
+	
+	if (project.hasProperty("removeFromLatest")) {
+		for (String key : gameVersions.keySet()) {
+			String val = gameVersions.get(key)
+			if (val.equals(cyanversion) && key.endsWith("-latest")) {
+				gameVersions.remove(key)
+				break
+			}
+		}
+		for (String key : paperSupportVersions.keySet()) {
+			String val = paperSupportVersions.get(key)
+			if (val.equals(cyanversion) && (key.endsWith("-latest") || key.equals("latest"))) {
+				paperSupportVersions.remove(key)
+				break
+			}
+		}
+		for (String key : forgeSupportVersions.keySet()) {
+			String val = forgeSupportVersions.get(key)
+			if (val.equals(cyanversion) && key.endsWith("-latest")) {
+				forgeSupportVersions.remove(key)
+				break
+			}
+		}
+		for (String key : fabricSupportVersions.keySet()) {
+			String val = fabricSupportVersions.get(key)
+			if (val.equals(cyanversion) && key.endsWith("-latest")) {
+				fabricSupportVersions.remove(key)
+				break
+			}
+		}
+	}
+	
+	if (project.hasProperty("removeFromStable")) {
+		for (String key : gameVersions.keySet()) {
+			String val = gameVersions.get(key)
+			if (val.equals(cyanversion) && key.endsWith("-stable")) {
+				gameVersions.remove(key)
+				break
+			}
+		}
+		for (String key : paperSupportVersions.keySet()) {
+			String val = paperSupportVersions.get(key)
+			if (val.equals(cyanversion) && (key.endsWith("-stable") || key.equals("stable"))) {
+				paperSupportVersions.remove(key)
+				break
+			}
+		}
+		for (String key : forgeSupportVersions.keySet()) {
+			String val = forgeSupportVersions.get(key)
+			if (val.equals(cyanversion) && key.endsWith("-stable")) {
+				forgeSupportVersions.remove(key)
+				break
+			}
+		}
+		for (String key : fabricSupportVersions.keySet()) {
+			String val = fabricSupportVersions.get(key)
+			if (val.equals(cyanversion) && key.endsWith("-stable")) {
+				fabricSupportVersions.remove(key)
+				break
+			}
+		}
+	}
+	
+	def loaderversion = null;
+	if (!modloader.equals("")) {
+		if (modloader.startsWith("forge-")) {
+			loaderversion = modloader.substring("forge-".length())
+		} else if (modloader.startsWith("fabric-loader-")) {
+			loaderversion = modloader.substring("fabric-loader-".length())
+		}  else if (modloader.startsWith("paper-")) {
+			loaderversion = modloader.substring("paper-".length())
+		}
+	}
+	
+	if (project.hasProperty("removeFromTesting")) {
+		for (String key : gameVersions.keySet()) {
+			String val = gameVersions.get(key)
+			if (val.equals(cyanversion) && key.endsWith("-testing")) {
+				gameVersions.remove(key)
+				break
+			}
+		}
+		for (String key : paperSupportVersions.keySet()) {
+			String val = paperSupportVersions.get(key)
+			if (val.equals(cyanversion) && (key.endsWith("-testing") || key.equals("testing"))) {
+				paperSupportVersions.remove(key)
+				break
+			}
+		}
+		for (String key : forgeSupportVersions.keySet()) {
+			String val = forgeSupportVersions.get(key)
+			if (val.equals(cyanversion) && key.endsWith("-testing")) {
+				forgeSupportVersions.remove(key)
+				break
+			}
+		}
+		for (String key : fabricSupportVersions.keySet()) {
+			String val = fabricSupportVersions.get(key)
+			if (val.equals(cyanversion) && key.endsWith("-testing")) {
+				fabricSupportVersions.remove(key)
+				break
+			}
+		}
+	} else {
+		gameVersions.put(minecraft + "-testing", cyanversion)
+		
+		if ((!project.hasProperty("paperUnusable") || project.hasProperty("paperTesting")) && paper != null) {
+			paperSupportVersions.put(paper + "-testing", cyanversion)
+			paperSupportVersions.put("testing", cyanversion)
+		}
+		
+		if (!modloader.equals("")) {
+			if (modloader.startsWith("forge-")) {
+				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-testing", cyanversion);
+			} else if (modloader.startsWith("fabric-loader-")) {
+				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-testing", cyanversion);
+			}  else if (modloader.startsWith("paper-")) {
+				paperSupportVersions.put(minecraft + "-" + loaderversion + "-testing", cyanversion);
+			}
+		}
+	}
+	
+	if (project.hasProperty("addToLatest")) {
+		gameVersions.put(minecraft + "-latest", cyanversion)
+		
+		if (!modloader.equals("")) {
+			if (modloader.startsWith("forge-")) {
+				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
+			} else if (modloader.startsWith("fabric-loader-")) {
+				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);				
+			}  else if (modloader.startsWith("paper-")) {
+				paperSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);				
+			}
+		}
+		
+		if (!project.hasProperty("paperUnstable") && paper != null) {
+			paperSupportVersions.put(paper + "-latest", cyanversion)
+			paperSupportVersions.put("latest", cyanversion)
+		}
+	} else if (project.hasProperty("addToStable")) {
+		gameVersions.put(minecraft + "-stable", cyanversion)
+		gameVersions.put(minecraft + "-stable", cyanversion)
+		
+		if (!modloader.equals("")) {
+			if (modloader.startsWith("forge-")) {
+				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
+				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-stable", cyanversion);
+			} else if (modloader.startsWith("fabric-loader-")) {
+				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
+				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-stable", cyanversion);
+			}  else if (modloader.startsWith("paper-")) {
+				paperSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
+				paperSupportVersions.put(minecraft + "-" + loaderversion + "-stable", cyanversion);
+			}
+		}
+		
+		if (!project.hasProperty("paperUnstable") && paper != null) {
+			paperSupportVersions.put(paper + "-stable", cyanversion)
+			paperSupportVersions.put(paper + "-latest", cyanversion)
+			paperSupportVersions.put("stable", cyanversion)
+			paperSupportVersions.put("latest", cyanversion)
+		} else if (!project.hasProperty("paperUnusable") && paper != null) {
+			paperSupportVersions.put(paper + "-latest", cyanversion)			
+			paperSupportVersions.put("latest", cyanversion)
+		}
+	}
+	
+	for (String key : gameVersions.keySet()) {
+		def val = gameVersions.get(key).replaceAll("\n", "\n    ")
+		byGameVersions += "    $key> '${val}'\n"
+	}
+	
+	for (String key : forgeSupportVersions.keySet()) {
+		def val = forgeSupportVersions.get(key).replaceAll("\n", "\n    ")
+		cyanforgesupportversions += "    $key> '${val}'\n"
+	}
+	
+	for (String key : fabricSupportVersions.keySet()) {
+		def val = fabricSupportVersions.get(key).replaceAll("\n", "\n    ")
+		cyanfabricsupportversions += "    $key> '${val}'\n"
+	}
+
+	for (String key : paperSupportVersions.keySet()) {
+		def val = paperSupportVersions.get(key).replaceAll("\n", "\n    ")
+		cyanpapersupportversions += "    $key> '${val}'\n"
 	}
 
 	if (project.hasProperty("LTS") && project.getProperty("LTS").equals("true")) {
@@ -1137,6 +1379,10 @@ processResources {
 	inputs.property "lts", "${lts}"
 	inputs.property "allcyanchangelog", "${allcyanchangelog}"
 	inputs.property "agentjar", project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
+	inputs.property "byGameVersions", "${byGameVersions}"
+	inputs.property "cyanforgesupportversions", "${cyanforgesupportversions}"
+	inputs.property "cyanfabricsupportversions", "${cyanfabricsupportversions}"
+	inputs.property "cyanpapersupportversions", "${cyanpapersupportversions}"
 
 	def projbins = ""
 	def resources = ""
@@ -1215,7 +1461,11 @@ processResources {
 		"groupslashed": project.group.replaceAll("\\.", "/"),
 		"classwrapperclient": "${classWrapperClient}",
 		"allcyanchangelog": "${allcyanchangelog}",
-		"mappingsVersion": "${mappingsVersion}"
+		"mappingsVersion": "${mappingsVersion}",
+		"cyangameversions": "${byGameVersions}",
+		"cyanforgesupportversions": "${cyanforgesupportversions}",
+		"cyanfabricsupportversions": "${cyanfabricsupportversions}",
+		"cyanpapersupportversions": "${cyanpapersupportversions}"
 	]
 
 	for (def proj : project(":").childProjects) {
@@ -1351,13 +1601,6 @@ task serverJar (type: Jar, dependsOn: build) {
 	exclude "**/log4j2-ide.xml"
 	rename "log4j2-server.xml", "log4j2.xml"
 	includeEmptyDirs = false
-
-	String cyanclasspath = ""
-	String bootclasspath = ""
-	def bootlibs = ["javassist", "reflections"]
-	def libnames = []
-	def remotelibs = new HashMap<String, URL>()
-	def filepaths = new HashMap<String, Path>()
 
 	def loadfirst = ["gson"]
 	if (!modloader.equals("")) {
