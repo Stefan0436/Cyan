@@ -75,6 +75,8 @@ jar {
 }
 
 processResources {
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+	
 	def useurl = fallback_url
 	if (fallback_url.equals(""))
 		useurl = backup_url
