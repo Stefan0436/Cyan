@@ -17,6 +17,9 @@ public class TestingConfig extends Configuration<TestingConfig> {
 	public String folder() {
 		return "test1";
 	}
+	
+	public String[] tests = new String[] {"test1", "test2"};
+	public String[] tests2 = new String[] {};
 
 	@Comment(value = "Testing", afterValue = true)
 	@Comment("Testing parameter")

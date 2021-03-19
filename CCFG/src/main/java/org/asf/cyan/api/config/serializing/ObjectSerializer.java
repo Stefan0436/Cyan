@@ -740,7 +740,6 @@ public class ObjectSerializer {
 		}
 		output = builder.toString();
 		if (values.length == 0 && (Map.class.isAssignableFrom(type) || Configuration.class.isAssignableFrom(type))) {
-			output = output.substring(0, output.length() - 1);
 			suffix = suffix.substring(1);
 			if (lastWasEmptyMap && !lastWasCommented && (aPrefix == null || aPrefix.isEmpty())) {
 				output = output.substring(1);
