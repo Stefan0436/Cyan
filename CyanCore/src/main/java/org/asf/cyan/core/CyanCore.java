@@ -273,7 +273,7 @@ public class CyanCore extends CyanComponent {
 		info("Searching for Cyan Components in loaded jars...");
 		trace("FIND all classes annotated with CYAN_COMPONENT, caller: " + CallTrace.traceCallName());
 		Set<Class<?>> classes = reflections.getTypesAnnotatedWith(CYAN_COMPONENT.class);
-		for (Class<?> cls : classes) {
+		for (Class<?> cls : new ArrayList<Class<?>>(classes)) {
 			String tName = cls.getTypeName();
 			if (!tName.startsWith("org.asf.cyan.") && !tName.equals("org.asf.cyan.")
 					&& !allowedPackages.stream().anyMatch(t -> t.equals(tName) || t.startsWith(tName + "."))) {
