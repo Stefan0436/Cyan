@@ -703,6 +703,9 @@ def libnames = []
 def remotelibs = new HashMap<String, URL>()
 def filepaths = new HashMap<String, Path>()
 
+def fabricloader = ""
+def fabricintermediary = ""
+
 def loadfirst = ["gson"]
 if (!modloader.equals("")) {
 	if (modloader.startsWith("forge-")) {
@@ -868,7 +871,8 @@ if (!modloader.equals("")) {
 		def fabricversion = modloader.substring("fabric-loader-".length())
 		URL mdataURL = new URL("https://meta.fabricmc.net/v2/versions/loader/"+minecraft+"/"+fabricversion)
 		InputStreamReader rd = new InputStreamReader(mdataURL.openStream())
-		JsonObject metadata = JsonParser.parseReader(rd)
+		JsonElement ele = JsonParser.parseReader(rd)
+		JsonObject metadata = (ele.isJsonArray() ? ele.getAsJsonArray().get(0).getAsJsonObject() : ele.getAsJsonObject())
 		rd.close()
 
 		for (JsonElement dependency : metadata.get("launcherMeta").getAsJsonObject().get("libraries").getAsJsonObject().get("common").getAsJsonArray()) {
@@ -965,7 +969,7 @@ if (!modloader.equals("")) {
 			remotelibs.put(lib, new URL(url))
 
 			cyanclasspath += lib
-			ext.fabricloader = lib
+			fabricloader = lib
 		}
 
 		information = metadata.get("intermediary").getAsJsonObject().get("maven").getAsString().split(":")
@@ -995,7 +999,7 @@ if (!modloader.equals("")) {
 			lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
 			remotelibs.put(lib, new URL(url))
 
-			ext.fabricintermediary = lib
+			fabricintermediary = lib
 		}
 
 		println "Done."
@@ -1750,9 +1754,9 @@ task serverJar (type: Jar, dependsOn: build) {
 		if (modloader.startsWith("fabric-loader-")) {
 			println " |"
 			println " | Merging fabric loader and intermediary jars..."
-			File loader = new File(dest, ext.fabricloader)
-			File intermediary = new File(dest, ext.fabricintermediary)
-			File output = new File(dest, ext.fabricloader+".tmp")
+			File loader = new File(dest, fabricloader)
+			File intermediary = new File(dest, fabricintermediary)
+			File output = new File(dest, fabricloader+".tmp")
 			if (output.exists()) output.delete()
 
 			ZipOutputStream strm = new ZipOutputStream(new FileOutputStream(output))

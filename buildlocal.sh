@@ -53,7 +53,7 @@ if [ "$modloader" != "" ]; then
         extraargs+=" -PoverrideLaunchWrapperClient=CyanForgeClientWrapper -PoverrideLaunchWrapperServer=CyanForgeServerWrapper -PsetModLoader=\"forge-$forgeversion\" -PsetInheritsFromVersion=\"$gameversion-forge-$forgeversion\""
         ;;
         fabric)
-        if [ "$modloaderversion" == "" ]; then fabricversion="$(curl "https://meta.fabricmc.net/v2/versions/ /$gameversion" -s --output - | jq ".[0].loader.version" -r)"
+        if [ "$modloaderversion" == "" ]; then fabricversion="$(curl "https://meta.fabricmc.net/v2/versions/loader/$gameversion" -s --output - | jq ".[0].loader.version" -r)"
         else fabricversion=$modloaderversion; fi
         extraargs+=" -PoverrideLaunchWrapperClient=CyanFabricClientWrapper -PoverrideLaunchWrapperServer=CyanFabricServerWrapper -PsetModLoader=\"fabric-loader-$fabricversion\" -PsetInheritsFromVersion=\"fabric-loader-$fabricversion-$gameversion\""
         ;;
