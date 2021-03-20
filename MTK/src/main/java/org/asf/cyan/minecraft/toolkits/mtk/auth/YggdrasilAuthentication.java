@@ -10,9 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.UUID;
 
-import org.asf.cyan.api.config.CCFGConfigGenerator;
 import org.asf.cyan.api.config.Configuration;
-import org.asf.cyan.api.config.serializing.ObjectSerializer;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftToolkit;
 
