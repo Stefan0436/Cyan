@@ -33,7 +33,7 @@ public class CrashReportModification {
 	private final Throwable exception = null;
 
 	@TargetName(target = "getDetails")
-	@InjectAt(location = InjectLocation.HEAD, targetCall = "append(java.lang.String)", targetOwner = "java.lang.StringBuilder", offset = 8)
+	@InjectAt(location = InjectLocation.TAIL, targetCall = "append(java.lang.String)", targetOwner = "java.lang.StringBuilder", offset = 1)
 	public void getDetails1(StringBuilder var1) {
 		if (uncategorizedStackTrace != null && uncategorizedStackTrace.length != 0) {
 			areCyanTransformersPresent = false;
@@ -72,13 +72,13 @@ public class CrashReportModification {
 							+ new File(MinecraftInstallationToolkit.getMinecraftDirectory(),
 									"transformer-backtrace/classes").getCanonicalPath());
 					var1.append("\n");
-					var1.append("\tThe dump will be deleted on next " + Modloader.getModloaderName().toUpperCase()
-							+ "  startup.");
+					var1.append("\tThe dump will be deleted on next "
+							+ Modloader.getModloader().getSimpleName().toUpperCase() + " startup.");
 				} catch (Exception e) {
-					var1.append("Error:\n\tCould not dump FLUID transformer metadata, an exception was thrown: "
+					var1.append("Failure:\n\tCould not dump FLUID transformer metadata, an exception was thrown: "
 							+ e.getClass().getTypeName() + ": " + e.getMessage()).append("\n");
 					for (StackTraceElement ele : e.getStackTrace()) {
-						var1.append("\t").append("at ").append(ele).append("\n");
+						var1.append("\t- ").append("at ").append(ele).append("\n");
 					}
 				}
 				var1.append("\n");

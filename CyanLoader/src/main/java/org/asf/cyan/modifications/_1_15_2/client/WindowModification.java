@@ -23,7 +23,6 @@ public class WindowModification {
 	@InjectAt(location = InjectLocation.HEAD)
 	public void setTitle(String title) {
 		title = title + " - " + Modloader.getModloaderName() + " - Version " + Modloader.getModloaderVersion();
-		throw new RuntimeException("test");
 	}
 
 	public String getErrorSection() {

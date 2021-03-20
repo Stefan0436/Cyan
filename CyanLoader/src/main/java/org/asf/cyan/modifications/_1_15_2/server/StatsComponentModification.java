@@ -56,7 +56,7 @@ public class StatsComponentModification {
 		else
 			msgs[3] = "Online players: ? / ? (loading)";
 
-		msgs[6] = "Loaded " + Modloader.getModloaderName() + " Mods: "
+		msgs[6] = "Loaded " + Modloader.getModloader().getSimpleName() + " Mods: "
 				+ (Modloader.getModloader().getLoadedMods().length
 						+ Modloader.getModloader().getLoadedCoremods().length)
 				+ " / " + Modloader.getModloader().getKnownModsCount();

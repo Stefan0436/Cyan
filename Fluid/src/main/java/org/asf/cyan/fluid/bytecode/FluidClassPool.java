@@ -241,7 +241,9 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 				return cls;
 		}
 
-		for (IClassSourceProvider<?> provider : sources) {
+		ArrayList<ClassNode> backupOldNames = new ArrayList<ClassNode>(oldNames.keySet()); 
+		ArrayList<IClassSourceProvider<?>> backupProviders = new ArrayList<IClassSourceProvider<?>>(sources);
+		for (IClassSourceProvider<?> provider : backupProviders) {
 			try {
 				ClassNode node = new ClassNode();
 				InputStream strm = provider.getStream(name);
@@ -257,7 +259,7 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 				classes.add(node);
 
 				String oldname = name;
-				for (Object t1 : oldNames.keySet().toArray()) {
+				for (Object t1 : backupOldNames) {
 					ClassNode t = (ClassNode) t1;
 					if (t.name.equals(nameFinal)) {
 						oldname = oldNames.get(t);

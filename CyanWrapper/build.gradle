@@ -703,8 +703,56 @@ def libnames = []
 def remotelibs = new HashMap<String, URL>()
 def filepaths = new HashMap<String, Path>()
 
+def loadfirst = ["gson"]
+if (!modloader.equals("")) {
+	if (modloader.startsWith("forge-")) {
+		loadfirst.add("log4j-core")
+		loadfirst.add("log4j-api")
+	}
+}
+
 String cyanclasspath = ""
 String bootclasspath = ""
+
+libraries.forEach { k, v ->
+	String[] information = k.split(":")
+	String group = ""
+	String name = information[0]
+	String versionstr = ""
+
+	if (information.length == 3) {
+		group = information[0]
+		name = information[1]
+		versionstr = information[2]
+	} else if (information.length >= 2) {
+		name = information[0]
+		versionstr = information[1]
+	}
+
+	if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) }) && loadfirst.stream().anyMatch({ t -> t.equalsIgnoreCase(name) })) {
+		if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
+		libnames.add(group+"."+name)
+
+		def lib = "libraries/"+group.replaceAll("\\.", "/")
+
+		if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
+		lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
+		filepaths.put(lib, v.toPath())
+
+		cyanclasspath += lib
+	} else if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) }) && bootlibs.stream().anyMatch({ t -> t.equalsIgnoreCase(name) })) {
+		if (!bootclasspath.isEmpty()) bootclasspath+=" "
+		libnames.add(group+"."+name)
+
+		def lib = "libraries/"+group.replaceAll("\\.", "/")
+
+		if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
+		lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
+		filepaths.put(lib, v.toPath())
+
+		bootclasspath += lib
+	}
+}
 
 if (!modloader.equals("")) {
 	if (modloader.startsWith("forge-")) {
@@ -1600,54 +1648,6 @@ task serverJar (type: Jar, dependsOn: build) {
 	exclude "**/log4j2-ide.xml"
 	rename "log4j2-server.xml", "log4j2.xml"
 	includeEmptyDirs = false
-
-	def loadfirst = ["gson"]
-	if (!modloader.equals("")) {
-		if (modloader.startsWith("forge-")) {
-			loadfirst.add("log4j-core")
-			loadfirst.add("log4j-api")
-		}
-	}
-
-	libraries.forEach { k, v ->
-		String[] information = k.split(":")
-		String group = ""
-		String name = information[0]
-		String versionstr = ""
-
-		if (information.length == 3) {
-			group = information[0]
-			name = information[1]
-			versionstr = information[2]
-		} else if (information.length >= 2) {
-			name = information[0]
-			versionstr = information[1]
-		}
-
-		if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) }) && loadfirst.stream().anyMatch({ t -> t.equalsIgnoreCase(name) })) {
-			if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
-			libnames.add(group+"."+name)
-
-			def lib = "libraries/"+group.replaceAll("\\.", "/")
-
-			if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
-			lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
-			filepaths.put(lib, v.toPath())
-
-			cyanclasspath += lib
-		} else if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) }) && bootlibs.stream().anyMatch({ t -> t.equalsIgnoreCase(name) })) {
-			if (!bootclasspath.isEmpty()) bootclasspath+=" "
-			libnames.add(group+"."+name)
-
-			def lib = "libraries/"+group.replaceAll("\\.", "/")
-
-			if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
-			lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
-			filepaths.put(lib, v.toPath())
-
-			bootclasspath += lib
-		}
-	}
 
 	if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
 	cyanclasspath+="vanilla-server.jar"
