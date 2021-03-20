@@ -31,10 +31,10 @@ Upcoming Cyan Update: Alpha 11, changes:
  - Implemented lambda support (FLUID A15)
  - Created a FLUID transformer metadata API (FLUID A15, the crash report uses this)
  - Implemented IINC support (and fixed arrays by doing so) (FLUID A15)
- - Versioning API (CyanUtil A3) -- TODO
+ - Versioning API (CyanUtil A4) -- TODO
  - PseudoCode Bytecode Exporter API (FLUID A15)
  - Reporting API (CyanUtil A3)
- - SideOnly, PlatformOnly, PlatformExclude and VersionRegex annotations for FLUID transformers (CyanUtil A3) -- TODO
+ - SideOnly, PlatformOnly, PlatformExclude and VersionRegex annotations for FLUID transformers (CyanUtil A4) -- TODO
  - CyanUtil now delivers a modloader API, CyanLoader is such an implementation (CyanUtil A3)
  - Fixed target calls (FLUID A15, fixed forge support in the process)
  - FLUID now searches superclasses and interfaces for method injection, if possible (FLUID A15)
