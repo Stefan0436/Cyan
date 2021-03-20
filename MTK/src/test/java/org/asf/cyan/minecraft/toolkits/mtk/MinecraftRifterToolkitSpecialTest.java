@@ -228,14 +228,15 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 					new URL("file:////tmp"), OffsetDateTime.now());
 		}
 
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-mtktest", "spigot", info, GameSide.SERVER)) {
-			MinecraftMappingsToolkit.downloadYarnMappings(info, GameSide.SERVER);
-			MinecraftMappingsToolkit.saveMappingsToDisk("-mtktest", "spigot", info, GameSide.SERVER);
-		}
-
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(info, GameSide.SERVER)) {
 			MinecraftMappingsToolkit.downloadVanillaMappings(info, GameSide.SERVER);
 			MinecraftMappingsToolkit.saveMappingsToDisk(info, GameSide.SERVER);
+		}
+
+		Mapping<?> vanilla = MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER);
+		if (!MinecraftMappingsToolkit.areMappingsAvailable("-mtktest", "spigot", info, GameSide.SERVER)) {
+			MinecraftMappingsToolkit.downloadSpigotMappings(vanilla, info);
+			MinecraftMappingsToolkit.saveMappingsToDisk("-mtktest", "spigot", info, GameSide.SERVER);
 		}
 
 		MinecraftMappingsToolkit.loadMappings("-mtktest", "spigot", info, GameSide.SERVER);
