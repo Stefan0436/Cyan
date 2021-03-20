@@ -89,7 +89,7 @@ class CompatibilityMappings extends VanillaMappings {
 					m.obfuscated = mapProperty(combine, mapping.obfuscated, m.obfuscated, true);
 				} else if (m.mappingType == MAPTYPE.METHOD) {
 					Mapping<?> argMap = tMap.mappings[ind];
-					boolean remap = alwaysAllowRemap;
+					boolean remap = true;
 					String map = mapMethod(combine, mapping.obfuscated, m.obfuscated, true, argMap.argumentTypes);
 					if (map.equals(m.obfuscated) && !map.equals("<init>") && !map.equals("<clinit>")
 							&& !argMap.name.equals(argMap.obfuscated)) {
@@ -105,9 +105,9 @@ class CompatibilityMappings extends VanillaMappings {
 								+ "), obfuscated: " + mapping.obfuscated + "." + map);
 						missingMappings = missingMappings.add(BigInteger.ONE);
 						
-						remap = true;
+						remap = false;
 					}
-					if (remap) {
+					if (remap || alwaysAllowRemap) {
 						int i = 0;
 						for (String type : m.argumentTypes) {
 							Mapping<?> tmap = mapClassToMapping(type, t2 -> true, true);
