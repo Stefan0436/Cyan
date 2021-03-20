@@ -22,8 +22,7 @@ plugins {
 apply plugin: 'eclipse'
 apply plugin: 'org.asf.cyan.cornflower'
 
-project(":").childProjects.each {
-	proj ->
+project(":").childProjects.each { proj ->
 	if (!proj.value.name.equals(project.name)) {
 		project.evaluationDependsOn ":"+proj.value.name
 	}
