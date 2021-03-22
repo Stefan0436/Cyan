@@ -1,0 +1,22 @@
+plugins {
+	id 'maven-publish'
+	id "io.github.amarcinkowski.eclipse-php" version "1.3.0"
+}
+
+version = "1.0.0.A1"
+group = "org.asf.cyan"
+
+def authorname = "AerialWorks Software Development"
+
+apply plugin: 'eclipse'
+buildDir = '../build/WebAPI'
+
+repositories {
+    mavenCentral()
+    jcenter()
+	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
+}
+
+task build(type: Copy) {
+    
+}
