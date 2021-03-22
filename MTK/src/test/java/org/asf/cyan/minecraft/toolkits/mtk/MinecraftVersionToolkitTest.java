@@ -20,6 +20,7 @@ public class MinecraftVersionToolkitTest {
 	
 	public MinecraftVersionToolkitTest() {		
 		if (!CyanCore.isInitialized()) {
+			CyanCore.simpleInit();
 			MinecraftToolkit.initializeMTK();
 			CyanCore.initializeComponents();
 		}
