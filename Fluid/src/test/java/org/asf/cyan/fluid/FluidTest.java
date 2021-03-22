@@ -47,6 +47,7 @@ public class FluidTest extends CyanComponent {
 			pool.getClassNode("aac$a1")
 		};
 
+		TestCCImplementation.simpleInit();
 		DeobfuscationTargetMap mp = Fluid.createTargetMap(classes, pool, mappings);
 		Fluid.deobfuscate(classes, pool, mappings);
 		FluidMemberRemapper fluidmemberremapper = Fluid.createMemberRemapper(mp);

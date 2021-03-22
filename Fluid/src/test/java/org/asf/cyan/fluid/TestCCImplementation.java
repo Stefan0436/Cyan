@@ -10,10 +10,25 @@ import org.asf.cyan.fluid.implementation.CyanTransformerMetadata;
 
 public class TestCCImplementation extends CyanComponent {
 
+	private static boolean prepared = false;
+	private static TestCCImplementation impl;
+
+	public static void simpleInit() {
+		if (prepared)
+			return;
+		
+		impl = new TestCCImplementation();
+		impl.assignImplementation();
+		
+		prepared = true;
+	}
+
 	private static boolean init = false;
+
 	public static boolean isInitialized() {
 		return init;
 	}
+
 	protected static void initComponent() {
 		init = true;
 		try {
@@ -23,7 +38,7 @@ public class TestCCImplementation extends CyanComponent {
 			error("Failed to close FLUID!", e);
 		}
 	}
-	
+
 	@Override
 	protected void setupComponents() {
 		if (init)
@@ -41,28 +56,31 @@ public class TestCCImplementation extends CyanComponent {
 		} catch (IllegalStateException e) {
 			error("Failed to open FLUID!", e);
 		}
-		
+
 		trace("INITIALIZE all components, caller: " + CallTrace.traceCallName());
 		trace("CREATE ConfigurationBuilder instance, caller: " + CallTrace.traceCallName());
 	}
 
 	@Override
-	protected void finalizeComponents() {}
+	protected void finalizeComponents() {
+	}
 
 	@Override
 	protected Class<?>[] getComponentClasses() {
-		return new Class<?>[] { CyanTransformer.class, CyanTransformerMetadata.class, CyanBytecodeExporter.class, TestCCImplementation.class, CyanReportBuilder.class };
+		return new Class<?>[] { CyanTransformer.class, CyanTransformerMetadata.class, CyanBytecodeExporter.class,
+				TestCCImplementation.class, CyanReportBuilder.class };
 	}
-	
+
 	public static void setDebugLog() {
+		simpleInit();
 		if (LOG == null)
 			initLogger();
 		trace(CallTrace.traceCallName() + " set the log level to DEBUG.");
 		Configurator.setLevel("CYAN", Level.DEBUG);
 	}
-	
+
 	public static void initializeComponents() throws IllegalStateException {
-		TestCCImplementation impl = new TestCCImplementation();
+		simpleInit();
 		impl.initializeComponentClasses();
 	}
 
