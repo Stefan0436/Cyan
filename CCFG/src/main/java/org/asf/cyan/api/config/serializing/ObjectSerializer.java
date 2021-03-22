@@ -631,7 +631,8 @@ public class ObjectSerializer {
 				String v = serialize(d);
 				int length = Splitter.split(v, '\n').length;
 				if (first) {
-					builder.append(pref).append(toCCFGEntry(key, v, d.getClass(), action, true, wascommented, wasemtpy));
+					builder.append(pref)
+							.append(toCCFGEntry(key, v, d.getClass(), action, true, wascommented, wasemtpy));
 					first = false;
 				} else
 					builder.append(System.lineSeparator()).append(pref)
@@ -640,11 +641,11 @@ public class ObjectSerializer {
 				String suffix = action.processSuffix(key);
 				wascommented = (prefix != null && !prefix.isEmpty()) || (suffix != null && !suffix.isEmpty());
 				wasemtpy = false;
-				
+
 				if (Map.class.isAssignableFrom(d.getClass()) || Configuration.class.isAssignableFrom(d.getClass())) {
 					wasemtpy = length == 0;
 				}
-				
+
 				action.onAdd(key, v);
 			} catch (IOException e) {
 				action.error(e);
@@ -654,8 +655,10 @@ public class ObjectSerializer {
 		String aSuffix = action.processSuffix(null);
 		if (aSuffix != null) {
 			String newOut = "";
+
 			for (String line : Splitter.split(Replacer.removeChar(aSuffix, '\r'), '\n'))
 				newOut += System.lineSeparator() + pref + line;
+
 			builder.append(newOut);
 		}
 
@@ -690,7 +693,8 @@ public class ObjectSerializer {
 		String prefix = "";
 		String suffix = "";
 		if (aPrefix != null && !aPrefix.isEmpty()) {
-			output = (!firstEntry && !lastWasCommented ? System.lineSeparator() : "") + aPrefix + System.lineSeparator() + output;
+			output = (!firstEntry && !lastWasCommented ? System.lineSeparator() : "") + aPrefix + System.lineSeparator()
+					+ output;
 		} else if (!firstEntry && !lastWasCommented
 				&& (Map.class.isAssignableFrom(type) || Configuration.class.isAssignableFrom(type))) {
 			output = System.lineSeparator() + output;
@@ -720,7 +724,7 @@ public class ObjectSerializer {
 				suffix = "]" + aSuffix;
 			}
 		}
-		
+
 		if (aPrefix != null && !aPrefix.isEmpty()) {
 			suffix += System.lineSeparator();
 		}
@@ -741,9 +745,6 @@ public class ObjectSerializer {
 		output = builder.toString();
 		if (values.length == 0 && (Map.class.isAssignableFrom(type) || Configuration.class.isAssignableFrom(type))) {
 			suffix = suffix.substring(1);
-			if (lastWasEmptyMap && !lastWasCommented && (aPrefix == null || aPrefix.isEmpty())) {
-				output = output.substring(1);
-			}
 		}
 		output += suffix;
 
