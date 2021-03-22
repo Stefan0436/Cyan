@@ -363,10 +363,14 @@ public abstract class CyanComponent {
 
 	protected static void initLogger() throws UnsupportedOperationException {
 		if (LOG == null) {
-			LOG = (ExtendedLogger) LogManager.getLogger("CYAN");
+			LOG = (ExtendedLogger) LogManager.getLogger(getMainImplementation().getLoggerName());
 		} else {
 			throw new UnsupportedOperationException("Logger already initialized.");
 		}
+	}
+	
+	protected String getLoggerName() {
+		return "CYAN";
 	}
 
 	protected static ClassLoader agentloader;
