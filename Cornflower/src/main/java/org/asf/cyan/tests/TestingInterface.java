@@ -56,6 +56,7 @@ public class TestingInterface {
 		}
 		WriteLine("Loading the MTK...");
 		if (!CyanCore.isInitialized())  {
+			CyanCore.simpleInit();
 			System.clearProperty("log4j2.configurationFile");
 			MinecraftInstallationToolkit.setMinecraftDirectory(new File(mtkdir));
 			MinecraftToolkit.initializeMTK();

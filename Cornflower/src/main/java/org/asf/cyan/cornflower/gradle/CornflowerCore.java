@@ -35,6 +35,7 @@ public class CornflowerCore {
 		}
 		
 		if (!CyanCore.isInitialized()) {
+			CyanCore.simpleInit();
 			try {
 				MinecraftInstallationToolkit.setMinecraftDirectory(fld);
 			} catch (IOException e) {
