@@ -25,6 +25,10 @@ public class TestingConfig extends Configuration<TestingConfig> {
 	@Comment("Testing parameter")
 	public String testStr = "default";
 
+	@Comment(value = "Testing", afterValue = true)
+	@Comment("Testing parameter #2")
+	public String testStr2 = "test\n - test";
+
 	@OptionalEntry
 	@Comment("This is an optional entry")
 	@Comment("Second comment")
