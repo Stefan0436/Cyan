@@ -157,6 +157,7 @@ public class CyanCore extends CyanComponent {
 	 * Set log to debug
 	 */
 	public static void setDebugLog() {
+		simpleInit();
 		if (LOG == null)
 			initLogger();
 		trace(CallTrace.traceCallName() + " set the log level to DEBUG.");
@@ -167,6 +168,7 @@ public class CyanCore extends CyanComponent {
 	 * Set log to trace (prints even more than debug)
 	 */
 	public static void setTraceLog() {
+		simpleInit();
 		if (LOG == null)
 			initLogger();
 		trace(CallTrace.traceCallName() + " set the log level to TRACE.");
@@ -177,6 +179,7 @@ public class CyanCore extends CyanComponent {
 	 * Disable Cyan Logging (set to warnings only)
 	 */
 	public static void disableLog() {
+		simpleInit();
 		if (LOG == null)
 			initLogger();
 		trace(CallTrace.traceCallName() + " set the log level to WARN.");
@@ -187,6 +190,7 @@ public class CyanCore extends CyanComponent {
 	 * Set Cyan Logging to errors only
 	 */
 	public static void disableWarnLog() {
+		simpleInit();
 		if (LOG == null)
 			initLogger();
 		trace(CallTrace.traceCallName() + " set the log level to ERROR.");
@@ -197,6 +201,7 @@ public class CyanCore extends CyanComponent {
 	 * Set Cyan Logging to fatal errors only
 	 */
 	public static void disableError() {
+		simpleInit();
 		if (LOG == null)
 			initLogger();
 		trace(CallTrace.traceCallName() + " set the log level to FATAL.");
@@ -207,6 +212,7 @@ public class CyanCore extends CyanComponent {
 	 * Disable Cyan Logging completely
 	 */
 	public static void disableAllLog() {
+		simpleInit();
 		if (LOG == null)
 			initLogger();
 		trace(CallTrace.traceCallName() + " disabled logging.");
@@ -217,6 +223,7 @@ public class CyanCore extends CyanComponent {
 	 * Enable Cyan Logging (set level to INFO)
 	 */
 	public static void enableLog() {
+		simpleInit();
 		if (LOG == null)
 			initLogger();
 		trace(CallTrace.traceCallName() + " set the log level to INFO.");
