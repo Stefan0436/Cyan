@@ -7,10 +7,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A25'
-		classpath 'org.asf.cyan:CCFG:1.0.0.A3'
-		classpath 'com.google.code.gson:gson:2.8.6'
-		classpath group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A26'
 	}
 }
 
@@ -96,7 +93,7 @@ import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit
 import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender
 import org.asf.cyan.core.CyanCore
-import org.asf.cyan.api.cyanloader.CyanSide
+import org.asf.cyan.api.modloader.information.game.GameSide
 
 buildDir = '../build/Wrapper'
 
@@ -505,13 +502,13 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(minecraft)
 		if (!MinecraftInstallationToolkit.checkVersion(version))
 		MinecraftInstallationToolkit.downloadVersionAndLibraries(version)
-		if (MinecraftInstallationToolkit.getVersionJar(version, CyanSide.CLIENT) == null)
-		MinecraftInstallationToolkit.downloadVersionJar(version, CyanSide.CLIENT)
-		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, CyanSide.CLIENT)) {
-			MinecraftMappingsToolkit.downloadVanillaMappings(version, CyanSide.CLIENT)
-			MinecraftMappingsToolkit.saveMappingsToDisk(version, CyanSide.CLIENT)
+		if (MinecraftInstallationToolkit.getVersionJar(version, GameSide.CLIENT) == null)
+		MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.CLIENT)
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, GameSide.CLIENT)) {
+			MinecraftMappingsToolkit.downloadVanillaMappings(version, GameSide.CLIENT)
+			MinecraftMappingsToolkit.saveMappingsToDisk(version, GameSide.CLIENT)
 		}
-		MinecraftMappingsToolkit.loadMappings(version, CyanSide.CLIENT)
+		MinecraftMappingsToolkit.loadMappings(version, GameSide.CLIENT)
 		MinecraftInstallationToolkit.extractNatives(version)
 
 		mainClass project.group+".CyanIDEWrapper"
@@ -528,9 +525,9 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 			classpath proj.value
 		}
 
-		File jar = MinecraftModdingToolkit.deobfuscateJar(version, CyanSide.CLIENT)
+		File jar = MinecraftModdingToolkit.deobfuscateJar(version, GameSide.CLIENT)
 		classpath MinecraftInstallationToolkit.getLibraries(version)
-		sourceLookup MinecraftModdingToolkit.sourcesJar(version, CyanSide.CLIENT)
+		sourceLookup MinecraftModdingToolkit.sourcesJar(version, GameSide.CLIENT)
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "clients/cyan/"+minecraft)
 
@@ -558,8 +555,8 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(minecraft)
 		if (!MinecraftInstallationToolkit.checkVersion(version))
 		MinecraftInstallationToolkit.downloadVersionAndLibraries(version)
-		if (MinecraftInstallationToolkit.getVersionJar(version, CyanSide.CLIENT) == null)
-		MinecraftInstallationToolkit.downloadVersionJar(version, CyanSide.CLIENT)
+		if (MinecraftInstallationToolkit.getVersionJar(version, GameSide.CLIENT) == null)
+		MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.CLIENT)
 		MinecraftInstallationToolkit.extractNatives(version)
 
 		mainClass project.group+".CyanIDEWrapper"
@@ -576,7 +573,7 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 			classpath proj.value
 		}
 
-		File jar = MinecraftInstallationToolkit.getVersionJar(version, CyanSide.CLIENT)
+		File jar = MinecraftInstallationToolkit.getVersionJar(version, GameSide.CLIENT)
 		classpath MinecraftInstallationToolkit.getLibraries(version)
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "clients/cyan/"+minecraft)
@@ -604,13 +601,13 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 		MinecraftInstallationToolkit.setIDE()
 
 		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(minecraft)
-		if (MinecraftInstallationToolkit.getVersionJar(version, CyanSide.SERVER) == null)
-		MinecraftInstallationToolkit.downloadVersionJar(version, CyanSide.SERVER)
-		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, CyanSide.SERVER)) {
-			MinecraftMappingsToolkit.downloadVanillaMappings(version, CyanSide.SERVER)
-			MinecraftMappingsToolkit.saveMappingsToDisk(version, CyanSide.SERVER)
+		if (MinecraftInstallationToolkit.getVersionJar(version, GameSide.SERVER) == null)
+		MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.SERVER)
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, GameSide.SERVER)) {
+			MinecraftMappingsToolkit.downloadVanillaMappings(version, GameSide.SERVER)
+			MinecraftMappingsToolkit.saveMappingsToDisk(version, GameSide.SERVER)
 		}
-		MinecraftMappingsToolkit.loadMappings(version, CyanSide.SERVER)
+		MinecraftMappingsToolkit.loadMappings(version, GameSide.SERVER)
 
 		mainClass project.group+".CyanIDEWrapper"
 
@@ -626,8 +623,8 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 			classpath proj.value
 		}
 
-		File jar = MinecraftModdingToolkit.deobfuscateJar(version, CyanSide.SERVER)
-		sourceLookup MinecraftModdingToolkit.sourcesJar(version, CyanSide.SERVER)
+		File jar = MinecraftModdingToolkit.deobfuscateJar(version, GameSide.SERVER)
+		sourceLookup MinecraftModdingToolkit.sourcesJar(version, GameSide.SERVER)
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft)
 		if (!new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft).exists())
@@ -656,8 +653,8 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 		MinecraftInstallationToolkit.setIDE()
 
 		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(minecraft)
-		if (MinecraftInstallationToolkit.getVersionJar(version, CyanSide.SERVER) == null)
-		MinecraftInstallationToolkit.downloadVersionJar(version, CyanSide.SERVER)
+		if (MinecraftInstallationToolkit.getVersionJar(version, GameSide.SERVER) == null)
+		MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.SERVER)
 
 		mainClass project.group+".CyanIDEWrapper"
 
@@ -673,7 +670,7 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 			classpath proj.value
 		}
 
-		File jar = MinecraftInstallationToolkit.getVersionJar(version, CyanSide.SERVER)
+		File jar = MinecraftInstallationToolkit.getVersionJar(version, GameSide.SERVER)
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft)
 		if (!new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft).exists())
@@ -1371,11 +1368,11 @@ processResources {
 
 	if (project.hasProperty("addChangeLog")) {
 		def value = ""
-		for (String line : project.getProperty("addChangeLog").split("\\\\n")) {
+		def data = project.getProperty("addChangeLog").replace("\r", "").replace("\\n", "\n")
+		for (String line : data.split("\n")) {
 			if (!value.equals("")) value += "\n    "
 			value += line
 		}
-		value = value.replaceAll("\n", "\n    ")
 		allcyanchangelog += "    ${cyanversion}> '${value}'"
 	} else if (!allcyanchangelog.equals("")) allcyanchangelog = allcyanchangelog.substring(0, allcyanchangelog.length() - 1)
 
@@ -1797,7 +1794,7 @@ task serverJar (type: Jar, dependsOn: build) {
 
 		println " |"
 		println " | Downloading vanilla server..."
-		File server = org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit.downloadVersionJar(org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit.getLatestReleaseVersion(), org.asf.cyan.api.cyanloader.CyanSide.SERVER)
+		File server = org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit.downloadVersionJar(org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit.getLatestReleaseVersion(), org.asf.cyan.api.modloader.information.game.GameSide.SERVER)
 		if (new File(dest, "vanilla-server.jar").exists()) new File(dest, "vanilla-server.jar").delete()
 		println " +-- Installing vanilla server..."
 		Files.copy(server.toPath(), new File(dest, "vanilla-server.jar").toPath())
