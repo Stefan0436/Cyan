@@ -1,0 +1,10 @@
+{
+	"api": {
+		"version": "indev",
+		"applications": {
+			"cyan": {
+				"pretty_name": "Cyan Modloader"
+			}
+		}
+	}
+}

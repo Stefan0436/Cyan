@@ -1,0 +1,10 @@
+{
+	"api": {
+		"version": "${WebAPI.version}",
+		"applications": {
+			"cyan": {
+				
+			}
+		}
+	}
+}

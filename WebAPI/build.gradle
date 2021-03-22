@@ -1,7 +1,9 @@
 plugins {
 	id 'maven-publish'
-	id "io.github.amarcinkowski.eclipse-php" version "1.3.0"
+	id "io.github.amarcinkowski.eclipse-php" version "1.2.9"
 }
+
+apply from: "../config.gradle"
 
 version = "1.0.0.A1"
 group = "org.asf.cyan"
@@ -17,6 +19,48 @@ repositories {
 	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
 }
 
-task build(type: Copy) {
-    
+task processResources(type: ProcessResources) {
+	from "src/main/resources"
+	into new File(buildDir, "resources")
+	
+	HashMap<String, ?> props = new HashMap<String, ?>();
+
+	for (def proj : project(":").childProjects) {
+		HashMap<String, String> newProps = new HashMap<String, String>();
+		
+		proj.value.getProperties().forEach { k, v ->
+			if (v instanceof String) {
+				newProps.put(k, v)
+			}
+		}
+		
+		props.put(proj.value.name, newProps)
+	}
+
+	props.put("cyan", [
+		"version": cyanversion,
+		"gameversion": minecraft,
+		"timeStartDev": timeStartDev,
+		"timeRelease": timeRelease
+	])
+	
+	expand props
+}
+
+task makePages (dependsOn: processResources, type: Copy) {
+	from "src/main/php"
+	into new File(buildDir, "php")
+}
+
+task build (dependsOn: makePages) {
+	doLast {
+		copy {
+			from new File(buildDir, "php")
+			into new File(buildDir, "website")
+		}
+		copy {
+			from new File(buildDir, "resources")
+			into new File(buildDir, "website/resources")
+		}
+	}
 }
