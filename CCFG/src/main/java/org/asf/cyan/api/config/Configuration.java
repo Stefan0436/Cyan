@@ -197,7 +197,9 @@ public abstract class Configuration<T extends Configuration<T>> {
 		if (hasChanges() && !hasChanges(false)) { // FIXME: change when value overwriting is implemented
 			oldcontent += System.lineSeparator();
 		}
-		String ccfg = toString(newfile, oldcontent) + System.lineSeparator();
+		String ccfg = toString(newfile, oldcontent);
+		if (!ccfg.endsWith(System.lineSeparator()))
+			ccfg += System.lineSeparator();
 		if (!conf.getParentFile().exists())
 			conf.getParentFile().mkdirs();
 
