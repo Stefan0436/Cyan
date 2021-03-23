@@ -1171,21 +1171,21 @@ processResources {
 		}
 		for (String key : paperSupportVersions.keySet()) {
 			String val = paperSupportVersions.get(key)
-			if (val.equals(cyanversion) && (key.endsWith("-latest") || key.equals("latest"))) {
+			if (val.equals(cyanversion) && (key.endsWith("-latest") || key.startsWith("latest-") || key.equals("latest"))) {
 				paperSupportVersions.remove(key)
 				break
 			}
 		}
 		for (String key : forgeSupportVersions.keySet()) {
 			String val = forgeSupportVersions.get(key)
-			if (val.equals(cyanversion) && key.endsWith("-latest")) {
+			if (val.equals(cyanversion) && key.endsWith("-latest") || key.startsWith("latest-")) {
 				forgeSupportVersions.remove(key)
 				break
 			}
 		}
 		for (String key : fabricSupportVersions.keySet()) {
 			String val = fabricSupportVersions.get(key)
-			if (val.equals(cyanversion) && key.endsWith("-latest")) {
+			if (val.equals(cyanversion) && key.endsWith("-latest") || key.startsWith("latest-")) {
 				fabricSupportVersions.remove(key)
 				break
 			}
@@ -1202,21 +1202,21 @@ processResources {
 		}
 		for (String key : paperSupportVersions.keySet()) {
 			String val = paperSupportVersions.get(key)
-			if (val.equals(cyanversion) && (key.endsWith("-stable") || key.equals("stable"))) {
+			if (val.equals(cyanversion) && (key.endsWith("-stable") || key.startsWith("stable-") || key.equals("stable"))) {
 				paperSupportVersions.remove(key)
 				break
 			}
 		}
 		for (String key : forgeSupportVersions.keySet()) {
 			String val = forgeSupportVersions.get(key)
-			if (val.equals(cyanversion) && key.endsWith("-stable")) {
+			if (val.equals(cyanversion) && key.endsWith("-stable") || key.startsWith("stable-")) {
 				forgeSupportVersions.remove(key)
 				break
 			}
 		}
 		for (String key : fabricSupportVersions.keySet()) {
 			String val = fabricSupportVersions.get(key)
-			if (val.equals(cyanversion) && key.endsWith("-stable")) {
+			if (val.equals(cyanversion) && key.endsWith("-stable") || key.startsWith("stable-")) {
 				fabricSupportVersions.remove(key)
 				break
 			}
@@ -1244,21 +1244,21 @@ processResources {
 		}
 		for (String key : paperSupportVersions.keySet()) {
 			String val = paperSupportVersions.get(key)
-			if (val.equals(cyanversion) && (key.endsWith("-testing") || key.equals("testing"))) {
+			if (val.equals(cyanversion) && (key.endsWith("-testing") || key.startsWith("testing-") || key.equals("testing"))) {
 				paperSupportVersions.remove(key)
 				break
 			}
 		}
 		for (String key : forgeSupportVersions.keySet()) {
 			String val = forgeSupportVersions.get(key)
-			if (val.equals(cyanversion) && key.endsWith("-testing")) {
+			if (val.equals(cyanversion) && key.endsWith("-testing") || key.startsWith("testing-")) {
 				forgeSupportVersions.remove(key)
 				break
 			}
 		}
 		for (String key : fabricSupportVersions.keySet()) {
 			String val = fabricSupportVersions.get(key)
-			if (val.equals(cyanversion) && key.endsWith("-testing")) {
+			if (val.equals(cyanversion) && key.endsWith("-testing") || key.startsWith("testing-")) {
 				fabricSupportVersions.remove(key)
 				break
 			}
@@ -1268,15 +1268,17 @@ processResources {
 		
 		if ((!project.hasProperty("paperUnusable") || project.hasProperty("paperTesting")) && paper != null) {
 			paperSupportVersions.put(paper + "-testing", cyanversion)
-			paperSupportVersions.put("testing", cyanversion)
+			paperSupportVersions.put("testing", cyanversion)			
 		}
 		
 		if (!modloader.equals("")) {
 			if (modloader.startsWith("forge-")) {
+				forgeSupportVersions.put("testing-forge", minecraft + "-" + loaderversion)
 				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-testing", cyanversion);
 			} else if (modloader.startsWith("fabric-loader-")) {
+				fabricSupportVersions.put("testing-fabric", minecraft + "-" + loaderversion)
 				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-testing", cyanversion);
-			}  else if (modloader.startsWith("paper-")) {
+			} else if (modloader.startsWith("paper-")) {
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-testing", cyanversion);
 			}
 		}
@@ -1287,27 +1289,35 @@ processResources {
 		
 		if (!modloader.equals("")) {
 			if (modloader.startsWith("forge-")) {
+				forgeSupportVersions.put("latest-paper", minecraft + "-" + loaderversion)
 				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 			} else if (modloader.startsWith("fabric-loader-")) {
+				fabricSupportVersions.put("latest-fabric", minecraft + "-" + loaderversion)
 				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);				
 			}  else if (modloader.startsWith("paper-")) {
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);				
 			}
 		}
 		
-		if (!project.hasProperty("paperUnstable") && paper != null) {
+		if (!project.hasProperty("paperUnstable") && paper != null) {			
 			paperSupportVersions.put(paper + "-latest", cyanversion)
 			paperSupportVersions.put("latest", cyanversion)
 		}
 	} else if (project.hasProperty("addToStable")) {
 		gameVersions.put(minecraft + "-stable", cyanversion)
-		gameVersions.put(minecraft + "-stable", cyanversion)
+		gameVersions.put(minecraft + "-latest", cyanversion)
 		
 		if (!modloader.equals("")) {
 			if (modloader.startsWith("forge-")) {
+				forgeSupportVersions.put("stable-forge", minecraft + "-" + loaderversion)
+				forgeSupportVersions.put("latest-forge", minecraft + "-" + loaderversion)
+				
 				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-stable", cyanversion);
 			} else if (modloader.startsWith("fabric-loader-")) {
+				fabricSupportVersions.put("stable-fabric", minecraft + "-" + loaderversion)
+				fabricSupportVersions.put("latest-fabric", minecraft + "-" + loaderversion)
+				
 				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-stable", cyanversion);
 			}  else if (modloader.startsWith("paper-")) {
@@ -1318,6 +1328,7 @@ processResources {
 		
 		if (!project.hasProperty("paperUnstable") && paper != null) {
 			paperSupportVersions.put(paper + "-stable", cyanversion)
+			
 			paperSupportVersions.put(paper + "-latest", cyanversion)
 			paperSupportVersions.put("stable", cyanversion)
 			paperSupportVersions.put("latest", cyanversion)
