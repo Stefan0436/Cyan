@@ -1,6 +1,11 @@
 {
 	"api": {
 		"version": "indev",
+		"apis": [
+			"v1"
+		],
+		"recommended": "v1",
+		"deprecated": [],
 		"applications": {
 			"cyan": {
 				"pretty_name": "Cyan Modloader"
