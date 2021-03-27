@@ -27,7 +27,6 @@ import org.asf.cyan.cornflower.gradle.Cornflower;
 import org.asf.cyan.cornflower.gradle.utilities.ITaskExtender;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
-import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskProvider;
 
@@ -409,15 +408,6 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 		output.archive(archives);
 	}
 
-	public void sourceLookup(ConfigurableFileCollection archives) {
-		SourceMementoClosureOwner output = new SourceMementoClosureOwner();
-		if (!sourceMementoSpecified)
-			sourceLookup.clear();
-
-		sourceMementoSpecified = true;
-		output.add(archives);
-	}
-
 	public void sourceLookup(Project[] projects) {
 		SourceMementoClosureOwner output = new SourceMementoClosureOwner();
 		if (!sourceMementoSpecified)
@@ -507,15 +497,6 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 
 		classpathMementoSpecified = true;
 		output.archive(archives);
-	}
-
-	public void classpath(ConfigurableFileCollection archives) {
-		ClasspathMementoClosureOwner output = new ClasspathMementoClosureOwner();
-		if (!classpathMementoSpecified)
-			classPath.clear();
-
-		classpathMementoSpecified = true;
-		output.add(archives);
 	}
 
 	public void classpath(Project[] projects) {
@@ -680,12 +661,6 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 			}
 		}
 
-		public void archive(ConfigurableFileCollection files) {
-			for (File file : files) {
-				archive(file);
-			}
-		}
-
 		public void archive(File... files) {
 			for (File file : files) {
 				archive(file);
@@ -727,12 +702,6 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 		public void string(String... variables) {
 			for (String variable : variables) {
 				variable(variable);
-			}
-		}
-
-		public void add(ConfigurableFileCollection files) {
-			for (File file : files) {
-				add(file);
 			}
 		}
 
@@ -1078,12 +1047,6 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 			sourceLookup.add(new SourceMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(), file));
 		}
 
-		public void archive(ConfigurableFileCollection files) {
-			for (File file : files) {
-				archive(file);
-			}
-		}
-
 		public void archive(File... files) {
 			for (File file : files) {
 				archive(file);
@@ -1109,12 +1072,6 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 
 		public void addDefault() {
 			sourceLookup.add(new SourceMemento());
-		}
-
-		public void add(ConfigurableFileCollection files) {
-			for (File file : files) {
-				add(file);
-			}
 		}
 
 		public void add(File[] files) {

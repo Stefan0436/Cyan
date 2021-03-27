@@ -8,7 +8,7 @@ apply from: "../config.gradle"
 version = "1.0.0.A1"
 group = "org.asf.cyan"
 
-def authorname = "AerialWorks Software Development"
+def authorname = "AerialWorks Software Foundation"
 
 apply plugin: 'eclipse'
 buildDir = '../build/WebAPI'
