@@ -25,17 +25,37 @@ public class ConfigurationTest {
 		}
 		return val;
 	}
-	
+
 	@Test
 	public void testWriteNew() throws IOException {
 		TestingConfig.baseDir = "bin/test";
 		TestingConfig test = new TestingConfig();
 		if (test.exists())
 			test.getFile().delete();
-		
+
 		test.writeAll();
 		assertTrue(test.exists());
 	}
+
+	@Test
+	public void recursiveMapTest() throws IOException {
+		TestingConfig.baseDir = "bin/test";
+		TestingConfig test = new TestingConfig();
+		if (test.exists())
+			test.getFile().delete();
+
+		test.testMap3.put("test", new HashMap<String, String>(Map.of("one", "two")));
+
+		test.writeAll();
+		assertTrue(test.exists());
+
+		test = new TestingConfig();
+		test.readAll();
+
+		assertTrue(test.testMap3.containsKey("test"));
+		assertTrue(test.testMap3.get("test").get("one").equals("two"));
+	}
+
 //
 //	@Test
 //	public void testWriteNewSetValue() throws IOException {
@@ -67,26 +87,29 @@ public class ConfigurationTest {
 	@Test
 	public void testReadAll() throws IOException {
 		int length1 = rnd.nextInt(5000);
-		while (length1 < 0) length1 = rnd.nextInt();
+		while (length1 < 0)
+			length1 = rnd.nextInt();
 		int length2 = rnd.nextInt(5000);
-		while (length2 < 0) length2 = rnd.nextInt();
+		while (length2 < 0)
+			length2 = rnd.nextInt();
 		int length3 = rnd.nextInt(5000);
-		while (length3 < 0) length3 = rnd.nextInt();
-		
+		while (length3 < 0)
+			length3 = rnd.nextInt();
+
 		Character[] allowed = ArrayUtil.rangingNumeric('b', 'z', true, true);
 		String testVal1 = "";
 		for (int i = 0; i < length1; i++) {
-			testVal1+=allowed[rnd.nextInt(allowed.length)];
+			testVal1 += allowed[rnd.nextInt(allowed.length)];
 		}
-		
+
 		String testVal2 = "";
 		for (int i = 0; i < length2; i++) {
-			testVal2+=allowed[rnd.nextInt(allowed.length)];
+			testVal2 += allowed[rnd.nextInt(allowed.length)];
 		}
 
 		String testVal3 = "";
 		for (int i = 0; i < length3; i++) {
-			testVal3+=allowed[rnd.nextInt(allowed.length)];
+			testVal3 += allowed[rnd.nextInt(allowed.length)];
 		}
 
 		Map<String, String> testmp1 = new HashMap<String, String>();
@@ -105,30 +128,21 @@ public class ConfigurationTest {
 			testmp1.put(key, genText(100));
 			testmp2.put(key, rnd.nextInt());
 		}
-		
+
 		String testmptxt1 = "{";
 		for (String line : ObjectSerializer.serialize(testmp1).split(System.lineSeparator())) {
-			testmptxt1+="\n    "+line;
+			testmptxt1 += "\n    " + line;
 		}
-		testmptxt1+="\n}";
+		testmptxt1 += "\n}";
 		String testmptxt2 = "{";
 		for (String line : ObjectSerializer.serialize(testmp2).split(System.lineSeparator())) {
-			testmptxt2+="\n    "+line;
+			testmptxt2 += "\n    " + line;
 		}
-		testmptxt2+="\n}";
-		
-		String testConfig = "# test\n# test config\n\n"
-				+ "testStr> '"+testVal1+"' # test\n"
-				+ "optionalTest> '"+testVal2+"'\n"
-				+ "test4> 4\n"
-				+ "\n"
-				+ "test3> {\n"
-				+ "    testSubConfig> '"+testVal3+"'\n"
-				+ "}\n"
-				+ "\n"
-				+ "testMap1> "+testmptxt1+"\n"
-				+ "\n"
-				+ "testMap2> "+testmptxt2+"\n";
+		testmptxt2 += "\n}";
+
+		String testConfig = "# test\n# test config\n\n" + "testStr> '" + testVal1 + "' # test\n" + "optionalTest> '"
+				+ testVal2 + "'\n" + "test4> 4\n" + "\n" + "test3> {\n" + "    testSubConfig> '" + testVal3 + "'\n"
+				+ "}\n" + "\n" + "testMap1> " + testmptxt1 + "\n" + "\n" + "testMap2> " + testmptxt2 + "\n";
 		TestingConfig test = new TestingConfig().readAll(testConfig);
 		for (String key : test.testMap1.keySet()) {
 			assertTrue(test.testMap1.get(key).equals(testmp1.get(key)));
@@ -136,18 +150,20 @@ public class ConfigurationTest {
 		for (String key : test.testMap2.keySet()) {
 			assertTrue(test.testMap2.get(key).equals(testmp2.get(key)));
 		}
-		
+
 		assertTrue(test.test3.testSubConfig.equals(testVal3));
 		assertTrue(test.testStr.equals(testVal1));
 		assertTrue(test.optionalTest.equals(testVal2));
 	}
-	
+
 	@Test
 	public void testCCFGComments() throws NoSuchFieldException, SecurityException {
-		String testVal = "Testing configuration file,"+System.lineSeparator()+"multi-line comment test."+System.lineSeparator()+System.lineSeparator()+"Our header";
+		String testVal = "Testing configuration file," + System.lineSeparator() + "multi-line comment test."
+				+ System.lineSeparator() + System.lineSeparator() + "Our header";
 		assertTrue(test.getConfigHeader().equals(testVal));
 		assertTrue(test.getKeyHeaderComment(test.getClass().getField("testStr")).equals("Testing parameter"));
 		assertTrue(test.getKeyFooterComment(test.getClass().getField("testStr")).equals("Testing"));
-		assertTrue(test.getKeyHeaderComment(test.getClass().getField("optionalTest")).equals("This is an optional entry"+System.lineSeparator()+"Second comment"));		
+		assertTrue(test.getKeyHeaderComment(test.getClass().getField("optionalTest"))
+				.equals("This is an optional entry" + System.lineSeparator() + "Second comment"));
 	}
 }

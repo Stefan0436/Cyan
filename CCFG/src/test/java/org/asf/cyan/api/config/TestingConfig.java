@@ -17,8 +17,8 @@ public class TestingConfig extends Configuration<TestingConfig> {
 	public String folder() {
 		return "test1";
 	}
-	
-	public String[] tests = new String[] {"test1", "test2"};
+
+	public String[] tests = new String[] { "test1", "test2" };
 	public String[] tests2 = new String[] {};
 
 	@Comment(value = "Testing", afterValue = true)
@@ -33,16 +33,18 @@ public class TestingConfig extends Configuration<TestingConfig> {
 	@Comment("This is an optional entry")
 	@Comment("Second comment")
 	public String optionalTest = "some optional value";
-	
+
 	@Comment("Another test, this time, sub-categories")
 	public SubConfigTest test3 = new SubConfigTest();
-	
+
 	@Comment("Test integer")
 	public int test4 = 0;
-	
+
 	@Comment("Should only be added if it has a value")
 	public String defaultEmpty = null;
-	
-	public HashMap<String,String> testMap1 = new HashMap<String,String>();
-	public HashMap<String,Integer> testMap2 = new HashMap<String,Integer>();
+
+	public HashMap<String, String> testMap1 = new HashMap<String, String>();
+	public HashMap<String, Integer> testMap2 = new HashMap<String, Integer>();
+
+	public HashMap<String, HashMap<String, String>> testMap3 = new HashMap<String, HashMap<String, String>>();
 }

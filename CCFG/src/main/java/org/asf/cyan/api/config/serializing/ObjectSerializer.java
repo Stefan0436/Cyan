@@ -82,6 +82,24 @@ public class ObjectSerializer {
 		@Override
 		public void run(String key, String txt) {
 			try {
+				if (type.getActualTypeArguments()[1] instanceof ParameterizedType) {
+					ParameterizedType paramtype = (ParameterizedType) type.getActualTypeArguments()[1];
+					Class<?> cls = Class.forName(paramtype.getRawType().getTypeName());
+					
+					if (Map.class.isAssignableFrom(cls)) {
+						MapPutPropAction a = new MapPutPropAction(cls, paramtype);
+						parse(txt, a);
+						for (IOException ex : a.exs) {
+							throw ex;
+						}
+						mp.put(key, a.mp);
+					} else {
+						Object o = deserialize(txt, cls);
+						mp.put(key, o);
+					}
+
+					return;
+				}
 				Class cls = Class.forName(type.getActualTypeArguments()[1].getTypeName());
 				Object o = deserialize(txt, cls);
 				mp.put(key, o);
