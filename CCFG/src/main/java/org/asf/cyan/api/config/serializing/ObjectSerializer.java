@@ -544,7 +544,7 @@ public class ObjectSerializer {
 						}
 						break;
 					case '\'':
-						if (array == 0) {
+						if (array == 0 && brquote == 0) {
 							quote = !quote;
 							if (brquote != 0)
 								txt.append(ch);

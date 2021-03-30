@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Random;
 
 import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
+import org.asf.cyan.api.config.gitmoduletest.GitConfiguration;
+import org.asf.cyan.api.config.gitmoduletest.GitRepositoryConfig;
 import org.asf.cyan.api.config.serializing.ObjectSerializer;
 import org.junit.Test;
 
@@ -54,6 +56,29 @@ public class ConfigurationTest {
 
 		assertTrue(test.testMap3.containsKey("test"));
 		assertTrue(test.testMap3.get("test").get("one").equals("two"));
+	}
+
+	@Test
+	public void mapInConfigTest() throws IOException {
+		GitConfiguration.baseDir = "bin/test";
+		GitConfiguration test = new GitConfiguration("bin/test");
+		if (test.exists())
+			test.getFile().delete();
+
+		GitRepositoryConfig testSubConf = new GitRepositoryConfig();
+		testSubConf.author = "ASF";
+		testSubConf.accessGroup = "asf";
+		test.repositories.put("test", testSubConf);
+
+		test.writeAll();
+		assertTrue(test.exists());
+
+		test = new GitConfiguration("bin/test");
+		test.readAll();
+
+		assertTrue(test.repositories.containsKey("test"));
+		assertTrue(test.repositories.get("test").author.equals("ASF"));
+		assertTrue(test.repositories.get("test").accessGroup.equals("asf"));
 	}
 
 //
