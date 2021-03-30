@@ -1,5 +1,7 @@
 package org.asf.cyan.api.config;
 
+import org.asf.cyan.api.config.annotations.Comment;
+
 public class SubConfigTest extends Configuration<SubConfigTest> {
 
 	@Override
@@ -12,5 +14,6 @@ public class SubConfigTest extends Configuration<SubConfigTest> {
 		return null;
 	}
 	
+	@Comment("test")
 	public String testSubConfig = "HI";
 }

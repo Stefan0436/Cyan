@@ -383,12 +383,17 @@ public class ObjectSerializer {
 				StringBuilder builder = new StringBuilder();
 				boolean first = true;
 				String[] lines = Splitter.split(((Configuration<?>) input).toString(), System.lineSeparator());
-				for (String line : lines) {
+				for (int i = 0; i < lines.length; i++) {
+					String line = lines[i];
+					if (i + 1 == lines.length && line.isEmpty()) {
+						break;
+					}
+					
 					if (first) {
 						builder.append(indent).append(line);
 						first = false;
 					} else
-						builder.append(System.lineSeparator()).append(indent).append(line);
+						builder.append(System.lineSeparator()).append(indent).append(line);					
 				}
 				return builder.toString();
 			} else if (PrimitiveClassUtil.isSupportedWrapper(cls))
