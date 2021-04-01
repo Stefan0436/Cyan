@@ -22,6 +22,7 @@ import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.config.serializing.internal.Splitter;
 import org.asf.cyan.fluid.bytecode.enums.ComparisonMethod;
 import org.asf.cyan.fluid.bytecode.sources.IClassSourceProvider;
+import org.asf.cyan.fluid.bytecode.sources.LoaderClassSourceProvider;
 import org.asf.cyan.fluid.bytecode.sources.URLClassSourceProvider;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -82,6 +83,7 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 	 */
 	public static FluidClassPool create() {
 		FluidClassPool pool = new FluidClassPool();
+		pool.addSource(new LoaderClassSourceProvider(ClassLoader.getSystemClassLoader()));
 		pool.addDefaultCp();
 		return pool;
 	}
