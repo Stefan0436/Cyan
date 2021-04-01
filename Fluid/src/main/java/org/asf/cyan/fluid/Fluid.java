@@ -1,5 +1,6 @@
 package org.asf.cyan.fluid;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.net.URISyntaxException;
@@ -450,7 +451,7 @@ public class Fluid extends CyanComponent {
 			debug("Attaching to vm with PID " + Long.toString(ProcessHandle.current().pid()) + " (self)...");
 			final VirtualMachine vm = VirtualMachine.attach(Long.toString(ProcessHandle.current().pid()));
 			debug("Finding jar path...");
-			String path = FluidAgent.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+			String path = new File(FluidAgent.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getCanonicalPath();
 			debug("Path: " + path);
 			if (System.getProperty("cyanAgentJar") != null && !path.endsWith(".jar")) {
 				path = System.getProperty("cyanAgentJar");
