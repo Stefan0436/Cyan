@@ -108,6 +108,8 @@ public class ObjectSerializerTest {
 
 		assertTrue(test2.size() == testmp.size());
 		for (String key : test2.keySet()) {
+			if (!test2.get(key).equals(testmp.get(key)))
+				System.err.println("Test failed: " + test2.get(key) + " should be equal to " + testmp.get(key));
 			assertTrue(test2.get(key).equals(testmp.get(key)));
 		}
 	}
