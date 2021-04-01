@@ -1583,6 +1583,23 @@ task gameData () {
 				rename v.getName(), name+"-"+version+".jar"
 			}
 		}
+		if (project.hasProperty("currentXML")) {
+			def log = new File("${buildDir}", project.version+"/.minecraft/assets/log_configs/")
+			log.mkdirs()
+			println " |"
+			println " | Installing logging files..."
+			File xml = new File(project(":CyanLoader").sourceSets.main.output.resourcesDir, "log4j2.xml")
+			if (!xml.exists()) {
+				logger.error ""
+				logger.error "CyanLoader has not yet created its resources, cannot parse sha and size, please rerun the build after it has completed"
+				logger.error ""
+			} else {
+				if (new File(log, "cyanclient-" + cyanversion + ".xml").exists())
+					new File(log, "cyanclient-" + cyanversion + ".xml").delete();
+				
+				Files.copy(xml.toPath(), new File(log, "cyanclient-" + cyanversion + ".xml").toPath())
+			}
+		}
 		println " |"
 		println " | Installing version files..."
 		versionFiles.forEach { k, v ->

@@ -9,9 +9,7 @@ import java.nio.file.Files;
 import javax.swing.JOptionPane;
 
 import org.asf.cyan.api.classloading.DynamicClassLoader;
-import org.asf.cyan.api.config.CCFGConfigGenerator;
 import org.asf.cyan.api.config.Configuration;
-import org.asf.cyan.api.config.serializing.ObjectSerializer;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.core.CyanCore;
 import org.asf.cyan.core.CyanInfo;
