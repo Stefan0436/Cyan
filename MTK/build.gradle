@@ -55,7 +55,7 @@ dependencies {
 	implementation 'org.ow2.asm:asm-commons:9.1'
 	
     implementation 'org.javassist:javassist:3.27.1-ASF-SNAPSHOT-5'
-	implementation 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.1'
+	implementation 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.13'
 	implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
 	
     testImplementation 'junit:junit:4.12'
