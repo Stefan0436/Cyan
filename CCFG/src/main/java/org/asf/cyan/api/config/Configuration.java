@@ -148,7 +148,7 @@ public abstract class Configuration<T extends Configuration<T>> {
 			}
 		});
 
-		if (hasChanges() && allowWrite) {
+		if (allowWrite && hasChanges()) {
 			try {
 				writeAll();
 			} catch (IOException e) {
