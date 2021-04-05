@@ -116,10 +116,11 @@ public class ObjectSerializerTest {
 	
 	@Test
 	public void testCharacterEscaping() throws IOException {
-		String test1 = "hi\r\nhi\nhello\'test\'\\r\\\\r\'test2\'\\rtest";
+		String test1 = "hi\r\nhi\nhello\'test\'\\r\\\\r\'test2\'\\rtest\ttabs";
 		String out1 = ObjectSerializer.serialize(test1);
 		System.out.println(out1);
 		String out2 = ObjectSerializer.deserialize(out1, String.class);
+		System.out.println(out2);
 		assertTrue(out2.equals(test1));
 	}
 

@@ -133,6 +133,8 @@ public class ObjectSerializer {
 			}
 			input = input.replaceAll("([^\\\\])\\\\r", "$1\r");
 			input = input.replaceAll("\\\\r", "\\r");
+			input = input.replaceAll("([^\\\\])\\\\t", "$1\t");
+			input = input.replaceAll("\\\\t", "\\t");
 			return (T) input;
 		case "java.net.URL":
 			return (T) new URL(input);
@@ -367,6 +369,8 @@ public class ObjectSerializer {
 			}
 			output = output.replaceAll("\\\\\\\\r", "\\\\\\\\\\\\r");
 			output = output.replaceAll("\r", "\\\\r");
+			output = output.replaceAll("\\\\\\\\t", "\\\\\\\\\\\\t");
+			output = output.replaceAll("\t", "\\\\t");
 			return output;
 		case "java.net.URL":
 			return input.toString();
@@ -506,7 +510,7 @@ public class ObjectSerializer {
 					if (line.startsWith(" "))
 						line = line.substring(1);
 
-			if ((line.startsWith("#") || line.isBlank()) && !quote && brquote == 0)
+			if ((line.startsWith("#") && !quote) || (line.isBlank() && !quote && brquote == 0))
 				continue;
 
 			if (!quote && brquote == 0) {
@@ -544,7 +548,7 @@ public class ObjectSerializer {
 						}
 						break;
 					case '\'':
-						if (array == 0 && brquote == 0) {
+						if (array == 0) {
 							quote = !quote;
 							if (brquote != 0)
 								txt.append(ch);

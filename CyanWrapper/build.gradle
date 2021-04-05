@@ -261,8 +261,8 @@ dependencies {
 
 	wrapper 'org.javassist:javassist:3.27.1-ASF-SNAPSHOT-5'
 
-	//	wrapper project(":MixinSupport")
-	//	implementation project(":MixinSupport")
+	// wrapper project(":MixinSupport")
+	// implementation project(":MixinSupport")
 }
 
 jar {
