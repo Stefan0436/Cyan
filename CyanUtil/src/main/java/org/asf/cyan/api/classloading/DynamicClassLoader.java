@@ -11,7 +11,9 @@ import java.net.URLStreamHandlerFactory;
 import java.nio.ByteBuffer;
 import java.security.CodeSource;
 import java.security.cert.Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.BiFunction;
 
 /**
  * 
@@ -21,75 +23,90 @@ import java.util.HashMap;
  *
  */
 public class DynamicClassLoader extends URLClassLoader {
-	
+
 	private boolean secured = false;
-	
+
 	/**
-	 * Secures the class loader, prevents options from being set. (can only be called ONCE)
+	 * Secures the class loader, prevents options from being set. (can only be
+	 * called ONCE)
 	 */
 	public void secure() {
 		if (secured)
 			throw new IllegalStateException("Classloader already secured!");
-		
+
 		apply();
-		
+
 		secured = true;
 	}
-	
+
 	private boolean hasOption(int opt) {
 		return (opt & options) == opt;
 	}
-	
+
 	/**
-	 * Apply all options, cannot be done after secure has been called. (secure calls this too)
+	 * Apply all options, cannot be done after secure has been called. (secure calls
+	 * this too)
 	 */
 	public void apply() {
 		if (secured)
 			throw new IllegalStateException("Classloader has been secured! Applying options denied!");
-		
+
 		if (hasOption(OPTION_LOAD))
 			allowSelfToLoad = true;
 		if (hasOption(OPTION_ALLOW_DEFINE))
 			allowSelfToDefine = true;
 		if (hasOption(OPTION_DENY_ADD_RUNTIME))
 			denyAdding = true;
+		if (hasOption(OPTION_ENABLE_TRANSFORMER_ENGINE))
+			transforming = true;
 	}
-	
+
 	/**
-	 * Allow the defining of classes. (can only be set before adding urls or calling secure)
+	 * Allow the defining of classes. (can only be set before adding urls or calling
+	 * secure)
 	 */
-	public static final int OPTION_ALLOW_DEFINE = 0x10;
+	public static final int OPTION_ALLOW_DEFINE = 0x1 << 1;
 
 	/**
 	 * Sets the class loader to allow the loading of classes.
 	 */
-	public static final int OPTION_LOAD = 0x20;
+	public static final int OPTION_LOAD = 0x1 << 2;
 
 	/**
 	 * Prevents the adding of sources after the classloader has been secured.
 	 */
-	public static final int OPTION_DENY_ADD_RUNTIME = 0x30;
+	public static final int OPTION_DENY_ADD_RUNTIME = 0x1 << 3;
 
 	/**
 	 * Prevents the class loader from being secured by addUrl or addUrls.
 	 */
-	public static final int OPTION_PREVENT_AUTOSECURE = 0x40;
-	
+	public static final int OPTION_PREVENT_AUTOSECURE = 0x1 << 4;
+
+	/**
+	 * Enables the transformer engine.
+	 */
+	public static final int OPTION_ENABLE_TRANSFORMER_ENGINE = 0x1 << 5;
+
 	private int options = 0;
+
 	public void setOptions(int options) {
 		if (secured)
 			throw new IllegalStateException("Classloader has been secured!");
-		
+
 		this.options = this.options | options;
-		
+
 		if (hasOption(OPTION_PREVENT_AUTOSECURE))
 			noSecureOnAdd = true;
 	}
-	
+
+	private boolean transforming = false;
 	private boolean noSecureOnAdd = false;
 	private boolean allowSelfToLoad = false;
 	private boolean allowSelfToDefine = false;
 	private boolean denyAdding = false;
+
+	private ArrayList<BiFunction<byte[], String, byte[]>> transformers = new ArrayList<BiFunction<byte[], String, byte[]>>();
+
 	private static HashMap<String, String> rewrittenResources = new HashMap<String, String>();
 
 	static {
@@ -208,9 +225,9 @@ public class DynamicClassLoader extends URLClassLoader {
 	public void addUrl(URL url) {
 		if (secured && denyAdding)
 			throw new RuntimeException("Classloader has been secured, dynamic loading denied.");
-		
+
 		super.addURL(url);
-		
+
 		if (!secured && !noSecureOnAdd)
 			secure();
 	}
@@ -223,11 +240,11 @@ public class DynamicClassLoader extends URLClassLoader {
 	public void addUrls(URL[] urls) {
 		if (secured && denyAdding)
 			throw new RuntimeException("Classloader has been secured, dynamic loading denied.");
-		
+
 		for (URL url : urls) {
 			super.addURL(url);
 		}
-		
+
 		if (!secured && !noSecureOnAdd)
 			secure();
 	}
@@ -240,13 +257,26 @@ public class DynamicClassLoader extends URLClassLoader {
 	public void addUrls(Iterable<URL> urls) {
 		if (secured && denyAdding)
 			throw new RuntimeException("Classloader has been secured, dynamic loading denied.");
-		
+
 		for (URL url : urls) {
 			super.addURL(url);
 		}
-		
+
 		if (!secured && !noSecureOnAdd)
 			secure();
+	}
+
+	/**
+	 * Adds class transformers (needs to be enabled, cannot be done after securing
+	 * the class loader)
+	 * 
+	 * @param transformer Transformer to add
+	 */
+	public void addTransfomer(BiFunction<byte[], String, byte[]> transformer) {
+		if (secured)
+			throw new RuntimeException("Classloader has been secured.");
+
+		transformers.add(transformer);
 	}
 
 	public Class<?> getLoadedClass(String name) {
@@ -305,7 +335,7 @@ public class DynamicClassLoader extends URLClassLoader {
 			else
 				return getParent().loadClass(name);
 		}
-		
+
 		if (!allowSelfToDefine)
 			return super.loadClass(name, resolve);
 
@@ -326,8 +356,13 @@ public class DynamicClassLoader extends URLClassLoader {
 
 				BufferedInputStream strm = new BufferedInputStream(u.openStream());
 				byte[] data = strm.readAllBytes();
+				if (transforming) {
+					for (BiFunction<byte[], String, byte[]> transformer : transformers) {
+						data = transformer.apply(data, name);
+					}
+				}
 				strm.close();
-				
+
 				Class<?> cls = defineClass(name, ByteBuffer.wrap(data), new CodeSource(u, (Certificate[]) null));
 				if (resolve)
 					this.resolveClass(cls);
