@@ -12,6 +12,7 @@ import org.asf.cyan.api.events.core.EventBusFactory;
 import org.asf.cyan.api.modloader.IModloaderComponent;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.api.modloader.information.providers.IModProvider;
 import org.asf.cyan.api.versioning.StringVersionProvider;
 import org.asf.cyan.core.CyanCore;
@@ -310,13 +311,13 @@ public class CyanLoader extends Modloader implements IModProvider {
 	}
 
 	@Override
-	public Object[] getLoadedNormalMods() {
-		return new Object[0]; // TODO
+	public IModManifest[] getLoadedNormalMods() {
+		return new IModManifest[0]; // TODO
 	}
 
 	@Override
-	public Object[] getLoadedCoreMods() {
-		return new Object[0]; // TODO
+	public IModManifest[] getLoadedCoreMods() {
+		return new IModManifest[0]; // TODO
 	}
 
 	@Override
