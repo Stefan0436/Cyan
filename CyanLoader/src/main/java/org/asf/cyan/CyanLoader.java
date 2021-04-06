@@ -371,6 +371,32 @@ public class CyanLoader extends Modloader implements IModProvider {
 		} else if (BaseEventController.class.getTypeName().equals(component.getTypeName())) {
 			return true;
 		} else if (IAcceptableComponent.class.isAssignableFrom(component)) {
+			
+			try {
+				URL location = component.getProtectionDomain().getCodeSource().getLocation();
+
+				if (!location.toString().endsWith(".class")) {
+					String pref = location.toString();
+					if ((pref.endsWith(".jar") || pref.endsWith(".zip")) && !pref.startsWith("jar:")) {
+						pref = "jar:" + pref + "!/";
+					}
+					pref += "/" + component.getTypeName().replace(".", "/") + ".class";
+					location = new URL(pref);
+				}
+
+				InputStream strm = location.openStream();
+				String key = sha256HEX(strm.readAllBytes());
+				strm.close();
+
+				System.err.println("COREMOD MIGHT HAVE BEEN TAMPERED WITH!");
+								
+			} catch (Exception ex) {
+				fatal("Failed to read module hash, class: " + component.getTypeName());
+				fatal("Will not continue as it is way too risky.");
+				System.exit(-1);
+				return false;
+			}
+			
 			return true;
 		}
 		return false;
@@ -409,7 +435,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 			if (key == null)
 				return false;
 
-			URL jar = null;
 			URL location = cp.getClass().getProtectionDomain().getCodeSource().getLocation();
 			String pref = location.toString();
 			if (pref.startsWith("jar:")) {
@@ -432,14 +457,14 @@ public class CyanLoader extends Modloader implements IModProvider {
 					if (!location.toString().endsWith(".class")) {
 						String pref2 = location.toString();
 						if ((pref2.endsWith(".jar") || pref2.endsWith(".zip")) && !pref2.startsWith("jar:")) {
-							pref2 = "jar:" + pref + "!/";
+							pref2 = "jar:" + pref2 + "!/";
 						}
 						pref2 += "/" + cp.getClass().getTypeName().replace(".", "/") + ".class";
 						location = new URL(pref2);
 					}
 
 					InputStream strm = location.openStream();
-					acceptedKey = sha1HEX(strm.readAllBytes());
+					acceptedKey = sha256HEX(strm.readAllBytes());
 					strm.close();
 				} catch (Exception e) {
 					return false;
@@ -473,8 +498,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 		return false;
 	}
 
-	private String sha1HEX(byte[] array) throws NoSuchAlgorithmException {
-		MessageDigest digest = MessageDigest.getInstance("SHA-1");
+	private String sha256HEX(byte[] array) throws NoSuchAlgorithmException {
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		byte[] sha = digest.digest(array);
 		StringBuilder result = new StringBuilder();
 		for (byte aByte : sha) {
