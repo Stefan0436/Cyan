@@ -13,6 +13,7 @@ import org.asf.cyan.api.events.core.IEventListener;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.api.modloader.information.modloader.LoadPhase;
+import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.api.modloader.information.providers.IGameProvider;
 import org.asf.cyan.api.modloader.information.providers.ILaunchPlatformProvider;
 import org.asf.cyan.api.modloader.information.providers.IModProvider;
@@ -215,13 +216,13 @@ public abstract class Modloader extends CyanComponent {
 	/**
 	 * Get all loaded mods of all modloaders (including coremods)
 	 */
-	public static Object[] getAllMods() { // TODO: change to a different class when ready
-		ArrayList<Object> mods = new ArrayList<Object>();
+	public static IModManifest[] getAllMods() {
+		ArrayList<IModManifest> mods = new ArrayList<IModManifest>();
 		for (Modloader loader : getAllModloaders()) {
 			mods.addAll(Arrays.asList(loader.getLoadedMods()));
 			mods.addAll(Arrays.asList(loader.getLoadedCoremods()));
 		}
-		return mods.toArray(t -> new Object[t]);
+		return mods.toArray(t -> new IModManifest[t]);
 	}
 
 	/**
@@ -271,7 +272,8 @@ public abstract class Modloader extends CyanComponent {
 				Constructor<IModloaderComponent> ctor;
 				IModloaderComponent component;
 				try {
-					ctor = componentCls.getConstructor();
+					ctor = componentCls.getDeclaredConstructor();
+					ctor.setAccessible(true);
 					component = ctor.newInstance();
 				} catch (IllegalAccessException | NoSuchMethodException | SecurityException | InstantiationException
 						| IllegalArgumentException | InvocationTargetException ex) {
@@ -616,7 +618,7 @@ public abstract class Modloader extends CyanComponent {
 	/**
 	 * Get the mods loaded by this modloader.
 	 */
-	public Object[] getLoadedMods() { // TODO: change to a different class when ready
+	public IModManifest[] getLoadedMods() {
 		if (modProvider == null && !noModProvider) {
 			for (IModloaderInfoProvider info : informationProviders) {
 				if (info instanceof IModProvider) {
@@ -629,16 +631,13 @@ public abstract class Modloader extends CyanComponent {
 			return modProvider.getLoadedNormalMods();
 		}
 
-		if (getNextImplementation() == null)
-			return new Object[0];
-
-		return getNextImplementation().getLoadedMods();
+		return new IModManifest[0];
 	}
 
 	/**
 	 * Get the core mods loaded by this modloader.
 	 */
-	public Object[] getLoadedCoremods() { // TODO: change to a different class when ready
+	public IModManifest[] getLoadedCoremods() {
 		if (modProvider == null && !noModProvider) {
 			for (IModloaderInfoProvider info : informationProviders) {
 				if (info instanceof IModProvider) {
@@ -651,10 +650,39 @@ public abstract class Modloader extends CyanComponent {
 			return modProvider.getLoadedCoreMods();
 		}
 
-		if (getNextImplementation() == null)
-			return new Object[0];
+		return new IModManifest[0];
+	}
 
-		return getNextImplementation().getLoadedCoremods();
+	/**
+	 * Retrieves loaded mods by their id
+	 * 
+	 * @param id Mod id
+	 * @return Mod manifest or null
+	 */
+	public IModManifest getLoadedMod(String id) {
+		for (IModManifest mod : getLoadedMods()) {
+			if (mod.id().equalsIgnoreCase(id)) {
+				return mod;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Retrieves loaded coremods by their id
+	 * 
+	 * @param id Coremod id
+	 * @return Coremod manifest or null
+	 */
+	public IModManifest getLoadedCoremod(String id) {
+		for (IModManifest mod : getLoadedCoremods()) {
+			if (mod.id().equalsIgnoreCase(id)) {
+				return mod;
+			}
+		}
+
+		return null;
 	}
 
 	private String tsCache = null;

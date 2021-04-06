@@ -3,9 +3,14 @@ package org.asf.cyan;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 import org.asf.cyan.api.events.IEventProvider;
 import org.asf.cyan.api.events.core.EventBusFactory;
@@ -30,6 +35,8 @@ import org.asf.cyan.minecraft.toolkits.mtk.MinecraftToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.PaperCompatibilityMappings;
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
+import org.asf.cyan.mods.internal.BaseEventController;
+import org.asf.cyan.mods.internal.IAcceptableComponent;
 
 /**
  * 
@@ -54,6 +61,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 	private static boolean vanillaMappings = true;
 	private static boolean loaded = false;
 	private static File cyanDir;
+
+	private static String[] acceptableProviders = new String[] { "transformers", "coremod.init" };
 
 	public static File getCyanDataDirectory() {
 		return cyanDir;
@@ -124,6 +133,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 			CyanCore.initLoader();
 
 		CyanCore.simpleInit();
+		CyanCore.initLogger();
 
 		// TODO: add core mod components to the cyancore so they can be presented to our
 		// modloader
@@ -358,6 +368,10 @@ public class CyanLoader extends Modloader implements IModProvider {
 			return true;
 		} else if (CyanErrorHandlers.class.isAssignableFrom(component)) {
 			return true;
+		} else if (BaseEventController.class.getTypeName().equals(component.getTypeName())) {
+			return true;
+		} else if (IAcceptableComponent.class.isAssignableFrom(component)) {
+			return true;
 		}
 		return false;
 	}
@@ -377,8 +391,96 @@ public class CyanLoader extends Modloader implements IModProvider {
 		} else if (component instanceof CyanErrorHandlers) {
 			((CyanErrorHandlers) component).attach();
 			return true;
+		} else if (component instanceof BaseEventController) {
+			BaseEventController controller = (BaseEventController) component;
+			controller.assign();
+			controller.attachListenerRegistry((channel, listener) -> {
+				try {
+					attachEventListener(channel, listener);
+				} catch (IllegalStateException e) {
+					error("Failed to attach event listener " + listener.getListenerName() + " to event " + channel
+							+ ", event not recognized.");
+				}
+			});
+			return true;
+		} else if (component instanceof IAcceptableComponent) {
+			IAcceptableComponent cp = (IAcceptableComponent) component;
+			String key = cp.executionKey();
+			if (key == null)
+				return false;
+
+			URL jar = null;
+			URL location = cp.getClass().getProtectionDomain().getCodeSource().getLocation();
+			String pref = location.toString();
+			if (pref.startsWith("jar:")) {
+				pref = pref.substring("jar:".length(), pref.lastIndexOf("!/"));
+			} else if (pref.contains(".class")) {
+				pref = pref.substring(0, pref.lastIndexOf(cp.getClass().getTypeName().replace(".", "/") + ".class"));
+			}
+
+			String acceptedKey = "";
+			if (System.getProperty("coreModDebugKeys") != null) {
+				if (!Stream.of(System.getProperty("coreModDebugKeys").split(":")).anyMatch(t -> t.equals(key)))
+					return false;
+				else {
+					acceptedKey = key;
+				}
+			} else {
+				try {
+					location = cp.getClass().getProtectionDomain().getCodeSource().getLocation();
+
+					if (!location.toString().endsWith(".class")) {
+						String pref2 = location.toString();
+						if ((pref2.endsWith(".jar") || pref2.endsWith(".zip")) && !pref2.startsWith("jar:")) {
+							pref2 = "jar:" + pref + "!/";
+						}
+						pref2 += "/" + cp.getClass().getTypeName().replace(".", "/") + ".class";
+						location = new URL(pref2);
+					}
+
+					InputStream strm = location.openStream();
+					acceptedKey = sha1HEX(strm.readAllBytes());
+					strm.close();
+				} catch (Exception e) {
+					return false;
+				}
+			}
+
+			if (!key.equals(acceptedKey))
+				return false;
+
+			for (String prov : cp.providers()) {
+				if (!Stream.of(acceptableProviders).anyMatch(t -> t.equals(prov))) {
+					return false;
+				}
+			}
+
+			for (String prov : cp.providers()) {
+				if (prov.equals("transformers")) {
+					String[] transformers = (String[]) cp.provide(prov);
+					for (String transformer : transformers) {
+						try {
+							Fluid.registerTransformer(transformer, new URL(pref));
+						} catch (IllegalStateException | ClassNotFoundException | MalformedURLException e) {
+							throw new RuntimeException(e);
+						}
+					}
+				}
+			}
+
+			return true;
 		}
 		return false;
+	}
+
+	private String sha1HEX(byte[] array) throws NoSuchAlgorithmException {
+		MessageDigest digest = MessageDigest.getInstance("SHA-1");
+		byte[] sha = digest.digest(array);
+		StringBuilder result = new StringBuilder();
+		for (byte aByte : sha) {
+			result.append(String.format("%02x", aByte));
+		}
+		return result.toString();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -403,5 +505,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 			} catch (IllegalStateException e) {
 			}
 		}
+		BaseEventController.work();
 	}
 }
