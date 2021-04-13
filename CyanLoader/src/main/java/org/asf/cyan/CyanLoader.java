@@ -419,6 +419,11 @@ public class CyanLoader extends Modloader implements IModProvider {
 					fatal("Missing mod dependency for " + dsp + ": " + id + " (incompatible newer version installed)");
 					System.exit(-1);
 				}
+			} else {
+				if (!ver.isEqualTo(Version.fromString(version.trim()))) {
+					fatal("Missing mod dependency for " + dsp + ": " + id + " (incompatible version installed)");
+					System.exit(-1);
+				}
 			}
 		}
 	}
