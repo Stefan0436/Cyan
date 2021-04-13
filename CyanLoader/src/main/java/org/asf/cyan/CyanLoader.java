@@ -71,7 +71,7 @@ import org.asf.cyan.security.TrustContainer;
  *
  */
 public class CyanLoader extends Modloader implements IModProvider {
-	
+
 	private CyanLoader() {
 		mavenRepositories.put("AerialWorks", "https://aerialworks.ddns.net/maven");
 		mavenRepositories.put("Maven Central", "https://repo1.maven.org/maven2");
@@ -741,7 +741,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 			if (trust.exists()) {
 				try {
 					TrustContainer ctc = TrustContainer.importContainer(trust);
-					if (!ctc.getVersion().equals(version) && !version.equals("latest")) {
+					if (!ctc.getVersion().equals(version) && !version.equals("latest")
+							&& version.matches("^[0-9]+-[0-9]+$")) {
 						update = true;
 						trust.delete();
 					} else {
