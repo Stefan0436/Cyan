@@ -25,19 +25,26 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> {
 
 	public String modClassName = null;
 	public String modClassPackage = null;
-	
+
 	public String coremodComponentKey = null;
-	
+
+	public String modGroup = null;
 	public String modId = null;
 	public String displayName = null;
 
 	public String version = null;
+	public String gameVersionRegex = null;
+	public String gameVersionMessage = null;
 
-	public String fallbackDescription = null;
 	public String descriptionLanguageKey = null;
+	public String fallbackDescription = null;
+
+	public HashMap<String, String> jars = new HashMap<String, String>();
 
 	public HashMap<String, String> dependencies = new HashMap<String, String>();
 	public HashMap<String, String> optionalDependencies = new HashMap<String, String>();
 	public HashMap<String, HashMap<String, String>> mavenDependencies = new HashMap<String, HashMap<String, String>>();
+
+	public HashMap<String, String> trustContainers = new HashMap<String, String>();
 
 }

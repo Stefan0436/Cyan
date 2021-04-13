@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.fluid.bytecode.sources.IClassSourceProvider;
 import org.asf.cyan.fluid.remapping.Mapping;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftMappingsToolkit;
@@ -52,8 +53,8 @@ public class RiftPaperToolchainProvider implements IRiftToolchainProvider {
 	}
 
 	@Override
-	public File[] getLibraries() throws IOException {
-		return new File[0];
+	public IClassSourceProvider<?>[] getSources() throws IOException {
+		return new IClassSourceProvider<?>[0];
 	}
 
 }

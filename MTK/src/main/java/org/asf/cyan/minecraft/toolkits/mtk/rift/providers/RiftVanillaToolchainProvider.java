@@ -2,8 +2,11 @@ package org.asf.cyan.minecraft.toolkits.mtk.rift.providers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.fluid.bytecode.sources.FileClassSourceProvider;
+import org.asf.cyan.fluid.bytecode.sources.IClassSourceProvider;
 import org.asf.cyan.fluid.remapping.Mapping;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftMappingsToolkit;
@@ -55,13 +58,17 @@ public class RiftVanillaToolchainProvider implements IRiftToolchainProvider {
 	}
 
 	@Override
-	public File[] getLibraries() throws IOException {
+	public IClassSourceProvider<?>[] getSources() throws IOException {
 		if (side == GameSide.CLIENT) {
 			verify();
-			return MinecraftInstallationToolkit.getLibraries(version);
+			ArrayList<IClassSourceProvider<?>> sources = new  ArrayList< IClassSourceProvider<?>>();
+			for (File lib : MinecraftInstallationToolkit.getLibraries(version)) {
+				sources.add(new FileClassSourceProvider(lib));
+			}
+			return sources.toArray(t -> new IClassSourceProvider<?>[t]);
 		}
 		
-		return new File[0];
+		return new IClassSourceProvider<?>[0];
 	}
 
 	private boolean verified = false;

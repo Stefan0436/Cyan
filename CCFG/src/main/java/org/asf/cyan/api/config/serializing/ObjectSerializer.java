@@ -503,7 +503,7 @@ public class ObjectSerializer {
 
 		for (int lineNum = 0; lineNum < lines.length; lineNum++) {
 			if (txt != null)
-				txt.append(System.lineSeparator());
+				txt.append("\n");
 			String line = lines[lineNum];
 			if (indent)
 				for (int i = 0; i < 4; i++)

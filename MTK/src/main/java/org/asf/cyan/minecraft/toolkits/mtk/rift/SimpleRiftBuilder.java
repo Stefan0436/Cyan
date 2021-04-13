@@ -11,7 +11,6 @@ import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.fluid.bytecode.FluidClassPool;
 import org.asf.cyan.fluid.bytecode.enums.ComparisonMethod;
-import org.asf.cyan.fluid.bytecode.sources.FileClassSourceProvider;
 import org.asf.cyan.fluid.bytecode.sources.IClassSourceProvider;
 import org.asf.cyan.fluid.remapping.MAPTYPE;
 import org.asf.cyan.fluid.remapping.Mapping;
@@ -185,8 +184,8 @@ public class SimpleRiftBuilder implements Closeable {
 			ZipInputStream strm = new ZipInputStream(new FileInputStream(provider.getJar()));
 			libs.importArchive(strm);
 			strm.close();
-			for (File lib : provider.getLibraries()) {
-				libs.addSource(new FileClassSourceProvider(lib));
+			for (IClassSourceProvider<?> src : provider.getSources()) {
+				libs.addSource(src);
 			}
 		}
 

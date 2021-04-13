@@ -58,7 +58,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	public static boolean isIDEModeEnabled() {
 		return ide;
 	}
-	
+
 	public static void setIDE() {
 		ide = true;
 	}
@@ -108,9 +108,12 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 * Clear all rule variables
 	 */
 	public static void clearVariables() {
+		if (variableStorage == null)
+			variableStorage = new HashMap<String, String>();
 		variableStorage.clear();
 		variableStorage.put("launcher_name", "Cyan-MTK");
-		variableStorage.put("launcher_version", (MinecraftToolkit.getVersion().contains("${") ? "unknown" : MinecraftToolkit.getVersion()));
+		variableStorage.put("launcher_version",
+				(MinecraftToolkit.getVersion().contains("${") ? "unknown" : MinecraftToolkit.getVersion()));
 		variableStorage.put("cyan_version", CyanInfo.getCyanVersion());
 	}
 
@@ -121,7 +124,6 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	protected static void initComponent() {
 		MinecraftToolkit.trace("INITIALIZE Minecraft Installation Toolkit, caller: " + CallTrace.traceCallName());
 
-		variableStorage = new HashMap<String, String>();
 		clearVariables();
 
 		try {

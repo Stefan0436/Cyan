@@ -80,6 +80,7 @@ dependencies {
 	implementation project(':Fluid')
 	implementation project(':CyanUtil')
 	implementation project(':CCFG')
+	implementation project(':ClassTrust')
 	
 	implementation 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.13'
 	
@@ -105,6 +106,33 @@ jar {
 	}
 	exclude "**/extra/**"
 	exclude "**/tests/**"
+	includeEmptyDirs = false
+}
+
+task modAPIJar(type: Jar) {
+	from sourceSets.main.output
+	classifier = 'modapi'
+	destinationDirectory = file('../build/CyanLoader/API')
+	manifest {
+		attributes([
+			"Specification-Title": project.name,
+			"Specification-Vendor": "${authorname}",
+			"Specification-Version": project.version,
+			"Implementation-Title": project.name,
+			"Implementation-Version": project.version,
+			"Implementation-Vendor" :"${authorname}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+	exclude "**/extra/**"
+	exclude "**/tests/**"
+	exclude "**/internal/BaseEventController**"
+	exclude "**/internal/CyanModManifest**"
+	exclude "**/internal/ModInfoCache**"
+	exclude "**/loader/**"
+	exclude "**/modifications/**"
+	exclude "**/CyanErrorHandlers**"
+	exclude "**/DownloadWindow**"
 	includeEmptyDirs = false
 }
 
@@ -181,6 +209,7 @@ task prepareSourceZip {
 artifacts {
 	archives sourcesJar
 	archives javadocJar
+	archives modAPIJar
 	archives createCyanSourceZip
 }
 

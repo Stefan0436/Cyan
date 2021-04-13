@@ -85,7 +85,7 @@ public class ObjectSerializerTest {
 
 	// Serializing maps needs to be done with field reflection, else it doesn't work
 	Map<String, String> testmp = new HashMap<String, String>();
-	
+
 	@Test
 	public void serializeMap() throws IOException, NoSuchFieldException, SecurityException {
 		int length = rnd.nextInt(1000);
@@ -113,15 +113,67 @@ public class ObjectSerializerTest {
 			assertTrue(test2.get(key).equals(testmp.get(key)));
 		}
 	}
-	
+
 	@Test
 	public void testCharacterEscaping() throws IOException {
-		String test1 = "hi\r\nhi\nhello\'test\'\\r\\\\r\'test2\'\\rtest\ttabs";
+		String test1 = "hi\r\nhi\nhello\r\'test\'\\r\\\\r\'test2\'\\rtest\ttabs";
 		String out1 = ObjectSerializer.serialize(test1);
 		System.out.println(out1);
 		String out2 = ObjectSerializer.deserialize(out1, String.class);
 		System.out.println(out2);
+
+		String out3 = ObjectSerializer.toCCFGEntry("test", out1, String.class, new CCFGGetPropAction<String>() {
+
+			@Override
+			public String processPrefix(String key) {
+				return null;
+			}
+
+			@Override
+			public String processSuffix(String key) {
+				return null;
+			}
+
+			@Override
+			public Object getProp(String key) {
+				return null;
+			}
+
+			@Override
+			public String[] keys() {
+				return null;
+			}
+
+			@Override
+			public void error(IOException exception) {
+			}
+
+		}, true, false, false);
+
+		CCFGStringPutAction getter = new CCFGStringPutAction();
+		ObjectSerializer.parse(out3, getter);
+		String out4 = getter.retrieveValue();
+
+		assertTrue(out4.equals(test1));
 		assertTrue(out2.equals(test1));
+	}
+
+	class CCFGStringPutAction extends CCFGPutPropAction {
+
+		private String value = "";
+
+		@Override
+		public void run(String key, String txt) {
+			try {
+				value = ObjectSerializer.deserialize(txt, String.class);
+			} catch (IOException e) {
+			}
+		}
+
+		public String retrieveValue() {
+			return value;
+		}
+
 	}
 
 	@Test

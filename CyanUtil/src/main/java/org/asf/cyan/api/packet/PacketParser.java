@@ -32,14 +32,15 @@ public class PacketParser {
 		public long length;
 	}
 
-	protected ArrayList<PacketEntry<?>> entries = new ArrayList<PacketEntry<?>>();
+	public class Entry {
+		public Entry next;
+		public PacketEntry<?> value;
+	}
+
+	protected Entry currentEntry;
 
 	@SuppressWarnings("rawtypes")
 	protected HashMap<Long, Class<? extends PacketEntry>> entryTypes = new HashMap<Long, Class<? extends PacketEntry>>();
-
-	public PacketEntry<?>[] getEntries() {
-		return entries.toArray(t -> new PacketEntry<?>[t]);
-	}
 
 	/**
 	 * Creates a new parser instance, registers the default entry types.
@@ -98,7 +99,8 @@ public class PacketParser {
 			headersLst.add(head);
 		}
 
-		entries.clear();
+		currentEntry = new Entry();
+		Entry entry = currentEntry;
 		for (PkHeader header : headersLst) {
 			try {
 				@SuppressWarnings("rawtypes")
@@ -107,10 +109,29 @@ public class PacketParser {
 				PacketEntry<?> ent = ctor.newInstance();
 				ent = ent.importStream(input, header.length);
 
-				entries.add(ent);
+				entry.value = ent;
 			} catch (Exception e) {
 				throw new IllegalArgumentException("Failed to create packet entry with type: " + header.type, e);
 			}
+			entry.next = new Entry();
+			entry = entry.next;
+		}
+	}
+
+	/**
+	 * Retrieves the next entry
+	 * 
+	 * @param <T> Entry type
+	 * @return Entry or null if end was reached.
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> PacketEntry<T> nextEntry() {
+		if (currentEntry == null)
+			return null;
+		else {
+			PacketEntry<T> ent = (PacketEntry<T>) currentEntry.value;
+			currentEntry = currentEntry.next;
+			return ent;
 		}
 	}
 }

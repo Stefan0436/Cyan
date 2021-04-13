@@ -23,8 +23,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.asf.cyan.cornflower.classpath.util.PathPriority;
 import org.asf.cyan.cornflower.classpath.util.SourceType;
-import org.asf.cyan.cornflower.gradle.Cornflower;
 import org.asf.cyan.cornflower.gradle.utilities.ITaskExtender;
+
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
@@ -55,17 +55,14 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 
 	public EclipseLaunchGenerator() {
 		sourceLookup.add(new SourceMemento());
-		classPath.add(new ClasspathMemento(Cornflower.getPluginInstance(Cornflower.class).getProject()));
+		classPath.add(new ClasspathMemento(getProject()));
 
 		this.workingDir = new File("run");
-		this.name = "Launch " + Cornflower.getPluginInstance(Cornflower.class).getProject().getName();
-		if (Cornflower.getPluginInstance(Cornflower.class).getProject().getGroup() != null
-				&& !Cornflower.getPluginInstance(Cornflower.class).getProject().getGroup().equals(""))
-			mainClass = Cornflower.getPluginInstance(Cornflower.class).getProject().getGroup().toString()
-					+ ".main.Main";
+		this.name = "Launch " + getProject().getName();
+		if (getProject().getGroup() != null && !getProject().getGroup().equals(""))
+			mainClass = getProject().getGroup().toString() + ".main.Main";
 		else
-			mainClass = Cornflower.getPluginInstance(Cornflower.class).getProject().getName().toLowerCase()
-					+ ".main.Main";
+			mainClass = getProject().getName().toLowerCase() + ".main.Main";
 	}
 
 	@TaskAction
@@ -82,7 +79,7 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 			MAPPED_RESOURCE_PATHS.setAttribute("key", "org.eclipse.debug.core.MAPPED_RESOURCE_PATHS");
 
 			Element projName = dom.createElement("listEntry");
-			projName.setAttribute("value", "/" + Cornflower.getPluginInstance(Cornflower.class).getProject().getName());
+			projName.setAttribute("value", "/" + getProject().getName());
 			MAPPED_RESOURCE_PATHS.appendChild(projName);
 
 			launchConfiguration.appendChild(MAPPED_RESOURCE_PATHS);
@@ -131,8 +128,7 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 			classPathLst.setAttribute("key", "org.eclipse.jdt.launching.CLASSPATH");
 
 			for (ClasspathMemento cp : classPath) {
-				classPathLst.appendChild(
-						cp.createMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(), dom, builder));
+				classPathLst.appendChild(cp.createMemento(getProject(), dom, builder));
 			}
 
 			launchConfiguration.appendChild(classPathLst);
@@ -186,8 +182,7 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 
 				Element MODULE_NAME = dom.createElement("stringAttribute");
 				MODULE_NAME.setAttribute("key", "org.eclipse.jdt.launching.MODULE_NAME");
-				MODULE_NAME.setAttribute("value",
-						Cornflower.getPluginInstance(Cornflower.class).getProject().getName());
+				MODULE_NAME.setAttribute("value", getProject().getName());
 				launchConfiguration.appendChild(MODULE_NAME);
 			}
 
@@ -209,7 +204,7 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 
 			Element PROJECT_ATTR = dom.createElement("stringAttribute");
 			PROJECT_ATTR.setAttribute("key", "org.eclipse.jdt.launching.PROJECT_ATTR");
-			PROJECT_ATTR.setAttribute("value", Cornflower.getPluginInstance(Cornflower.class).getProject().getName());
+			PROJECT_ATTR.setAttribute("value", getProject().getName());
 			launchConfiguration.appendChild(PROJECT_ATTR);
 
 			if (jvmArguments.size() != 0 && launchType.type == local) {
@@ -234,8 +229,8 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 			} catch (IOException e) {
 			}
 
-			if ((workingDir.isAbsolute() && Cornflower.getPluginInstance(Cornflower.class).getProject().getProjectDir()
-					.toPath().relativize(workingDir.toPath()).startsWith(".."))
+			if ((workingDir.isAbsolute()
+					&& getProject().getProjectDir().toPath().relativize(workingDir.toPath()).startsWith(".."))
 					|| workingDir.getPath().startsWith("..")) {
 				try {
 					dir = workingDir.getCanonicalPath();
@@ -244,15 +239,12 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 				}
 			} else {
 				if (!workingDir.isAbsolute()) {
-					dir = "${workspace_loc:" + Cornflower.getPluginInstance(Cornflower.class).getProject().getName()
-							+ "/" + workingDir.getPath() + "}";
+					dir = "${workspace_loc:" + getProject().getName() + "/" + workingDir.getPath() + "}";
 				} else
-					dir = "${workspace_loc:" + Cornflower.getPluginInstance(Cornflower.class).getProject().getName()
-							+ "/" + Cornflower.getPluginInstance(Cornflower.class).getProject().getProjectDir().toPath()
-									.relativize(workingDir.toPath()).toString()
-							+ "}";
+					dir = "${workspace_loc:" + getProject().getName() + "/"
+							+ getProject().getProjectDir().toPath().relativize(workingDir.toPath()).toString() + "}";
 			}
-			
+
 			if (!workingDir.exists())
 				workingDir.mkdirs();
 
@@ -270,9 +262,7 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 			tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 			tr.setOutputProperty(OutputKeys.STANDALONE, "no");
 
-			FileWriter writer = new FileWriter(
-					new File(Cornflower.getPluginInstance(Cornflower.class).getProject().getProjectDir(),
-							"/" + name + ".launch"));
+			FileWriter writer = new FileWriter(new File(getProject().getProjectDir(), "/" + name + ".launch"));
 
 			tr.transform(new DOMSource(dom), new StreamResult(writer));
 			writer.close();
@@ -505,12 +495,12 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 			classPath.clear();
 
 		classpathMementoSpecified = true;
-		
+
 		if (!sourceMementoSpecified)
 			sourceLookup.clear();
 
 		sourceMementoSpecified = true;
-		
+
 		output.add(projects);
 	}
 
@@ -520,12 +510,12 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 			classPath.clear();
 
 		classpathMementoSpecified = true;
-		
+
 		if (!sourceMementoSpecified)
 			sourceLookup.clear();
 
 		sourceMementoSpecified = true;
-		
+
 		output.add(project);
 	}
 
@@ -570,6 +560,7 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 		return !disable;
 	}
 
+	@Override
 	public void registerTask(String name, TaskProvider<DefaultTask> task) {
 		if (name.equals("createEclipseLaunches")) {
 			task.get().setDescription("Generate the eclipse launch files");
@@ -621,8 +612,7 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 		}
 
 		public void add(SourceType type, String value) {
-			classPath.add(
-					new ClasspathMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(), type, value));
+			classPath.add(new ClasspathMemento(getProject(), type, value));
 		}
 
 		public void add(SourceType type, String... values) {
@@ -631,13 +621,11 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 		}
 
 		public void add(String value) {
-			classPath.add(
-					new ClasspathMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(), type, value));
+			classPath.add(new ClasspathMemento(getProject(), type, value));
 		}
 
 		public void dir(String file) {
-			classPath.add(new ClasspathMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(),
-					SourceType.folder, file));
+			classPath.add(new ClasspathMemento(getProject(), SourceType.folder, file));
 		}
 
 		public void dir(String... files) {
@@ -647,12 +635,11 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 		}
 
 		public void archive(String file) {
-			classPath.add(new ClasspathMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(),
-					SourceType.archive, file));
+			classPath.add(new ClasspathMemento(getProject(), SourceType.archive, file));
 		}
 
 		public void archive(File file) {
-			classPath.add(new ClasspathMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(), file));
+			classPath.add(new ClasspathMemento(getProject(), file));
 		}
 
 		public void archive(String... files) {
@@ -674,18 +661,15 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 		}
 
 		public void archive(File file, File source) {
-			classPath.add(
-					new ClasspathMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(), file, source));
+			classPath.add(new ClasspathMemento(getProject(), file, source));
 		}
 
 		public void archive(String file, String source) {
-			classPath.add(
-					new ClasspathMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(), file, source));
+			classPath.add(new ClasspathMemento(getProject(), file, source));
 		}
 
 		public void variable(String variable) {
-			classPath.add(new ClasspathMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(),
-					SourceType.classpathVariable, variable));
+			classPath.add(new ClasspathMemento(getProject(), SourceType.classpathVariable, variable));
 		}
 
 		public void variable(String... variables) {
@@ -695,8 +679,7 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 		}
 
 		public void string(String variable) {
-			classPath.add(new ClasspathMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(),
-					SourceType.variableString, variable));
+			classPath.add(new ClasspathMemento(getProject(), SourceType.variableString, variable));
 		}
 
 		public void string(String... variables) {
@@ -707,12 +690,12 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 
 		public void add(File[] files) {
 			for (File file : files) {
-				classPath.add(new ClasspathMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(), file));
+				classPath.add(new ClasspathMemento(getProject(), file));
 			}
 		}
 
 		public void add(File file) {
-			classPath.add(new ClasspathMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(), file));
+			classPath.add(new ClasspathMemento(getProject(), file));
 		}
 
 		public void add(Iterable<Project> projects) {
@@ -1007,8 +990,7 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 		}
 
 		public void add(SourceType type, String value) {
-			sourceLookup
-					.add(new SourceMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(), type, value));
+			sourceLookup.add(new SourceMemento(getProject(), type, value));
 		}
 
 		public void add(SourceType type, String... values) {
@@ -1017,13 +999,11 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 		}
 
 		public void add(String value) {
-			sourceLookup
-					.add(new SourceMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(), type, value));
+			sourceLookup.add(new SourceMemento(getProject(), type, value));
 		}
 
 		public void dir(String file) {
-			sourceLookup.add(new SourceMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(),
-					SourceType.folder, file));
+			sourceLookup.add(new SourceMemento(getProject(), SourceType.folder, file));
 		}
 
 		public void dir(String... files) {
@@ -1033,8 +1013,7 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 		}
 
 		public void archive(String file) {
-			sourceLookup.add(new SourceMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(),
-					SourceType.archive, file));
+			sourceLookup.add(new SourceMemento(getProject(), SourceType.archive, file));
 		}
 
 		public void archive(String... files) {
@@ -1044,7 +1023,7 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 		}
 
 		public void archive(File file) {
-			sourceLookup.add(new SourceMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(), file));
+			sourceLookup.add(new SourceMemento(getProject(), file));
 		}
 
 		public void archive(File... files) {
@@ -1060,8 +1039,7 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 		}
 
 		public void variable(String variable) {
-			sourceLookup.add(new SourceMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(),
-					SourceType.classpathVariable, variable));
+			sourceLookup.add(new SourceMemento(getProject(), SourceType.classpathVariable, variable));
 		}
 
 		public void variable(String... variables) {
@@ -1076,12 +1054,12 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 
 		public void add(File[] files) {
 			for (File file : files) {
-				sourceLookup.add(new SourceMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(), file));
+				sourceLookup.add(new SourceMemento(getProject(), file));
 			}
 		}
 
 		public void add(File file) {
-			sourceLookup.add(new SourceMemento(Cornflower.getPluginInstance(Cornflower.class).getProject(), file));
+			sourceLookup.add(new SourceMemento(getProject(), file));
 		}
 
 		public void add(Iterable<Project> projects) {

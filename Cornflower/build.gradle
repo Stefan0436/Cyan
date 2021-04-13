@@ -86,6 +86,8 @@ dependencies {
 	implementation project(":CyanUtil")
 	implementation project(":Fluid")
 	implementation project(":CCFG")
+	implementation project(":ClassTrust")
+	implementation project(":TrustExplorer")
 	
 	mavendependency group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.7'
 	mavendependency group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
@@ -112,6 +114,8 @@ dependencies {
 	mavendependency project(":CyanUtil")
 	mavendependency project(":Fluid")
 	mavendependency project(":CCFG")
+	mavendependency project(":ClassTrust")
+	mavendependency project(":TrustExplorer")
 }
 
 jar {

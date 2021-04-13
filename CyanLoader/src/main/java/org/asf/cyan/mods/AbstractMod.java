@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.stream.Stream;
 
 import org.asf.cyan.api.common.CyanComponent;
+import org.asf.cyan.api.events.core.ISynchronizedEventListener;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.mods.IModManifest;
@@ -32,6 +33,7 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 	private String id = null;
 	private String dsp = null;
 	private String desc = null;
+	private String group = null;
 
 	private AbstractMod[] deps;
 	private String[] optdeps;
@@ -46,6 +48,7 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 		id = manifest.modId;
 		dsp = manifest.displayName;
 		desc = manifest.fallbackDescription;
+		group = manifest.modGroup;
 		version = Version.fromString(manifest.version);
 
 		ArrayList<AbstractMod> mods = new ArrayList<AbstractMod>();
@@ -56,6 +59,22 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 
 		mods.clear();
 		optdeps = manifest.optionalDependencies.keySet().toArray(t -> new String[t]);
+
+		modloader.attachEventListener("mod.loaded", new ISynchronizedEventListener() {
+
+			@Override
+			public String getListenerName() {
+				return getId() + " Mod Support Listener";
+			}
+
+			@Override
+			public void received(Object... params) {
+				if (params.length == 1 && params[0] instanceof AbstractMod) {
+					enableModSupport((AbstractMod) params[0]);
+				}
+			}
+
+		});
 
 		addEventListenerContainer(this);
 	}
@@ -130,7 +149,7 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 	 * Retrieves the mod instance of the given id
 	 * 
 	 * @param <T> Mod type
-	 * @param id  Mod id
+	 * @param id  Mod id (group:modid)
 	 * @return Mod instance or null.
 	 */
 	@SuppressWarnings("unchecked")
@@ -160,7 +179,7 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 	/**
 	 * Checks if the given mod id is loaded.
 	 * 
-	 * @param id Mod id
+	 * @param id Mod id (group:modid)
 	 * @return True if loaded, false otherwise
 	 */
 	protected boolean isModLoaded(String id) {
@@ -173,10 +192,10 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 	}
 
 	/**
-	 * Retrieves this mod's id
+	 * Retrieves this mod's id (group:modid)
 	 */
 	public String getId() {
-		return id;
+		return group + ":" + id;
 	}
 
 	/**

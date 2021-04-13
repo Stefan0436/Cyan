@@ -45,6 +45,7 @@ public class CyanIDEWrapper {
 			InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException, IOException {
 
 		MinecraftInstallationToolkit.setIDE();
+		CyanLoader.enableDeveloperMode();
 		
 		boolean deobf = Boolean.valueOf(System.getProperty("cyan.deobfuscated"));
 		String side = System.getProperty("cyan.side");
@@ -52,7 +53,7 @@ public class CyanIDEWrapper {
 		String serverMAIN = System.getProperty("cyan.launcher.server.wrapper", "net.minecraft.server.Main");
 
 		CyanCore.initLoader();
-		((DynamicClassLoader) CyanCore.getCoreClassLoader()).setOptions(DynamicClassLoader.OPTION_ALLOW_DEFINE | DynamicClassLoader.OPTION_LOAD);
+		((DynamicClassLoader) CyanCore.getCoreClassLoader()).setOptions(DynamicClassLoader.OPTION_ALLOW_DEFINE);
 		((DynamicClassLoader) CyanCore.getCoreClassLoader()).addUrl(new URL(System.getProperty("mainJAR")));
 
 		if (deobf) {

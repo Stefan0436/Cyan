@@ -42,6 +42,8 @@ public abstract class Modloader extends CyanComponent {
 	private Modloader nextImplementation;
 
 	private static EventBus sharedEventBus;
+
+	private boolean manualAppend = false;
 	private EventBus modloaderEventBus;
 
 	private String brandCache = null;
@@ -240,21 +242,15 @@ public abstract class Modloader extends CyanComponent {
 	protected static void addModloaderImplementation(Modloader modloader) {
 		debug("Assigning modloader implementation... Implementation name: " + modloader.getImplementationName());
 
-		if (getModloader(modloader.getName()) != null) {
+		if (getModloader(modloader.getName()) != null && !getModloader(modloader.getName()).manualAppend) {
 			throw new RuntimeException("Modloader conflict! Duplicate modloader detected: " + modloader.getName()
 					+ " found in both " + modloader.getClass().getTypeName() + " and "
 					+ getModloader(modloader.getName()).getClass().getTypeName());
+		} else if (!getModloader(modloader.getName()).manualAppend) {
+			appendImplementation(modloader);
 		}
 
-		if (selectedImplementation != null) {
-			Modloader loader = selectedImplementation;
-			while (loader.nextImplementation != null)
-				loader = loader.getNextImplementation();
-
-			loader.nextImplementation = modloader;
-		} else {
-			selectedImplementation = modloader;
-		}
+		getModloader(modloader.getName()).manualAppend = false;
 		debug("Added modloader: " + modloader.getName());
 		debug("Searching for IModloaderComponent implementations...");
 
@@ -305,6 +301,19 @@ public abstract class Modloader extends CyanComponent {
 		}
 
 		modloader.postRegister();
+	}
+
+	protected static void appendImplementation(Modloader modloader) {
+		modloader.manualAppend = true;
+		if (selectedImplementation != null) {
+			Modloader loader = selectedImplementation;
+			while (loader.nextImplementation != null)
+				loader = loader.getNextImplementation();
+
+			loader.nextImplementation = modloader;
+		} else {
+			selectedImplementation = modloader;
+		}
 	}
 
 	protected EventBus getEventChannel(String name) {
@@ -705,8 +714,10 @@ public abstract class Modloader extends CyanComponent {
 
 		String brand = getSimpleName();
 
-		if (getNextImplementation() == null)
+		if (getNextImplementation() == null) {
+			brandCache = brand;
 			return brand;
+		}
 
 		brand += getNextImplementation().getGameBrand();
 

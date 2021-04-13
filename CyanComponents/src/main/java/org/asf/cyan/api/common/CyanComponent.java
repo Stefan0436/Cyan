@@ -1,5 +1,6 @@
 package org.asf.cyan.api.common;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -235,7 +236,8 @@ public abstract class CyanComponent {
 	static void logwm(String message, Level level, Throwable data) {
 		if (LOG == null)
 			initLogger();
-		trace("SEND " + level.toString() + " message from class " + CallTrace.traceCallName(2) + ", message: " + message);
+		trace("SEND " + level.toString() + " message from class " + CallTrace.traceCallName(2) + ", message: "
+				+ message);
 		trace("PARSE marker of the " + CallTrace.traceCallName(2) + " class");
 		String markerName = CallTrace.traceCallName(2);
 		if (Stream.of(CallTrace.traceCall(2).getDeclaredMethods()).anyMatch(t -> t.getName() == "getMarker")) {
@@ -368,7 +370,7 @@ public abstract class CyanComponent {
 			throw new UnsupportedOperationException("Logger already initialized.");
 		}
 	}
-	
+
 	protected String getLoggerName() {
 		return "CYAN";
 	}
@@ -421,8 +423,7 @@ public abstract class CyanComponent {
 		trace("LOOP through found classes, caller: " + CallTrace.traceCallName());
 		for (Class<?> c2 : components) {
 			debug("Loading CyanComponent " + c2.getTypeName() + "...");
-			trace("GET and INVOKE init method of the " + c2.getName() + " class, caller: "
-					+ CallTrace.traceCallName());
+			trace("GET and INVOKE init method of the " + c2.getName() + " class, caller: " + CallTrace.traceCallName());
 			try {
 				Method m = c2.getDeclaredMethod("initComponent");
 				m.setAccessible(true);
@@ -474,6 +475,25 @@ public abstract class CyanComponent {
 	 */
 	protected static <T> Class<T>[] findClasses(CyanComponent implementation, Class<T> interfaceOrSupertype) {
 		return implementation.findClassesInternal(interfaceOrSupertype);
+	}
+
+	/**
+	 * Finds annotated classes. Needs an implementation to work.
+	 * 
+	 * @param implementation       Implementation to use.
+	 * @param annotation Annotation class.
+	 * @return Array of matching classes.
+	 */
+	protected static <T extends Annotation> Class<T>[] findAnnotatedClasses(CyanComponent implementation, Class<T> annotation) {
+		return implementation.findAnnotatedClassesInternal(annotation);
+	}
+
+	/**
+	 * Called in some cases to find annotated classes (Override only)
+	 */
+	@SuppressWarnings("unchecked")
+	protected <T extends Annotation> Class<T>[] findAnnotatedClassesInternal(Class<T> annotation) {
+		return (Class<T>[]) new Class<?>[0];
 	}
 
 }

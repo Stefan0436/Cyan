@@ -51,8 +51,8 @@ public class DynamicClassLoader extends URLClassLoader {
 		if (secured)
 			throw new IllegalStateException("Classloader has been secured! Applying options denied!");
 
-		if (hasOption(OPTION_LOAD))
-			allowSelfToLoad = true;
+		if (hasOption(OPTION_DENY_SELF_LOAD))
+			allowSelfToLoad = false;
 		if (hasOption(OPTION_ALLOW_DEFINE))
 			allowSelfToDefine = true;
 		if (hasOption(OPTION_DENY_ADD_RUNTIME))
@@ -68,9 +68,9 @@ public class DynamicClassLoader extends URLClassLoader {
 	public static final int OPTION_ALLOW_DEFINE = 0x1 << 1;
 
 	/**
-	 * Sets the class loader to allow the loading of classes.
+	 * Sets the class loader to force the parent to load classes instead of doing it itself.
 	 */
-	public static final int OPTION_LOAD = 0x1 << 2;
+	public static final int OPTION_DENY_SELF_LOAD = 0x1 << 2;
 
 	/**
 	 * Prevents the adding of sources after the classloader has been secured.
@@ -101,7 +101,7 @@ public class DynamicClassLoader extends URLClassLoader {
 
 	private boolean transforming = false;
 	private boolean noSecureOnAdd = false;
-	private boolean allowSelfToLoad = false;
+	private boolean allowSelfToLoad = true;
 	private boolean allowSelfToDefine = false;
 	private boolean denyAdding = false;
 

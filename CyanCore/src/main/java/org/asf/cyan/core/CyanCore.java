@@ -1,6 +1,7 @@
 package org.asf.cyan.core;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -44,7 +45,8 @@ public class CyanCore extends CyanComponent {
 	private static String entryMethod = "Generic Launcher";
 
 	/**
-	 * Register a package for loading CyanComponents. (can only be done during or before coreload)
+	 * Register a package for loading CyanComponents. (can only be done during or
+	 * before coreload)
 	 * 
 	 * @param packageName Package name (such as org.asf.cyan, subpackages are
 	 *                    included)
@@ -57,7 +59,8 @@ public class CyanCore extends CyanComponent {
 	}
 
 	/**
-	 * Add a class for the findClasses method. (can only be done during or before coreload)
+	 * Add a class for the findClasses method. (can only be done during or before
+	 * coreload)
 	 * 
 	 * @param cls Class to add
 	 */
@@ -332,18 +335,7 @@ public class CyanCore extends CyanComponent {
 					error("Failed to load the " + rname + " package.", ex);
 				}
 			}
-			for (Package p : loader.getDefinedPackages()) {
-				String rname = p.getName().replace(".", "/");
-				try {
-					Enumeration<URL> roots = loader.getResources(rname);
-					for (URL i : Collections.list(roots)) {
-						if (!conf.getUrls().contains(i))
-							conf.addUrls(i);
-					}
-				} catch (IOException ex) {
-					error("Failed to load the " + rname + " package.", ex);
-				}
-			}
+			conf.addUrls(loader.getURLs());
 		}
 
 		trace("CREATE Reflections instance, caller: " + CallTrace.traceCallName());
@@ -432,13 +424,35 @@ public class CyanCore extends CyanComponent {
 
 		ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
 		classes.addAll(reflections.getSubTypesOf(interfaceOrSupertype));
-		
+
 		for (Class<?> cls : additionalClasses) {
 			if (interfaceOrSupertype.isAssignableFrom(cls)) {
 				classes.add(cls);
 			}
 		}
-		
+
+		return classes.toArray(t -> new Class[t]);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	protected <T extends Annotation> Class<T>[] findAnnotatedClassesInternal(Class<T> annotation) {
+		if (reflections == null) {
+			initReflections();
+		}
+
+		if (LOG == null)
+			initLogger();
+
+		ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
+		classes.addAll(reflections.getTypesAnnotatedWith(annotation));
+
+		for (Class<?> cls : additionalClasses) {
+			if (cls.isAnnotationPresent(annotation)) {
+				classes.add(cls);
+			}
+		}
+
 		return classes.toArray(t -> new Class[t]);
 	}
 
@@ -503,7 +517,7 @@ public class CyanCore extends CyanComponent {
 
 		Method meth = clas.getMethod("main", String[].class);
 		Modloader.getModloader().dispatchEvent("game.beforestart", new Object[] { game, args });
-		
+
 		info("Starting minecraft...");
 		setPhase(LoadPhase.RUNTIME);
 

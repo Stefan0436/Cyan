@@ -176,7 +176,7 @@ public class CyanInfo extends Configuration<CyanInfo> {
 	public String devStartDate;
 	public String releaseDate;
 	public String version;
-	public String modloaderVersion;
+	public String modloaderVersion = "";
 	public String displayAppend;
 	public String checkSource;
 	public String changelog;

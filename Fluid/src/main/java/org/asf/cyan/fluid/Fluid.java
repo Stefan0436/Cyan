@@ -505,7 +505,7 @@ public class Fluid extends CyanComponent {
 			for (Mapping<?> root : mappings) {
 				for (Mapping<?> clsMapping : root.mappings) {
 					if (clsMapping.mappingType == MAPTYPE.CLASS
-							&& clsMapping.obfuscated.equals(cls.name.replaceAll("/", "."))) {
+							&& clsMapping.obfuscated.equals(cls.name.replace("/", "."))) {
 						DeobfuscationTarget target = new DeobfuscationTarget();
 
 						target.jvmName = clsMapping.name.replaceAll("\\.", "/");

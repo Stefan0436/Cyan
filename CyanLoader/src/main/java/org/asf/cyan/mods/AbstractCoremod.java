@@ -17,25 +17,44 @@ import org.asf.cyan.mods.internal.IAcceptableComponent;
 public abstract class AbstractCoremod extends AbstractMod implements ICoremod, IAcceptableComponent {
 
 	private String execKey = null;
+	private ArrayList<String> transformerPackages = new ArrayList<String>();
 	private ArrayList<String> transformers = new ArrayList<String>();
-		
+
 	@Override
 	public void setup(Modloader modloader, GameSide side, CyanModfileManifest manifest) {
 		super.setup(modloader, side, manifest);
 		execKey = manifest.coremodComponentKey;
-		addTransformerPackage(getClass().getPackageName() + ".transformers");
 	}
-	
+
 	/**
 	 * Adds all transformers in the given package
 	 */
 	protected void addTransformerPackage(String pkg) {
-		
+		transformerPackages.add(pkg);
+	}
+
+	/**
+	 * Adds transformers
+	 */
+	protected void addTransformer(Class<?> transformer) {
+		transformers.add(transformer.getTypeName());
 	}
 
 	@Override
 	public String[] providers() {
-		return new String[] { "transformers", "coremod.init" };
+		return new String[] { "transformers", "transformer-packages", "auto.init" };
+	}
+
+	@Override
+	public String[] earlyInfoRequests() {
+		return new String[] { "coremod.manifest" };
+	}
+
+	@Override
+	public void provideInfo(String name, Object data) {
+		if (name.equals("coremod.manifest")) {
+			execKey = ((CyanModfileManifest) data).coremodComponentKey;
+		}
 	}
 
 	@Override
@@ -47,10 +66,18 @@ public abstract class AbstractCoremod extends AbstractMod implements ICoremod, I
 	public Object provide(String provider) {
 		if (provider.equals("transformers")) {
 			return transformers.toArray(t -> new String[t]);
-		} else if (provider.endsWith("coremod.init")) {
-
+		} else if (provider.equals("transformer-packages")) {
+			return transformerPackages.toArray(t -> new String[t]);
+		} else if (provider.equals("auto.init")) {
+			addTransformerPackage(getClass().getPackageName() + ".transformers");
+			setupCoremod();
 		}
 		return null;
 	}
+
+	/**
+	 * Runs before transformer registration, to allow transformers to be added
+	 */
+	protected abstract void setupCoremod();
 
 }

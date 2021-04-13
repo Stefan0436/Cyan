@@ -15,7 +15,8 @@ import org.gradle.internal.classloader.VisitableURLClassLoader;
  */
 public class Cornflower extends ExtendedPlugin {
 	public Cornflower() throws MalformedURLException {
-		System.setProperty("log4j2.configurationFile", CornflowerCore.class.getResource("/log4j2-cornflower.xml").toString());
+		System.setProperty("log4j2.configurationFile",
+				CornflowerCore.class.getResource("/log4j2-cornflower.xml").toString());
 		try {
 			Class.forName("org.asf.cyan.tests.TestCommand");
 			VisitableURLClassLoader urlClassLoader = (VisitableURLClassLoader) Thread.currentThread()
@@ -30,5 +31,18 @@ public class Cornflower extends ExtendedPlugin {
 	@Override
 	protected void applyPlugin(Project target) {
 		CornflowerCore.load(target, getSharedCacheFolder("Cornflower-MTK"));
+	}
+
+	public void logInfo(String msg) {
+		CornflowerCore.LOGGER.info(msg);
+	}
+
+	public void deleteDir(File input) {
+		for (File dir : input.listFiles((t) -> t.isDirectory()))
+			deleteDir(dir);
+		for (File file : input.listFiles((t) -> !t.isDirectory()))
+			file.delete();
+
+		input.delete();
 	}
 }

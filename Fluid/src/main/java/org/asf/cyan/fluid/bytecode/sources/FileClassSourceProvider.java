@@ -1,6 +1,5 @@
 package org.asf.cyan.fluid.bytecode.sources;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -61,9 +60,9 @@ public class FileClassSourceProvider implements IClassSourceProvider<String> {
 			}
 		}
 
-		BufferedInputStream strm;
+		InputStream strm;
 		try {
-			strm = new BufferedInputStream(url.openStream());
+			strm = url.openStream();
 		} catch (IOException e) {
 			return null;
 		}
