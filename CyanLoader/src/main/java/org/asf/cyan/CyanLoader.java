@@ -26,6 +26,7 @@ import java.util.zip.ZipInputStream;
 
 import org.asf.cyan.api.events.IEventProvider;
 import org.asf.cyan.api.events.core.EventBusFactory;
+import org.asf.cyan.api.fluid.annotations.PlatformExclude;
 import org.asf.cyan.api.fluid.annotations.PlatformOnly;
 import org.asf.cyan.api.fluid.annotations.SideOnly;
 import org.asf.cyan.api.fluid.annotations.VersionRegex;
@@ -898,6 +899,9 @@ public class CyanLoader extends Modloader implements IModProvider {
 						} else if (cls.isAnnotationPresent(PlatformOnly.class)
 								&& cls.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
 							continue;
+						} else if (cls.isAnnotationPresent(PlatformExclude.class)
+								&& cls.getAnnotation(PlatformOnly.class).value() == getModloaderLaunchPlatform()) {
+							continue;
 						} else if (cls.isAnnotationPresent(VersionRegex.class)
 								&& !cls.getAnnotation(VersionRegex.class).modloaderVersion()
 								&& !getModloaderGameVersion().matches(cls.getAnnotation(VersionRegex.class).value())) {
@@ -916,6 +920,9 @@ public class CyanLoader extends Modloader implements IModProvider {
 							continue;
 						} else if (hook.isAnnotationPresent(PlatformOnly.class)
 								&& hook.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
+							continue;
+						} else if (hook.isAnnotationPresent(PlatformExclude.class)
+								&& hook.getAnnotation(PlatformExclude.class).value() == getModloaderLaunchPlatform()) {
 							continue;
 						} else if (hook.isAnnotationPresent(VersionRegex.class)
 								&& !hook.getAnnotation(VersionRegex.class).modloaderVersion()
@@ -1004,6 +1011,9 @@ public class CyanLoader extends Modloader implements IModProvider {
 							} else if (cls.isAnnotationPresent(PlatformOnly.class)
 									&& cls.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
 								continue;
+							} else if (cls.isAnnotationPresent(PlatformExclude.class) && cls
+									.getAnnotation(PlatformExclude.class).value() == getModloaderLaunchPlatform()) {
+								continue;
 							} else if (cls.isAnnotationPresent(VersionRegex.class)
 									&& !cls.getAnnotation(VersionRegex.class).modloaderVersion()
 									&& !getModloaderGameVersion()
@@ -1026,6 +1036,9 @@ public class CyanLoader extends Modloader implements IModProvider {
 							continue;
 						} else if (transformer.isAnnotationPresent(PlatformOnly.class) && transformer
 								.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
+							continue;
+						} else if (transformer.isAnnotationPresent(PlatformExclude.class) && transformer
+								.getAnnotation(PlatformExclude.class).value() == getModloaderLaunchPlatform()) {
 							continue;
 						} else if (transformer.isAnnotationPresent(VersionRegex.class)
 								&& !transformer.getAnnotation(VersionRegex.class).modloaderVersion()
