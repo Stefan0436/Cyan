@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.fluid.api.ClassLoadHook;
 import org.asf.cyan.mods.config.CyanModfileManifest;
 import org.asf.cyan.mods.internal.IAcceptableComponent;
 
@@ -20,6 +21,9 @@ public abstract class AbstractCoremod extends AbstractMod implements ICoremod, I
 	private ArrayList<String> transformerPackages = new ArrayList<String>();
 	private ArrayList<String> transformers = new ArrayList<String>();
 
+	private ArrayList<String> hookPackages = new ArrayList<String>();
+	private ArrayList<ClassLoadHook> hooks = new ArrayList<ClassLoadHook>();
+
 	@Override
 	public void setup(Modloader modloader, GameSide side, CyanModfileManifest manifest) {
 		super.setup(modloader, side, manifest);
@@ -31,6 +35,7 @@ public abstract class AbstractCoremod extends AbstractMod implements ICoremod, I
 	 */
 	protected void addTransformerPackage(String pkg) {
 		transformerPackages.add(pkg);
+		hookPackages.add(pkg);
 	}
 
 	/**
@@ -40,9 +45,25 @@ public abstract class AbstractCoremod extends AbstractMod implements ICoremod, I
 		transformers.add(transformer.getTypeName());
 	}
 
+	/**
+	 * Adds all class load hooks in the given package
+	 */
+	protected void addClassHookPackage(String pkg) {
+		transformerPackages.add(pkg);
+		hookPackages.add(pkg);
+	}
+
+	/**
+	 * Adds class load hooks
+	 */
+	protected void addClassHook(ClassLoadHook hook) {
+		hooks.add(hook);
+	}
+
 	@Override
 	public String[] providers() {
-		return new String[] { "transformers", "transformer-packages", "auto.init" };
+		return new String[] { "transformers", "transformer-packages", "class-hooks", "class-hook-packages",
+				"auto.init" };
 	}
 
 	@Override
@@ -68,6 +89,10 @@ public abstract class AbstractCoremod extends AbstractMod implements ICoremod, I
 			return transformers.toArray(t -> new String[t]);
 		} else if (provider.equals("transformer-packages")) {
 			return transformerPackages.toArray(t -> new String[t]);
+		} else if (provider.equals("class-hooks")) {
+			return hooks.toArray(t -> new ClassLoadHook[t]);
+		} else if (provider.equals("class-hook-packages")) {
+			return hookPackages.toArray(t -> new String[t]);
 		} else if (provider.equals("auto.init")) {
 			addTransformerPackage(getClass().getPackageName() + ".transformers");
 			setupCoremod();

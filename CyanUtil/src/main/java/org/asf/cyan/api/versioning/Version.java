@@ -1,5 +1,7 @@
 package org.asf.cyan.api.versioning;
 
+import java.util.ArrayList;
+
 /**
  * 
  * Cyan Version API - parses versions and has various features;
@@ -8,11 +10,20 @@ package org.asf.cyan.api.versioning;
  *
  */
 public class Version {
-	
-	public class VersionSegment {
-		public char character = (char)-1;
-		public char separator = (char)-1;
+
+	private ArrayList<VersionSegment> segments = new ArrayList<VersionSegment>();
+
+	protected static class VersionSegment {
+		public String data = null;
+		public int value = -1;
+
+		public int separator = -1;
 		public boolean hasSeparator = false;
+
+		@Override
+		public String toString() {
+			return data + (separator != -1 ? (char) separator : "");
+		}
 	}
 
 	protected Version() {
@@ -25,7 +36,77 @@ public class Version {
 	 * @return Version instance.
 	 */
 	public static Version fromString(String version) {
-		return null; // TODO
+		Version ver = new Version();
+		return ver.parse(version);
+	}
+
+	private Version parse(String version) {
+		segments.clear();
+
+		boolean lastWasAlpha = false;
+		boolean first = true;
+
+		VersionSegment last = new VersionSegment();
+		segments.add(last);
+
+		for (char ch : version.toCharArray()) {
+			if (!first) {
+				if (last.data != null) {
+					if ((Character.isAlphabetic(ch) && !lastWasAlpha) || (Character.isDigit(ch) && lastWasAlpha)) {
+						if (last.data.matches("^[0-9]+$"))
+							last.value = Integer.valueOf(last.data);
+
+						last.hasSeparator = true;
+						if (last.value == -1 && last.data != null && last.data.length() > 0
+								&& Character.isAlphabetic(last.data.charAt(0)))
+							last.value = last.data.charAt(0);
+
+						last = new VersionSegment();
+						segments.add(last);
+					}
+				}
+			}
+
+			if (!Character.isDigit(ch) && !Character.isAlphabetic(ch)) {
+				if (first) {
+					continue;
+				}
+
+				if (last.data != null) {
+					if (last.data.matches("^[0-9]+$"))
+						last.value = Integer.valueOf(last.data);
+
+					last.separator = ch;
+					last.hasSeparator = true;
+					last = new VersionSegment();
+					segments.add(last);
+				}
+				continue;
+			}
+
+			if (Character.isAlphabetic(ch) && lastWasAlpha) {
+				if (last.value == -1)
+					last.value = last.data.charAt(0);
+				last.data += ch;
+				continue;
+			}
+
+			if (last.data == null) {
+				last.data = "";
+			}
+			last.data += ch;
+
+			lastWasAlpha = Character.isAlphabetic(ch);
+			first = false;
+		}
+
+		if (last.data != null && last.data.matches("^[0-9]+$"))
+			last.value = Integer.valueOf(last.data);
+		if (last.value == -1 && last.data != null && last.data.length() > 0
+				&& Character.isAlphabetic(last.data.charAt(0)))
+			last.value = last.data.charAt(0);
+
+		return this;
 	}
 
 	/**
@@ -35,6 +116,8 @@ public class Version {
 	 * @return 1 if greater, 0 if equal and -1 if less.
 	 */
 	public int compareTo(Version other) {
+		if (isEqualTo(other))
+			return 0;
 		if (isGreaterThan(other))
 			return 1;
 		if (isLessThan(other))
@@ -44,28 +127,100 @@ public class Version {
 	}
 
 	public boolean isEqualTo(Version other) {
-		return false; // TODO
+		if (other.segments.size() != segments.size())
+			return false;
+
+		int i = 0;
+		for (VersionSegment segment : segments) {
+			VersionSegment otherSegment = other.segments.get(i);
+			if (segment.value != otherSegment.value)
+				return false;
+			i++;
+		}
+
+		return true;
 	}
 
 	public boolean isGreaterThan(Version other) {
-		return false; // TODO
+		if (!segments.stream().anyMatch(t -> isSnapshot(t)) && !other.segments.stream().anyMatch(t -> isSnapshot(t))) {
+			if (other.segments.size() < segments.size())
+				return true;
+			if (other.segments.size() > segments.size())
+				return false;
+		}
+
+		int i = 0;
+		for (VersionSegment segment : segments) {
+			if (i >= other.segments.size())
+				return true;
+
+			VersionSegment otherSegment = other.segments.get(i);
+			if (isSnapshot(otherSegment) && !isSnapshot(segment))
+				return true;
+			else if (!isSnapshot(segment) && isSnapshot(otherSegment))
+				return false;
+
+			if (segment.value < otherSegment.value)
+				return false;
+			i++;
+		}
+
+		return true;
+	}
+
+	private boolean isSnapshot(VersionSegment t) {
+		return t.toString().toLowerCase().contains("snapshot") || t.toString().toLowerCase().contains("beta")
+				|| t.toString().toLowerCase().contains("alpha") || t.toString().toLowerCase().contains("pre");
 	}
 
 	public boolean isLessThan(Version other) {
-		return false; // TODO
+		if (!segments.stream().anyMatch(t -> isSnapshot(t)) && !other.segments.stream().anyMatch(t -> isSnapshot(t))) {
+			if (other.segments.size() > segments.size())
+				return true;
+			if (other.segments.size() < segments.size())
+				return false;
+		}
+
+		int i = 0;
+		for (VersionSegment segment : segments) {
+			if (i >= other.segments.size()) {
+				if (isSnapshot(segment) && !other.segments.stream().anyMatch(t -> isSnapshot(t))) {
+					break;
+				}
+				return false;
+			}
+
+			VersionSegment otherSegment = other.segments.get(i);
+			if (isSnapshot(otherSegment) && !isSnapshot(segment))
+				return false;
+			else if (!isSnapshot(otherSegment) && isSnapshot(segment))
+				return true;
+
+			if (segment.value > otherSegment.value)
+				return false;
+			i++;
+		}
+
+		return true;
 	}
 
 	public boolean isGreaterOrEqualTo(Version other) {
-		return false; // TODO
+		int comp = compareTo(other);
+		return comp == 1 || comp == 0;
 	}
 
 	public boolean isLessOrEqualTo(Version other) {
-		return false; // TODO
+		int comp = compareTo(other);
+		return comp == -1 || comp == 0;
 	}
 
 	@Override
 	public String toString() {
-		return null; // TODO
+		String str = "";
+		for (VersionSegment segment : segments) {
+			str += segment.toString();
+		}
+		return str;
 	}
 
 }

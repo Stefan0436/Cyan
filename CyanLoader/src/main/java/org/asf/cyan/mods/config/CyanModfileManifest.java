@@ -43,6 +43,8 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> {
 
 	public HashMap<String, String> dependencies = new HashMap<String, String>();
 	public HashMap<String, String> optionalDependencies = new HashMap<String, String>();
+
+	public HashMap<String, String> mavenRepositories = new HashMap<String, String>();
 	public HashMap<String, HashMap<String, String>> mavenDependencies = new HashMap<String, HashMap<String, String>>();
 
 	public HashMap<String, String> trustContainers = new HashMap<String, String>();
