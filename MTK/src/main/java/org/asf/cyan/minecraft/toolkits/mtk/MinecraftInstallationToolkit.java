@@ -1774,7 +1774,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 								strm1.transferTo(strm);
 								strm1.close();
 								strm.close();
-								info("Saving -> OK");
+								debug("Saving -> OK");
 							} else
 								MinecraftToolkit.info("Skipped file " + output.getName() + " as it already exists.");
 						}
@@ -1961,7 +1961,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		FileOutputStream st = new FileOutputStream(f);
 		st.write(file);
 		st.close();
-		MinecraftToolkit.info("Saving -> OK");
+		MinecraftToolkit.debug("Saving -> OK");
 	}
 
 }

@@ -543,10 +543,10 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 		sourceLookup MinecraftModdingToolkit.sourcesJar(version, GameSide.CLIENT)
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "clients/cyan/"+minecraft)
-
+		
+		classpath jar
 		jvm "-DassetRoot="+MinecraftInstallationToolkit.getAssetsRoot().getCanonicalPath()
 		jvm "-DassetIndex="+MinecraftInstallationToolkit.getAssetId(version)
-		jvm "-DmainJAR="+jar.toURI().toURL().toString()
 		jvm "-DcyanAgentJar="+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
 		jvm "-Djdk.attach.allowAttachSelf=true"
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
@@ -590,10 +590,10 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 		classpath MinecraftInstallationToolkit.getLibraries(version)
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "clients/cyan/"+minecraft)
-
+		
+		classpath jar
 		jvm "-DassetRoot="+MinecraftInstallationToolkit.getAssetsRoot().getCanonicalPath()
 		jvm "-DassetIndex="+MinecraftInstallationToolkit.getAssetId(version)
-		jvm "-DmainJAR="+jar.toURI().toURL().toString()
 		jvm "-DcyanAgentJar="+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
 		jvm "-Djdk.attach.allowAttachSelf=true"
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
@@ -647,9 +647,6 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 		Files.writeString(new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").toPath(), "eula=true")
 
 		classpath jar
-		jvm "-DassetRoot="+MinecraftInstallationToolkit.getAssetsRoot().getCanonicalPath()
-		jvm "-DassetIndex="+MinecraftInstallationToolkit.getAssetId(version)
-		jvm "-DmainJAR="+jar.toURI().toURL().toString()
 		jvm "-javaagent:"+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
 
@@ -693,9 +690,6 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 		Files.writeString(new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").toPath(), "eula=true")
 
 		classpath jar
-		jvm "-DassetRoot="+MinecraftInstallationToolkit.getAssetsRoot().getCanonicalPath()
-		jvm "-DassetIndex="+MinecraftInstallationToolkit.getAssetId(version)
-		jvm "-DmainJAR="+jar.toURI().toURL().toString()
 		jvm "-javaagent:"+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
 

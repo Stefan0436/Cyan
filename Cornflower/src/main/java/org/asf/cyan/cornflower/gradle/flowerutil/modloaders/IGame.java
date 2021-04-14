@@ -11,5 +11,9 @@ public interface IGame {
 	public IGame newInstance(Project proj, String version);
 	
 	public void addRepositories(RepositoryHandler repositories);
-	public void addDependencies(ConfigurationContainer configurations);	
+	public void addDependencies(ConfigurationContainer configurations);
+	
+	public IGameExecutionContext[] getContexts();
+
+	public String getVersion();
 }

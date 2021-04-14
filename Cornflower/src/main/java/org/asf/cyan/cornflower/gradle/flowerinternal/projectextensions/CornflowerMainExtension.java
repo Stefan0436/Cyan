@@ -3,22 +3,78 @@ package org.asf.cyan.cornflower.gradle.flowerinternal.projectextensions;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Optional;
 
+import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
+
+import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.cyan.game.MinecraftGameProvider;
+import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.McpPlatform;
+import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.SpigotPlatform;
+import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.VanillaPlatform;
+import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.YarnPlatform;
+
+import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IGame;
 import org.asf.cyan.cornflower.gradle.utilities.IProjectExtension;
 import org.asf.cyan.cornflower.gradle.utilities.modding.GameDependency;
+import org.asf.cyan.cornflower.gradle.utilities.modding.IPlatformConfiguration;
 import org.asf.cyan.cornflower.gradle.utilities.modding.ModloaderDependency;
+import org.asf.cyan.cornflower.gradle.utilities.modding.PlatformClosureOwner;
 import org.asf.cyan.fluid.bytecode.sources.FileClassSourceProvider;
 import org.asf.cyan.fluid.bytecode.sources.IClassSourceProvider;
 import org.asf.cyan.fluid.bytecode.sources.URLClassSourceProvider;
 import org.asf.cyan.fluid.remapping.Mapping;
+import org.asf.cyan.minecraft.toolkits.mtk.MinecraftMappingsToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftRifterToolkit;
+import org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.rift.SimpleRiftBuilder;
 import org.asf.cyan.minecraft.toolkits.mtk.rift.providers.IRiftToolchainProvider;
+import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
+import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType;
+import org.gradle.api.Project;
 
 import groovy.lang.Closure;
 
 public class CornflowerMainExtension implements IProjectExtension {
+
+	public static class PlatformConfiguration {
+		public IPlatformConfiguration MCP;
+		public IPlatformConfiguration SPIGOT;
+		public IPlatformConfiguration VANILLA;
+		public IPlatformConfiguration YARN;
+
+		public ArrayList<IPlatformConfiguration> all = new ArrayList<IPlatformConfiguration>();
+
+		public PlatformConfiguration() {
+			MCP = new McpPlatform();
+			SPIGOT = new SpigotPlatform();
+			YARN = new YarnPlatform();
+			VANILLA = new VanillaPlatform();
+
+			all.add(MCP);
+			all.add(SPIGOT);
+			all.add(VANILLA);
+			all.add(YARN);
+		}
+
+		public void MCP(Closure<?> closure) {
+			MCP.importClosure(PlatformClosureOwner.fromClosure(closure));
+		}
+
+		public void SPIGOT(Closure<?> closure) {
+			SPIGOT.importClosure(PlatformClosureOwner.fromClosure(closure));
+		}
+
+		public void VANILLA(Closure<?> closure) {
+			VANILLA.importClosure(PlatformClosureOwner.fromClosure(closure));
+		}
+
+		public void YARN(Closure<?> closure) {
+			YARN.importClosure(PlatformClosureOwner.fromClosure(closure));
+		}
+	}
 
 	public static final Class<org.asf.cyan.cornflower.classpath.util.SourceType> SourceType = org.asf.cyan.cornflower.classpath.util.SourceType.class;
 	public static final Class<org.asf.cyan.cornflower.classpath.util.EntryType> EntryType = org.asf.cyan.cornflower.classpath.util.EntryType.class;
@@ -27,11 +83,26 @@ public class CornflowerMainExtension implements IProjectExtension {
 	public static final Class<?> EclipseLaunchGenerator = org.asf.cyan.cornflower.gradle.tasks.EclipseLaunchGenerator.class;
 	public static final Class<?> CtcUtil = org.asf.cyan.cornflower.gradle.tasks.CtcTask.class;
 
-	public static final GameSideContainer GameSide = new GameSideContainer();
-	public static final LaunchPlatformContainer LaunchPlatform = new LaunchPlatformContainer();
-	
 	public static final ModloaderDependency Modloader = new ModloaderDependency();
 	public static final GameDependency Game = new GameDependency();
+
+	public static final LaunchPlatform DEOBFUSCATED = LaunchPlatform.DEOBFUSCATED;
+	public static final LaunchPlatform UNKNOWN = LaunchPlatform.UNKNOWN;
+	public static final LaunchPlatform VANILLA = LaunchPlatform.VANILLA;
+	public static final LaunchPlatform SPIGOT = LaunchPlatform.SPIGOT;
+	public static final LaunchPlatform YARN = LaunchPlatform.YARN;
+	public static final LaunchPlatform MCP = LaunchPlatform.MCP;
+
+	public static final GameSide SERVER = GameSide.SERVER;
+	public static final GameSide CLIENT = GameSide.CLIENT;
+
+	public static void platforms(Project proj, Closure<?> closure) {
+		PlatformConfiguration config = new PlatformConfiguration();
+		closure.setDelegate(config);
+		closure.call();
+
+		proj.getExtensions().getExtraProperties().set("platforms", config);
+	}
 
 	public static String connectiveHttpURLScheme(String server, String group, String modid, String modversion,
 			String trustname) {
@@ -51,32 +122,33 @@ public class CornflowerMainExtension implements IProjectExtension {
 		return ConfigurableRiftProvider.fromClosure(provider);
 	}
 
-	public static IRiftToolchainProvider riftProvider(
-			org.asf.cyan.api.modloader.information.game.LaunchPlatform platform) {
-		return SimpleRiftBuilder.getProviderForPlatform(platform, null, null, null, null);
-	}
+	public static IRiftToolchainProvider getPlatformRiftProvider(Project project, LaunchPlatform platform,
+			GameSide side) {
 
-	@SuppressWarnings("unused")
-	private static class GameSideContainer {
-		public static final org.asf.cyan.api.modloader.information.game.GameSide SERVER = org.asf.cyan.api.modloader.information.game.GameSide.SERVER;
-		public static final org.asf.cyan.api.modloader.information.game.GameSide CLIENT = org.asf.cyan.api.modloader.information.game.GameSide.CLIENT;
-	}
+		PlatformConfiguration platforms = (PlatformConfiguration) project.getExtensions().getExtraProperties()
+				.get("platforms");
 
-	@SuppressWarnings("unused")
-	private static class LaunchPlatformContainer {
-		public static final org.asf.cyan.api.modloader.information.game.LaunchPlatform DEOBFUSCATED = org.asf.cyan.api.modloader.information.game.LaunchPlatform.DEOBFUSCATED;
-		public static final org.asf.cyan.api.modloader.information.game.LaunchPlatform UNKNOWN = org.asf.cyan.api.modloader.information.game.LaunchPlatform.UNKNOWN;
-		public static final org.asf.cyan.api.modloader.information.game.LaunchPlatform VANILLA = org.asf.cyan.api.modloader.information.game.LaunchPlatform.VANILLA;
-		public static final org.asf.cyan.api.modloader.information.game.LaunchPlatform SPIGOT = org.asf.cyan.api.modloader.information.game.LaunchPlatform.SPIGOT;
-		public static final org.asf.cyan.api.modloader.information.game.LaunchPlatform YARN = org.asf.cyan.api.modloader.information.game.LaunchPlatform.YARN;
-		public static final org.asf.cyan.api.modloader.information.game.LaunchPlatform MCP = org.asf.cyan.api.modloader.information.game.LaunchPlatform.MCP;
+		String vanillaVersion = platforms.VANILLA.getMappingsVersion();
+		for (IPlatformConfiguration conf : platforms.all) {
+			if (conf.getPlatform() == platform) {
+				MinecraftVersionInfo gameVersion = MinecraftVersionToolkit.getVersion(vanillaVersion);
+				if (gameVersion == null)
+					gameVersion = new MinecraftVersionInfo(vanillaVersion, MinecraftVersionType.UNKNOWN, null,
+							OffsetDateTime.now());
+
+				return SimpleRiftBuilder.getProviderForPlatform(conf.getPlatform(), gameVersion, side,
+						conf.getModloaderVersion(), conf.getMappingsVersion());
+			}
+		}
+
+		return null;
 	}
 
 	@SuppressWarnings("unused")
 	private static class ConfigurableRiftProvider implements IRiftToolchainProvider {
 
 		public ArrayList<IClassSourceProvider<?>> sources = new ArrayList<IClassSourceProvider<?>>();
-		public Mapping<?> mappings;
+		public ArrayList<Mapping<?>> mappings = new ArrayList<Mapping<?>>();
 		public File mainJar;
 
 		public static ConfigurableRiftProvider fromClosure(Closure<?> closure) {
@@ -122,6 +194,20 @@ public class CornflowerMainExtension implements IProjectExtension {
 				library(lib);
 		}
 
+		public void mappings(Iterable<Mapping<?>> mappings) {
+			for (Mapping<?> map : mappings)
+				mappings(map);
+		}
+
+		public void mappings(Mapping<?> mappings) {
+			this.mappings.add(MinecraftRifterToolkit.generateRiftTargets(mappings));
+		}
+
+		public void mappings(Mapping<?>[] mappings) {
+			for (Mapping<?> map : mappings)
+				mappings(map);
+		}
+
 		@Override
 		public File getJar() throws IOException {
 			return mainJar;
@@ -134,7 +220,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 
 		@Override
 		public Mapping<?> getRiftMappings() throws IOException {
-			return MinecraftRifterToolkit.generateRiftTargets(mappings);
+			return MinecraftRifterToolkit.generateRiftTargets(mappings.toArray(t -> new Mapping<?>[t]));
 		}
 
 	}

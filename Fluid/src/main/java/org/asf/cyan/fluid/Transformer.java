@@ -28,37 +28,59 @@ public abstract class Transformer extends CyanComponent {
 
 	// Basic information getters
 	protected abstract String getDeobfNameInternal(String clName);
+
 	protected abstract String getImplementationName();
 
 	// Transformer
-	protected abstract void transformInternal(ClassNode cls, HashMap<String, String> transformerOwners, HashMap<String, ArrayList<ClassNode>> transformers, String clName, String loadingName, FluidClassPool pool, FluidClassPool transformerPool);
+	protected abstract void transformInternal(ClassNode cls, HashMap<String, String> transformerOwners,
+			HashMap<String, ArrayList<ClassNode>> transformers, String clName, String loadingName, FluidClassPool pool,
+			FluidClassPool transformerPool);
 
 	// Field getters
 	protected abstract boolean checkField(String fname, FluidClassPool pool, ClassNode cls);
+
 	protected abstract FieldNode getField(String fname, FluidClassPool pool, ClassNode cls);
 
 	// FMI
 	protected abstract List<AnnotationInfo> getParameterAnnotations(MethodNode method, int param);
+
 	protected abstract FluidMethodInfo createFMI(String name, String[] types, String returnType, String owner);
+
 	protected abstract FluidMethodInfo createFMI(String methodName, String methodDesc);
+
 	protected abstract FluidMethodInfo createFMI(String methodIdentifier);
+
 	protected abstract FluidMethodInfo createFMI(MethodInsnNode method);
+
 	protected abstract FluidMethodInfo createFMI(MethodNode method);
+
 	protected abstract FluidMethodInfo createFMI(String name, String[] types, String returnType);
-	protected abstract MethodNode remapFMI(FluidMethodInfo self, String clName, ClassNode transformerNode, FluidMethodInfo method, boolean fullRemap, FluidClassPool pool);
+
+	protected abstract MethodNode remapFMI(FluidMethodInfo self, String clName, ClassNode transformerNode,
+			FluidMethodInfo method, boolean fullRemap, FluidClassPool pool);
+
 	protected abstract FluidMethodInfo applyFMI(FluidMethodInfo self, MethodNode method);
+
 	protected abstract FluidMethodInfo applyFMI(FluidMethodInfo self, String owner, MethodInsnNode method);
-	protected abstract FluidMethodInfo transformFMI(FluidMethodInfo self, InsnList instructions, ClassNode transformerNode, String clName, ClassNode cls, FluidClassPool pool);
-	
+
+	protected abstract FluidMethodInfo transformFMI(FluidMethodInfo self, InsnList instructions,
+			ClassNode transformerNode, String clName, ClassNode cls, FluidClassPool pool);
+
 	// AnnoInfo
 	protected abstract AnnotationInfo createAnnoInfo(AnnotationNode node);
+
 	protected abstract AnnotationInfo[] createAnnoInfo(AbstractInsnNode node);
+
 	protected abstract AnnotationInfo[] createAnnoInfo(MethodNode node);
+
 	protected abstract AnnotationInfo[] createAnnoInfo(FieldNode node);
+
 	protected abstract AnnotationInfo[] createAnnoInfo(ClassNode node);
-	
+
 	/**
-	 * Assigns the implementation FLUID uses. (recommended to extend the CYAN implementation)
+	 * Assigns the implementation FLUID uses. (recommended to extend the CYAN
+	 * implementation)
+	 * 
 	 * @param transformerEngine Transformer engine to use
 	 */
 	protected static void setImplementation(Transformer transformerEngine) {
@@ -89,19 +111,21 @@ public abstract class Transformer extends CyanComponent {
 	 * @param pool              Class pool loading the class
 	 * @param transformerPool   Class pool containing the transformers
 	 */
-	public static byte[] transform(ClassNode cls, HashMap<String, String> transformerOwners, HashMap<String, ArrayList<ClassNode>> transformers, String clName,
-			String loadingName, FluidClassPool pool, FluidClassPool transformerPool, ClassLoader loader) {
-		selectedTransformer.transformInternal(cls, transformerOwners, transformers, clName, loadingName, pool, transformerPool);
-		
+	public static byte[] transform(ClassNode cls, HashMap<String, String> transformerOwners,
+			HashMap<String, ArrayList<ClassNode>> transformers, String clName, String loadingName, FluidClassPool pool,
+			FluidClassPool transformerPool, ClassLoader loader) {
+		selectedTransformer.transformInternal(cls, transformerOwners, transformers, clName, loadingName, pool,
+				transformerPool);
+
 		FluidClassWriter clsWriter = new FluidClassWriter(pool, ClassWriter.COMPUTE_FRAMES, loader);
 		cls.accept(clsWriter);
 		byte[] bytecode = clsWriter.toByteArray();
-
+		
 		try {
-			pool.detachClass(cls.name, true);
+			pool.rewriteClass(cls.name, bytecode);
 		} catch (ClassNotFoundException e) {
 		}
-		cls = pool.readClass(cls.name, bytecode);
+		
 		return bytecode;
 	}
 
@@ -142,7 +166,8 @@ public abstract class Transformer extends CyanComponent {
 			return remap(clName, transformerNode, method, true, pool);
 		}
 
-		public MethodNode remap(String clName, ClassNode transformerNode, FluidMethodInfo method, boolean fullRemap, FluidClassPool pool) {
+		public MethodNode remap(String clName, ClassNode transformerNode, FluidMethodInfo method, boolean fullRemap,
+				FluidClassPool pool) {
 			return selectedTransformer.remapFMI(this, clName, transformerNode, method, fullRemap, pool);
 		}
 

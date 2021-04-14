@@ -3,12 +3,10 @@ package org.asf.cyan;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.nio.file.Files;
 
 import javax.swing.JOptionPane;
 
-import org.asf.cyan.api.classloading.DynamicClassLoader;
 import org.asf.cyan.api.config.Configuration;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.core.CyanCore;
@@ -22,7 +20,6 @@ import org.asf.cyan.minecraft.toolkits.mtk.auth.YggdrasilAuthentication;
 import org.asf.cyan.minecraft.toolkits.mtk.auth.windowed.YggdrasilAuthenticationWindow;
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType;
-
 
 // Large wrapper for the IDE, needed or CYAN won't run correctly.
 // Half of it is for authenticating the game.
@@ -46,16 +43,13 @@ public class CyanIDEWrapper {
 
 		MinecraftInstallationToolkit.setIDE();
 		CyanLoader.enableDeveloperMode();
-		
+
 		boolean deobf = Boolean.valueOf(System.getProperty("cyan.deobfuscated"));
 		String side = System.getProperty("cyan.side");
 		String clientMAIN = System.getProperty("cyan.launcher.client.wrapper", "net.minecraft.client.main.Main");
 		String serverMAIN = System.getProperty("cyan.launcher.server.wrapper", "net.minecraft.server.Main");
 
 		CyanCore.initLoader();
-		((DynamicClassLoader) CyanCore.getCoreClassLoader()).setOptions(DynamicClassLoader.OPTION_ALLOW_DEFINE);
-		((DynamicClassLoader) CyanCore.getCoreClassLoader()).addUrl(new URL(System.getProperty("mainJAR")));
-
 		if (deobf) {
 			CyanInfo.setDeobfuscated();
 			CyanLoader.disableVanillaMappings();
@@ -130,9 +124,9 @@ public class CyanIDEWrapper {
 				MinecraftInstallationToolkit.saveVersionManifest(version);
 			}
 
-			String[] gameArgs = MinecraftInstallationToolkit.generateGameArguments(version, null, account.getPlayerName(),
-					account.getUUID(), account.getAccessToken(), account.getAccountType(), new File("."),
-					new File(System.getProperty("assetRoot")), System.getProperty("assetIndex"));
+			String[] gameArgs = MinecraftInstallationToolkit.generateGameArguments(version, null,
+					account.getPlayerName(), account.getUUID(), account.getAccessToken(), account.getAccountType(),
+					new File("."), new File(System.getProperty("assetRoot")), System.getProperty("assetIndex"));
 			arguments = new String[gameArgs.length + args.length];
 			int index = 0;
 			for (String arg : gameArgs) {

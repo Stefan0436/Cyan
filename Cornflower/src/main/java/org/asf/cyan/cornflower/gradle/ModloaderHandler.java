@@ -1,5 +1,6 @@
 package org.asf.cyan.cornflower.gradle;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.function.Consumer;
 
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IGame;
+import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IGameExecutionContext;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IModloader;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
@@ -114,6 +116,9 @@ public class ModloaderHandler extends CyanComponent {
 
 			game.addRepositories(proj.getRepositories());
 			game.addDependencies(proj.getConfigurations());
+			for (IGameExecutionContext ctx : game.getContexts()) {
+				IGameExecutionContext context = ctx.newInstance(proj, game.getVersion());
+			}
 		}
 
 	}

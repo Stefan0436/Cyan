@@ -11,7 +11,6 @@ import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -39,12 +38,16 @@ import org.objectweb.asm.tree.MethodNode;
  *
  */
 public class FluidClassPool extends CyanComponent implements Closeable {
+	private class ClassEntry {
+		public ClassNode node;
+		public String firstName;
+	}
+
 	private FluidClassPool() {
 	}
 
 	private ArrayList<IClassSourceProvider<?>> sources = new ArrayList<IClassSourceProvider<?>>();
-	private ArrayList<ClassNode> classes = new ArrayList<ClassNode>();
-	private HashMap<ClassNode, String> oldNames = new HashMap<ClassNode, String>();
+	private ArrayList<ClassEntry> classes = new ArrayList<ClassEntry>();
 
 	private ByteArrayOutputStream topOutput = new ByteArrayOutputStream();
 	private ZipOutputStream output = new ZipOutputStream(topOutput);
@@ -146,11 +149,11 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 	 */
 	public ClassNode readClass(String name, byte[] bytecode) {
 		name = name.replaceAll("\\.", "/");
-		final String nameFinal = name;
-		ArrayList<ClassNode> clsLstBackup = new ArrayList<ClassNode>(classes);
-		for (ClassNode cls : clsLstBackup) {
-			if (cls.name.equals(name)) {
-				return cls;
+
+		ArrayList<ClassEntry> clsLstBackup = new ArrayList<ClassEntry>(classes);
+		for (ClassEntry cls : clsLstBackup) {
+			if (cls.node.name.equals(name)) {
+				return cls.node;
 			}
 		}
 
@@ -159,20 +162,12 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 		reader.accept(node, 0);
 
 		fixLocalVariableNames(node);
-
 		node.name = name;
-		classes.add(node);
 
-		String oldname = name;
-
-		for (Object t1 : oldNames.keySet().toArray()) {
-			ClassNode t = (ClassNode) t1;
-			if (t.name.equals(nameFinal)) {
-				oldname = oldNames.get(t);
-				oldNames.remove(t);
-			}
-		}
-		oldNames.put(node, oldname);
+		ClassEntry entry = new ClassEntry();
+		entry.node = node;
+		entry.firstName = name.replace(".", "/");
+		classes.add(entry);
 		return node;
 	}
 
@@ -187,30 +182,24 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 	 */
 	public ClassNode readClass(String name, InputStream strm) throws IOException {
 		name = name.replaceAll("\\.", "/");
-		final String nameFinal = name;
-		ArrayList<ClassNode> clsLstBackup = new ArrayList<ClassNode>(classes);
-		for (ClassNode cls : clsLstBackup) {
-			if (cls.name.equals(name))
-				return cls;
+
+		ArrayList<ClassEntry> clsLstBackup = new ArrayList<ClassEntry>(classes);
+		for (ClassEntry cls : clsLstBackup) {
+			if (cls.node.name.equals(name))
+				return cls.node;
 		}
+
 		ClassNode node = new ClassNode();
 		ClassReader reader = new ClassReader(strm);
 		reader.accept(node, 0);
 
 		fixLocalVariableNames(node);
-
 		node.name = name;
-		classes.add(node);
 
-		String oldname = name;
-		for (Object t1 : oldNames.keySet().toArray()) {
-			ClassNode t = (ClassNode) t1;
-			if (t.name.equals(nameFinal)) {
-				oldname = oldNames.get(t);
-				oldNames.remove(t);
-			}
-		}
-		oldNames.put(node, oldname);
+		ClassEntry entry = new ClassEntry();
+		entry.node = node;
+		entry.firstName = name.replace(".", "/");
+		classes.add(entry);
 		return node;
 	}
 
@@ -225,25 +214,17 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 	public ClassNode getClassNode(String name) throws ClassNotFoundException {
 		name = name.replaceAll("\\.", "/");
 		final String nameFinal = name;
-		ArrayList<ClassNode> oldNLstBackup = new ArrayList<ClassNode>(oldNames.keySet());
-		Optional<ClassNode> oldN = oldNLstBackup.stream()
-				.filter(t -> oldNames.get(t).replaceAll("\\.", "/").equals(nameFinal)).findFirst();
-		if (!oldN.isEmpty()) {
-			ArrayList<ClassNode> clsNodesBackup = new ArrayList<ClassNode>(classes);
-			for (ClassNode t : clsNodesBackup) {
-				if (t.name.equals(oldN.get().name)) {
-					return t;
-				}
-			}
+
+		Optional<ClassEntry> oldN = new ArrayList<ClassEntry>(classes).stream()
+				.filter(t -> t.firstName.equals(nameFinal)).findFirst();
+		if (!oldN.isEmpty())
+			return oldN.get().node;
+
+		for (ClassEntry cls : new ArrayList<ClassEntry>(classes)) {
+			if (cls.node.name.equals(name))
+				return cls.node;
 		}
 
-		ArrayList<ClassNode> clsLstBackup = new ArrayList<ClassNode>(classes);
-		for (ClassNode cls : clsLstBackup) {
-			if (cls.name.equals(name))
-				return cls;
-		}
-
-		ArrayList<ClassNode> backupOldNames = new ArrayList<ClassNode>(oldNames.keySet()); 
 		ArrayList<IClassSourceProvider<?>> backupProviders = new ArrayList<IClassSourceProvider<?>>(sources);
 		for (IClassSourceProvider<?> provider : backupProviders) {
 			try {
@@ -254,21 +235,14 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 
 				ClassReader reader = new ClassReader(strm);
 				reader.accept(node, 0);
-
 				fixLocalVariableNames(node);
 				strm.close();
 
-				classes.add(node);
+				ClassEntry entry = new ClassEntry();
+				entry.node = node;
+				entry.firstName = name.replace(".", "/");
+				classes.add(entry);
 
-				String oldname = name;
-				for (Object t1 : backupOldNames) {
-					ClassNode t = (ClassNode) t1;
-					if (t.name.equals(nameFinal)) {
-						oldname = oldNames.get(t);
-						oldNames.remove(t);
-					}
-				}
-				oldNames.put(node, oldname);
 				return node;
 			} catch (IOException ex) {
 			}
@@ -332,10 +306,10 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 	 */
 	public byte[] getByteCode(String name) {
 		name = name.replaceAll("\\.", "/");
-		ArrayList<ClassNode> clsLstBackup = new ArrayList<ClassNode>(classes);
-		for (ClassNode cls : clsLstBackup) {
-			if (cls.name.equals(name))
-				return getByteCode(cls);
+		ArrayList<ClassEntry> clsLstBackup = new ArrayList<ClassEntry>(classes);
+		for (ClassEntry cls : clsLstBackup) {
+			if (cls.node.name.equals(name))
+				return getByteCode(cls.node);
 		}
 		return null;
 	}
@@ -381,8 +355,8 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 				name = name.substring(0, name.lastIndexOf(".class"));
 
 				final String nameFinal = name;
-				if (!this.classes.stream().anyMatch(t -> t.name.equals(nameFinal))
-						&& !oldNames.containsValue(nameFinal)) {
+				if (!this.classes.stream()
+						.anyMatch(t -> t.node.name.equals(nameFinal) || t.firstName.equals(nameFinal))) {
 					if (loadClasses && (includedclasses.size() == 0 || includedclasses.contains(nameFinal)))
 						readClass(name, strm);
 					else
@@ -402,24 +376,10 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 	 * @throws ClassNotFoundException If the class cannot be found.
 	 */
 	public void detachClass(String name) throws ClassNotFoundException {
-		detachClass(name, false);
-	}
-
-	/**
-	 * Removes a class from the pool
-	 * 
-	 * @param name   Class name
-	 * @param unsafe True to use unsafe detaching (keeps the old name locked), false
-	 *               otherwise
-	 * @throws ClassNotFoundException If the class cannot be found.
-	 */
-	public void detachClass(String name, boolean unsafe) throws ClassNotFoundException {
 		name = name.replaceAll("\\.", "/");
-		ArrayList<ClassNode> clsLstBackup = new ArrayList<ClassNode>(classes);
-		for (ClassNode cls : clsLstBackup) {
-			if (cls.name.equals(name)) {
-				if (!unsafe)
-					oldNames.remove(cls);
+		ArrayList<ClassEntry> clsLstBackup = new ArrayList<ClassEntry>(classes);
+		for (ClassEntry cls : clsLstBackup) {
+			if (cls.node.name.equals(name)) {
 				classes.remove(cls);
 				return;
 			}
@@ -463,8 +423,8 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 			}
 		}
 
-		for (ClassNode node : classes) {
-			addFile(node.name.replaceAll("\\.", "/") + ".class", getByteCode(node));
+		for (ClassEntry node : classes) {
+			addFile(node.node.name.replaceAll("\\.", "/") + ".class", getByteCode(node.node));
 		}
 
 		output.close();
@@ -500,8 +460,8 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 			}
 		}
 
-		for (ClassNode node : classes) {
-			addFile(node.name.replaceAll("\\.", "/") + ".class", getByteCode(node));
+		for (ClassEntry node : classes) {
+			addFile(node.node.name.replaceAll("\\.", "/") + ".class", getByteCode(node.node));
 		}
 
 		output.close();
@@ -531,7 +491,6 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 		output.close();
 		topOutput.close();
 		sources.clear();
-		oldNames.clear();
 		classes.clear();
 		entries.clear();
 	}
@@ -548,5 +507,52 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Reads the bytecode into an existing class
+	 * 
+	 * @param name     Class name
+	 * @param bytecode Bytecode to import
+	 * @return New class node
+	 * @throws ClassNotFoundException
+	 */
+	public ClassNode rewriteClass(String name, byte[] bytecode) throws ClassNotFoundException {
+		name = name.replaceAll("\\.", "/");
+		ArrayList<ClassEntry> clsLstBackup = new ArrayList<ClassEntry>(classes);
+		for (ClassEntry cls : clsLstBackup) {
+			if (cls.node.name.equals(name)) {
+				cls.node = new ClassNode();
+				ClassReader reader = new ClassReader(bytecode);
+				reader.accept(cls.node, 0);
+				fixLocalVariableNames(cls.node);
+				return cls.node;
+			}
+		}
+		throw new ClassNotFoundException("Could not find class " + name.replaceAll("/", "."));
+	}
+
+	/**
+	 * Reads the bytecode into an existing class
+	 * 
+	 * @param name  Class name
+	 * @param input Bytecode stream to import
+	 * @return New class node
+	 * @throws ClassNotFoundException If the class cannot be found
+	 * @throws IOException            If reading fails
+	 */
+	public ClassNode rewriteClass(String name, InputStream input) throws ClassNotFoundException, IOException {
+		name = name.replaceAll("\\.", "/");
+		ArrayList<ClassEntry> clsLstBackup = new ArrayList<ClassEntry>(classes);
+		for (ClassEntry cls : clsLstBackup) {
+			if (cls.node.name.equals(name)) {
+				cls.node = new ClassNode();
+				ClassReader reader = new ClassReader(input);
+				reader.accept(cls.node, 0);
+				fixLocalVariableNames(cls.node);
+				return cls.node;
+			}
+		}
+		throw new ClassNotFoundException("Could not find class " + name.replaceAll("/", "."));
 	}
 }

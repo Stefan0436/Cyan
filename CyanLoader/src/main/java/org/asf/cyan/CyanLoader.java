@@ -806,6 +806,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 				fatal("Coremod path '" + manifest.modGroup + "." + manifest.modId + "' was imported twice!");
 				System.exit(-1);
 			}
+			
+			CyanCore.addAllowedPackage(manifest.modClassPackage);
 			coreModManifests.put(manifest.modGroup + "." + manifest.modId, manifest);
 		});
 

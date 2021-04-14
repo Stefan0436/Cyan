@@ -27,11 +27,11 @@ public class CyanMixinClassHook extends ClassLoadHook {
 	private static MixinEnvironment environment;
 	private static boolean setPool = false;
 	private static boolean activated = false;
-	
+
 	public static void activate() {
 		activated = true;
 	}
-	
+
 	@Override
 	public boolean isSilent() {
 		return true;
@@ -59,20 +59,20 @@ public class CyanMixinClassHook extends ClassLoadHook {
 			ProtectionDomain protectionDomain, byte[] classfileBuffer) throws ClassNotFoundException {
 		if (!activated)
 			return;
-		
+
 		if (transformer == null) {
 			environment = MixinEnvironment.getCurrentEnvironment();
 			transformer = ((CyanMixinService) MixinService.getService()).getTransformer();
 		}
-		
+
 		if (MixinService.getService() instanceof CyanMixinService && !setPool) {
-			((CyanMixinService)MixinService.getService()).setClassPool(cp);
+			((CyanMixinService) MixinService.getService()).setClassPool(cp);
 			setPool = true;
 		}
-		
+
 		if (transformer == null)
 			return;
-		
+
 		if (Stream.of(transformer.getClass().getMethods()).anyMatch(t -> t.getName().equals("transformClass"))) {
 			Method m;
 			try {
@@ -87,9 +87,9 @@ public class CyanMixinClassHook extends ClassLoadHook {
 		} else {
 			ClassWriter writer = new ClassWriter(0);
 			cc.accept(writer);
-			byte[] bytecode = transformer.transformClassBytes(cc.name.replaceAll("/", "."), cc.name.replaceAll("/", "."), writer.toByteArray());
-			cp.detachClass(cc.name, true);
-			cc = cp.readClass(cc.name, bytecode);
+			byte[] bytecode = transformer.transformClassBytes(cc.name.replaceAll("/", "."),
+					cc.name.replaceAll("/", "."), writer.toByteArray());
+			cc = cp.rewriteClass(cc.name, bytecode);
 		}
 	}
 

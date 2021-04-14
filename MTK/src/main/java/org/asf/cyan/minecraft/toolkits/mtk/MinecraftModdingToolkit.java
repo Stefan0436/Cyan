@@ -74,7 +74,15 @@ public class MinecraftModdingToolkit extends CyanComponent {
 		if (input == null)
 			throw new FileNotFoundException(
 					"Could not find " + side.toString().toLowerCase() + " jar for version " + version);
+		
+		String name = input.getName();
+		String ext = name.substring(name.lastIndexOf(".") + 1);
+		name = name.substring(0, name.lastIndexOf("."));
 
+		File output = new File(input.getParent(), name + "-deobf." + ext);
+		if (output.exists() && !overwrite)
+			return output;
+		
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, side))
 			throw new IOException("No mappings are present for the " + version + " " + side.toString().toLowerCase());
 
@@ -214,7 +222,7 @@ public class MinecraftModdingToolkit extends CyanComponent {
 					fIn.transferTo(strm);
 					fIn.close();
 					strm.closeEntry();
-					info(f.getName() + " -> <jararchive>!/" + prefix + f.getName());
+					debug(f.getName() + " -> <jararchive>!/" + prefix + f.getName());
 				} catch (IOException e) {
 					error("Failed to add file " + f.getName(), e);
 				}
@@ -317,7 +325,7 @@ public class MinecraftModdingToolkit extends CyanComponent {
 				FileOutputStream strm = new FileOutputStream(output);
 				trace("TRANSFER ZipInputStream to FileOutputStream, caller: " + CallTrace.traceCallName());
 				jar.transferTo(strm);
-				info(path + " -> " + output.getName());
+				debug(path + " -> " + output.getName());
 				strm.close();
 
 				if (output.getName().endsWith(".class"))
@@ -371,7 +379,7 @@ public class MinecraftModdingToolkit extends CyanComponent {
 				debug("Copying " + k.getCanonicalPath() + " to " + v.getName());
 				Files.copy(k.toPath(), v.toPath());
 				v = v.getCanonicalFile();
-				info(k.getName() + " -> " + tmpDecomp.getParentFile().toPath().relativize(v.toPath()));
+				debug(k.getName() + " -> " + tmpDecomp.getParentFile().toPath().relativize(v.toPath()));
 			} catch (IOException e) {
 				error("Failed to copy " + k.getName(), e);
 			}

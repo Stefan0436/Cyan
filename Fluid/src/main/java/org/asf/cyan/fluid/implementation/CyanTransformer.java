@@ -496,7 +496,7 @@ public class CyanTransformer extends Transformer {
 							}
 						}
 
-						if (!lineless && injectNode == null && targetMethName == null) {
+						if (injectNode == null && targetMethName == null) {
 							if (at.get("location") == InjectLocation.HEAD) {
 								int offset = at.get("offset", 0);
 								tnode = methodStartLabel;
