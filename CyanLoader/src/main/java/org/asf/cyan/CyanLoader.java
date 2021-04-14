@@ -351,15 +351,17 @@ public class CyanLoader extends Modloader implements IModProvider {
 			}
 		});
 
-		ICoremod mod = getMod(manifest.modClassPackage + "." + manifest.modClassName, true);
+		IMod mod = getMod(manifest.modClassPackage + "." + manifest.modClassName, coremod);
 		if (mod == null) {
-			fatal("Failed to load coremod " + manifest.modGroup + ":" + manifest.modId
-					+ " as it was not accepted by the modloader!");
+			if (coremod) {
+				fatal("Failed to load coremod " + manifest.modGroup + ":" + manifest.modId
+						+ " as it was not accepted by the modloader!");
+			}
 			System.exit(-1);
 		}
 
 		if (coremod) {
-			loadCoremod(mod, manifest, classesMap.get(manifest.modGroup + ":" + manifest.modId));
+			loadCoremod((ICoremod) mod, manifest, classesMap.get(manifest.modGroup + ":" + manifest.modId));
 		} else {
 			// TODO
 		}
