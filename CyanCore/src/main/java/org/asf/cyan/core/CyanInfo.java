@@ -1,6 +1,6 @@
 package org.asf.cyan.core;
 
-import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
@@ -23,7 +23,7 @@ import org.asf.cyan.api.versioning.VersionStatus;
  */
 public class CyanInfo extends Configuration<CyanInfo> {
 	static CyanInfo info = null;
-	static CyanInfoProvider provider;
+	static CyanInfoProvider provider;	
 	public static final String infoPath = "/org/asf/cyan/CyanVersionHolder/generic/CyanVersionHolder-generic-versions.ccfg";
 
 	@SuppressWarnings("unchecked")
@@ -161,8 +161,7 @@ public class CyanInfo extends Configuration<CyanInfo> {
 
 	static final String readCCFG() {
 		try {
-			BufferedInputStream strm = new BufferedInputStream(
-					CyanCore.getCoreClassLoader().getResource("cyan.release.ccfg").openStream());
+			InputStream strm = CyanCore.getCoreClassLoader().getResource("cyan.release.ccfg").openStream();
 			String conf = new String(strm.readAllBytes());
 			strm.close();
 			return conf;

@@ -78,8 +78,14 @@ public class TrustContainer {
 
 			ClassTrustEntry[] entries = new ClassTrustEntry[entryCount];
 			for (int ind = 0; ind < entryCount; ind++) {
-				entries[ind] = ClassTrustEntry.create(parser.<String>nextEntry().get(),
-						parser.<String>nextEntry().get());
+				String entryName = parser.<String>nextEntry().get();
+				int hashes = parser.<Integer>nextEntry().get();
+
+				String[] hashArray = new String[hashes];
+				for (int i2 = 0; i2 < hashes; i2++) {
+					hashArray[i2] = parser.<String>nextEntry().get();
+				}
+				entries[ind] = ClassTrustEntry.create(entryName, hashArray);
 			}
 
 			store.entries[i] = PackageTrustEntry.create(name, entries);
@@ -108,7 +114,9 @@ public class TrustContainer {
 			builder.add(entry.getEntries().length);
 			for (ClassTrustEntry cls : entry.getEntries()) {
 				builder.add(cls.getName());
-				builder.add(cls.getSha256());
+				builder.add(cls.getHashes().length);
+				for (String hash : cls.getHashes())
+					builder.add(hash);
 			}
 		}
 
@@ -153,11 +161,13 @@ public class TrustContainer {
 		String sha256 = sha256HEX(strm.readAllBytes());
 		strm.close();
 
-		if (!ent.getSha256().equals(sha256)) {
-			return 1;
+		for (String hash : ent.getHashes()) {
+			if (hash.equals(sha256)) {
+				return 0;
+			}
 		}
 
-		return 0;
+		return 1;
 	}
 
 	private String sha256HEX(byte[] array) {

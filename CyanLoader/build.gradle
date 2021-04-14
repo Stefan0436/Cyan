@@ -34,36 +34,6 @@ task createCyanSourceZip(type: Zip, dependsOn: 'prepareSourceZip') {
 	classifier 'FULL-SOURCES'
 }
 
-configurePublish {
-	pretty_name "CyanLoader"
-	description "Cyan main startup system - called from the wrappers"
-	page "https://aerialworks.ddns.net/maven"
-	address "https://aerialworks.ddns.net/maven"
-	
-	author {
-		name "$authorname"
-		id "ASF"
-	}
-	
-	license {
-		name "GNU General Public License v2.0"
-		url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
-	}
-	
-	artifact {
-		name 'CyanLoader-Sources'
-		artifact_description 'Source artifact for the Cyan project, contains the entire source tree'
-		artifact_version project.version
-		
-		task {
-			artifact tasks.createCyanSourceZip
-			classifier 'full'
-		}		
-	}
-	
-	resource "/log4j2.xml"
-}
-
 jar.dependsOn('processResources')
 
 repositories {
@@ -109,10 +79,10 @@ jar {
 	includeEmptyDirs = false
 }
 
-task modAPIJar(type: Jar) {
+task coremodAPIJar(type: Jar) {
+	archiveBaseName = "CyanCoreModding"
 	from sourceSets.main.output
-	classifier = 'modapi'
-	destinationDirectory = file('../build/CyanLoader/API')
+	destinationDirectory = file('../build/CyanLoader/API/Coremods')
 	manifest {
 		attributes([
 			"Specification-Title": project.name,
@@ -132,7 +102,36 @@ task modAPIJar(type: Jar) {
 	exclude "**/loader/**"
 	exclude "**/modifications/**"
 	exclude "**/CyanErrorHandlers**"
+	exclude "**/CyanLoader**"
 	exclude "**/DownloadWindow**"
+	includeEmptyDirs = false
+}
+
+task modAPIJar(type: Jar) {
+	archiveBaseName = "CyanModding"
+	from sourceSets.main.output
+	destinationDirectory = file('../build/CyanLoader/API/Mods')
+	manifest {
+		attributes([
+			"Specification-Title": project.name,
+			"Specification-Vendor": "${authorname}",
+			"Specification-Version": project.version,
+			"Implementation-Title": project.name,
+			"Implementation-Version": project.version,
+			"Implementation-Vendor" :"${authorname}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+	exclude "**/extra/**"
+	exclude "**/tests/**"
+	exclude "**/internal/**"
+	exclude "**/loader/**"
+	exclude "**/modifications/**"
+	exclude "**/CyanErrorHandlers**"
+	exclude "**/CyanLoader**"
+	exclude "**/DownloadWindow**"
+	exclude "**/ICoremod**"
+	exclude "**/AbstractCoremod**"
 	includeEmptyDirs = false
 }
 
@@ -153,6 +152,56 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 	from sourceSets.main.allSource
 	exclude "**/extra/**"
 	destinationDirectory = file('../build/CyanLoader/Source jars')
+}
+
+configurePublish {
+	pretty_name "CyanLoader"
+	description "Cyan main startup system - called from the wrappers"
+	page "https://aerialworks.ddns.net/maven"
+	address "https://aerialworks.ddns.net/maven"
+	
+	author {
+		name "$authorname"
+		id "ASF"
+	}
+	
+	license {
+		name "GNU General Public License v2.0"
+		url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
+	}
+	
+	artifact {
+		name 'CyanCoreModding'
+		artifact_description 'Cyan Coremod Toolkit (stripped-down cyanloader for development purposes)'
+		artifact_version project.version
+		
+		task {
+			artifact tasks.coremodAPIJar
+		}
+	}
+	
+	artifact {
+		name 'CyanModding'
+		artifact_description 'Cyan Modding Toolkit (stripped-down cyanloader for development purposes)'
+		artifact_version project.version
+		
+		task {
+			artifact tasks.modAPIJar
+		}
+	}
+	
+	artifact {
+		name 'CyanLoader-Sources'
+		artifact_description 'Source artifact for the Cyan project, contains the entire source tree'
+		artifact_version project.version
+		
+		task {
+			artifact tasks.createCyanSourceZip
+			classifier 'full'
+		}
+	}
+	
+	resource "/log4j2.xml"
 }
 
 task prepareSourceZip {
@@ -210,6 +259,7 @@ artifacts {
 	archives sourcesJar
 	archives javadocJar
 	archives modAPIJar
+	archives coremodAPIJar
 	archives createCyanSourceZip
 }
 

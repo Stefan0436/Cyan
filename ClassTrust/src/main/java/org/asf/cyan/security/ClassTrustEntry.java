@@ -9,7 +9,7 @@ package org.asf.cyan.security;
  */
 public class ClassTrustEntry {
 	private String name;
-	private String sha256;
+	private String[] hashes;
 
 	protected ClassTrustEntry() {
 	}
@@ -18,13 +18,13 @@ public class ClassTrustEntry {
 	 * Creates a new class trust entry
 	 * 
 	 * @param name   Class simple name
-	 * @param sha256 Class hash
+	 * @param hashes Class hashes
 	 * @return New ClassTrustEntry instance
 	 */
-	public static ClassTrustEntry create(String name, String sha256) {
+	public static ClassTrustEntry create(String name, String[] hashes) {
 		ClassTrustEntry ent = new ClassTrustEntry();
 		ent.name = name;
-		ent.sha256 = sha256;
+		ent.hashes = hashes;
 		return ent;
 	}
 
@@ -38,11 +38,11 @@ public class ClassTrustEntry {
 	}
 
 	/**
-	 * Retrieves the class hash
+	 * Retrieves the class hashes
 	 * 
-	 * @return Class SHA-256 hash
+	 * @return Class SHA-256 hash array
 	 */
-	public String getSha256() {
-		return sha256;
+	public String[] getHashes() {
+		return hashes.clone();
 	}
 }

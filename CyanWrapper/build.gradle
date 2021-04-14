@@ -40,7 +40,9 @@ public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 
 	public String[] longTermSupportVersions;
 	public String[] requiredUpgrade;
-
+	
+	public HashMap<String, String> libraryVersions = new HashMap<String, String>();
+	
 	public HashMap<String, String> changelogs = new HashMap<String, String>();
 	public HashMap<String, String> allVersions = new HashMap<String, String>();
 	public HashMap<String, String> byGameVersions = new HashMap<String, String>();
@@ -128,6 +130,14 @@ configurePublish {
 		pretty_name "Generic Cyan Information Artifact"
 		artifact_description "Generic artifact for holding the cyan version information, used for version checking"
 		artifact_version "generic"
+		artifact_resource "versions.ccfg"
+	}
+
+	artifact {
+		name "CyanVersionHolder"
+		pretty_name "Generic Cyan Information Artifact"
+		artifact_description "Generic artifact for holding the cyan version information, used for version checking"
+		artifact_version "${cyanversion}"
 		artifact_resource "versions.ccfg"
 	}
 
@@ -1083,6 +1093,9 @@ processResources {
 	def latestbeta = ""
 	def latestpreview = ""
 	
+	def libraryVersions = ""
+	
+	HashMap<String, String> libraryVersionMap = new HashMap<String, String>();
 	HashMap<String, String> gameVersions = new HashMap<String, String>(); 
 	HashMap<String, String> forgeSupportVersions = new HashMap<String, String>();
 	HashMap<String, String> fabricSupportVersions = new HashMap<String, String>();
@@ -1341,6 +1354,21 @@ processResources {
 		}
 	}
 	
+	libraries.each { k, v ->
+		def name = null
+		def version = null
+		project(":").childProjects.each { proj ->
+			if (k.equals(proj.value.group+":"+proj.value.name+":"+proj.value.version) && proj.value.file('bin/main').exists() && proj.value.hasProperty("sourceSets")) {
+				name = proj.value.name
+				version = proj.value.version
+			}
+		}
+
+		if (name != null) {
+			libraryVersionMap.put(name, version)
+		}
+	}
+	
 	for (String key : gameVersions.keySet()) {
 		def val = gameVersions.get(key).replaceAll("\n", "\n    ")
 		byGameVersions += "    $key> '${val}'\n"
@@ -1359,6 +1387,11 @@ processResources {
 	for (String key : paperSupportVersions.keySet()) {
 		def val = paperSupportVersions.get(key).replaceAll("\n", "\n    ")
 		cyanpapersupportversions += "    $key> '${val}'\n"
+	}
+	
+	for (String key : libraryVersionMap.keySet()) {
+		def val = libraryVersionMap.get(key).replaceAll("\n", "\n    ")
+		libraryVersions += "    $key> '${val}'\n"
 	}
 
 	if (project.hasProperty("LTS") && project.getProperty("LTS").equals("true")) {
@@ -1424,6 +1457,7 @@ processResources {
 
 	allcyan += "    ${cyanversion}> '${cyantype}'"
 
+	inputs.property "libraryVersions", "${libraryVersions}"
 	inputs.property "mcver", "${minecraft}"
 	inputs.property "allcyan", "${allcyan}"
 	inputs.property "gameexact", "${exactgameversion}"
@@ -1527,7 +1561,8 @@ processResources {
 		"cyangameversions": "${byGameVersions}",
 		"cyanforgesupportversions": "${cyanforgesupportversions}",
 		"cyanfabricsupportversions": "${cyanfabricsupportversions}",
-		"cyanpapersupportversions": "${cyanpapersupportversions}"
+		"cyanpapersupportversions": "${cyanpapersupportversions}",
+		"libraryVersions": "${libraryVersions}"
 	]
 
 	for (def proj : project(":").childProjects) {

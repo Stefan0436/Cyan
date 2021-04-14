@@ -1,0 +1,223 @@
+package org.asf.cyan.cornflower.gradle.flowerinternal.implementation.cyan;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Scanner;
+
+import org.asf.cyan.core.CyanInfo;
+import org.asf.cyan.core.CyanUpdateInfo;
+import org.asf.cyan.cornflower.gradle.Cornflower;
+import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IModloader;
+import org.asf.cyan.cornflower.gradle.utilities.GradleUtil;
+import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ConfigurationContainer;
+import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.dsl.RepositoryHandler;
+import org.gradle.api.internal.artifacts.dependencies.AbstractDependency;
+
+public class CyanModloader implements IModloader {
+
+	private static final String maven = "https://aerialworks.ddns.net/maven";
+	public static final String infoPathTemplate = "/org/asf/cyan/CyanVersionHolder/%version%/CyanVersionHolder-%version%-versions.ccfg";
+
+	private HashMap<String, String> libraries = new HashMap<String, String>();
+
+	private Project project;
+	private int api;
+
+	public static final int BaseModding = 1 << 1;
+	public static final int CyanUtil = 1 << 2;
+	public static final int CoreMods = 1 << 3;
+	public static final int FLUID = 1 << 4;
+	public static final int CyanCore = 1 << 5;
+	public static final int MTK = 1 << 6;
+	public static final int ClassTrust = 1 << 7;
+	public static final int FullCyanLoader = 1 << 8;
+
+	private boolean hasAPI(int api) {
+		return (api & this.api) == api;
+	}
+
+	public CyanModloader() {
+	}
+
+	public CyanModloader(Project proj, String version, int api) {
+		project = proj;
+
+		boolean latest = false;
+		if (version.equals("latest")) {
+			try {
+				StringBuilder conf = new StringBuilder();
+				URL u = new URL(maven + CyanInfo.infoPath);
+				Scanner sc = new Scanner(u.openStream());
+				while (sc.hasNext())
+					conf.append(sc.nextLine() + System.lineSeparator());
+				sc.close();
+
+				CyanUpdateInfo versions = new CyanUpdateInfo(conf.toString());
+				version = versions.latestStableVersion;
+				if (version.isEmpty())
+					version = versions.latestPreviewVersion;
+				if (version.isEmpty())
+					version = versions.latestBetaVersion;
+				if (version.isEmpty())
+					version = versions.latestAlphaVersion;
+			} catch (IOException e) {
+				latest = true;
+			}
+		}
+
+		this.api = api;
+
+		File infoDir = GradleUtil.getCacheFolder(Cornflower.class, project, "cyanloader-modloader-info");
+		File versionFile = new File(infoDir, "version.info");
+		if (versionFile.exists() && latest) {
+			try {
+				version = new String(Files.readAllBytes(versionFile.toPath()));
+			} catch (IOException e) {
+			}
+		} else if (latest) {
+			throw new RuntimeException("Failed to resolve latest cyan version");
+		}
+
+		try {
+			Files.write(versionFile.toPath(), version.getBytes());
+		} catch (IOException e) {
+		}
+
+		File manifest = new File(infoDir, "mainfest-" + version + ".ccfg");
+		String config = "";
+		try {
+			URL u = new URL(maven + infoPathTemplate.replace("%version%", version));
+			StringBuilder conf = new StringBuilder();
+			Scanner sc = new Scanner(u.openStream());
+			while (sc.hasNext())
+				conf.append(sc.nextLine() + System.lineSeparator());
+			sc.close();
+			config = conf.toString();
+		} catch (IOException e) {
+			if (manifest.exists()) {
+				try {
+					config = new String(Files.readAllBytes(manifest.toPath()));
+				} catch (IOException e1) {
+					throw new RuntimeException(
+							"Failed to resolve cyan library information for version '" + version + "'");
+				}
+			} else {
+				throw new RuntimeException("Failed to resolve cyan library information for version '" + version + "'");
+			}
+		}
+		try {
+			Files.write(manifest.toPath(), config.getBytes());
+		} catch (IOException e) {
+		}
+
+		libraries = new CyanUpdateInfo(config).libraryVersions;
+	}
+
+	@Override
+	public String name() {
+		return "Cyan";
+	}
+
+	@Override
+	public String fullName() {
+		return "CyanLoader";
+	}
+
+	@Override
+	public IModloader newInstance(Project project, String version, int api) {
+		return new CyanModloader(project, version, api);
+	}
+
+	@Override
+	public void addRepositories(RepositoryHandler repositories) {
+		repositories.maven((repo) -> {
+			repo.setName("AerialWorks");
+			repo.setUrl(maven);
+		});
+	}
+
+	@Override
+	public void addDependencies(ConfigurationContainer configurations) {
+		configurations.maybeCreate("implementation");
+		Configuration implementation = configurations.getByName("implementation");
+
+		implementation.getDependencies().add(createDependency("org.asf.cyan", "CCFG", libraries.get("CCFG")));
+		implementation.getDependencies()
+				.add(createDependency("org.asf.cyan", "CyanComponents", libraries.get("CyanComponents")));
+
+		if (hasAPI(FullCyanLoader))
+			implementation.getDependencies()
+					.add(createDependency("org.asf.cyan", "CyanLoader", libraries.get("CyanLoader")));
+
+		if (hasAPI(BaseModding) && !hasAPI(FullCyanLoader))
+			implementation.getDependencies()
+					.add(createDependency("org.asf.cyan", "CyanModding", libraries.get("CyanLoader")));
+		if (hasAPI(CyanUtil))
+			implementation.getDependencies()
+					.add(createDependency("org.asf.cyan", "CyanUtil", libraries.get("CyanUtil")));
+		if (hasAPI(CoreMods) && !hasAPI(FullCyanLoader))
+			implementation.getDependencies()
+					.add(createDependency("org.asf.cyan", "CyanCoreModding", libraries.get("CyanLoader")));
+		if (hasAPI(FLUID))
+			implementation.getDependencies().add(createDependency("org.asf.cyan", "Fluid", libraries.get("Fluid")));
+		if (hasAPI(CyanCore))
+			implementation.getDependencies()
+					.add(createDependency("org.asf.cyan", "CyanCore", libraries.get("CyanCore")));
+
+		if (hasAPI(MTK))
+			implementation.getDependencies().add(createDependency("org.asf.cyan", "MTK", libraries.get("MTK")));
+		if (hasAPI(ClassTrust))
+			implementation.getDependencies()
+					.add(createDependency("org.asf.cyan", "ClassTrust", libraries.get("ClassTrust")));
+	}
+
+	private Dependency createDependency(String group, String name, String version) {
+		return new DynamicDependency(group, name, version);
+	}
+
+	private class DynamicDependency extends AbstractDependency {
+
+		private String group;
+		private String name;
+		private String version;
+
+		public DynamicDependency(String group, String name, String version) {
+			this.group = group;
+			this.name = name;
+			this.version = version;
+		}
+
+		@Override
+		public String getGroup() {
+			return group;
+		}
+
+		@Override
+		public String getName() {
+			return name;
+		}
+
+		@Override
+		public String getVersion() {
+			return version;
+		}
+
+		@Override
+		public boolean contentEquals(Dependency dependency) {
+			return dependency.getName().equals(name) && dependency.getGroup().equals(getGroup())
+					&& dependency.getVersion().equals(getVersion());
+		}
+
+		@Override
+		public Dependency copy() {
+			return new DynamicDependency(group, name, version);
+		}
+
+	}
+}

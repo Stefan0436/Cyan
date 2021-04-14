@@ -19,6 +19,8 @@ public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 	
 	public String[] longTermSupportVersions;
 	public String[] requiredUpgrade;
+
+	public HashMap<String, String> libraryVersions = new HashMap<String, String>();
 	
 	public HashMap<String, String> changelogs = new HashMap<String, String>();
 	public HashMap<String, String> allVersions = new HashMap<String, String>();

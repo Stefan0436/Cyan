@@ -15,6 +15,10 @@ allVersions> {
 ${allcyan}
 }
 
+# All library versions (all cyan libraries)
+libraryVersions> {
+$libraryVersions}
+
 # Map of all versions with their changelogs
 changelogs> {
 ${allcyanchangelog}

@@ -9,6 +9,7 @@ import java.net.URLEncoder;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -70,10 +71,15 @@ public class CtcUtil {
 						if (Files.readAllLines(cls.toPath()).size() < 1) {
 							throw new IOException("Invalid UCTC directory! Invalid class file detected!");
 						}
-						if (pkg.getName().equals("(default)"))
-							builder.addClass("", clname, Files.readAllLines(cls.toPath()).get(0));
-						else
-							builder.addClass(pkg.getName(), clname, Files.readAllLines(cls.toPath()).get(0));
+						ArrayList<String> hashes = new ArrayList<String>();
+						for (String line : Files.readAllLines(cls.toPath())) {
+							if (!line.isEmpty())
+								hashes.add(line.trim());
+						}
+						if (pkg.getName().equals("(default)")) {
+							builder.addClass("", clname, hashes.toArray(t -> new String[t]));
+						} else
+							builder.addClass(pkg.getName(), clname, hashes.toArray(t -> new String[t]));
 						setValue.accept(value++);
 					}
 				}
@@ -112,7 +118,12 @@ public class CtcUtil {
 				packageDir.mkdirs();
 
 			for (ClassTrustEntry cls : en.getEntries()) {
-				Files.writeString(new File(packageDir, cls.getName() + ".cls").toPath(), cls.getSha256());
+				StringBuilder hashFile = new StringBuilder();
+				for (String hash : cls.getHashes()) {
+					hashFile.append(hash).append(System.lineSeparator());
+				}
+				
+				Files.writeString(new File(packageDir, cls.getName() + ".cls").toPath(), hashFile.toString());
 				setValue.accept(value++);
 			}
 			setValue.accept(value++);
@@ -169,7 +180,7 @@ public class CtcUtil {
 		HashMap<String, List<String>> headers = new HashMap<String, List<String>>(connection.getRequestProperties());
 		connection.setDoOutput(true);
 		connection.setFixedLengthStreamingMode(input.length());
-		
+
 		FileInputStream strm = new FileInputStream(input);
 		try {
 			strm.transferTo(connection.getOutputStream());

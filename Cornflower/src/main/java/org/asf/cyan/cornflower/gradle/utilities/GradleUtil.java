@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 
+import org.gradle.api.Project;
+
 /**
  * Gradle utility class
  * 
@@ -11,7 +13,7 @@ import java.io.IOException;
  *
  */
 public class GradleUtil {
-	
+
 	/**
 	 * Get the gradle cache root
 	 * 
@@ -71,10 +73,42 @@ public class GradleUtil {
 	public static File getPluginCache(Class<? extends ExtendedPlugin> plugin) {
 		ExtendedPlugin plugin_instance = ExtendedPlugin.getPluginInstance(plugin);
 		Object group = plugin_instance.getProject().getGroup();
-		File f = new File(getPluginCacheRoot(plugin), (!group.equals("") ? group + "." : "")+plugin_instance.getProject().getName());
+		File f = new File(getPluginCacheRoot(plugin),
+				(!group.equals("") ? group + "." : "") + plugin_instance.getProject().getName());
 		if (!f.exists())
 			f.mkdir();
 
+		return f;
+	}
+
+	/**
+	 * Get the project cache directory for a specified plugin
+	 * 
+	 * @param plugin  The plugin class
+	 * @param project The project to use
+	 * @return File object that represents the cache directory
+	 */
+	public static File getPluginCache(Class<? extends ExtendedPlugin> plugin, Project project) {
+		Object group = project.getGroup();
+		File f = new File(getPluginCacheRoot(plugin), (!group.equals("") ? group + "." : "") + project.getName());
+		if (!f.exists())
+			f.mkdirs();
+
+		return f;
+	}
+
+	/**
+	 * Get or create a cache directory for a project
+	 * 
+	 * @param plugin     The plugin class
+	 * @param project    The project to use
+	 * @param folderName The name of the cache folder
+	 * @return File object that represents the cache directory
+	 */
+	public static File getCacheFolder(Class<? extends ExtendedPlugin> plugin, Project project, String folderName) {
+		File f = new File(getPluginCache(plugin, project), folderName);
+		if (!f.exists())
+			f.mkdirs();
 		return f;
 	}
 
@@ -91,7 +125,7 @@ public class GradleUtil {
 			f.mkdir();
 		return f;
 	}
-	
+
 	/**
 	 * Get or create a cache directory shared across projects
 	 * 

@@ -77,16 +77,16 @@ public class PackageTrustEntry {
 	 * order to use this
 	 * 
 	 * @param simpleName Class simple name
-	 * @param sha256     Class hash
+	 * @param hashes     Class hashes (SHA-256)
 	 */
-	public void pushClass(String simpleName, String sha256) {
+	public void pushClass(String simpleName, String[] hashes) {
 		if (editable) {
 			ClassTrustEntry[] entries = this.entries.clone();
 			this.entries = new ClassTrustEntry[this.entries.length + 1];
 			for (int i = 0; i < entries.length; i++) {
 				this.entries[i] = entries[i];
 			}
-			this.entries[this.entries.length - 1] = ClassTrustEntry.create(simpleName, sha256);
+			this.entries[this.entries.length - 1] = ClassTrustEntry.create(simpleName, hashes);
 			for (int i = 0; i < entries.length; i++) {
 				entries[i] = null;
 			}

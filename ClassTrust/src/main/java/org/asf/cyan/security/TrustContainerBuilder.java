@@ -32,10 +32,10 @@ public class TrustContainerBuilder {
 	 * 
 	 * @param packagePath Package path
 	 * @param name        Class simple name
-	 * @param sha256      Class SHA-256 hash
+	 * @param hashes      Allowed hashses
 	 * @return Self
 	 */
-	public TrustContainerBuilder addClass(String packagePath, String name, String sha256) {
+	public TrustContainerBuilder addClass(String packagePath, String name, String... hashes) {
 		PackageTrustEntry pkg = null;
 		if (packages.stream().anyMatch(t -> t.getName().equals(packagePath))) {
 			pkg = packages.stream().filter(t -> t.getName().equals(packagePath)).findFirst().get();
@@ -44,7 +44,7 @@ public class TrustContainerBuilder {
 			packages.add(pkg);
 		}
 
-		pkg.pushClass(name, sha256);
+		pkg.pushClass(name, hashes);
 
 		return this;
 	}
@@ -80,7 +80,7 @@ public class TrustContainerBuilder {
 		InputStream strm = location.openStream();
 		String sha256 = sha256HEX(strm.readAllBytes());
 		strm.close();
-		pkg.pushClass(cls.getSimpleName(), sha256);
+		pkg.pushClass(cls.getSimpleName(), new String[] { sha256 });
 
 		return this;
 	}

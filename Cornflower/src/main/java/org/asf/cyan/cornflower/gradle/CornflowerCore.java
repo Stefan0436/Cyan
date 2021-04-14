@@ -33,7 +33,7 @@ public class CornflowerCore {
 			System.setProperty("cyan.cornflower.mtkdir", fld.getCanonicalPath());
 		} catch (ClassNotFoundException | IOException e) {
 		}
-		
+
 		if (!CyanCore.isInitialized()) {
 			CyanCore.simpleInit();
 			try {
@@ -41,12 +41,17 @@ public class CornflowerCore {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
+
 			MinecraftToolkit.initializeMTK();
 			CyanCore.initializeComponents();
 		}
 
 		LOGGER = LogManager.getLogger("Cornflower");
 		MAIN = MarkerManager.getMarker("MAIN");
+
+		target.afterEvaluate((proj) -> {
+			ModloaderHandler.exec(proj);
+		});
 	}
+
 }

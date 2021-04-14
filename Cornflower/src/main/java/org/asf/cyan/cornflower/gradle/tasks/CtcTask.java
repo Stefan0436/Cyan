@@ -5,12 +5,14 @@ import java.net.URL;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Optional;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.asf.cyan.CtcUtil;
 import org.asf.cyan.cornflower.gradle.Cornflower;
@@ -181,11 +183,11 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 					Cornflower.getPluginInstance(Cornflower.class).logInfo("Added: " + num + " / " + max);
 				});
 				File out = new File(output.replace("%version%", version));
-				Files.move(Path.of(output), out.toPath());
+				Files.move(new File(output).toPath(), out.toPath());
 
 				if (createHash) {
-					Files.writeString(new File(out.getAbsolutePath() + ".sha256").toPath(),
-							sha256HEX(Files.readAllBytes(out.toPath())) + "  " + out.getName());
+					Files.write(new File(out.getAbsolutePath() + ".sha256").toPath(),
+							(sha256HEX(Files.readAllBytes(out.toPath())) + "  " + out.getName()).getBytes());
 				}
 
 				if (postCompletePack != null) {
@@ -230,6 +232,34 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 				new File(output).delete();
 
 			new File(output).mkdirs();
+			for (String file : new ArrayList<String>(inputs)) {
+				File f = new File(file);
+				if (f.getName().endsWith(".jar") || f.getName().endsWith(".zip")) {
+					ZipFile zip = new ZipFile(f);
+					Enumeration<? extends ZipEntry> entries = zip.entries();
+
+					while (entries.hasMoreElements()) {
+						ZipEntry entry = entries.nextElement();
+						String path = entry.getName().replace("\\", "/");
+
+						while (path.startsWith("/"))
+							path = path.substring(1);
+
+						if (entry.getName().endsWith(".class")) {
+							byte[] data = zip.getInputStream(entry).readAllBytes();
+
+							ClassNode node = new ClassNode();
+							ClassReader reader = new ClassReader(data);
+							reader.accept(node, 0);
+
+							String hash = sha256HEX(data);
+							addHash(hash, node.name.replace("/", "."), output);
+						}
+					}
+
+					zip.close();
+				}
+			}
 			for (String file : inputs) {
 				File f = new File(file);
 				if (f.getName().endsWith(".class") && !f.isDirectory()) {
@@ -240,29 +270,18 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 					strm.close();
 
 					String hash = sha256HEX(Files.readAllBytes(f.toPath()));
-					String name = node.name.replace("/", ".");
-					String pkg = "(default)";
-					if (name.contains(".")) {
-						pkg = name.substring(0, name.lastIndexOf("."));
-						name = name.substring(name.lastIndexOf(".") + 1);
-					}
-
-					File outp = new File(output, pkg + "/" + name + ".cls");
-					if (!outp.getParentFile().exists())
-						outp.getParentFile().mkdirs();
-
-					Files.writeString(outp.toPath(), hash);
+					addHash(hash, node.name.replace("/", "."), output);
 				}
 			}
 
-			Files.writeString(new File(output, "main.header").toPath(), "Name: " + new File(output).getName());
+			Files.write(new File(output, "main.header").toPath(), ("Name: " + new File(output).getName()).getBytes());
 		} else if (method.equals("publish")) {
 			for (String input : inputs) {
 				if (input.endsWith(".ctc")) {
 					CtcUtil.publish(new File(input), new URL(output), (group) -> {
 						Optional<Credentials> cred = credentials.stream().filter(t -> t.group.equals(group))
 								.findFirst();
-						if (cred.isEmpty())
+						if (!cred.isPresent())
 							return null;
 
 						return new Object[] { cred.get().username, cred.get().password };
@@ -272,6 +291,30 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 				}
 			}
 		}
+	}
+
+	private void addHash(String hash, String name, String output) throws IOException {
+		String pkg = "(default)";
+		if (name.contains(".")) {
+			pkg = name.substring(0, name.lastIndexOf("."));
+			name = name.substring(name.lastIndexOf(".") + 1);
+		}
+
+		File outp = new File(output, pkg + "/" + name + ".cls");
+		if (!outp.getParentFile().exists())
+			outp.getParentFile().mkdirs();
+
+		ArrayList<String> hashes = new ArrayList<String>();
+		hashes.add(hash);
+		if (outp.exists()) {
+			for (String existingHash : Files.readAllLines(outp.toPath())) {
+				hashes.add(existingHash.trim());
+			}
+		}
+
+		StringBuilder hashfile = new StringBuilder();
+		hashes.forEach((t) -> hashfile.append(t).append(System.lineSeparator()));
+		Files.write(outp.toPath(), hashfile.toString().getBytes());
 	}
 
 	private void copyDir(File in, File out) throws IOException {

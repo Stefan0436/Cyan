@@ -309,6 +309,11 @@ public class CyanCore extends CyanComponent {
 			conf.setUrls(urls);
 			trace("ADD Cyan Source Location to URL list, caller: " + CallTrace.traceCallName());
 			conf.addUrls(CyanCore.class.getProtectionDomain().getCodeSource().getLocation());
+			trace("ADD Cornflower Source Location to URL list, caller: " + CallTrace.traceCallName());
+			try {
+				conf.addUrls(Class.forName("org.asf.cyan.cornflower.gradle.CornflowerCore").getProtectionDomain().getCodeSource().getLocation());
+			} catch (ClassNotFoundException e1) {
+			}
 			try {
 				conf.addUrls(Class.forName("org.asf.cyan.minecraft.toolkits.mtk.MinecraftToolkit").getProtectionDomain()
 						.getCodeSource().getLocation());
