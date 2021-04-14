@@ -13,11 +13,8 @@ import org.asf.cyan.cornflower.gradle.Cornflower;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IModloader;
 import org.asf.cyan.cornflower.gradle.utilities.GradleUtil;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
-import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
-import org.gradle.api.internal.artifacts.dependencies.AbstractDependency;
 
 public class CyanModloader implements IModloader {
 
@@ -144,80 +141,31 @@ public class CyanModloader implements IModloader {
 
 	@Override
 	public void addDependencies(ConfigurationContainer configurations) {
-		configurations.maybeCreate("implementation");
-		Configuration implementation = configurations.getByName("implementation");
-
-		implementation.getDependencies().add(createDependency("org.asf.cyan", "CCFG", libraries.get("CCFG")));
-		implementation.getDependencies()
-				.add(createDependency("org.asf.cyan", "CyanComponents", libraries.get("CyanComponents")));
+		addDependency("org.asf.cyan", "CCFG", libraries.get("CCFG"));
+		addDependency("org.asf.cyan", "CyanComponents", libraries.get("CyanComponents"));
 
 		if (hasAPI(FullCyanLoader))
-			implementation.getDependencies()
-					.add(createDependency("org.asf.cyan", "CyanLoader", libraries.get("CyanLoader")));
+			addDependency("org.asf.cyan", "CyanLoader", libraries.get("CyanLoader"));
 
 		if (hasAPI(BaseModding) && !hasAPI(FullCyanLoader))
-			implementation.getDependencies()
-					.add(createDependency("org.asf.cyan", "CyanModding", libraries.get("CyanLoader")));
+			addDependency("org.asf.cyan", "CyanModding", libraries.get("CyanLoader"));
 		if (hasAPI(CyanUtil))
-			implementation.getDependencies()
-					.add(createDependency("org.asf.cyan", "CyanUtil", libraries.get("CyanUtil")));
+			addDependency("org.asf.cyan", "CyanUtil", libraries.get("CyanUtil"));
 		if (hasAPI(CoreMods) && !hasAPI(FullCyanLoader))
-			implementation.getDependencies()
-					.add(createDependency("org.asf.cyan", "CyanCoreModding", libraries.get("CyanLoader")));
+			addDependency("org.asf.cyan", "CyanCoreModding", libraries.get("CyanLoader"));
 		if (hasAPI(FLUID))
-			implementation.getDependencies().add(createDependency("org.asf.cyan", "Fluid", libraries.get("Fluid")));
+			addDependency("org.asf.cyan", "Fluid", libraries.get("Fluid"));
 		if (hasAPI(CyanCore))
-			implementation.getDependencies()
-					.add(createDependency("org.asf.cyan", "CyanCore", libraries.get("CyanCore")));
+			addDependency("org.asf.cyan", "CyanCore", libraries.get("CyanCore"));
 
 		if (hasAPI(MTK))
-			implementation.getDependencies().add(createDependency("org.asf.cyan", "MTK", libraries.get("MTK")));
+			addDependency("org.asf.cyan", "MTK", libraries.get("MTK"));
 		if (hasAPI(ClassTrust))
-			implementation.getDependencies()
-					.add(createDependency("org.asf.cyan", "ClassTrust", libraries.get("ClassTrust")));
+			addDependency("org.asf.cyan", "ClassTrust", libraries.get("ClassTrust"));
 	}
 
-	private Dependency createDependency(String group, String name, String version) {
-		return new DynamicDependency(group, name, version);
+	private void addDependency(String group, String name, String version) {
+		project.getDependencies().add("implementation", group + ":" + name + ":" + version);
 	}
 
-	private class DynamicDependency extends AbstractDependency {
-
-		private String group;
-		private String name;
-		private String version;
-
-		public DynamicDependency(String group, String name, String version) {
-			this.group = group;
-			this.name = name;
-			this.version = version;
-		}
-
-		@Override
-		public String getGroup() {
-			return group;
-		}
-
-		@Override
-		public String getName() {
-			return name;
-		}
-
-		@Override
-		public String getVersion() {
-			return version;
-		}
-
-		@Override
-		public boolean contentEquals(Dependency dependency) {
-			return dependency.getName().equals(name) && dependency.getGroup().equals(getGroup())
-					&& dependency.getVersion().equals(getVersion());
-		}
-
-		@Override
-		public Dependency copy() {
-			return new DynamicDependency(group, name, version);
-		}
-
-	}
 }

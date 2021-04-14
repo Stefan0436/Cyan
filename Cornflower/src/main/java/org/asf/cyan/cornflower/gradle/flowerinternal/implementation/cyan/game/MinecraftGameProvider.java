@@ -35,7 +35,7 @@ public class MinecraftGameProvider implements IGame {
 
 	@Override
 	public void addRepositories(RepositoryHandler repositories) {
-
+		repositories=repositories;
 	}
 
 	@Override
