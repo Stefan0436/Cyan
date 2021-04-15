@@ -88,6 +88,18 @@ public class CyanLoader extends Modloader implements IModProvider {
 
 	private HashMap<String, String> mavenRepositories = new HashMap<String, String>();
 
+	private static String platformVersion = "";
+	
+	/**
+	 * Sets the platform version (can only be done ONCE)
+	 * @param version Platform version
+	 */
+	public static void setPlatformVersion(String version) {
+		if (!platformVersion.isEmpty())
+			return;
+		platformVersion = version;
+	}
+	
 	private static boolean developerMode = false;
 	private static SecurityConfiguration securityConf;
 	private static ArrayList<TrustContainer> trust = new ArrayList<TrustContainer>();
@@ -559,7 +571,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 			}
 
 			String platformVersion = manifest.platforms.get(CyanInfo.getPlatform().toString());
-			String cVersion = Fluid.getMappings()[0].mappingsVersion;
+			String cVersion = CyanLoader.platformVersion;
 
 			if (cVersion == null)
 				cVersion = CyanInfo.getModloaderVersion();

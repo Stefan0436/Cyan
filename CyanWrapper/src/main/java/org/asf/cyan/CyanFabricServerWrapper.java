@@ -28,7 +28,6 @@ public class CyanFabricServerWrapper {
 		while (sc.hasNext())
 			builder.append(sc.nextLine());
 		sc.close();
-		CyanCore.setEntryMethod("CyanFabricWrapper Version " + builder.toString().trim());
 
 		info = CyanClientWrapper.class.getResource("/mappings.info");
 		StringBuilder mappingsVersion = new StringBuilder();
@@ -36,6 +35,9 @@ public class CyanFabricServerWrapper {
 		while (sc.hasNext())
 			mappingsVersion.append(sc.nextLine());
 		sc.close();
+
+		CyanLoader.setPlatformVersion(mappingsVersion.toString());
+		CyanCore.setEntryMethod("CyanFabricWrapper Version " + builder.toString().trim());
 		
 		CyanLoader.disableVanillaMappings();
 		CyanLoader.addCompatibilityMappings(CyanLoader.getFabricCompatibilityMappings(GameSide.SERVER, mappingsVersion.toString()));

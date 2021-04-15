@@ -36,6 +36,8 @@ public class CyanFabricClientWrapper {
 			mappingsVersion.append(sc.nextLine());
 		sc.close();
 		
+		CyanLoader.setPlatformVersion(mappingsVersion.toString());
+		
 		CyanCore.setEntryMethod("CyanFabricWrapper Version " + builder.toString().trim());
 		CyanLoader.disableVanillaMappings();
 		CyanLoader.addCompatibilityMappings(CyanLoader.getFabricCompatibilityMappings(GameSide.CLIENT, mappingsVersion.toString()));

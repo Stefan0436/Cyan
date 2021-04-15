@@ -246,7 +246,7 @@ public abstract class Modloader extends CyanComponent {
 			throw new RuntimeException("Modloader conflict! Duplicate modloader detected: " + modloader.getName()
 					+ " found in both " + modloader.getClass().getTypeName() + " and "
 					+ getModloader(modloader.getName()).getClass().getTypeName());
-		} else if (!getModloader(modloader.getName()).manualAppend) {
+		} else if (getModloader(modloader.getName()) == null) {
 			appendImplementation(modloader);
 		}
 

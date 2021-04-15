@@ -32,11 +32,6 @@ public class CyanPaperServerWrapper extends CyanComponent {
 			builder.append(sc.nextLine());
 		sc.close();
 
-		Fluid.addAgent("io.papermc.paperclip.Agent", "premain");
-		CyanCore.setEntryMethod("CyanPaperWrapper Version " + builder.toString().trim());
-
-		CyanLoader.setupModloader("SERVER");
-
 		info = CyanClientWrapper.class.getResource("/mappings.info");
 		StringBuilder mappingsVersion = new StringBuilder();
 		sc = new Scanner(info.openStream());
@@ -44,6 +39,12 @@ public class CyanPaperServerWrapper extends CyanComponent {
 			mappingsVersion.append(sc.nextLine());
 		sc.close();
 
+		CyanLoader.setPlatformVersion(mappingsVersion.toString());
+		
+		Fluid.addAgent("io.papermc.paperclip.Agent", "premain");
+		CyanCore.setEntryMethod("CyanPaperWrapper Version " + builder.toString().trim());
+
+		CyanLoader.setupModloader("SERVER");
 		CyanLoader.disableVanillaMappings();
 		CyanLoader.addCompatibilityMappings(CyanLoader.getPaperCompatibilityMappings(mappingsVersion.toString()));
 		CyanLoader.initializeGame("SERVER");

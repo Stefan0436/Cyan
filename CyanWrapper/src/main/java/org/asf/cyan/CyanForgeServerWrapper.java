@@ -37,8 +37,9 @@ public class CyanForgeServerWrapper {
 			mcp.append(sc.nextLine());
 		sc.close();
 		
+		CyanLoader.setPlatformVersion(mcp.toString());
+		
 		CyanCore.setEntryMethod("CyanForgeWrapper Version " + builder.toString().trim() + ", MCP version " + mcp);
-
 		CyanLoader.disableVanillaMappings();
 		CyanLoader.addCompatibilityMappings(CyanLoader.getForgeCompatibilityMappings(GameSide.SERVER, mcp.toString()));
 		CyanLoader.initializeGame("SERVER");

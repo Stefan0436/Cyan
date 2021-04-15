@@ -38,6 +38,8 @@ public class CyanForgeClientWrapper {
 			mcp.append(sc.nextLine());
 		sc.close();
 
+		CyanLoader.setPlatformVersion(mcp.toString());
+		
 		CyanCore.setEntryMethod("CyanForgeWrapper Version " + builder.toString().trim() + ", MCP version " + mcp);
 		CyanLoader.disableVanillaMappings();
 		CyanLoader.addCompatibilityMappings(CyanLoader.getForgeCompatibilityMappings(GameSide.CLIENT, mcp.toString()));
