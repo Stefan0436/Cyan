@@ -103,7 +103,7 @@ public class ServerGame implements IGameExecutionContext {
 	}
 
 	@Override
-	public String[] libraries() {
+	public String[] runtimeLibraries() {
 		prepare();
 		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion);
 	}
@@ -140,6 +140,11 @@ public class ServerGame implements IGameExecutionContext {
 	@Override
 	public File[] flatDirs() {
 		return new File[0];
+	}
+
+	@Override
+	public String[] libraries() {
+		return new String[0];
 	}
 
 }

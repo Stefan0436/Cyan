@@ -80,7 +80,7 @@ public class ClientGame implements IGameExecutionContext {
 	@Override
 	public String[] libraries() {
 		prepare();
-		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion);
+		return MinecraftInstallationToolkit.getLibrariesMavenFormat(gameVersion);
 	}
 
 	@Override
@@ -149,5 +149,11 @@ public class ClientGame implements IGameExecutionContext {
 		}
 		allDirs[i] = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/jars");
 		return allDirs;
+	}
+
+	@Override
+	public String[] runtimeLibraries() {
+		prepare();
+		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion);
 	}
 }

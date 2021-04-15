@@ -16,6 +16,8 @@ public interface IGameExecutionContext {
 	}
 
 	public String[] libraries();
+
+	public String[] runtimeLibraries();
 	
 	public File[] flatDirs();
 
