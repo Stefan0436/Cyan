@@ -638,14 +638,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 							if (type.startsWith("platform:")) {
 								String platform = type.substring("platform:".length());
 								if (CyanInfo.getPlatform().toString().equalsIgnoreCase(platform)) {
-									String extension = path.substring(path.lastIndexOf(".") + 1);
-									if (path.toLowerCase()
-											.endsWith("-" + platform.toLowerCase() + "." + extension.toLowerCase())) {
-										path = path.substring(0, path.indexOf("-" + platform.toLowerCase())) + "."
-												+ extension;
-
-										output = new File(cache, path);
-									}
 									allow = true;
 								} else {
 									allow = false;
@@ -654,14 +646,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 							} else if (type.startsWith("gameversion:")) {
 								String gameversion = type.substring("gameversion:".length());
 								if (CyanInfo.getMinecraftVersion().toString().equalsIgnoreCase(gameversion)) {
-									String extension = path.substring(path.lastIndexOf(".") + 1);
-									if (path.toLowerCase().endsWith(
-											"-" + gameversion.toLowerCase() + "." + extension.toLowerCase())) {
-										path = path.substring(0, path.indexOf("-" + gameversion.toLowerCase())) + "."
-												+ extension;
-
-										output = new File(cache, path);
-									}
 									allow = true;
 								} else {
 									allow = false;
@@ -670,14 +654,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 							} else if (type.startsWith("side:")) {
 								String side = type.substring("side:".length());
 								if (CyanInfo.getSide().toString().equalsIgnoreCase(side)) {
-									String extension = path.substring(path.lastIndexOf(".") + 1);
-									if (path.toLowerCase()
-											.endsWith("-" + side.toLowerCase() + "." + extension.toLowerCase())) {
-										path = path.substring(0, path.indexOf("-" + side.toLowerCase())) + "."
-												+ extension;
-
-										output = new File(cache, path);
-									}
 									allow = true;
 								} else {
 									allow = false;
@@ -686,14 +662,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 							} else if (type.startsWith("loaderversion:")) {
 								String loaderversion = type.substring("loaderversion:".length());
 								if (CyanInfo.getCyanVersion().toString().equalsIgnoreCase(loaderversion)) {
-									String extension = path.substring(path.lastIndexOf(".") + 1);
-									if (path.toLowerCase().endsWith(
-											"-" + loaderversion.toLowerCase() + "." + extension.toLowerCase())) {
-										path = path.substring(0, path.indexOf("-" + loaderversion.toLowerCase())) + "."
-												+ extension;
-
-										output = new File(cache, path);
-									}
 									allow = true;
 								} else {
 									allow = false;
