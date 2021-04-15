@@ -32,7 +32,7 @@ for arg in "${args[@]}"; do
     elif [ "$arg" == "--version" ]; then
         gameversion=${args[index + 1]}
         skip=true
-    elif [ "$arg" == "--mappings-version"]; then
+    elif [ "$arg" == "--mappings-version" ]; then
         mappings=${args[index + 1]}
         skip=true
     fi
@@ -67,7 +67,7 @@ if [ "$modloader" != "" ]; then
         else
             if [ "$mappings" == "auto" ]; then
 	        	1>&2 echo Cannot set paper version without specifying the EXACT mappings version
-	        	1>&2 echo Please add --mappings-version hash:version to the script arguments
+	        	1>&2 echo "Please add --mappings-version hash:version to the script arguments"
             	exit 1
             fi
         	paperversion=$modloaderversion
@@ -78,7 +78,7 @@ if [ "$modloader" != "" ]; then
 fi
 
 if [ "$mappings" != "auto" ]; then
-	extraargs += " -DoverrideMappingsVersion=\"$mappings\""
+	extraargs+=" -DoverrideMappingsVersion=\"$mappings\""
 fi
 
 eval './gradlew '"$extraargs"' -PresetLibSourceCache -PoverrideCyanLibraryURL="" -PcurrentXML processResources && ./gradlew '"$extraargs"' -PoverrideCyanLibraryURL="" -PcurrentXML build '"$BUILDCMD"' && echo && echo Done, saved in build.'
