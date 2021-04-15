@@ -94,7 +94,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 	private static final PrintStream defaultOutputStream = System.out;
 	private static ArrayList<Mapping<?>> compatibilityMappings = new ArrayList<Mapping<?>>();
 	private static String[] allowedComponentPackages = new String[0];
-	private static String[] coremoduleKeys;
 	private static Mapping<?> mappings = null;
 	private static boolean vanillaMappings = true;
 	private static boolean loaded = false;
@@ -178,9 +177,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 			return;
 
 		if (developerMode) {
-			if (System.getProperty("coreModDebugKeys") != null)
-				coremoduleKeys = System.getProperty("coreModDebugKeys").split(":");
-
 			if (System.getProperty("authorizeDebugPackages") != null)
 				allowedComponentPackages = System.getProperty("authorizeDebugPackages").split(":");
 
@@ -192,10 +188,9 @@ public class CyanLoader extends Modloader implements IModProvider {
 			System.err.println("");
 			System.err.println("");
 		} else {
-			if (System.getProperty("coreModDebugKeys") != null
-					|| System.getProperty("authorizeDebugPackages") != null) {
+			if (System.getProperty("authorizeDebugPackages") != null) {
 				System.err.println(
-						"Cyan is not running in a development environment, you cannot use coreModDebugKeys and authorizeDebugPackages outside of it.");
+						"Cyan is not running in a development environment, you cannot use authorizeDebugPackages outside of it.");
 				System.exit(-1);
 			}
 		}
@@ -1313,11 +1308,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 			info("You will need to be running development cyan wrappers. If you are, you can use the");
 			info("-DauthorizeDebugPackages=<package> argument to whitelist your component.");
 			info("(use -DauthorizeDebugPackages=<package1>:<package2> for multiple)");
-			info("");
-			info("Note that you will need to have a valid debug key as secondary security.");
-			info("A debug key needs to be assigned in the component (using a virtual manifest)");
-			info("as well as on the command line. Use -DcoreModDebugKeys=<key> to add them");
-			info("(use -DcoreModDebugKeys=<key1>:<key2> for multiple)");
 
 			System.exit(-1);
 		}
