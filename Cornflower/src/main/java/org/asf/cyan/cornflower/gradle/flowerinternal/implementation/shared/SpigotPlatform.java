@@ -13,6 +13,7 @@ public class SpigotPlatform implements IPlatformConfiguration {
 	@Override
 	public IPlatformConfiguration importClosure(PlatformClosureOwner output) {
 		version = output.version;
+		modloader = output.modloader;
 		return this;
 	}
 
