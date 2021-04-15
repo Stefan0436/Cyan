@@ -1,5 +1,6 @@
 package org.asf.cyan.cornflower.gradle;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IGame;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IGameExecutionContext;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IModloader;
+import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
@@ -23,6 +25,9 @@ public class ModloaderHandler extends CyanComponent {
 
 	@SuppressWarnings("unchecked")
 	public static void exec(Project proj) {
+		Log4jToGradleAppender.logInfo();
+		CornflowerCore.LOGGER.info("Loading Cornflower modloader and game dependencies...");
+
 		ArrayList<Dependency> remoteDependencies = new ArrayList<Dependency>();
 		for (Configuration conf : proj.getConfigurations()) {
 			for (Dependency dep : conf.getDependencies()) {
@@ -90,7 +95,7 @@ public class ModloaderHandler extends CyanComponent {
 							.get("cornflowermodloaders")) {
 						if (game.modloader().isAssignableFrom(modloader.getClass())) {
 							if (game.name().equalsIgnoreCase(dep.getName())) {
-								game = game.newInstance(proj, dep.getVersion());
+								game = game.newInstance(proj, dep.getVersion(), modloader);
 								if (game == null)
 									continue;
 
@@ -113,12 +118,28 @@ public class ModloaderHandler extends CyanComponent {
 		for (IGame game : (ArrayList<IGame>) proj.getExtensions().getExtraProperties().get("cornflowergames")) {
 			game.addRepositories(proj.getRepositories());
 			game.addDependencies(proj.getConfigurations());
+
 			for (IGameExecutionContext ctx : game.getContexts()) {
 				IGameExecutionContext context = ctx.newInstance(proj, game.getVersion());
+				File[] dirs = context.flatDirs();
+				if (dirs.length != 0) {
+					proj.getRepositories().flatDir((repo) -> {
+						repo.dirs((Object[]) dirs);
+					});
+				}
+
+				String mainJar = context.deobfuscatedJarDependency();
+				if (mainJar == null)
+					mainJar = context.gameJarDependency();
+
+				proj.getDependencies().add("implementation", mainJar);
+				for (String lib : context.libraries())
+					proj.getDependencies().add("implementation", lib);
 			}
 		}
 
 		proj.getExtensions().getExtraProperties().set("remoteDependencies", remoteDependencies);
+		Log4jToGradleAppender.noLogInfo();
 	}
 
 	private static void findDeps(Project proj, String depType, Consumer<Dependency> handler) {

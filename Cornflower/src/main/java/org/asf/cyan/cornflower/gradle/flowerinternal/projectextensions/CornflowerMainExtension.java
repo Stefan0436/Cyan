@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
@@ -15,6 +16,7 @@ import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.Vanil
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.YarnPlatform;
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.closureowners.SpigotPlatformClosureOwner;
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.closureowners.YarnPlatformClosureOwner;
+import org.asf.cyan.cornflower.gradle.tasks.RiftJarTask;
 import org.asf.cyan.cornflower.gradle.utilities.IProjectExtension;
 import org.asf.cyan.cornflower.gradle.utilities.modding.GameDependency;
 import org.asf.cyan.cornflower.gradle.utilities.modding.IPlatformConfiguration;
@@ -140,6 +142,102 @@ public class CornflowerMainExtension implements IProjectExtension {
 		}
 
 		return null;
+	}
+
+	public static void addPlatformRiftTasks(Project project, Closure<?> closure) {
+		PlatformRiftClosureOwner.runClosure(project, closure);
+	}
+
+	@SuppressWarnings("unused")
+	private static class PlatformRiftClosureOwner {
+		public ArrayList<Object> sources = new ArrayList<Object>();
+		public ArrayList<IRiftToolchainProvider> providers = new ArrayList<IRiftToolchainProvider>();
+		public ArrayList<IPlatformConfiguration> platforms = new ArrayList<IPlatformConfiguration>();
+
+		public void from(Object... sources) {
+			for (Object source : sources)
+				this.sources.add(source);
+		}
+
+		public void provider(IRiftToolchainProvider provider) {
+			providers.add(provider);
+		}
+
+		public void platform(IPlatformConfiguration platform) {
+			platforms.add(platform);
+		}
+
+		public void platform(IPlatformConfiguration[] platforms) {
+			for (IPlatformConfiguration platform : platforms)
+				this.platforms.add(platform);
+		}
+
+		public void platform(Iterable<IPlatformConfiguration> platforms) {
+			for (IPlatformConfiguration platform : platforms)
+				this.platforms.add(platform);
+		}
+
+		public void platform(PlatformConfiguration platforms) {
+			for (IPlatformConfiguration platform : platforms.all)
+				this.platforms.add(platform);
+		}
+
+		public static void runClosure(Project project, Closure<?> closure) {
+			PlatformRiftClosureOwner owner = new PlatformRiftClosureOwner();
+			closure.setDelegate(owner);
+			closure.call();
+
+			owner.add(project);
+		}
+
+		private void add(Project project) {
+			for (IPlatformConfiguration platform : platforms) {
+				if (platform.getMappingsVersion(CLIENT) != null) {
+					project.task(Map.of("type", RiftJar), platform.getPlatform().toString().toLowerCase() + "Rift",
+							new TaskClosure(project, project, platform.getPlatform(), CLIENT));
+				}
+				if (platform.getMappingsVersion(SERVER) != null) {
+					project.task(Map.of("type", RiftJar),
+							platform.getPlatform().toString().toLowerCase() + "RiftServer",
+							new TaskClosure(project, project, platform.getPlatform(), SERVER));
+				}
+			}
+		}
+
+		private class TaskClosure extends Closure<RiftJarTask> {
+			private Project project;
+			private LaunchPlatform platform;
+			private GameSide side;
+
+			public TaskClosure(Object owner, Project project, LaunchPlatform platform, GameSide side) {
+				super(owner);
+				this.project = project;
+				this.platform = platform;
+				this.side = side;
+			}
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public RiftJarTask call() {
+				RiftJarTask tsk = (RiftJarTask) getDelegate();
+				tsk.provider(getPlatformRiftProvider(project, platform, side));
+
+				PlatformConfiguration platforms = (PlatformConfiguration) project.getExtensions().getExtraProperties()
+						.get("platforms");
+				IPlatformConfiguration config = platforms.all.stream().filter(t -> t.getPlatform() == platform)
+						.findFirst().get();
+
+				tsk.mappings_identifier(platform.toString().toLowerCase() + "-" + config.getDisplayVersion());
+				tsk.getArchiveClassifier().set("RIFT-" + platform.toString().toUpperCase());
+				tsk.from(sources);
+				providers.forEach((prov) -> tsk.provider(prov));
+
+				project.getTasks().getByName("rift").finalizedBy(tsk);
+				return tsk;
+			}
+
+		}
 	}
 
 	@SuppressWarnings("unused")

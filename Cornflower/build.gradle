@@ -28,7 +28,7 @@ def display="Cornflower Gradle Plugin"
 def authorname="AerialWorks Software Foundation"
 def plugindescription="Cyan Cornflower - Gradle plugin to help with Cyan modding"
 def versiontype="ALPHA"
-version="1.0.0.A27"
+version="1.0.0.A28"
 
 sourceSets {
 	main {
@@ -281,7 +281,7 @@ cornflowerAPISourcesJar.dependsOn cornflowerAPIJar
 
 task cornflowerExtAPIJar(type: Jar, dependsOn: jar) {
 	from sourceSets.main.output
-	classifier = 'API'
+	classifier = 'EXT-API'
 	
 	manifest {
 		attributes([

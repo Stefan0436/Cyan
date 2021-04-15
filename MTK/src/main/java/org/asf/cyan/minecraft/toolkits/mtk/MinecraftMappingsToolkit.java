@@ -160,7 +160,6 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 	 * Retrieves the latest YARN mappings for a given minecraft version
 	 * 
 	 * @param version Minecraft version
-	 * @param side    Game side
 	 * @return YARN version
 	 * @throws IOException If downloading the version information fails
 	 */
@@ -331,7 +330,6 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 	 * @throws IOException If retrieving the version information fails.
 	 */
 	public static String getLatestSpigotMappings(MinecraftVersionInfo version) throws IOException {
-		info("Resolving SPIGOT mappings of minecraft version " + version + "...");
 		JsonObject refs = getRefs(version);
 		String commit = refs.get("BuildData").getAsString();
 
@@ -378,6 +376,8 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 	 */
 	public static SpigotMappings downloadSpigotMappings(Mapping<?> fallback, MinecraftVersionInfo version,
 			String mappingsVersion) throws IOException {
+		info("Resolving SPIGOT mappings of minecraft version " + version + "...");
+		
 		if (!MinecraftToolkit.hasMinecraftDownloadConnection())
 			throw new IOException("No network connection");
 

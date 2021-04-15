@@ -192,14 +192,12 @@ public class CyanLoader extends Modloader implements IModProvider {
 			System.err.println("");
 			System.err.println("");
 		} else {
-
 			if (System.getProperty("coreModDebugKeys") != null
 					|| System.getProperty("authorizeDebugPackages") != null) {
 				System.err.println(
 						"Cyan is not running in a development environment, you cannot use coreModDebugKeys and authorizeDebugPackages outside of it.");
 				System.exit(-1);
 			}
-
 		}
 
 		if (side.equals("SERVER")) {
@@ -243,6 +241,29 @@ public class CyanLoader extends Modloader implements IModProvider {
 		ld.addInformationProvider(ld);
 		appendImplementation(ld);
 
+		if (System.getProperty("debugModfileManifests") != null) {
+			String[] files = null;
+
+			if (System.getProperty("os.name").toLowerCase().contains("win")
+					&& !System.getProperty("os.name").toLowerCase().contains("darwin"))
+				files = System.getProperty("debugModfileManifests").split(";");
+			else
+				files = System.getProperty("debugModfileManifests").split(":");
+
+			for (String file : files) {
+				if (file.startsWith("CM//") && developerMode == true) {
+					CyanModfileManifest mod = new CyanModfileManifest();
+					mod.readAll(new String(Files.readAllBytes(new File(file.substring(4)).toPath())));
+					ld.coreModManifests.put(mod.modGroup + ":" + mod.modId, mod);
+					CyanCore.addAllowedPackage(mod.modClassPackage);
+				} else if (file.startsWith("M//")) {
+					CyanModfileManifest mod = new CyanModfileManifest();
+					mod.readAll(new String(Files.readAllBytes(new File(file.substring(3)).toPath())));
+					ld.modManifests.put(mod.modGroup + ":" + mod.modId, mod);
+					CyanCore.addAllowedPackage(mod.modClassPackage);
+				}
+			}
+		}
 		MinecraftToolkit.resetServerConnectionState();
 
 		if (!coremods.exists())

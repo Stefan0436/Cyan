@@ -27,7 +27,7 @@ configurePublish {
 	}
 }
 
-version="1.0.0.A16"
+version="1.0.0.A17"
 jar.dependsOn('processResources')
 
 processResources  {

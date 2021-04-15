@@ -2,10 +2,13 @@ package org.asf.cyan.cornflower.gradle.flowerinternal.implementation.cyan.game;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.cyan.CyanModloader;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IGameExecutionContext;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftMappingsToolkit;
@@ -17,17 +20,34 @@ import org.gradle.api.Project;
 
 public class ClientGame implements IGameExecutionContext {
 
-	private Project proj;
 	private String version;
-
 	private MinecraftVersionInfo gameVersion;
 
-	public ClientGame() {
+	private CyanModloader modloader;
+	private MinecraftVersionInfo cyanVersion;
+
+	public ClientGame(CyanModloader modloader) {
+		this.modloader = modloader;
 	}
 
-	public ClientGame(Project proj, String version) {
-		this.proj = proj;
+	public ClientGame(Project proj, String version, CyanModloader modloader) {
 		this.version = version;
+		this.modloader = modloader;
+
+		try {
+			cyanVersion = new MinecraftVersionInfo(version + "-cyan-" + modloader.getVersion(),
+					MinecraftVersionType.UNKNOWN,
+					new URL(CyanModloader.maven + "/org/asf/cyan/CyanWrapper/" + modloader.libraries.get("CyanWrapper")
+							+ "/CyanWrapper-" + modloader.libraries.get("CyanWrapper") + "-" + version + "-cyan-"
+							+ modloader.getVersion() + ".json"),
+					OffsetDateTime.now());
+
+			if (!MinecraftInstallationToolkit.isVersionManifestSaved(cyanVersion)) {
+				MinecraftInstallationToolkit.saveVersionManifest(cyanVersion);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -37,29 +57,31 @@ public class ClientGame implements IGameExecutionContext {
 
 	@Override
 	public IGameExecutionContext newInstance(Project proj, String version) {
-		return new ClientGame(proj, version);
+		return new ClientGame(proj, version, modloader);
 	}
 
 	@Override
-	public File gameJar() {
+	public String gameJarDependency() {
 		prepare();
-		return MinecraftInstallationToolkit.getVersionJar(gameVersion, GameSide.CLIENT);
+		return ":client:" + gameVersion;
 	}
 
 	@Override
-	public File deobfuscatedJar() {
+	public String deobfuscatedJarDependency() {
 		prepare();
 		try {
-			return MinecraftModdingToolkit.deobfuscateJar(gameVersion, GameSide.CLIENT);
+			MinecraftModdingToolkit.deobfuscateJar(gameVersion, GameSide.CLIENT);
+			return ":client:" + gameVersion + "-deobf";
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	@Override
-	public File[] libraries() {
+	public String[] libraries() {
 		prepare();
-		return MinecraftInstallationToolkit.getLibraries(gameVersion); // TODO: cyan libraries
+
+		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion);
 	}
 
 	@Override
@@ -70,9 +92,8 @@ public class ClientGame implements IGameExecutionContext {
 	@Override
 	public String[] jvm() {
 		prepare();
-		
+
 		ArrayList<String> args = new ArrayList<String>();
-		args.add("-Djdk.attach.allowAttachSelf=true");
 		try {
 			args.add("-DassetRoot=" + MinecraftInstallationToolkit.getAssetsRoot().getCanonicalPath());
 			args.add("-DassetIndex=" + MinecraftInstallationToolkit.getAssetId(gameVersion));
@@ -87,11 +108,11 @@ public class ClientGame implements IGameExecutionContext {
 	public String[] commandline() {
 		return new String[0];
 	}
-	
+
 	private void prepare() {
 		if (gameVersion != null)
 			return;
-		
+
 		try {
 			gameVersion = MinecraftVersionToolkit.getVersion(version);
 			if (gameVersion == null)
@@ -116,5 +137,18 @@ public class ClientGame implements IGameExecutionContext {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public File[] flatDirs() {
+		File[] dirs = Stream.of(MinecraftInstallationToolkit.getLibraries(cyanVersion)).map(t -> t.getParentFile())
+				.toArray(t -> new File[t]);
+		File[] allDirs = new File[dirs.length + 1];
+		int i = 0;
+		for (File dir : dirs) {
+			allDirs[i++] = dir;
+		}
+		allDirs[i] = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/jars");
+		return allDirs;
 	}
 }

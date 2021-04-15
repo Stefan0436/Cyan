@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.cyan.CyanModloader;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IGameExecutionContext;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftMappingsToolkit;
@@ -16,17 +17,18 @@ import org.gradle.api.Project;
 
 public class ServerGame implements IGameExecutionContext {
 
-	private Project proj;
 	private String version;
-
 	private MinecraftVersionInfo gameVersion;
 
-	public ServerGame() {
+	private CyanModloader modloader;
+
+	public ServerGame(CyanModloader modloader) {
+		this.modloader = modloader;
 	}
 
-	public ServerGame(Project proj, String version) {
-		this.proj = proj;
+	public ServerGame(Project proj, String version, CyanModloader modloader) {
 		this.version = version;
+		this.modloader = modloader;
 	}
 
 	private void prepare() {
@@ -55,7 +57,7 @@ public class ServerGame implements IGameExecutionContext {
 			throw new RuntimeException(e);
 		}
 	}
-		
+
 	@Override
 	public String name() {
 		return "Cyan " + version + " Server";
@@ -63,29 +65,30 @@ public class ServerGame implements IGameExecutionContext {
 
 	@Override
 	public IGameExecutionContext newInstance(Project proj, String version) {
-		return new ServerGame(proj, version);
+		return new ServerGame(proj, version, modloader);
 	}
 
 	@Override
-	public File gameJar() {
+	public String gameJarDependency() {
 		prepare();
-		return MinecraftInstallationToolkit.getVersionJar(gameVersion, GameSide.SERVER);
+		return ":server:" + gameVersion + "-deobf";
 	}
 
 	@Override
-	public File deobfuscatedJar() {
+	public String deobfuscatedJarDependency() {
 		prepare();
 		try {
-			return MinecraftModdingToolkit.deobfuscateJar(gameVersion, GameSide.SERVER);
+			MinecraftModdingToolkit.deobfuscateJar(gameVersion, GameSide.SERVER);
+			return ":server:" + gameVersion + "-deobf";
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	@Override
-	public File[] libraries() {
+	public String[] libraries() {
 		prepare();
-		return new File[0]; // TODO: Cyan Libraries
+		return MinecraftInstallationToolkit.getLibrariesMavenFormat(gameVersion);
 	}
 
 	@Override
@@ -102,6 +105,11 @@ public class ServerGame implements IGameExecutionContext {
 	@Override
 	public String[] commandline() {
 		return new String[0];
+	}
+
+	@Override
+	public File[] flatDirs() {
+		return new File[0];
 	}
 
 }

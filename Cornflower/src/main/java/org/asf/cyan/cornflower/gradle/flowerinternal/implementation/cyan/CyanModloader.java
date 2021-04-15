@@ -12,6 +12,7 @@ import org.asf.cyan.core.CyanUpdateInfo;
 import org.asf.cyan.cornflower.gradle.Cornflower;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IModloader;
 import org.asf.cyan.cornflower.gradle.utilities.GradleUtil;
+
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
@@ -21,8 +22,9 @@ public class CyanModloader implements IModloader {
 	public static final String maven = "https://aerialworks.ddns.net/maven";
 	public static final String infoPathTemplate = "/org/asf/cyan/CyanVersionHolder/%version%/CyanVersionHolder-%version%-versions.ccfg";
 
-	private HashMap<String, String> libraries = new HashMap<String, String>();
+	public HashMap<String, String> libraries = new HashMap<String, String>();
 
+	private String version;
 	private Project project;
 	private int api;
 
@@ -44,7 +46,6 @@ public class CyanModloader implements IModloader {
 
 	public CyanModloader(Project proj, String version, int api) {
 		project = proj;
-
 		boolean latest = false;
 		if (version.equals("latest")) {
 			try {
@@ -114,6 +115,7 @@ public class CyanModloader implements IModloader {
 		}
 
 		libraries = new CyanUpdateInfo(config).libraryVersions;
+		this.version = version;
 	}
 
 	@Override
@@ -133,6 +135,8 @@ public class CyanModloader implements IModloader {
 
 	@Override
 	public void addRepositories(RepositoryHandler repositories) {
+		repositories.mavenCentral();
+		
 		repositories.maven((repo) -> {
 			repo.setName("AerialWorks");
 			repo.setUrl(maven);
@@ -166,6 +170,10 @@ public class CyanModloader implements IModloader {
 
 	private void addDependency(String group, String name, String version) {
 		project.getDependencies().add("implementation", group + ":" + name + ":" + version);
+	}
+
+	public String getVersion() {
+		return version;
 	}
 
 }

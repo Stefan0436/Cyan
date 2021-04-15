@@ -47,7 +47,7 @@ public class RiftPaperToolchainProvider implements IRiftToolchainProvider {
 	@Override
 	public File getJar() throws IOException {
 		File jarDir = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/jars");
-		File jarFile = new File(jarDir, version.getVersion() + "-server-deobf.jar");
+		File jarFile = new File(jarDir, "server-" + version.getVersion() + "-deobf.jar");
 
 		if (!jarFile.exists())
 			MinecraftModdingToolkit.deobfuscateJar(version, GameSide.SERVER);

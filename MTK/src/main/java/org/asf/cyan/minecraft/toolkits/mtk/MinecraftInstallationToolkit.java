@@ -997,6 +997,71 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	}
 
 	/**
+	 * Get the array of library files needed to run the game in maven format, NOTE:
+	 * does NOT add the version jar
+	 * 
+	 * @param version The MinecraftVersionInfo object representing the version.
+	 *                (might not have all installed, use checkVersion to verify)
+	 * @return Array of library files
+	 */
+	public static String[] getLibrariesMavenFormat(MinecraftVersionInfo version) {
+		ArrayList<String> libraries = new ArrayList<String>();
+
+		JsonObject manifest;
+		try {
+			manifest = getVersionManifest(version);
+		} catch (IOException e) {
+			return new String[0];
+		}
+
+		Gson gson = new Gson();
+		recurseInheritsFrom(manifest, manifest, gson);
+		MinecraftToolkit.info("Resolving version libraries...");
+		for (JsonElement o : manifest.get("libraries").getAsJsonArray()) {
+			JsonObject obj = o.getAsJsonObject();
+			String name = obj.get("name").getAsString();
+			boolean allow = true;
+			if (obj.has("rules")) {
+				for (JsonElement r : obj.get("rules").getAsJsonArray()) {
+					JsonObject rule = r.getAsJsonObject();
+					Map<?, ?> rules = gson.fromJson(rule, Map.class);
+					allow = evaluate(rules, variableStorage, gson, null, "allow");
+				}
+			}
+			if (!allow)
+				continue;
+			if (obj.has("name")) {
+				String group = "";
+				String libname = "";
+				String libversion = "";
+
+				String[] info = obj.get("name").getAsString().split(":");
+				if (info.length == 3) {
+					group = info[0];
+					libname = info[1];
+					libversion = info[2];
+				} else if (info.length == 2) {
+					libname = info[0];
+					libversion = info[1];
+				} else if (info.length == 1) {
+					libname = info[0];
+				}
+				libraries.add(group + ":" + libname + ":" + libversion);
+			}
+			for (String key : obj.keySet()) {
+				if (key.equals("downloads") || key.equals("url") || key.equals("name") || key.equals("rules")
+						|| key.equals("natives") || key.equals("extract"))
+					continue;
+
+				MinecraftToolkit.warn(
+						"No implementation for " + key + ".*! Unable to parse it, name of library: " + name + ".");
+			}
+		}
+
+		return libraries.toArray(t -> new String[t]);
+	}
+
+	/**
 	 * Extract the natives, run after validating and before each time you start the
 	 * game
 	 * 
@@ -1109,7 +1174,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		File jarDir = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/jars");
 		if (!jarDir.exists())
 			jarDir.mkdirs();
-		File output = new File(jarDir, version.getVersion() + "-" + side.toString().toLowerCase() + ".jar");
+		File output = new File(jarDir, side.toString().toLowerCase() + "-" + version.getVersion() + ".jar");
 		if (output.exists()) {
 			return output;
 		} else
@@ -1144,7 +1209,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		if (!jarDir.exists())
 			jarDir.mkdirs();
 
-		File output = new File(jarDir, version.getVersion() + "-" + side.toString().toLowerCase() + ".jar");
+		File output = new File(jarDir, side.toString().toLowerCase() + "-" + version.getVersion() + ".jar");
 		if (output.exists() && !overwrite) {
 			return output;
 		} else if (output.exists()) {

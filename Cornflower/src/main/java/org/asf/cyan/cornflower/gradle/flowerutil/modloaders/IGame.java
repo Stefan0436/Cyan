@@ -8,7 +8,7 @@ public interface IGame {
 	public Class<? extends IModloader> modloader();
 	
 	public String name();
-	public IGame newInstance(Project proj, String version);
+	public IGame newInstance(Project proj, String version, IModloader modloader);
 	
 	public void addRepositories(RepositoryHandler repositories);
 	public void addDependencies(ConfigurationContainer configurations);

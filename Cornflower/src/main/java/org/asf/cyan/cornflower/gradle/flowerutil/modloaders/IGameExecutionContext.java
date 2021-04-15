@@ -9,13 +9,15 @@ public interface IGameExecutionContext {
 	
 	public IGameExecutionContext newInstance(Project proj, String version);
 
-	public File gameJar();
+	public String gameJarDependency();
 	
-	public default File deobfuscatedJar() {
+	public default String deobfuscatedJarDependency() {
 		return null;
 	}
 
-	public File[] libraries();
+	public String[] libraries();
+	
+	public File[] flatDirs();
 
 	public String mainClass();
 

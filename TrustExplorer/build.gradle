@@ -8,7 +8,7 @@ apply from: '../asf.mvn.publish.gradle'
 buildDir = '../build/TrustExplorer'
 
 group="org.asf.cyan"
-version="1.0.0.A1"
+version="1.0.0.A2"
 def authorname = "AerialWorks Software Foundation"
 
 sourceCompatibility = '1.9'

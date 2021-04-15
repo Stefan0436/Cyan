@@ -7,6 +7,7 @@ modloaderversion=
 skip=false
 processnormal=false
 gameversion=default
+mappings=auto
 
 for arg in "${args[@]}"; do
     if [ "$processnormal" == "true" ]; then
@@ -30,6 +31,9 @@ for arg in "${args[@]}"; do
         skip=true
     elif [ "$arg" == "--version" ]; then
         gameversion=${args[index + 1]}
+        skip=true
+    elif [ "$arg" == "--mappings-version"]; then
+        mappings=${args[index + 1]}
         skip=true
     fi
     index=$((index+1))
@@ -61,18 +65,20 @@ if [ "$modloader" != "" ]; then
         BUILDCMD="publish serverJar"
         if [ "$modloaderversion" == "" ]; then paperversion="$(curl "https://papermc.io/api/v2/projects/paper/versions/$gameversion" -s --output - | jq -r ".builds[-1]")"
         else
-        	1>&2 echo
-        	1>&2 echo
-        	1>&2 echo WARNING! Setting the PAPER version is unsafe and can cause world damage.
-        	1>&2 echo Make sure the mappings are correct before launching the server!
-        	1>&2 echo
-        	1>&2 echo
-        	sleep 3
+            if [ "$mappings" == "auto" ]; then
+	        	1>&2 echo Cannot set paper version without specifying the EXACT mappings version
+	        	1>&2 echo Please add --mappings-version hash:version to the script arguments
+            	exit 1
+            fi
         	paperversion=$modloaderversion
         fi
         extraargs+=" -PoverrideLaunchWrapperServer=CyanPaperServerWrapper -PsetModLoader=\"paper-$paperversion\" -PsetInheritsFromVersion=\"$gameversion-paper-$paperversion\""
         ;;
     esac
+fi
+
+if [ "$mappings" != "auto" ]; then
+	extraargs += " -DoverrideMappingsVersion=\"$mappings\""
 fi
 
 eval './gradlew '"$extraargs"' -PresetLibSourceCache -PoverrideCyanLibraryURL="" -PcurrentXML processResources && ./gradlew '"$extraargs"' -PoverrideCyanLibraryURL="" -PcurrentXML build '"$BUILDCMD"' && echo && echo Done, saved in build.'

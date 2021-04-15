@@ -17,12 +17,16 @@ public class MinecraftGameProvider implements IGame {
 
 	private String version;
 	public MinecraftVersionInfo gameVersion;
-	
+
+	private CyanModloader modloader;
+
 	public MinecraftGameProvider() {
 	}
 
-	public MinecraftGameProvider(Project project, String version) {
+	public MinecraftGameProvider(Project project, String version, CyanModloader modloader) {
 		this.version = version;
+		this.modloader = modloader;
+
 		gameVersion = MinecraftVersionToolkit.getVersion(version);
 		if (gameVersion == null)
 			gameVersion = new MinecraftVersionInfo(version, MinecraftVersionType.UNKNOWN, null, OffsetDateTime.now());
@@ -34,8 +38,8 @@ public class MinecraftGameProvider implements IGame {
 	}
 
 	@Override
-	public IGame newInstance(Project proj, String version) {
-		return new MinecraftGameProvider(proj, version);
+	public IGame newInstance(Project proj, String version, IModloader modloader) {
+		return new MinecraftGameProvider(proj, version, (CyanModloader) modloader);
 	}
 
 	@Override
@@ -45,7 +49,7 @@ public class MinecraftGameProvider implements IGame {
 
 	@Override
 	public void addRepositories(RepositoryHandler repositories) {
-		
+
 	}
 
 	@Override
@@ -55,7 +59,7 @@ public class MinecraftGameProvider implements IGame {
 
 	@Override
 	public IGameExecutionContext[] getContexts() {
-		return new IGameExecutionContext[] { new ClientGame(), new ServerGame() };
+		return new IGameExecutionContext[] { new ClientGame(modloader), new ServerGame(modloader) };
 	}
 
 	@Override
