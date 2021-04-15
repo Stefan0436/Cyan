@@ -11,7 +11,7 @@ public class CtcCLI {
 	private static Scanner in = new Scanner(System.in);
 	private static URL dest;
 	private static String lastGroup = "";
-	
+
 	public static void main(String[] args) throws IOException {
 		if (args.length < 3 || (!args[0].equals("pack") && !args[0].equals("unpack") && !args[0].equals("publish"))) {
 			System.err.println("Usage: ctc pack/unpack/publish <input> <output>");
@@ -31,7 +31,11 @@ public class CtcCLI {
 			CtcUtil.publish(new File(args[1]), dest, (group) -> {
 				return getCredentials(group);
 			}, (published) -> {
-				System.out.println("Published: " + published + " -> " + args[2] + "/" + published);
+				if (published.startsWith("/"))
+					published = published.substring(1);
+				if (!args[2].endsWith("/"))
+					args[2] = args[2] + "/";
+				System.out.println("Published: " + published + " -> " + args[2] + published);
 			});
 			in.close();
 		}
@@ -41,7 +45,7 @@ public class CtcCLI {
 		if (credentials != null && lastGroup.equals(group)) {
 			return credentials;
 		}
-		
+
 		lastGroup = group;
 		System.out.println("Please log in to your " + group + " account at " + dest.getHost() + "...");
 		System.out.print("Username: ");
@@ -49,7 +53,7 @@ public class CtcCLI {
 		System.out.print("Password for " + username + "@" + dest.getHost() + ": ");
 		char[] password = System.console().readPassword();
 		credentials = new Object[] { username, password };
-		return credentials ;
+		return credentials;
 	}
 
 }

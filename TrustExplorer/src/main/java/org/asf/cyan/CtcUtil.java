@@ -159,6 +159,7 @@ public class CtcUtil {
 
 		connection.setInstanceFollowRedirects(false);
 		connection.setRequestMethod("PUT");
+		connection.setRequestProperty("Content-Type", "application/octet-stream");
 
 		String cookieStr = "";
 		for (String cookie : cookies.keySet()) {
