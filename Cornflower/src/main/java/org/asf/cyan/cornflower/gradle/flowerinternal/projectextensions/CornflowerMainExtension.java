@@ -192,14 +192,14 @@ public class CornflowerMainExtension implements IProjectExtension {
 
 		private void add(Project project) {
 			for (IPlatformConfiguration platform : platforms) {
-				if (platform.getMappingsVersion(CLIENT) != null) {
+				if (platform.getMappingsVersion(GameSide.CLIENT) != null) {
 					project.task(Map.of("type", RiftJar), platform.getPlatform().toString().toLowerCase() + "Rift",
-							new TaskClosure(project, project, platform.getPlatform(), CLIENT));
+							new TaskClosure(project, project, platform.getPlatform(), GameSide.CLIENT));
 				}
-				if (platform.getMappingsVersion(SERVER) != null) {
+				if (platform.getMappingsVersion(GameSide.SERVER) != null) {
 					project.task(Map.of("type", RiftJar),
 							platform.getPlatform().toString().toLowerCase() + "RiftServer",
-							new TaskClosure(project, project, platform.getPlatform(), SERVER));
+							new TaskClosure(project, project, platform.getPlatform(), GameSide.SERVER));
 				}
 			}
 		}
@@ -230,7 +230,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 
 				tsk.mappings_identifier(platform.toString().toLowerCase() + "-" + config.getDisplayVersion());
 				tsk.getArchiveClassifier()
-						.set("RIFT-" + platform.toString().toUpperCase() + (side == SERVER ? "-SERVER" : ""));
+						.set("RIFT-" + platform.toString().toUpperCase() + (side == GameSide.SERVER ? "-SERVER" : ""));
 				tsk.from(sources);
 				providers.forEach((prov) -> tsk.provider(prov));
 

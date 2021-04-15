@@ -666,6 +666,22 @@ public class CyanLoader extends Modloader implements IModProvider {
 									allow = false;
 									break;
 								}
+							} else if (type.startsWith("side:")) {
+								String side = type.substring("side:".length());
+								if (CyanInfo.getSide().toString().equalsIgnoreCase(side)) {
+									String extension = path.substring(path.lastIndexOf(".") + 1);
+									if (path.toLowerCase()
+											.endsWith("-" + side.toLowerCase() + "." + extension.toLowerCase())) {
+										path = path.substring(0, path.indexOf("-" + side.toLowerCase())) + "."
+												+ extension;
+
+										output = new File(cache, path);
+									}
+									allow = true;
+								} else {
+									allow = false;
+									break;
+								}
 							} else if (type.startsWith("loaderversion:")) {
 								String loaderversion = type.substring("loaderversion:".length());
 								if (CyanInfo.getCyanVersion().toString().equalsIgnoreCase(loaderversion)) {

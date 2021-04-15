@@ -31,6 +31,7 @@ public class SpigotPlatform implements IPlatformConfiguration {
 	public String getMappingsVersion(GameSide side) {
 		if (side == GameSide.CLIENT)
 			return null;
+		
 		return version;
 	}
 

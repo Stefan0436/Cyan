@@ -45,4 +45,5 @@ Upcoming Cyan Update: Alpha 11, changes:
  - Fixed forge MCP mappings, implemented TSRG version 2 (MTK A14)
  - Forge now uses specific MCP version provided by the CyanWrapper build file. (CyanWrapper A5)
  - MTK MSA Account Support (MTK A15) -- TODO
- - Rift Support (Cornflower A27) -- TODO
+ - Rift Support (Cornflower A28)
+ - CTC Tasks (Cornflower A28)
