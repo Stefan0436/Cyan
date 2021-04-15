@@ -16,3 +16,161 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.asf.cyan.cornflower'
+
+platforms {
+	// Needs to be present when using RIFT.
+	// Minecraft VANILLA platform
+	VANILLA {
+		// Game version
+		version "1.16.5"
+	}
+	
+	// MCP platform, for forge support
+	MCP {
+		// YYYYMMDD.HHMMSS, should match upstream forge
+		version "20210115.111550"
+		
+		// Forge version
+		modloader "36.1.4"
+	}
+	
+	// Yarn platform, for fabric support
+	YARN {
+		// Build version for YARN,
+		// Search for matching game version in http://maven.modmuss50.me/net/fabricmc/yarn/maven-metadata.xml
+		// Or use getYarnVersion("game-version") to do so automatically
+		version "1.16.5+build.6" // getYarnVersion("1.16.5")
+		
+		// Fabric version
+		// For latest, use getLatestFabricVersion("game-version")
+		modloader "0.11.3" // getLatestFabricVersion("1.16.5")
+	}
+	
+	// Spigot platform, for paper support
+	SPIGOT {		
+		// SPIGOT mappings version, it is best to only use mappings that have been given a green light by the Cyan team.
+		//
+		// Use getRecommendedSpigotMappings("game-version") for the mappings that have been given a green light
+		// Use getLatestSpigotMappings("game-version") for mappings in pre-release testing stage
+		// Use getTestingSpigotMappings("game-version") for mappings in early testing stage (unrecommended, can really break things)
+		//
+		//
+		// If you really want the latest version, you can use the following.
+		// USE AT YOUR OWN RISK, CYAN WON'T BE HELD RESPONSIBLE FOR DAMAGED WORLDS.
+		//
+		// For the latest remote, use getRemoteSpigotMappingsVersion("game-version")
+		//
+		//
+		// Commit hash and craftbukkit build for mappings version (commit:craftbukkit)
+		version "f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3" // getRecommendedSpigotMappings("1.16.5")
+		
+		// Paper version, only use paper version compatible with the mappings,
+		//
+		// Use getPaperVersion("mappings-version") to retrieve the latest paper version that has been
+		// registered as 'compatible with mappings' in the generic version manifest of CYAN.
+		//
+		// Use getPaperVersionByDate("game-vesion", "mappings-version") to retrieve the paper version with date
+		// aproximatly matching the mappings publish date. (USE AT YOUR OWN RISK, SCRAPES SPIGOT WEB PAGE FOR DATE
+		// AND RECURSES THROUGH PAPER VERSIONS TO FIND THE UPDATE, PLEASE STORE VALUE AND USE AS LEAST AS POSSIBLE)
+		//
+		// Paper version
+		modloader "593" // getPaperVersion("f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3")
+	}
+}
+
+rift {
+	mappings_identifier "vanilla-"+platforms.VANILLA.getDisplayVersion()
+	
+	from tasks.jar.getArchiveFile()	
+	provider getPlatformRiftProvider(VANILLA, CLIENT)
+	
+	classifier "RIFT-VANILLA"
+}
+
+task riftServer(type: RiftJar) {
+	mappings_identifier "vanilla-"+platforms.VANILLA.getDisplayVersion() + "-server"
+	
+	from tasks.jar.getArchiveFile()	
+	provider getPlatformRiftProvider(VANILLA, SERVER)
+	
+	classifier "RIFT-VANILLA-SERVER"
+}
+
+task mcpRift(type: RiftJar) {
+	mappings_identifier "mcp-"+platforms.MCP.getDisplayVersion()
+	
+	from tasks.jar.getArchiveFile()
+	provider getPlatformRiftProvider(MCP, CLIENT)
+	
+	classifier "RIFT-MCP"
+}
+
+task mcpRiftServer(type: RiftJar) {
+	mappings_identifier "mcp-"+platforms.MCP.getDisplayVersion() + "-server"
+	
+	from tasks.jar.getArchiveFile()
+	provider getPlatformRiftProvider(MCP, SERVER)
+	
+	classifier "RIFT-MCP-SERVER"
+}
+
+task yarnRift(type: RiftJar) {
+	mappings_identifier "yarn-"+platforms.YARN.getDisplayVersion()
+	
+	from tasks.jar.getArchiveFile()
+	provider getPlatformRiftProvider(YARN, CLIENT)
+	
+	classifier "RIFT-YARN"	
+}
+
+task yarnRiftServer(type: RiftJar) {
+	mappings_identifier "yarn-"+platforms.YARN.getDisplayVersion() + "-server"
+	
+	from tasks.jar.getArchiveFile()
+	provider getPlatformRiftProvider(YARN, SERVER)
+	
+	classifier "RIFT-YARN-SERVER"
+}
+
+task spigotRiftServer(type: RiftJar) {
+	mappings_identifier "spigot-"+platforms.SPIGOT.getDisplayVersion()
+	
+	from tasks.jar.getArchiveFile()
+	provider getPlatformRiftProvider(SPIGOT, SERVER)
+	
+	classifier "RIFT-SPIGOT"
+}
+
+rift.finalizedBy spigotRiftServer
+rift.finalizedBy yarnRift
+rift.finalizedBy yarnRiftServer
+rift.finalizedBy mcpRift
+rift.finalizedBy mcpRiftServer
+rift.finalizedBy riftServer
+
+ctc {
+	method uctc
+	
+	input tasks.jar.getArchiveFile()
+	
+	input tasks.rift.getArchiveFile()
+	input tasks.riftServer.getArchiveFile()
+	
+	input tasks.mcpRift.getArchiveFile()
+	input tasks.mcpRiftServer.getArchiveFile()
+	
+	input tasks.yarnRift.getArchiveFile()
+	input tasks.yarnRiftServer.getArchiveFile()
+	
+	input tasks.spigotRiftServer.getArchiveFile()
+	
+	output "$buildDir/uctc/Main Trust"
+}
+
+build.finalizedBy rift
+rift.finalizedBy ctc
+
+dependencies {
+	implementation Modloader.forModloader("cyan")
+	implementation Game.forGame("Minecraft", "1.16.5")
+}
