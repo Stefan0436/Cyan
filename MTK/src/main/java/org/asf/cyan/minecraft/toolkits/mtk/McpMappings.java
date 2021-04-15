@@ -8,9 +8,9 @@ import org.asf.cyan.fluid.remapping.Mapping;
 @Comment("Cyan downloads the official and MCP mappings on first launch and converts them to CCFG so FLUID can read them.")
 @Comment("The mappings have not been included in cyan's jar files and may NOT be distributed!")
 class McpMappings extends Mapping<McpMappings> {
-	
+
 	public McpMappings() {
 		super();
 	}
-	
+
 }

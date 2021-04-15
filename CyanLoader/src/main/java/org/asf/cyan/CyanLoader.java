@@ -33,6 +33,7 @@ import org.asf.cyan.api.fluid.annotations.VersionRegex;
 import org.asf.cyan.api.modloader.IModloaderComponent;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.api.modloader.information.modloader.LoadPhase;
 import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.api.modloader.information.providers.IModProvider;
@@ -324,7 +325,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 					: manifest.version);
 
 			Version ver = Version.fromString(cVersion);
-			checkDependencyModVersion(version, cVersion, ver, id, manifest.displayName);
+			checkDependencyVersion(version, cVersion, ver,
+					"Missing mod dependency for " + manifest.displayName + ": " + id);
 
 			if (!optManifest.isEmpty() && !Stream.of(mods)
 					.anyMatch(t -> t.getManifest().id().equals(manifest.modGroup + ":" + manifest.modId))) {
@@ -345,7 +347,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 						: manifest.version);
 
 				Version ver = Version.fromString(cVersion);
-				checkDependencyModVersion(version, cVersion, ver, id, manifest.displayName);
+				checkDependencyVersion(version, cVersion, ver,
+						"Missing mod dependency for " + manifest.displayName + ": " + id);
 
 				loadMod(coremod, optManifest.get(), loadingMods);
 			}
@@ -367,7 +370,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 		}
 	}
 
-	private void checkDependencyModVersion(String checkVersion, String cVersion, Version ver, String id, String dsp) {
+	private void checkDependencyVersion(String checkVersion, String cVersion, Version ver, String message) {
 		for (String version : checkVersion.split(" & ")) {
 			version = version.trim();
 			if (version.startsWith("~=")) {
@@ -375,7 +378,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 				if (regex.startsWith(" "))
 					regex = regex.substring(1);
 				if (!cVersion.matches(regex)) {
-					fatal("Missing mod dependency for " + dsp + ": " + id + " (incompatible version installed)");
+					fatal(message + " (incompatible version installed)");
 					System.exit(-1);
 				}
 			} else if (version.startsWith(">=")) {
@@ -386,7 +389,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 				Version min = Version.fromString(str);
 
 				if (!ver.isGreaterOrEqualTo(min)) {
-					fatal("Missing mod dependency for " + dsp + ": " + id + " (outdated version installed)");
+					fatal(message + " (outdated version installed)");
 					System.exit(-1);
 				}
 			} else if (version.startsWith("<=")) {
@@ -397,7 +400,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 				Version min = Version.fromString(str);
 
 				if (!ver.isLessOrEqualTo(min)) {
-					fatal("Missing mod dependency for " + dsp + ": " + id + " (incompatible newer version installed)");
+					fatal(message + " (incompatible newer version installed)");
 					System.exit(-1);
 				}
 			} else if (version.startsWith(">")) {
@@ -408,7 +411,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 				Version min = Version.fromString(str);
 
 				if (!ver.isGreaterThan(min)) {
-					fatal("Missing mod dependency for " + dsp + ": " + id + " (outdated version installed)");
+					fatal(message + " (outdated version installed)");
 					System.exit(-1);
 				}
 			} else if (version.startsWith("<")) {
@@ -419,12 +422,12 @@ public class CyanLoader extends Modloader implements IModProvider {
 				Version min = Version.fromString(str);
 
 				if (!ver.isLessThan(min)) {
-					fatal("Missing mod dependency for " + dsp + ": " + id + " (incompatible newer version installed)");
+					fatal(message + " (incompatible newer version installed)");
 					System.exit(-1);
 				}
 			} else {
 				if (!ver.isEqualTo(Version.fromString(version.trim()))) {
-					fatal("Missing mod dependency for " + dsp + ": " + id + " (incompatible version installed)");
+					fatal(message + " (incompatible version installed)");
 					System.exit(-1);
 				}
 			}
@@ -523,6 +526,33 @@ public class CyanLoader extends Modloader implements IModProvider {
 			System.exit(-1);
 		}
 
+		if (CyanInfo.getPlatform() != LaunchPlatform.DEOBFUSCATED && CyanInfo.getPlatform() != LaunchPlatform.VANILLA
+				&& CyanInfo.getPlatform() != LaunchPlatform.UNKNOWN) {
+			if (!manifest.platforms.containsKey(CyanInfo.getPlatform().toString())) {
+				boolean first = true;
+				StringBuilder platforms = new StringBuilder();
+				for (String platform : manifest.platforms.keySet()) {
+					if (!first)
+						platforms.append(", ");
+					first = false;
+					platforms.append(platform);
+				}
+				fatal("Incompatible platform '" + CyanInfo.getPlatform() + "', coremod " + manifest.displayName
+						+ " only supports the following platforms: " + platforms);
+				System.exit(-1);
+			}
+
+			String platformVersion = manifest.platforms.get(CyanInfo.getPlatform().toString());
+			String cVersion = Fluid.getMappings()[0].mappingsVersion;
+
+			if (cVersion == null)
+				cVersion = CyanInfo.getModloaderVersion();
+
+			this.checkDependencyVersion(platformVersion, cVersion, Version.fromString(cVersion),
+					"Incompatible platform '" + CyanInfo.getPlatform() + "' for coremod '" + manifest.displayName
+							+ "'");
+		}
+
 		ZipInputStream strm = new ZipInputStream(new FileInputStream(ccmf));
 		boolean cacheOutOfDate = false;
 		ModInfoCache info = new ModInfoCache();
@@ -577,51 +607,63 @@ public class CyanLoader extends Modloader implements IModProvider {
 					if (!output.getParentFile().exists())
 						output.getParentFile().mkdirs();
 
-					String type = manifest.jars.get(path);
 					if (!output.exists()) {
 						boolean allow = false;
 
-						if (type.startsWith("platform:")) {
-							String platform = type.substring("platform:".length());
-							if (CyanInfo.getPlatform().toString().equalsIgnoreCase(platform)) {
-								String extension = path.substring(path.lastIndexOf(".") + 1);
-								if (path.toLowerCase()
-										.endsWith("-" + platform.toLowerCase() + "." + extension.toLowerCase())) {
-									path = path.substring(0, path.indexOf("-" + platform.toLowerCase())) + "."
-											+ extension;
+						for (String type : manifest.jars.get(path).split(" & ")) {
+							type = type.trim();
 
-									output = new File(cache, path);
+							if (type.startsWith("platform:")) {
+								String platform = type.substring("platform:".length());
+								if (CyanInfo.getPlatform().toString().equalsIgnoreCase(platform)) {
+									String extension = path.substring(path.lastIndexOf(".") + 1);
+									if (path.toLowerCase()
+											.endsWith("-" + platform.toLowerCase() + "." + extension.toLowerCase())) {
+										path = path.substring(0, path.indexOf("-" + platform.toLowerCase())) + "."
+												+ extension;
+
+										output = new File(cache, path);
+									}
+									allow = true;
+								} else {
+									allow = false;
+									break;
 								}
+							} else if (type.startsWith("gameversion:")) {
+								String gameversion = type.substring("gameversion:".length());
+								if (CyanInfo.getMinecraftVersion().toString().equalsIgnoreCase(gameversion)) {
+									String extension = path.substring(path.lastIndexOf(".") + 1);
+									if (path.toLowerCase().endsWith(
+											"-" + gameversion.toLowerCase() + "." + extension.toLowerCase())) {
+										path = path.substring(0, path.indexOf("-" + gameversion.toLowerCase())) + "."
+												+ extension;
+
+										output = new File(cache, path);
+									}
+									allow = true;
+								} else {
+									allow = false;
+									break;
+								}
+							} else if (type.startsWith("loaderversion:")) {
+								String loaderversion = type.substring("loaderversion:".length());
+								if (CyanInfo.getCyanVersion().toString().equalsIgnoreCase(loaderversion)) {
+									String extension = path.substring(path.lastIndexOf(".") + 1);
+									if (path.toLowerCase().endsWith(
+											"-" + loaderversion.toLowerCase() + "." + extension.toLowerCase())) {
+										path = path.substring(0, path.indexOf("-" + loaderversion.toLowerCase())) + "."
+												+ extension;
+
+										output = new File(cache, path);
+									}
+									allow = true;
+								} else {
+									allow = false;
+									break;
+								}
+							} else if (type.equals("any")) {
 								allow = true;
 							}
-						} else if (type.startsWith("gameversion:")) {
-							String gameversion = type.substring("gameversion:".length());
-							if (CyanInfo.getMinecraftVersion().toString().equalsIgnoreCase(gameversion)) {
-								String extension = path.substring(path.lastIndexOf(".") + 1);
-								if (path.toLowerCase()
-										.endsWith("-" + gameversion.toLowerCase() + "." + extension.toLowerCase())) {
-									path = path.substring(0, path.indexOf("-" + gameversion.toLowerCase())) + "."
-											+ extension;
-
-									output = new File(cache, path);
-								}
-								allow = true;
-							}
-						} else if (type.startsWith("loaderversion:")) {
-							String loaderversion = type.substring("loaderversion:".length());
-							if (CyanInfo.getCyanVersion().toString().equalsIgnoreCase(loaderversion)) {
-								String extension = path.substring(path.lastIndexOf(".") + 1);
-								if (path.toLowerCase()
-										.endsWith("-" + loaderversion.toLowerCase() + "." + extension.toLowerCase())) {
-									path = path.substring(0, path.indexOf("-" + loaderversion.toLowerCase())) + "."
-											+ extension;
-
-									output = new File(cache, path);
-								}
-								allow = true;
-							}
-						} else if (type.equals("any")) {
-							allow = true;
 						}
 
 						if (allow) {
@@ -806,7 +848,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 				fatal("Coremod path '" + manifest.modGroup + "." + manifest.modId + "' was imported twice!");
 				System.exit(-1);
 			}
-			
+
 			CyanCore.addAllowedPackage(manifest.modClassPackage);
 			coreModManifests.put(manifest.modGroup + "." + manifest.modId, manifest);
 		});
@@ -1076,14 +1118,14 @@ public class CyanLoader extends Modloader implements IModProvider {
 		}
 	}
 
-	public static Mapping<?> getFabricCompatibilityMappings(GameSide side) {
+	public static Mapping<?> getFabricCompatibilityMappings(GameSide side, String mappingsVersion) {
 		try {
 			if (!loaded)
 				prepare(side.toString());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		return new FabricCompatibilityMappings(mappings, side);
+		return new FabricCompatibilityMappings(mappings, side, mappingsVersion);
 	}
 
 	public static Mapping<?> getForgeCompatibilityMappings(GameSide side, String mcpVersion) {
@@ -1096,14 +1138,14 @@ public class CyanLoader extends Modloader implements IModProvider {
 		return new ForgeCompatibilityMappings(mappings, side, mcpVersion);
 	}
 
-	public static Mapping<?> getPaperCompatibilityMappings() {
+	public static Mapping<?> getPaperCompatibilityMappings(String mappingsVersion) {
 		try {
 			if (!loaded)
 				prepare(GameSide.SERVER.toString());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		return new PaperCompatibilityMappings(mappings);
+		return new PaperCompatibilityMappings(mappings, mappingsVersion);
 	}
 
 	public static void addCompatibilityMappings(Mapping<?> mappings) {

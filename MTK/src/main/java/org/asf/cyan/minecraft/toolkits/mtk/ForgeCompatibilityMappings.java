@@ -29,8 +29,8 @@ public class ForgeCompatibilityMappings extends CompatibilityMappings {
 			boolean msg, String mcp) {
 		try {
 			MinecraftToolkit.infoLog("Loading forge support... Preparing MCP mappings for compatibility...");
-			if (!MinecraftMappingsToolkit.areMappingsAvailable((modloader.isEmpty() ? "" : "-" + modloader + "-") + mcp, "mcp",
-					info, side)) {
+			if (!MinecraftMappingsToolkit.areMappingsAvailable((modloader.isEmpty() ? "" : "-" + modloader + "-") + mcp,
+					"mcp", info, side)) {
 
 				if (msg)
 					MinecraftToolkit.infoLog("First time loading with forge support for version " + modloader

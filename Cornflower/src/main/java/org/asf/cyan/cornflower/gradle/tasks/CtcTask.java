@@ -19,6 +19,8 @@ import org.asf.cyan.cornflower.gradle.Cornflower;
 import org.asf.cyan.cornflower.gradle.utilities.GradleUtil;
 import org.asf.cyan.cornflower.gradle.utilities.ITaskExtender;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.file.RegularFile;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskProvider;
 import org.objectweb.asm.ClassReader;
@@ -128,6 +130,14 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 
 	public void input(File input) throws IOException {
 		inputCache.add(input);
+	}
+
+	public void input(RegularFile input) throws IOException {
+		inputCache.add(input.getAsFile());
+	}
+
+	public void input(Provider<RegularFile> input) throws IOException {
+		inputCache.add(input.get().getAsFile());
 	}
 
 	public void input(String input) {

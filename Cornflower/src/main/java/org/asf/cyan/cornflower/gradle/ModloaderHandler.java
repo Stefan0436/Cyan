@@ -1,6 +1,5 @@
 package org.asf.cyan.cornflower.gradle;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -27,8 +26,8 @@ public class ModloaderHandler extends CyanComponent {
 		ArrayList<Dependency> remoteDependencies = new ArrayList<Dependency>();
 		for (Configuration conf : proj.getConfigurations()) {
 			for (Dependency dep : conf.getDependencies()) {
-				if (!dep.getGroup().startsWith("cornflower.internal.")) {
-					if (dep.getGroup() != null && dep.getName() != null) {
+				if (dep.getGroup() != null && !dep.getGroup().startsWith("cornflower.internal.")) {
+					if (dep.getName() != null) {
 						remoteDependencies.add(dep);
 					}
 				}
@@ -111,9 +110,7 @@ public class ModloaderHandler extends CyanComponent {
 					+ ", make sure you have the modloader that provides it, cornflower may not work properly.");
 		});
 
-		for (IGame game : (ArrayList<IGame>) proj.getExtensions().getExtraProperties()
-				.get("cornflowergames")) {
-
+		for (IGame game : (ArrayList<IGame>) proj.getExtensions().getExtraProperties().get("cornflowergames")) {
 			game.addRepositories(proj.getRepositories());
 			game.addDependencies(proj.getConfigurations());
 			for (IGameExecutionContext ctx : game.getContexts()) {
@@ -121,12 +118,13 @@ public class ModloaderHandler extends CyanComponent {
 			}
 		}
 
+		proj.getExtensions().getExtraProperties().set("remoteDependencies", remoteDependencies);
 	}
 
 	private static void findDeps(Project proj, String depType, Consumer<Dependency> handler) {
 		for (Configuration conf : proj.getConfigurations()) {
 			for (Dependency dep : new ArrayList<Dependency>(conf.getDependencies())) {
-				if (dep.getGroup().startsWith("cornflower.internal.")) {
+				if (dep.getGroup() != null && dep.getGroup().startsWith("cornflower.internal.")) {
 					String type = dep.getGroup().substring("cornflower.internal.".length());
 					if (type.equals(depType)) {
 						conf.getDependencies().remove(dep);

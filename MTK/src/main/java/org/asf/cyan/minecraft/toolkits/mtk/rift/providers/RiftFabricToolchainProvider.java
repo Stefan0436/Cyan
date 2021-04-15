@@ -19,17 +19,20 @@ public class RiftFabricToolchainProvider implements IRiftToolchainProvider {
 	private MinecraftVersionInfo version;
 	private GameSide side;
 	private String modloaderVersion;
+	private String mappingsVersion;
 
-	public RiftFabricToolchainProvider(MinecraftVersionInfo version, GameSide side, String modloaderVersion) {
+	public RiftFabricToolchainProvider(MinecraftVersionInfo version, GameSide side, String modloaderVersion,
+			String mappingsVersion) {
 		this.version = version;
 		this.side = side;
 		this.modloaderVersion = modloaderVersion;
+		this.mappingsVersion = mappingsVersion;
 	}
 
 	@Override
 	public Mapping<?> getRiftMappings() throws IOException {
 		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + modloaderVersion, "yarn", version, side)) {
-			MinecraftMappingsToolkit.downloadYarnMappings(version, side);
+			MinecraftMappingsToolkit.downloadYarnMappings(version, side, mappingsVersion);
 			MinecraftMappingsToolkit.saveMappingsToDisk("-" + modloaderVersion, "yarn", version, side);
 		}
 
@@ -44,7 +47,7 @@ public class RiftFabricToolchainProvider implements IRiftToolchainProvider {
 		if (side == GameSide.CLIENT)
 			verify();
 
-		return MinecraftRifterToolkit.generateCyanFabricRiftTargets(version, side, modloaderVersion);
+		return MinecraftRifterToolkit.generateCyanFabricRiftTargets(version, side, modloaderVersion, mappingsVersion);
 	}
 
 	@Override
@@ -65,13 +68,13 @@ public class RiftFabricToolchainProvider implements IRiftToolchainProvider {
 	public IClassSourceProvider<?>[] getSources() throws IOException {
 		if (side == GameSide.CLIENT) {
 			verify();
-			ArrayList<IClassSourceProvider<?>> sources = new  ArrayList< IClassSourceProvider<?>>();
+			ArrayList<IClassSourceProvider<?>> sources = new ArrayList<IClassSourceProvider<?>>();
 			for (File lib : MinecraftInstallationToolkit.getLibraries(version)) {
 				sources.add(new FileClassSourceProvider(lib));
 			}
 			return sources.toArray(t -> new IClassSourceProvider<?>[t]);
 		}
-		
+
 		return new IClassSourceProvider<?>[0];
 	}
 

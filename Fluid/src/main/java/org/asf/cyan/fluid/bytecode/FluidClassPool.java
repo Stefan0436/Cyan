@@ -74,7 +74,7 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 	}
 
 	public ClassNode[] getLoadedClasses() {
-		return classes.toArray(t -> new ClassNode[t]);
+		return classes.stream().map(t -> t.node).toArray(t -> new ClassNode[t]);
 	}
 
 	/**

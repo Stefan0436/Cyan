@@ -35,3 +35,20 @@ ${cyanfabricsupportversions}}
 
 paperSupport> {
 ${cyanpapersupportversions}}
+
+
+# Map of spigot mapping commit hashes compatible with specific paper versions 
+paperByMappings> {
+${paperByMappings}}
+
+# Spigot mappings that have passed all testing with CYAN
+spigotStableMappings> {
+${spigotStableMappings}}
+
+# Spigot mappings that are passing testing
+spigotLatestMappings> {
+${spigotLatestMappings}}
+
+# Spigot mappings that are being tested
+spigotTestingMappings> {
+${spigotTestingMappings}}

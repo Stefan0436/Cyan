@@ -18,7 +18,7 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler;
 
 public class CyanModloader implements IModloader {
 
-	private static final String maven = "https://aerialworks.ddns.net/maven";
+	public static final String maven = "https://aerialworks.ddns.net/maven";
 	public static final String infoPathTemplate = "/org/asf/cyan/CyanVersionHolder/%version%/CyanVersionHolder-%version%-versions.ccfg";
 
 	private HashMap<String, String> libraries = new HashMap<String, String>();

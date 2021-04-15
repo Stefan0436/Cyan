@@ -173,7 +173,8 @@ public class MinecraftRifterToolkit extends CyanComponent {
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, side))
 			throw new IOException("No mappings are present for the " + version + " " + side.toString().toLowerCase());
 
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + modloaderVersion + "-" + mcpVersion, "mcp", version, side))
+		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + modloaderVersion + "-" + mcpVersion, "mcp", version,
+				side))
 			throw new IOException(
 					"No MCP mappings are present for the " + version + " " + side.toString().toLowerCase());
 
@@ -211,11 +212,12 @@ public class MinecraftRifterToolkit extends CyanComponent {
 	 * @param version          Minecraft version
 	 * @param side             Which side (client or server)
 	 * @param modloaderVersion Modloader version
+	 * @param mappingsVersion  Mappings version
 	 * @return Mapping object representing the rift targets.
 	 * @throws IOException If the mappings don't match the version given
 	 */
 	public static Mapping<?> generateCyanFabricRiftTargets(MinecraftVersionInfo version, GameSide side,
-			String modloaderVersion) throws IOException {
+			String modloaderVersion, String mappingsVersion) throws IOException {
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, side))
 			throw new IOException("No mappings are present for the " + version + " " + side.toString().toLowerCase());
 
@@ -235,13 +237,13 @@ public class MinecraftRifterToolkit extends CyanComponent {
 			if (fabricMappingsVersionClient == null || !fabricMappingsVersionClient.equals(version)) {
 				fabricMappingsVersionClient = version;
 				fabricMappingsClient = new FabricCompatibilityMappings(MinecraftMappingsToolkit.getMappings(side),
-						modloaderVersion, version, side, false);
+						modloaderVersion, version, side, false, mappingsVersion);
 			}
 		} else {
 			if (fabricMappingsVersionServer == null || !fabricMappingsVersionServer.equals(version)) {
 				fabricMappingsVersionServer = version;
 				fabricMappingsServer = new FabricCompatibilityMappings(MinecraftMappingsToolkit.getMappings(side),
-						modloaderVersion, version, side, false);
+						modloaderVersion, version, side, false, mappingsVersion);
 			}
 		}
 
@@ -256,11 +258,12 @@ public class MinecraftRifterToolkit extends CyanComponent {
 	 * 
 	 * @param version          Minecraft version
 	 * @param modloaderVersion Modloader version
+	 * @param mappingsVersion  Mappings version
 	 * @return Mapping object representing the rift targets.
 	 * @throws IOException If the mappings don't match the version given
 	 */
-	public static Mapping<?> generateCyanPaperRiftTargets(MinecraftVersionInfo version, String modloaderVersion)
-			throws IOException {
+	public static Mapping<?> generateCyanPaperRiftTargets(MinecraftVersionInfo version, String modloaderVersion,
+			String mappingsVersion) throws IOException {
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, GameSide.SERVER))
 			throw new IOException(
 					"No mappings are present for the " + version + " " + GameSide.SERVER.toString().toLowerCase());
@@ -280,7 +283,7 @@ public class MinecraftRifterToolkit extends CyanComponent {
 		if (paperMappings == null || !paperMappingsVersion.equals(version)) {
 			paperMappingsVersion = version;
 			paperMappings = new PaperCompatibilityMappings(MinecraftMappingsToolkit.getMappings(GameSide.SERVER),
-					modloaderVersion, version, false);
+					modloaderVersion, version, false, mappingsVersion);
 		}
 
 		info("Generating SPIGOT RIFT reverse targeting mappings for server version " + version + "...");

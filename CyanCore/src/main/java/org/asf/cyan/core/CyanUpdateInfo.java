@@ -30,6 +30,14 @@ public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 	public HashMap<String, String> fabricSupport = new HashMap<String, String>();
 	public HashMap<String, String> paperSupport = new HashMap<String, String>();
 	
+	
+	public HashMap<String, String> paperByMappings = new HashMap<String, String>();
+	
+	public HashMap<String, String> spigotStableMappings = new HashMap<String, String>();
+	public HashMap<String, String> spigotLatestMappings = new HashMap<String, String>();
+	public HashMap<String, String> spigotTestingMappings = new HashMap<String, String>();
+	
+	
 	public CyanUpdateInfo(String content) {
 		readAll(content);
 	}

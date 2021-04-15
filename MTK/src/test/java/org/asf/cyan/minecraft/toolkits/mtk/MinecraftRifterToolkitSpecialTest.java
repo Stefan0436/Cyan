@@ -177,11 +177,13 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 		}
 
 		if (!MinecraftMappingsToolkit.areMappingsAvailable("-mtktest", "yarn", info, GameSide.CLIENT)) {
-			MinecraftMappingsToolkit.downloadYarnMappings(info, GameSide.CLIENT);
+			MinecraftMappingsToolkit.downloadYarnMappings(info, GameSide.CLIENT,
+					MinecraftMappingsToolkit.getLatestYarnVersion(info));
 			MinecraftMappingsToolkit.saveMappingsToDisk("-mtktest", "yarn", info, GameSide.CLIENT);
 		}
 		if (!MinecraftMappingsToolkit.areMappingsAvailable("-mtktest", "yarn", info, GameSide.SERVER)) {
-			MinecraftMappingsToolkit.downloadYarnMappings(info, GameSide.SERVER);
+			MinecraftMappingsToolkit.downloadYarnMappings(info, GameSide.SERVER,
+					MinecraftMappingsToolkit.getLatestYarnVersion(info));
 			MinecraftMappingsToolkit.saveMappingsToDisk("-mtktest", "yarn", info, GameSide.SERVER);
 		}
 
@@ -202,9 +204,9 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 		MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER);
 
 		SimpleMappings riftClient = (SimpleMappings) MinecraftRifterToolkit.generateCyanFabricRiftTargets(info,
-				GameSide.CLIENT, "mtktest");
+				GameSide.CLIENT, "mtktest", MinecraftMappingsToolkit.getLatestYarnVersion(info));
 		SimpleMappings riftServer = (SimpleMappings) MinecraftRifterToolkit.generateCyanFabricRiftTargets(info,
-				GameSide.SERVER, "mtktest");
+				GameSide.SERVER, "mtktest", MinecraftMappingsToolkit.getLatestYarnVersion(info));
 
 		testMappings(riftClient, MinecraftRifterToolkit.getFabricClientMappings(), riftServer,
 				MinecraftRifterToolkit.getFabricServerMappings());
@@ -235,14 +237,15 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 
 		Mapping<?> vanilla = MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER);
 		if (!MinecraftMappingsToolkit.areMappingsAvailable("-mtktest", "spigot", info, GameSide.SERVER)) {
-			MinecraftMappingsToolkit.downloadSpigotMappings(vanilla, info);
+			MinecraftMappingsToolkit.downloadSpigotMappings(vanilla, info,
+					MinecraftMappingsToolkit.getLatestSpigotMappings(info));
 			MinecraftMappingsToolkit.saveMappingsToDisk("-mtktest", "spigot", info, GameSide.SERVER);
 		}
 
 		MinecraftMappingsToolkit.loadMappings("-mtktest", "spigot", info, GameSide.SERVER);
 		MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER);
 		SimpleMappings riftServer = (SimpleMappings) MinecraftRifterToolkit.generateCyanPaperRiftTargets(info,
-				"mtktest");
+				"mtktest", MinecraftMappingsToolkit.getLatestYarnVersion(info));
 		testMappings(null, null, riftServer, MinecraftRifterToolkit.getPaperServerMappings());
 	}
 

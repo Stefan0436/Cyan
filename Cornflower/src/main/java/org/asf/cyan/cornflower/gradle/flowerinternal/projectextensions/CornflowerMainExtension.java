@@ -5,18 +5,16 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Optional;
 
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 
-import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.cyan.game.MinecraftGameProvider;
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.McpPlatform;
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.SpigotPlatform;
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.VanillaPlatform;
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.YarnPlatform;
-
-import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IGame;
+import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.closureowners.SpigotPlatformClosureOwner;
+import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.closureowners.YarnPlatformClosureOwner;
 import org.asf.cyan.cornflower.gradle.utilities.IProjectExtension;
 import org.asf.cyan.cornflower.gradle.utilities.modding.GameDependency;
 import org.asf.cyan.cornflower.gradle.utilities.modding.IPlatformConfiguration;
@@ -26,7 +24,6 @@ import org.asf.cyan.fluid.bytecode.sources.FileClassSourceProvider;
 import org.asf.cyan.fluid.bytecode.sources.IClassSourceProvider;
 import org.asf.cyan.fluid.bytecode.sources.URLClassSourceProvider;
 import org.asf.cyan.fluid.remapping.Mapping;
-import org.asf.cyan.minecraft.toolkits.mtk.MinecraftMappingsToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftRifterToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.rift.SimpleRiftBuilder;
@@ -64,7 +61,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 		}
 
 		public void SPIGOT(Closure<?> closure) {
-			SPIGOT.importClosure(PlatformClosureOwner.fromClosure(closure));
+			SPIGOT.importClosure(SpigotPlatformClosureOwner.fromClosure(closure));
 		}
 
 		public void VANILLA(Closure<?> closure) {
@@ -72,7 +69,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 		}
 
 		public void YARN(Closure<?> closure) {
-			YARN.importClosure(PlatformClosureOwner.fromClosure(closure));
+			YARN.importClosure(YarnPlatformClosureOwner.fromClosure(closure));
 		}
 	}
 
@@ -82,6 +79,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 
 	public static final Class<?> EclipseLaunchGenerator = org.asf.cyan.cornflower.gradle.tasks.EclipseLaunchGenerator.class;
 	public static final Class<?> CtcUtil = org.asf.cyan.cornflower.gradle.tasks.CtcTask.class;
+	public static final Class<?> RiftJar = org.asf.cyan.cornflower.gradle.tasks.RiftJarTask.class;
 
 	public static final ModloaderDependency Modloader = new ModloaderDependency();
 	public static final GameDependency Game = new GameDependency();
@@ -128,7 +126,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 		PlatformConfiguration platforms = (PlatformConfiguration) project.getExtensions().getExtraProperties()
 				.get("platforms");
 
-		String vanillaVersion = platforms.VANILLA.getMappingsVersion();
+		String vanillaVersion = platforms.VANILLA.getMappingsVersion(side);
 		for (IPlatformConfiguration conf : platforms.all) {
 			if (conf.getPlatform() == platform) {
 				MinecraftVersionInfo gameVersion = MinecraftVersionToolkit.getVersion(vanillaVersion);
@@ -137,7 +135,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 							OffsetDateTime.now());
 
 				return SimpleRiftBuilder.getProviderForPlatform(conf.getPlatform(), gameVersion, side,
-						conf.getModloaderVersion(), conf.getMappingsVersion());
+						conf.getModloaderVersion(), conf.getMappingsVersion(side));
 			}
 		}
 
@@ -220,7 +218,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 
 		@Override
 		public Mapping<?> getRiftMappings() throws IOException {
-			return MinecraftRifterToolkit.generateRiftTargets(mappings.toArray(t -> new Mapping<?>[t]));
+			return MinecraftRifterToolkit.generateRiftTargets(mappings.toArray(new Mapping<?>[0]));
 		}
 
 	}

@@ -29,12 +29,14 @@ public class CyanForgeServerWrapper {
 		while (sc.hasNext())
 			builder.append(sc.nextLine());
 		sc.close();
+		
 		info = CyanClientWrapper.class.getResource("/mappings.info");
 		StringBuilder mcp = new StringBuilder();
 		sc = new Scanner(info.openStream());
 		while (sc.hasNext())
 			mcp.append(sc.nextLine());
 		sc.close();
+		
 		CyanCore.setEntryMethod("CyanForgeWrapper Version " + builder.toString().trim() + ", MCP version " + mcp);
 
 		CyanLoader.disableVanillaMappings();

@@ -1,5 +1,6 @@
 package org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared;
 
+import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.cornflower.gradle.utilities.modding.IPlatformConfiguration;
 import org.asf.cyan.cornflower.gradle.utilities.modding.PlatformClosureOwner;
@@ -27,8 +28,13 @@ public class YarnPlatform implements IPlatformConfiguration {
 	}
 
 	@Override
-	public String getMappingsVersion() {
+	public String getMappingsVersion(GameSide side) {
 		return version;
+	}
+
+	@Override
+	public String getDisplayVersion() {
+		return version + "-" + modloader;
 	}
 
 }

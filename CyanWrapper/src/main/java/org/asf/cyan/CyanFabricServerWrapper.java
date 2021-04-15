@@ -29,9 +29,16 @@ public class CyanFabricServerWrapper {
 			builder.append(sc.nextLine());
 		sc.close();
 		CyanCore.setEntryMethod("CyanFabricWrapper Version " + builder.toString().trim());
+
+		info = CyanClientWrapper.class.getResource("/mappings.info");
+		StringBuilder mappingsVersion = new StringBuilder();
+		sc = new Scanner(info.openStream());
+		while (sc.hasNext())
+			mappingsVersion.append(sc.nextLine());
+		sc.close();
 		
 		CyanLoader.disableVanillaMappings();
-		CyanLoader.addCompatibilityMappings(CyanLoader.getFabricCompatibilityMappings(GameSide.SERVER));
+		CyanLoader.addCompatibilityMappings(CyanLoader.getFabricCompatibilityMappings(GameSide.SERVER, mappingsVersion.toString()));
 		CyanLoader.initializeGame("SERVER");
 		
 		String wrapper = System.getProperty("cyan.launcher.server.wrapper", "net.fabricmc.loader.launch.knot.KnotServer");

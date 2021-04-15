@@ -8,9 +8,9 @@ import org.asf.cyan.modifications._1_15_2.client.WindowModification;
 
 @TargetClass(target = "net.minecraft.client.Minecraft")
 public class MinecraftMock {
-	
+
 	public final File gameDirectory = null;
-	
+
 	@TargetType(target = "net.minecraft.client.gui.Font")
 	public Object font;
 
@@ -19,7 +19,7 @@ public class MinecraftMock {
 
 	@TargetType(target = "com.mojang.blaze3d.platform.Window")
 	public WindowModification getWindow() {
-      return this.window;
-   }
-	
+		return this.window;
+	}
+
 }

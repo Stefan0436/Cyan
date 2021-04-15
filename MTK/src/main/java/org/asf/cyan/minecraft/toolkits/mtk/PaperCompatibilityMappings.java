@@ -18,22 +18,25 @@ import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType;
  *
  */
 public class PaperCompatibilityMappings extends CompatibilityMappings {
-	public PaperCompatibilityMappings(Mapping<?> mappings) {
-		this(mappings, CyanInfo.getModloaderVersion(), MinecraftVersionToolkit.createOrGetVersion(
-				CyanInfo.getMinecraftVersion(), MinecraftVersionType.UNKNOWN, null, CyanInfo.getReleaseDate()), true);
+	public PaperCompatibilityMappings(Mapping<?> mappings, String mappingsVersion) {
+		this(mappings, CyanInfo.getModloaderVersion(),
+				MinecraftVersionToolkit.createOrGetVersion(CyanInfo.getMinecraftVersion(), MinecraftVersionType.UNKNOWN,
+						null, CyanInfo.getReleaseDate()),
+				true, mappingsVersion);
 	}
 
-	public PaperCompatibilityMappings(Mapping<?> mappings, String modloader, MinecraftVersionInfo info, boolean msg) {
+	public PaperCompatibilityMappings(Mapping<?> mappings, String modloader, MinecraftVersionInfo info, boolean msg,
+			String mappingsVersion) {
 		try {
 			MinecraftToolkit.infoLog("Loading paper support... Preparing SPIGOT mappings for compatibility...");
 			if (!MinecraftMappingsToolkit.areMappingsAvailable((modloader.isEmpty() ? "" : "-" + modloader), "spigot",
 					info, GameSide.SERVER)) {
-				
+
 				if (msg)
 					MinecraftToolkit.infoLog("First time loading with paper support for version " + modloader
 							+ ", downloading SPIGOT mappings...");
 
-				MinecraftMappingsToolkit.downloadSpigotMappings(mappings, info);
+				MinecraftMappingsToolkit.downloadSpigotMappings(mappings, info, mappingsVersion);
 				MinecraftMappingsToolkit.saveMappingsToDisk((modloader.isEmpty() ? "" : "-" + modloader), "spigot",
 						info, GameSide.SERVER);
 			}

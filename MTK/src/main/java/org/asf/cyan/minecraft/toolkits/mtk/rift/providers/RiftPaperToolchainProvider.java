@@ -16,10 +16,12 @@ public class RiftPaperToolchainProvider implements IRiftToolchainProvider {
 
 	private MinecraftVersionInfo version;
 	private String modloaderVersion;
+	private String mappingsVersion;
 
-	public RiftPaperToolchainProvider(MinecraftVersionInfo version, String modloaderVersion) {
+	public RiftPaperToolchainProvider(MinecraftVersionInfo version, String modloaderVersion, String mappingsVersion) {
 		this.version = version;
 		this.modloaderVersion = modloaderVersion;
+		this.mappingsVersion = mappingsVersion;
 	}
 
 	@Override
@@ -29,16 +31,17 @@ public class RiftPaperToolchainProvider implements IRiftToolchainProvider {
 			MinecraftMappingsToolkit.saveMappingsToDisk(version, GameSide.SERVER);
 		}
 
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + modloaderVersion, "spigot", version, GameSide.SERVER)) {
-			MinecraftMappingsToolkit
-					.downloadSpigotMappings(MinecraftMappingsToolkit.loadMappings(version, GameSide.SERVER), version);
+		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + modloaderVersion, "spigot", version,
+				GameSide.SERVER)) {
+			MinecraftMappingsToolkit.downloadSpigotMappings(
+					MinecraftMappingsToolkit.loadMappings(version, GameSide.SERVER), version, mappingsVersion);
 			MinecraftMappingsToolkit.saveMappingsToDisk("-" + modloaderVersion, "spigot", version, GameSide.SERVER);
 		}
 
 		MinecraftMappingsToolkit.loadMappings("-" + modloaderVersion, "spigot", version, GameSide.SERVER);
 		MinecraftMappingsToolkit.loadMappings(version, GameSide.SERVER);
 
-		return MinecraftRifterToolkit.generateCyanPaperRiftTargets(version, modloaderVersion);
+		return MinecraftRifterToolkit.generateCyanPaperRiftTargets(version, modloaderVersion, mappingsVersion);
 	}
 
 	@Override

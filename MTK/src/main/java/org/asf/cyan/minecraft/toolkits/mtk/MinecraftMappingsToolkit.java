@@ -73,7 +73,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 	protected static void initComponent() {
 		trace("INITIALIZE Minecraft Mappings Toolkit, caller: " + CallTrace.traceCallName());
 	}
-	
+
 	/**
 	 * Check if mappings are saved in cache
 	 * 
@@ -157,19 +157,17 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 	}
 
 	/**
-	 * Download version mappings into ram (Fabric Yarn)
+	 * Retrieves the latest YARN mappings for a given minecraft version
 	 * 
 	 * @param version Minecraft version
-	 * @param side    Which side (server or client)
-	 * @return Mapping object representing the version mappings
-	 * @throws IOException If downloading fails
+	 * @param side    Game side
+	 * @return YARN version
+	 * @throws IOException If downloading the version information fails
 	 */
-	public static YarnMappings downloadYarnMappings(MinecraftVersionInfo version, GameSide side) throws IOException {
+	public static String getLatestYarnVersion(MinecraftVersionInfo version) throws IOException {
 		if (!MinecraftToolkit.hasMinecraftDownloadConnection())
 			throw new IOException("No network connection");
-		String url = yarnUrl;
 
-		info("Resolving YARN " + side.toString().toLowerCase() + " mappings of minecraft version " + version + "...");
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder;
 		String mappingsVersion = "";
@@ -189,12 +187,31 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 				}
 			}
 			if (mapping != "") {
-				url = url.replaceAll("\\%version\\%", mapping);
 				mappingsVersion = mapping;
 			}
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new IOException(e);
 		}
+		return mappingsVersion;
+	}
+
+	/**
+	 * Download version mappings into ram (Fabric Yarn)
+	 * 
+	 * @param version         Minecraft version
+	 * @param side            Which side (server or client)
+	 * @param mappingsVersion Mappings version
+	 * @return Mapping object representing the version mappings
+	 * @throws IOException If downloading fails
+	 */
+	public static YarnMappings downloadYarnMappings(MinecraftVersionInfo version, GameSide side, String mappingsVersion)
+			throws IOException {
+		if (!MinecraftToolkit.hasMinecraftDownloadConnection())
+			throw new IOException("No network connection");
+
+		info("Resolving YARN " + side.toString().toLowerCase() + " mappings of minecraft version " + version + "...");
+		String url = yarnUrl.replace("%version%", mappingsVersion);
+
 		trace("CREATE StringBuilder for holding the YARN mappings, caller: " + CallTrace.traceCallName());
 		StringBuilder mappings_text = new StringBuilder();
 
@@ -283,7 +300,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 		trace("MAP version " + side + " MCP mappings into CCFG, caller: " + CallTrace.traceCallName());
 		McpMappings mappings = new McpMappings().parseTSRGMappings(mappings_text.toString());
 		mappings.mappingsVersion = mcpVersion;
-		
+
 		if (MappingsLoadEventProvider.isAccepted()) {
 			try {
 				Modloader.getModloader().dispatchEvent("mtk.mappings.downloaded", "mcp", version, side, mappings,
@@ -306,45 +323,68 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 	}
 
 	/**
-	 * Download version mappings into ram (Spigot)
+	 * Retrieves the latest SPIGOT mappings version for a given minecraft version
+	 * (returns mappings:craftbukkit)
 	 * 
-	 * @param fallback Fallback mappings
-	 * @param version  Minecraft version
-	 * @return Mapping object representing the version mappings
-	 * @throws IOException If downloading fails
+	 * @param version Minecraft version
+	 * @return Mappings commit hash and craftbukkit version
+	 * @throws IOException If retrieving the version information fails.
 	 */
-	public static SpigotMappings downloadSpigotMappings(Mapping<?> fallback, MinecraftVersionInfo version)
-			throws IOException {
-		if (!MinecraftToolkit.hasMinecraftDownloadConnection())
-			throw new IOException("No network connection");
-
+	public static String getLatestSpigotMappings(MinecraftVersionInfo version) throws IOException {
 		info("Resolving SPIGOT mappings of minecraft version " + version + "...");
-		URL infoURL = new URL(spigotInfoUrl.replaceAll("\\%mcver\\%", version.getVersion()));
-
-		InputStream info = infoURL.openStream();
-		JsonObject obj = JsonParser.parseReader(new InputStreamReader(info)).getAsJsonObject();
-		info.close();
-
-		JsonObject refs = obj.get("refs").getAsJsonObject();
-		String versionSpigot = "";
+		JsonObject refs = getRefs(version);
+		String commit = refs.get("BuildData").getAsString();
 
 		URL u = new URL(craftBukkitPOMUrl.replaceAll("\\%mcver\\%", version.getVersion()).replaceAll("\\%commit\\%",
-				refs.get("CraftBukkit").getAsString()));
+				getRefs(version).get("CraftBukkit").getAsString()));
+
+		String craftBukkitVersion = "";
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder;
 		try {
 			builder = factory.newDocumentBuilder();
 			Document document = builder.parse(u.openStream());
 			Element root = document.getDocumentElement();
-			versionSpigot = ((Element) root.getElementsByTagName("properties").item(0))
+			craftBukkitVersion = ((Element) root.getElementsByTagName("properties").item(0))
 					.getElementsByTagName("minecraft_version").item(0).getChildNodes().item(0).getNodeValue();
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new IOException(e);
 		}
 
-		String commit = refs.get("BuildData").getAsString();
-		String url = spigotDownloadUrl.replaceAll("\\%commit\\%", commit);
+		return commit + ":" + craftBukkitVersion;
+	}
 
+	private static JsonObject getRefs(MinecraftVersionInfo version) throws IOException {
+		if (!MinecraftToolkit.hasMinecraftDownloadConnection())
+			throw new IOException("No network connection");
+
+		URL infoURL = new URL(spigotInfoUrl.replaceAll("\\%mcver\\%", version.getVersion()));
+
+		InputStream info = infoURL.openStream();
+		JsonObject obj = JsonParser.parseReader(new InputStreamReader(info)).getAsJsonObject();
+		info.close();
+
+		return obj.get("refs").getAsJsonObject();
+	}
+
+	/**
+	 * Download version mappings into ram (SPIGOT)
+	 * 
+	 * @param fallback        Fallback mappings
+	 * @param version         Minecraft version
+	 * @param mappingsVersion Mappings hash
+	 * @return Mapping object representing the version mappings
+	 * @throws IOException If downloading fails
+	 */
+	public static SpigotMappings downloadSpigotMappings(Mapping<?> fallback, MinecraftVersionInfo version,
+			String mappingsVersion) throws IOException {
+		if (!MinecraftToolkit.hasMinecraftDownloadConnection())
+			throw new IOException("No network connection");
+
+		String commit = mappingsVersion.substring(0, mappingsVersion.indexOf(":"));
+		String craftBukkitVersion = mappingsVersion.substring(mappingsVersion.indexOf(":") + 1);
+
+		String url = spigotDownloadUrl.replaceAll("\\%commit\\%", commit);
 		trace("CREATE StringBuilder for holding the SPIGOT mappings, caller: " + CallTrace.traceCallName());
 		StringBuilder classMappings = new StringBuilder();
 		StringBuilder memberMapppings = new StringBuilder();
@@ -380,7 +420,8 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 		trace("MAP version SPIGOT mappings into CCFG, caller: " + CallTrace.traceCallName());
 		SpigotMappings mappings = new SpigotMappings().parseMultiMappings(fallback, classMappings.toString(),
 				memberMapppings.toString(), packageMapppings.toString(),
-				Map.of("net.minecraft.**", "net.minecraft.server.v" + versionSpigot));
+				Map.of("net.minecraft.**", "net.minecraft.server.v" + craftBukkitVersion));
+		mappings.mappingsVersion = commit;
 
 		if (MappingsLoadEventProvider.isAccepted()) {
 			try {

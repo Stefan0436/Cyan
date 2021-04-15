@@ -53,12 +53,12 @@ public class SimpleRiftBuilder implements Closeable {
 		case MCP:
 			return new RiftForgeToolchainProvider(version, side, modloaderVersion, mappingsVersion);
 		case YARN:
-			return new RiftFabricToolchainProvider(version, side, modloaderVersion);
+			return new RiftFabricToolchainProvider(version, side, modloaderVersion, mappingsVersion);
 		case SPIGOT:
 			if (side != GameSide.SERVER)
 				return null;
 			else
-				return new RiftPaperToolchainProvider(version, modloaderVersion);
+				return new RiftPaperToolchainProvider(version, modloaderVersion, mappingsVersion);
 		case UNKNOWN:
 			return null;
 		}
