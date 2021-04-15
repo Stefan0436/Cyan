@@ -229,7 +229,8 @@ public class CornflowerMainExtension implements IProjectExtension {
 						.findFirst().get();
 
 				tsk.mappings_identifier(platform.toString().toLowerCase() + "-" + config.getDisplayVersion());
-				tsk.getArchiveClassifier().set("RIFT-" + platform.toString().toUpperCase());
+				tsk.getArchiveClassifier()
+						.set("RIFT-" + platform.toString().toUpperCase() + (side == SERVER ? "-SERVER" : ""));
 				tsk.from(sources);
 				providers.forEach((prov) -> tsk.provider(prov));
 
