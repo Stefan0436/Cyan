@@ -80,7 +80,6 @@ public class ClientGame implements IGameExecutionContext {
 	@Override
 	public String[] libraries() {
 		prepare();
-
 		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion);
 	}
 

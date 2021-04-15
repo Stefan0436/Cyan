@@ -2,6 +2,7 @@ package org.asf.cyan.cornflower.gradle.flowerinternal.implementation.cyan.game;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.time.OffsetDateTime;
 
 import org.asf.cyan.api.modloader.information.game.GameSide;
@@ -21,6 +22,7 @@ public class ServerGame implements IGameExecutionContext {
 	private MinecraftVersionInfo gameVersion;
 
 	private CyanModloader modloader;
+	private MinecraftVersionInfo cyanVersion;
 
 	public ServerGame(CyanModloader modloader) {
 		this.modloader = modloader;
@@ -29,6 +31,21 @@ public class ServerGame implements IGameExecutionContext {
 	public ServerGame(Project proj, String version, CyanModloader modloader) {
 		this.version = version;
 		this.modloader = modloader;
+
+		try {
+			cyanVersion = new MinecraftVersionInfo(version + "-cyan-" + modloader.getVersion(),
+					MinecraftVersionType.UNKNOWN,
+					new URL(CyanModloader.maven + "/org/asf/cyan/CyanWrapper/" + modloader.libraries.get("CyanWrapper")
+							+ "/CyanWrapper-" + modloader.libraries.get("CyanWrapper") + "-" + version + "-cyan-"
+							+ modloader.getVersion() + ".json"),
+					OffsetDateTime.now());
+
+			if (!MinecraftInstallationToolkit.isVersionManifestSaved(cyanVersion)) {
+				MinecraftInstallationToolkit.saveVersionManifest(cyanVersion);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private void prepare() {
@@ -88,7 +105,7 @@ public class ServerGame implements IGameExecutionContext {
 	@Override
 	public String[] libraries() {
 		prepare();
-		return MinecraftInstallationToolkit.getLibrariesMavenFormat(gameVersion);
+		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion);
 	}
 
 	@Override
@@ -99,7 +116,20 @@ public class ServerGame implements IGameExecutionContext {
 	@Override
 	public String[] jvm() {
 		prepare();
-		return new String[] { "-javaagent:" }; // TODO
+
+		File jar = null;
+		for (File lib : MinecraftInstallationToolkit.getLibraries(cyanVersion)) {
+			if (lib.getName().toLowerCase().contains("fluid-")) {
+				jar = lib;
+				break;
+			}
+		}
+
+		try {
+			return new String[] { "-javaagent:" + jar.getCanonicalPath() };
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
