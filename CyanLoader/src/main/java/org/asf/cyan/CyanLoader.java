@@ -615,7 +615,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 
 			Files.writeString(modCache.toPath(), info.toString());
 		}
-
+		
+		info("Loading mod jars...");
 		ZipEntry ent = strm.getNextEntry();
 		while (ent != null) {
 			String path = ent.getName().replace("\\", "/");
@@ -709,6 +710,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 							strm.transferTo(outputStrm);
 							outputStrm.close();
 						} else {
+							ent = strm.getNextEntry();
 							continue;
 						}
 					}
