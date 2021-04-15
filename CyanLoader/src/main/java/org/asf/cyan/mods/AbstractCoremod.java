@@ -17,7 +17,6 @@ import org.asf.cyan.mods.internal.IAcceptableComponent;
  */
 public abstract class AbstractCoremod extends AbstractMod implements ICoremod, IAcceptableComponent {
 
-	private String execKey = null;
 	private ArrayList<String> transformerPackages = new ArrayList<String>();
 	private ArrayList<String> transformers = new ArrayList<String>();
 
@@ -27,7 +26,6 @@ public abstract class AbstractCoremod extends AbstractMod implements ICoremod, I
 	@Override
 	public void setup(Modloader modloader, GameSide side, CyanModfileManifest manifest) {
 		super.setup(modloader, side, manifest);
-		execKey = manifest.coremodComponentKey;
 	}
 
 	/**
@@ -64,23 +62,6 @@ public abstract class AbstractCoremod extends AbstractMod implements ICoremod, I
 	public String[] providers() {
 		return new String[] { "transformers", "transformer-packages", "class-hooks", "class-hook-packages",
 				"auto.init" };
-	}
-
-	@Override
-	public String[] earlyInfoRequests() {
-		return new String[] { "coremod.manifest" };
-	}
-
-	@Override
-	public void provideInfo(String name, Object data) {
-		if (name.equals("coremod.manifest")) {
-			execKey = ((CyanModfileManifest) data).coremodComponentKey;
-		}
-	}
-
-	@Override
-	public String executionKey() {
-		return execKey;
 	}
 
 	@Override

@@ -26,8 +26,6 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> {
 	public String modClassName = null;
 	public String modClassPackage = null;
 
-	public String coremodComponentKey = null;
-
 	public String modGroup = null;
 	public String modId = null;
 	public String displayName = null;

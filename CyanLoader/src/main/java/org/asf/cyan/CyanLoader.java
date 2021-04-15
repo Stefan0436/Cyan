@@ -891,12 +891,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 			}
 
 			CyanCore.addAllowedPackage(manifest.modClassPackage);
-			try {
-				CyanCore.addAdditionalClass(Class.forName(manifest.modClassPackage + "." + manifest.modClassName));
-			} catch (ClassNotFoundException e) {
-				fatal("Loading coremod class failed! Coremod: " + manifest.modGroup + ":" + manifest.modId + " ("
-						+ manifest.displayName + ")", e);
-			}
 			coreModManifests.put(manifest.modGroup + "." + manifest.modId, manifest);
 		});
 
@@ -1361,21 +1355,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 		} else if (component instanceof IAcceptableComponent) {
 			IAcceptableComponent cp = (IAcceptableComponent) component;
 
-			for (String request : cp.earlyInfoRequests()) {
-				if (request.equals("coremod.manifest") && cp instanceof ICoremod) {
-					Optional<CyanModfileManifest> man = coreModManifests.values().stream()
-							.filter(t -> cp.getClass().getTypeName().equals(t.modClassPackage + "." + t.modClassName))
-							.findFirst();
-
-					if (!man.isEmpty())
-						cp.provideInfo("coremod.manifest", man.get());
-				}
-			}
-
-			String key = cp.executionKey();
-			if (key == null)
-				return false;
-
 			URL location = cp.getClass().getProtectionDomain().getCodeSource().getLocation();
 			String pref = location.toString();
 			if (pref.startsWith("jar:")) {
@@ -1383,37 +1362,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 			} else if (pref.contains(".class")) {
 				pref = pref.substring(0, pref.lastIndexOf(cp.getClass().getTypeName().replace(".", "/") + ".class"));
 			}
-
-			String acceptedKey = "";
-			if (System.getProperty("coreModDebugKeys") != null) {
-				if (!Stream.of(coremoduleKeys).anyMatch(t -> t.equals(key)))
-					return false;
-				else {
-					acceptedKey = key;
-				}
-			} else {
-				try {
-					location = cp.getClass().getProtectionDomain().getCodeSource().getLocation();
-
-					if (!location.toString().endsWith(".class")) {
-						String pref2 = location.toString();
-						if ((pref2.endsWith(".jar") || pref2.endsWith(".zip")) && !pref2.startsWith("jar:")) {
-							pref2 = "jar:" + pref2 + "!/";
-						}
-						pref2 += cp.getClass().getTypeName().replace(".", "/") + ".class";
-						location = new URL(pref2);
-					}
-
-					InputStream strm = location.openStream();
-					acceptedKey = sha256HEX(strm.readAllBytes());
-					strm.close();
-				} catch (Exception e) {
-					return false;
-				}
-			}
-
-			if (!key.equals(acceptedKey))
-				return false;
 
 			for (String prov : cp.providers()) {
 				if (!Stream.of(acceptableProviders).anyMatch(t -> t.equals(prov))) {
