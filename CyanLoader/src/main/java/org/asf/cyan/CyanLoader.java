@@ -615,7 +615,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 
 			Files.writeString(modCache.toPath(), info.toString());
 		}
-		
+
 		info("Loading mod jars...");
 		ZipEntry ent = strm.getNextEntry();
 		while (ent != null) {
@@ -641,7 +641,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 									String extension = path.substring(path.lastIndexOf(".") + 1);
 									if (path.toLowerCase()
 											.endsWith("-" + platform.toLowerCase() + "." + extension.toLowerCase())) {
-										path = path.substring(0, path.toLowerCase().indexOf("-" + platform.toLowerCase())) + "."
+										path = path.substring(0,
+												path.toLowerCase().indexOf("-" + platform.toLowerCase())) + "."
 												+ extension;
 
 										output = new File(cache, path);
@@ -657,7 +658,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 									String extension = path.substring(path.lastIndexOf(".") + 1);
 									if (path.toLowerCase().endsWith(
 											"-" + gameversion.toLowerCase() + "." + extension.toLowerCase())) {
-										path = path.substring(0, path.toLowerCase().indexOf("-" + gameversion.toLowerCase())) + "."
+										path = path.substring(0,
+												path.toLowerCase().indexOf("-" + gameversion.toLowerCase())) + "."
 												+ extension;
 
 										output = new File(cache, path);
@@ -673,8 +675,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 									String extension = path.substring(path.lastIndexOf(".") + 1);
 									if (path.toLowerCase()
 											.endsWith("-" + side.toLowerCase() + "." + extension.toLowerCase())) {
-										path = path.substring(0, path.toLowerCase().indexOf("-" + side.toLowerCase())) + "."
-												+ extension;
+										path = path.substring(0, path.toLowerCase().indexOf("-" + side.toLowerCase()))
+												+ "." + extension;
 
 										output = new File(cache, path);
 									}
@@ -689,7 +691,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 									String extension = path.substring(path.lastIndexOf(".") + 1);
 									if (path.toLowerCase().endsWith(
 											"-" + loaderversion.toLowerCase() + "." + extension.toLowerCase())) {
-										path = path.substring(0, path.toLowerCase().indexOf("-" + loaderversion.toLowerCase())) + "."
+										path = path.substring(0,
+												path.toLowerCase().indexOf("-" + loaderversion.toLowerCase())) + "."
 												+ extension;
 
 										output = new File(cache, path);
@@ -729,7 +732,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 						}
 					}
 					modJar.close();
-
 					CyanCore.addCoreUrl(output.toURI().toURL());
 				}
 			}
@@ -889,6 +891,12 @@ public class CyanLoader extends Modloader implements IModProvider {
 			}
 
 			CyanCore.addAllowedPackage(manifest.modClassPackage);
+			try {
+				CyanCore.addAdditionalClass(Class.forName(manifest.modClassPackage + "." + manifest.modClassName));
+			} catch (ClassNotFoundException e) {
+				fatal("Loading coremod class failed! Coremod: " + manifest.modGroup + ":" + manifest.modId + " ("
+						+ manifest.displayName + ")", e);
+			}
 			coreModManifests.put(manifest.modGroup + "." + manifest.modId, manifest);
 		});
 

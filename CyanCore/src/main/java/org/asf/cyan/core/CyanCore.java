@@ -311,7 +311,8 @@ public class CyanCore extends CyanComponent {
 			conf.addUrls(CyanCore.class.getProtectionDomain().getCodeSource().getLocation());
 			trace("ADD Cornflower Source Location to URL list, caller: " + CallTrace.traceCallName());
 			try {
-				conf.addUrls(Class.forName("org.asf.cyan.cornflower.gradle.CornflowerCore").getProtectionDomain().getCodeSource().getLocation());
+				conf.addUrls(Class.forName("org.asf.cyan.cornflower.gradle.CornflowerCore").getProtectionDomain()
+						.getCodeSource().getLocation());
 			} catch (ClassNotFoundException e1) {
 			}
 			try {
@@ -431,7 +432,8 @@ public class CyanCore extends CyanComponent {
 		classes.addAll(reflections.getSubTypesOf(interfaceOrSupertype));
 
 		for (Class<?> cls : additionalClasses) {
-			if (interfaceOrSupertype.isAssignableFrom(cls)) {
+			if (interfaceOrSupertype.isAssignableFrom(cls)
+					&& !classes.stream().anyMatch(t -> t.getTypeName().equals(cls.getTypeName()))) {
 				classes.add(cls);
 			}
 		}
@@ -453,7 +455,8 @@ public class CyanCore extends CyanComponent {
 		classes.addAll(reflections.getTypesAnnotatedWith(annotation));
 
 		for (Class<?> cls : additionalClasses) {
-			if (cls.isAnnotationPresent(annotation)) {
+			if (cls.isAnnotationPresent(annotation)
+					&& !classes.stream().anyMatch(t -> t.getTypeName().equals(cls.getTypeName()))) {
 				classes.add(cls);
 			}
 		}
