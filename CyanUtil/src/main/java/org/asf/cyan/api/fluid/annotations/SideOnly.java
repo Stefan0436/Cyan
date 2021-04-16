@@ -1,7 +1,9 @@
 package org.asf.cyan.api.fluid.annotations;
 
 import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 
@@ -14,6 +16,7 @@ import org.asf.cyan.api.modloader.information.game.GameSide;
  *
  */
 @Target(TYPE)
+@Retention(RUNTIME)
 public @interface SideOnly {
 	public GameSide value();
 }

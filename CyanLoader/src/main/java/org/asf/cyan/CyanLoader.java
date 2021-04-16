@@ -1186,9 +1186,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 							if (transformer.getPackageName().equals(pkg)
 									|| transformer.getPackageName().startsWith(pkg + ".")) {
 								try {
-									Fluid.registerTransformer(transformer.getTypeName(), owner, source); // TODO: owner
-																											// mod
-									// names
+									Fluid.registerTransformer(transformer.getTypeName(), owner, source);
 								} catch (IllegalStateException | ClassNotFoundException e) {
 								}
 							}
@@ -1498,8 +1496,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 		createEventChannel("mod.loaded");
 
 		downloadMavenDependencies(coremodMavenDependencies);
-
 		loadCoreMods();
+		
 		BaseEventController.work();
 	}
 
