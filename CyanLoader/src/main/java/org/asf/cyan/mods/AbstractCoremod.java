@@ -23,6 +23,8 @@ public abstract class AbstractCoremod extends AbstractMod implements ICoremod, I
 	private ArrayList<String> hookPackages = new ArrayList<String>();
 	private ArrayList<ClassLoadHook> hooks = new ArrayList<ClassLoadHook>();
 
+	private String modid = "";
+
 	@Override
 	public void setup(Modloader modloader, GameSide side, CyanModfileManifest manifest) {
 		super.setup(modloader, side, manifest);
@@ -77,6 +79,8 @@ public abstract class AbstractCoremod extends AbstractMod implements ICoremod, I
 		} else if (provider.equals("auto.init")) {
 			addTransformerPackage(getClass().getPackageName() + ".transformers");
 			setupCoremod();
+		} else if (provider.equals("mod.id")) {
+			return modid;
 		}
 		return null;
 	}
@@ -86,4 +90,15 @@ public abstract class AbstractCoremod extends AbstractMod implements ICoremod, I
 	 */
 	protected abstract void setupCoremod();
 
+	@Override
+	public String[] infoRequests() {
+		return new String[] { "mod.manifest" };
+	}
+
+	@Override
+	public void provideInfo(Object data, String name) {
+		if (name.equals("mod.manifest")) {
+			modid = ((CyanModfileManifest) data).modGroup + ":" + ((CyanModfileManifest) data).modId;
+		}
+	}
 }

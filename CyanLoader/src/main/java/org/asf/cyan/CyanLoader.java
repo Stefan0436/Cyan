@@ -57,6 +57,7 @@ import org.asf.cyan.minecraft.toolkits.mtk.MinecraftToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.PaperCompatibilityMappings;
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
+import org.asf.cyan.mods.AbstractMod;
 import org.asf.cyan.mods.ICoremod;
 import org.asf.cyan.mods.IMod;
 import org.asf.cyan.mods.config.CyanModfileManifest;
@@ -89,9 +90,10 @@ public class CyanLoader extends Modloader implements IModProvider {
 	private HashMap<String, String> mavenRepositories = new HashMap<String, String>();
 
 	private static String platformVersion = "";
-	
+
 	/**
 	 * Sets the platform version (can only be done ONCE)
+	 * 
 	 * @param version Platform version
 	 */
 	public static void setPlatformVersion(String version) {
@@ -99,7 +101,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 			return;
 		platformVersion = version;
 	}
-	
+
 	private static boolean developerMode = false;
 	private static SecurityConfiguration securityConf;
 	private static ArrayList<TrustContainer> trust = new ArrayList<TrustContainer>();
@@ -122,7 +124,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 	private HashMap<String, IAcceptableComponent> loadedComponents = new HashMap<String, IAcceptableComponent>();
 
 	private static String[] acceptableProviders = new String[] { "transformers", "transformer-packages", "class-hooks",
-			"class-hook-packages", "auto.init" };
+			"class-hook-packages", "auto.init", "mod.id" };
 
 	public static File getCyanDataDirectory() {
 		return cyanDir;
@@ -261,12 +263,13 @@ public class CyanLoader extends Modloader implements IModProvider {
 				if (file.startsWith("CM//") && developerMode == true) {
 					CyanModfileManifest mod = new CyanModfileManifest();
 					mod.readAll(new String(Files.readAllBytes(new File(file.substring(4)).toPath())));
-					ld.coreModManifests.put(mod.modGroup + ":" + mod.modId, mod);
+					ld.coreModManifests.put(mod.modGroup + "." + mod.modId, mod);
+					ld.coreModManifests.put(mod.modClassPackage + "." + mod.modClassName, mod);
 					CyanCore.addAllowedPackage(mod.modClassPackage);
 				} else if (file.startsWith("M//")) {
 					CyanModfileManifest mod = new CyanModfileManifest();
 					mod.readAll(new String(Files.readAllBytes(new File(file.substring(3)).toPath())));
-					ld.modManifests.put(mod.modGroup + ":" + mod.modId, mod);
+					ld.modManifests.put(mod.modGroup + "." + mod.modId, mod);
 					CyanCore.addAllowedPackage(mod.modClassPackage);
 				}
 			}
@@ -303,7 +306,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 
 	private void loadCoreMods() {
 		coreModManifests.forEach((k, manifest) -> {
-			loadMod(true, manifest, new ArrayList<String>());
+			if (k.contains(":"))
+				loadMod(true, manifest, new ArrayList<String>());
 		});
 	}
 
@@ -481,6 +485,29 @@ public class CyanLoader extends Modloader implements IModProvider {
 			coremods.add(mod);
 			dispatchEvent("mod.loaded", mod);
 			mod.setup(getModloader(), getGameSide(), modManifest);
+
+			if (mod instanceof AbstractMod) {
+				modManifest.dependencies.forEach((id, ver) -> {
+					Optional<? extends IMod> depmod = coremods.stream().filter(t -> t.getManifest().id().equals(id))
+							.findFirst();
+					if (!depmod.isPresent())
+						depmod = mods.stream().filter(t -> t.getManifest().id().equals(id)).findFirst();
+
+					if (depmod.isPresent() && depmod.get() instanceof AbstractMod) {
+						((AbstractMod) mod).enableModSupport((AbstractMod) depmod.get());
+					}
+				});
+				modManifest.optionalDependencies.forEach((id, ver) -> {
+					Optional<? extends IMod> depmod = coremods.stream().filter(t -> t.getManifest().id().equals(id))
+							.findFirst();
+					if (!depmod.isPresent())
+						depmod = mods.stream().filter(t -> t.getManifest().id().equals(id)).findFirst();
+
+					if (depmod.isPresent() && depmod.get() instanceof AbstractMod) {
+						((AbstractMod) mod).enableModSupport((AbstractMod) depmod.get());
+					}
+				});
+			}
 		} else
 			throw new IllegalStateException("Already past CORELOAD");
 	}
@@ -899,6 +926,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 
 			CyanCore.addAllowedPackage(manifest.modClassPackage);
 			coreModManifests.put(manifest.modGroup + "." + manifest.modId, manifest);
+			coreModManifests.put(manifest.modClassPackage + "." + manifest.modClassName, manifest);
 		});
 
 		strm.close();
@@ -1095,8 +1123,10 @@ public class CyanLoader extends Modloader implements IModProvider {
 				@Override
 				public void run() {
 					info("Loading Coremod Transformers...");
-					for (String transformer : transformers.keySet()) {
-						URL source = transformers.get(transformer);
+					for (String[] transformerInfo : transformers.keySet()) {
+						String transformer = transformerInfo[0];
+						String owner = transformerInfo[1];
+						URL source = transformers.get(transformerInfo);
 						try {
 							Class<?> cls = Class.forName(transformer, false, CyanCore.getCoreClassLoader());
 							if (cls.isAnnotationPresent(SideOnly.class)
@@ -1119,7 +1149,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 								continue;
 							}
 
-							Fluid.registerTransformer(transformer, source);
+							Fluid.registerTransformer(transformer, owner, source);
 						} catch (IllegalStateException | ClassNotFoundException e) {
 						}
 					}
@@ -1146,11 +1176,15 @@ public class CyanLoader extends Modloader implements IModProvider {
 							continue;
 						}
 
-						transformerPackages.forEach((pkg, source) -> {
+						transformerPackages.forEach((pkgInfo, source) -> {
+							String pkg = pkgInfo[0];
+							String owner = pkgInfo[1];
 							if (transformer.getPackageName().equals(pkg)
 									|| transformer.getPackageName().startsWith(pkg + ".")) {
 								try {
-									Fluid.registerTransformer(transformer.getTypeName(), source);
+									Fluid.registerTransformer(transformer.getTypeName(), owner, source); // TODO: owner
+																											// mod
+									// names
 								} catch (IllegalStateException | ClassNotFoundException e) {
 								}
 							}
@@ -1247,8 +1281,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 	private static ArrayList<String> classHookPackages = new ArrayList<String>();
 	private static ArrayList<ClassLoadHook> classHooks = new ArrayList<ClassLoadHook>();
 
-	private static HashMap<String, URL> transformerPackages = new HashMap<String, URL>();
-	private static HashMap<String, URL> transformers = new HashMap<String, URL>();
+	private static HashMap<String[], URL> transformerPackages = new HashMap<String[], URL>();
+	private static HashMap<String[], URL> transformers = new HashMap<String[], URL>();
 
 	@Override
 	protected boolean presentComponent(Class<IModloaderComponent> component) {
@@ -1371,9 +1405,18 @@ public class CyanLoader extends Modloader implements IModProvider {
 				}
 			}
 
+			for (String rq : cp.infoRequests()) {
+				if (rq.equals("mod.manifest")) {
+					cp.provideInfo(coreModManifests.get(cp.getClass().getTypeName()), rq);
+				}
+			}
+
+			String modid = cp.getClass().getSimpleName();
 			for (String prov : cp.providers()) {
 				if (prov.equals("auto.init")) {
 					cp.provide("auto.init");
+				} else if (prov.equals("mod.id")) {
+					modid = cp.provide(prov).toString();
 				}
 			}
 
@@ -1382,7 +1425,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 					String[] transformers = (String[]) cp.provide(prov);
 					for (String transformer : transformers) {
 						try {
-							CyanLoader.transformers.put(transformer, new URL(pref));
+							CyanLoader.transformers.put(new String[] { transformer, modid }, new URL(pref));
 						} catch (IllegalStateException | MalformedURLException e) {
 							throw new RuntimeException(e);
 						}
@@ -1392,7 +1435,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 					for (String transformer : transformerPackages) {
 						try {
 							CyanCore.addAllowedPackage(transformer);
-							CyanLoader.transformerPackages.put(transformer, new URL(pref));
+							CyanLoader.transformerPackages.put(new String[] { transformer, modid }, new URL(pref));
 						} catch (IllegalStateException | MalformedURLException e) {
 							throw new RuntimeException(e);
 						}

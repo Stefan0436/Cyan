@@ -38,12 +38,21 @@ import org.objectweb.asm.tree.MethodNode;
  *
  */
 public class FluidClassPool extends CyanComponent implements Closeable {
+	/**
+	 * Main implementation, used to create class pool instances
+	 */
+	protected static FluidClassPool implementation = new FluidClassPool();
+	
+	protected FluidClassPool newInstance() {
+		return new FluidClassPool();
+	}
+	
 	private class ClassEntry {
 		public ClassNode node;
 		public String firstName;
 	}
 
-	private FluidClassPool() {
+	protected FluidClassPool() {
 	}
 
 	private ArrayList<IClassSourceProvider<?>> sources = new ArrayList<IClassSourceProvider<?>>();
@@ -85,7 +94,7 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 	 * @return New FluidClassPool
 	 */
 	public static FluidClassPool create() {
-		FluidClassPool pool = new FluidClassPool();
+		FluidClassPool pool = implementation.newInstance();
 		pool.addSource(new LoaderClassSourceProvider(ClassLoader.getSystemClassLoader()));
 		pool.addDefaultCp();
 		return pool;
@@ -97,7 +106,7 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 	 * @return New FluidClassPool
 	 */
 	public static FluidClassPool createEmpty() {
-		return new FluidClassPool();
+		return implementation.newInstance();
 	}
 
 	/**
