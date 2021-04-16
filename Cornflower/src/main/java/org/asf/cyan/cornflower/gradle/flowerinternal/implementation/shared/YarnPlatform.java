@@ -37,4 +37,9 @@ public class YarnPlatform implements IPlatformConfiguration {
 		return version + "-" + modloader;
 	}
 
+	@Override
+	public String getCommonMappingsVersion() {
+		return version;
+	}
+
 }

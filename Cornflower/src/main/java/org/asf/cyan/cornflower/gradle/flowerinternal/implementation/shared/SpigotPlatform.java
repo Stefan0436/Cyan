@@ -40,4 +40,9 @@ public class SpigotPlatform implements IPlatformConfiguration {
 		return version.split(":")[0] + "-" + version.split(":")[1] + "-" + modloader;
 	}
 
+	@Override
+	public String getCommonMappingsVersion() {
+		return version;
+	}
+
 }

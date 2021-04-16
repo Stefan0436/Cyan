@@ -1,15 +1,23 @@
 package org.asf.cyan.cornflower.gradle.utilities.modding.manifests;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.asf.cyan.api.config.Configuration;
 import org.asf.cyan.api.config.annotations.Comment;
+import org.asf.cyan.cornflower.gradle.tasks.CtcTask;
+import org.asf.cyan.security.TrustContainer;
 
 public class CyanModfileManifest extends Configuration<CyanModfileManifest> implements IModManifest {
 
 	private HashMap<File, String> jarFiles = new HashMap<File, String>();
+	private HashMap<CtcTask, String> ctcTasks;
+
+	public void setCtcTasks(HashMap<CtcTask, String> tasks) {
+		ctcTasks = tasks;
+	}
 
 	@Override
 	public String filename() {
@@ -110,11 +118,13 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> impl
 			if (checkString.equals("any"))
 				checkString = "";
 
-			checkString += " platform:" + side;
+			checkString += " platform:" + platform;
 		}
 		if (side != null) {
 			if (checkString.equals("any"))
 				checkString = "";
+			else
+				checkString += " &";
 
 			checkString += " side:" + side;
 		}
@@ -124,4 +134,24 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> impl
 		this.jars.put(outDir + "/" + jar.getName(), checkString);
 		this.jarFiles.put(jar, outDir + "/" + jar.getName());
 	}
+
+	@Override
+	public String toString() {
+		for (CtcTask ctc : ctcTasks.keySet()) {
+			try {
+				String dest = ctcTasks.get(ctc);
+				if (ctc.getVersion() == null)
+					throw new IOException(
+							"CTC task " + ctc.getName() + " has not been run yet or does not use the 'pack' method.");
+
+				TrustContainer cont = TrustContainer.importContainer(ctc.getOutput());
+				trustContainers.put(cont.getContainerName() + "@" + cont.getVersion(), dest);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		return super.toString();
+	}
+	
 }

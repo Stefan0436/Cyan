@@ -126,7 +126,7 @@ public class ServerGame implements IGameExecutionContext {
 		}
 
 		try {
-			return new String[] { "-javaagent:" + jar.getCanonicalPath() };
+			return new String[] { "-javaagent:" + jar.getCanonicalPath(), "-Dcyan.side=SERVER" };
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

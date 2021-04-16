@@ -30,8 +30,7 @@ class ExtensionProcesssor {
 		for (Class<?> c : classes) {
 			for (Method a : c.getMethods()) {
 				if (Modifier.isStatic(a.getModifiers())) {
-					target.getExtensions().getExtraProperties()
-							.set(a.getName(), new SpecialClosure(a, null, target));
+					target.getExtensions().getExtraProperties().set(a.getName(), new SpecialClosure(a, null, target));
 				}
 			}
 			for (Field a : c.getFields()) {
@@ -107,7 +106,10 @@ class ExtensionProcesssor {
 				}
 				return meth.invoke(null, params);
 			} catch (InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
-				return new RuntimeException(e);
+				if (e instanceof InvocationTargetException)
+					throw new RuntimeException(e.getCause());
+				else
+					throw new RuntimeException(e);
 			}
 		}
 	}

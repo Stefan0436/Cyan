@@ -35,4 +35,9 @@ public class VanillaPlatform implements IPlatformConfiguration {
 		return version;
 	}
 
+	@Override
+	public String getCommonMappingsVersion() {
+		return version;
+	}
+
 }

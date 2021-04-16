@@ -197,17 +197,20 @@ public class CornflowerMainExtension implements IProjectExtension {
 		}
 
 		private void add(Project project) {
+			ArrayList<RiftJarTask> tasks = new ArrayList<RiftJarTask>();
 			for (IPlatformConfiguration platform : platforms) {
 				if (platform.getMappingsVersion(GameSide.CLIENT) != null) {
-					project.task(Map.of("type", RiftJar), platform.getPlatform().toString().toLowerCase() + "Rift",
-							new TaskClosure(project, project, platform.getPlatform(), GameSide.CLIENT));
+					tasks.add((RiftJarTask) project.task(Map.of("type", RiftJar),
+							platform.getPlatform().toString().toLowerCase() + "Rift",
+							new TaskClosure(project, project, platform.getPlatform(), GameSide.CLIENT)));
 				}
 				if (platform.getMappingsVersion(GameSide.SERVER) != null) {
-					project.task(Map.of("type", RiftJar),
+					tasks.add((RiftJarTask) project.task(Map.of("type", RiftJar),
 							platform.getPlatform().toString().toLowerCase() + "RiftServer",
-							new TaskClosure(project, project, platform.getPlatform(), GameSide.SERVER));
+							new TaskClosure(project, project, platform.getPlatform(), GameSide.SERVER)));
 				}
 			}
+			project.getExtensions().getExtraProperties().set("riftTasks", tasks.toArray(new RiftJarTask[0]));
 		}
 
 		private class TaskClosure extends Closure<RiftJarTask> {
@@ -238,6 +241,8 @@ public class CornflowerMainExtension implements IProjectExtension {
 				tsk.getArchiveClassifier()
 						.set("RIFT-" + platform.toString().toUpperCase() + (side == GameSide.SERVER ? "-SERVER" : ""));
 				tsk.from(sources);
+				tsk.platform(platform);
+				tsk.side(side);
 				providers.forEach((prov) -> tsk.provider(prov));
 
 				project.getTasks().getByName("rift").finalizedBy(tsk);

@@ -1,17 +1,19 @@
 buildscript {
-    repositories {
-        jcenter()
-        mavenCentral()
-    }
-    dependencies {
-       classpath files("../../build/Cornflower/resources/main")
-       classpath files("../bin/main")
-    }
+	repositories {
+		jcenter()
+		mavenCentral()
+	}
+	dependencies {
+		classpath files("../../build/Cornflower/resources/main")
+		classpath files("../bin/main")
+	}
 }
 
 plugins {
-    id 'java'
+	id 'java'
 }
+
+version="1.0.0.A1"
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
@@ -24,28 +26,28 @@ platforms {
 		// Game version
 		version "1.16.5"
 	}
-	
+
 	// MCP platform, for forge support
 	MCP {
 		// YYYYMMDD.HHMMSS, should match upstream forge
 		version "20210115.111550"
-		
+
 		// Forge version
 		modloader "36.1.4"
 	}
-	
+
 	// Yarn platform, for fabric support
 	YARN {
 		// Build version for YARN,
 		// Search for matching game version in http://maven.modmuss50.me/net/fabricmc/yarn/maven-metadata.xml
 		// Or use getYarnVersion("game-version") to do so automatically
 		version "1.16.5+build.6" // getYarnVersion("1.16.5")
-		
+
 		// Fabric version
 		// For latest, use getLatestFabricVersion("game-version")
 		modloader "0.11.3" // getLatestFabricVersion("1.16.5")
 	}
-	
+
 	// Spigot platform, for paper support
 	SPIGOT {
 		// SPIGOT mappings version, it is best to only use mappings that have been given a green light by the Cyan team.
@@ -63,7 +65,7 @@ platforms {
 		//
 		// Commit hash and craftbukkit build for mappings version (commit:craftbukkit)
 		version "f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3" // getRecommendedSpigotMappings("1.16.5")
-		
+
 		// Paper version, only use paper version compatible with the mappings,
 		//
 		// Use getPaperVersion("mappings-version") to retrieve the latest paper version that has been
@@ -86,29 +88,51 @@ addPlatformRiftTasks {
 
 ctc {
 	method uctc
-	
-	input tasks.jar.getArchiveFile()
-	
-	input tasks.vanillaRift.getArchiveFile()
-	input tasks.vanillaRiftServer.getArchiveFile()
-	
-	input tasks.mcpRift.getArchiveFile()
-	input tasks.mcpRiftServer.getArchiveFile()
-	
-	input tasks.yarnRift.getArchiveFile()
-	input tasks.yarnRiftServer.getArchiveFile()
-	
-	input tasks.spigotRiftServer.getArchiveFile()
-	
-	output "$buildDir/uctc/Main Trust"
+
+	source tasks.jar.getArchiveFile()
+
+	source tasks.vanillaRift.getArchiveFile()
+	source tasks.vanillaRiftServer.getArchiveFile()
+
+	source tasks.mcpRift.getArchiveFile()
+	source tasks.mcpRiftServer.getArchiveFile()
+
+	source tasks.yarnRift.getArchiveFile()
+	source tasks.yarnRiftServer.getArchiveFile()
+
+	source tasks.spigotRiftServer.getArchiveFile()
+
+	destination "$buildDir/uctc/Main Trust"
 }
 
 task ctcPack (type: CtcUtil) {
 	method pack
 	createHash true
+
+	source "$buildDir/uctc/Main Trust"
+	destination genOutputName(new File(buildDir, "ctcs"), "Main Trust")
+}
+
+cmf {
+	manifest modfileManifest {
+		modid "examplemod"
+		modgroup "org.example"
+		
+		display_name "Example Mod"
+		mod_version project.version
+		
+		description 'Example Mod'
+		platform platforms
+		
+		jar tasks.jar.getArchiveFile()
+		jar riftTasks
+
+		trust_container tasks.ctcPack, "https://aerialworks.ddns.net/cyan/trust/download"
+	}
 	
-	input "$buildDir/uctc/Main Trust"
-	output genOutputName(new File(buildDir, "ctcs"), "Main Trust")
+	archiveVersion = project.version
+	archiveExtension = 'ccmf'
+	destinationDirectory = file("$buildDir/ccmf")
 }
 
 dependencies {
@@ -118,11 +142,16 @@ dependencies {
 	// 8 = Core Modding (includes modding)
 	// 16 = FLUID
 	implementation Modloader.forModloader("cyan", 4 | 8 | 16)
-	
+
 	// Selects game dependencies
 	implementation Game.forGame("Minecraft", "1.16.5")
 }
 
+rift.dependsOn jar
 build.finalizedBy rift
 rift.finalizedBy ctc
+ctc.dependsOn rift
 ctc.finalizedBy ctcPack
+ctcPack.dependsOn ctc
+ctcPack.finalizedBy cmf
+cmf.dependsOn ctcPack

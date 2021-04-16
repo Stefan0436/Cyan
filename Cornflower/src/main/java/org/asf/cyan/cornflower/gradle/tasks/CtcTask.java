@@ -21,7 +21,6 @@ import org.asf.cyan.cornflower.gradle.utilities.ITaskExtender;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.provider.Provider;
-import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskProvider;
 import org.objectweb.asm.ClassReader;
@@ -65,7 +64,7 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 
 	public String method = "";
 	public ArrayList<String> inputs = new ArrayList<String>();
-	public String output = "";
+	public String outputStr = "";
 
 	public String pack = "pack";
 	public String unpack = "unpack";
@@ -73,12 +72,12 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 	public String uctc = "uctc";
 
 	public boolean createHash = false;
-	
-	public String version = null;
+
+	public String ctcVersion = null;
 	public File outputFile = null;
 
 	public String getVersion() {
-		return version;
+		return ctcVersion;
 	}
 
 	public File getOutput() {
@@ -96,36 +95,36 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 	private ArrayList<String> methods = new ArrayList<String>(Arrays.asList("pack", "unpack", "publish", "uctc"));
 	private int max = 0;
 
-	public void input(Iterable<File> input) {
+	public void source(Iterable<File> input) {
 		for (File file : input)
 			inputCache.add(file);
 	}
 
-	public void input(File[] input) {
+	public void source(File[] input) {
 		for (File file : input)
 			inputCache.add(file);
 	}
 
-	public void addInput(Iterable<File> input) throws IOException {
+	private void addInput(Iterable<File> input) throws IOException {
 		for (File file : input) {
 			if (!file.exists())
 				continue;
 			if (file.isDirectory() && (method.equals("unpack") || method.equals("uctc") || method.equals("publish"))) {
 				addInput(file.listFiles());
 			} else {
-				input(file.getCanonicalPath());
+				source(file.getCanonicalPath());
 			}
 		}
 	}
 
-	public void addInput(File[] input) throws IOException {
+	private void addInput(File[] input) throws IOException {
 		for (File file : input) {
 			if (!file.exists())
 				continue;
 			if (file.isDirectory()) {
 				addInput(file.listFiles());
 			} else {
-				input(file.getCanonicalPath());
+				source(file.getCanonicalPath());
 			}
 		}
 	}
@@ -134,37 +133,37 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 		this.method = method;
 	}
 
-	public void input(File input) throws IOException {
+	public void source(File input) throws IOException {
 		inputCache.add(input);
 	}
 
-	public void input(RegularFile input) throws IOException {
+	public void source(RegularFile input) throws IOException {
 		inputCache.add(input.getAsFile());
 	}
 
-	public void input(Provider<RegularFile> input) throws IOException {
+	public void source(Provider<RegularFile> input) throws IOException {
 		inputCache.add(input.get().getAsFile());
 	}
 
-	public void input(String input) {
+	public void source(String input) {
 		inputs.add(input);
 	}
 
-	public void input(String[] input) {
+	public void source(String[] input) {
 		for (String inp : input)
-			input(inp);
+			source(inp);
 	}
 
-	public void output(File output) throws IOException {
-		output(output.getCanonicalPath());
+	public void destination(File output) throws IOException {
+		destination(output.getCanonicalPath());
 	}
 
-	public void output(String output) {
-		this.output = output;
+	public void destination(String output) {
+		this.outputStr = output;
 	}
 
-	public void output(URL output) {
-		output(output.toString());
+	public void destination(URL output) {
+		destination(output.toString());
 	}
 
 	@TaskAction
@@ -195,27 +194,27 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 			});
 			max = 0;
 			try {
-				String version = CtcUtil.pack(input, new File(output), (num) -> max = num, (num) -> {
+				String version = CtcUtil.pack(input, new File(outputStr), (num) -> max = num, (num) -> {
 					Cornflower.getPluginInstance(Cornflower.class).logInfo("Added: " + num + " / " + max);
 				});
-				File out = new File(output.replace("%version%", version));
-				Files.move(new File(output).toPath(), out.toPath());
+				File out = new File(outputStr.replace("%version%", version));
+				Files.move(new File(outputStr).toPath(), out.toPath());
 
 				if (createHash) {
 					Files.write(new File(out.getAbsolutePath() + ".sha256").toPath(),
 							(sha256HEX(Files.readAllBytes(out.toPath())) + "  " + out.getName()).getBytes());
 				}
 
-				this.version = version;
+				this.ctcVersion = version;
 				this.outputFile = out;
 			} finally {
 				Cornflower.getPluginInstance(Cornflower.class).deleteDir(input);
 			}
 		} else if (method.equals("unpack")) {
-			if (new File(output).exists() && new File(output).isDirectory())
-				Cornflower.getPluginInstance(Cornflower.class).deleteDir(new File(output));
+			if (new File(outputStr).exists() && new File(outputStr).isDirectory())
+				Cornflower.getPluginInstance(Cornflower.class).deleteDir(new File(outputStr));
 			else
-				new File(output).delete();
+				new File(outputStr).delete();
 
 			File input = new File(GradleUtil.getCacheFolder(Cornflower.class, "ctc-tmp"),
 					System.currentTimeMillis() + ".tmp");
@@ -233,7 +232,7 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 						Cornflower.getPluginInstance(Cornflower.class).logInfo("Extracted: " + num + " / " + max);
 					});
 
-					copyDir(inpFinal, new File(output));
+					copyDir(inpFinal, new File(outputStr));
 
 					Cornflower.getPluginInstance(Cornflower.class).deleteDir(inpFinal);
 				} catch (IOException e) {
@@ -241,12 +240,12 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 				}
 			});
 		} else if (method.equals("uctc")) {
-			if (new File(output).exists() && new File(output).isDirectory())
-				Cornflower.getPluginInstance(Cornflower.class).deleteDir(new File(output));
+			if (new File(outputStr).exists() && new File(outputStr).isDirectory())
+				Cornflower.getPluginInstance(Cornflower.class).deleteDir(new File(outputStr));
 			else
-				new File(output).delete();
+				new File(outputStr).delete();
 
-			new File(output).mkdirs();
+			new File(outputStr).mkdirs();
 			for (String file : new ArrayList<String>(inputs)) {
 				File f = new File(file);
 				if (f.getName().endsWith(".jar") || f.getName().endsWith(".zip")) {
@@ -268,7 +267,7 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 							reader.accept(node, 0);
 
 							String hash = sha256HEX(data);
-							addHash(hash, node.name.replace("/", "."), output);
+							addHash(hash, node.name.replace("/", "."), outputStr);
 						}
 					}
 
@@ -285,15 +284,16 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 					strm.close();
 
 					String hash = sha256HEX(Files.readAllBytes(f.toPath()));
-					addHash(hash, node.name.replace("/", "."), output);
+					addHash(hash, node.name.replace("/", "."), outputStr);
 				}
 			}
 
-			Files.write(new File(output, "main.header").toPath(), ("Name: " + new File(output).getName()).getBytes());
+			Files.write(new File(outputStr, "main.header").toPath(),
+					("Name: " + new File(outputStr).getName()).getBytes());
 		} else if (method.equals("publish")) {
 			for (String input : inputs) {
 				if (input.endsWith(".ctc")) {
-					CtcUtil.publish(new File(input), new URL(output), (group) -> {
+					CtcUtil.publish(new File(input), new URL(outputStr), (group) -> {
 						Optional<Credentials> cred = credentials.stream().filter(t -> t.group.equals(group))
 								.findFirst();
 						if (!cred.isPresent())
@@ -301,7 +301,7 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 
 						return new Object[] { cred.get().username, cred.get().password };
 					}, (published) -> {
-						System.out.println("Published: " + published + " -> " + output + "/" + published);
+						System.out.println("Published: " + published + " -> " + outputStr + "/" + published);
 					});
 				}
 			}

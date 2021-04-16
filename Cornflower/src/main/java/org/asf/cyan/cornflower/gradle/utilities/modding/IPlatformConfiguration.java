@@ -9,4 +9,5 @@ public interface IPlatformConfiguration {
 	public String getModloaderVersion();
 	public String getMappingsVersion(GameSide side);
 	public String getDisplayVersion();
+	public String getCommonMappingsVersion();
 }

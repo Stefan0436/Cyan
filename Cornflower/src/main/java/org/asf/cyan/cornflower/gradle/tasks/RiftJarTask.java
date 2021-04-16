@@ -9,6 +9,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
+import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.cornflower.gradle.utilities.ITaskExtender;
 import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender;
 import org.asf.cyan.fluid.bytecode.FluidClassPool;
@@ -33,6 +35,17 @@ public class RiftJarTask extends AbstractArchiveTask implements ITaskExtender {
 	public ArrayList<IRiftToolchainProvider> providers = new ArrayList<IRiftToolchainProvider>();
 	public String mappings_identifier = null;
 	public File mappings_savedir = null;
+
+	public LaunchPlatform platform;
+	public GameSide side;
+
+	public void platform(LaunchPlatform platform) {
+		this.platform = platform;
+	}
+
+	public void side(GameSide side) {
+		this.side = side;
+	}
 
 	public void mappings_savedir(File dir) {
 		mappings_savedir = dir;
@@ -87,7 +100,7 @@ public class RiftJarTask extends AbstractArchiveTask implements ITaskExtender {
 				return WorkResults.didWork(false);
 			else {
 				Log4jToGradleAppender.logInfo();
-				
+
 				ArrayList<String> classes = new ArrayList<String>();
 				SimpleRiftBuilder rift = new SimpleRiftBuilder();
 

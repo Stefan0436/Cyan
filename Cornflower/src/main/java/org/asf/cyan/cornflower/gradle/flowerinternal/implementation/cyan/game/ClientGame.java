@@ -94,6 +94,7 @@ public class ClientGame implements IGameExecutionContext {
 
 		ArrayList<String> args = new ArrayList<String>();
 		try {
+			args.add("-Dcyan.side=CLIENT");
 			args.add("-DassetRoot=" + MinecraftInstallationToolkit.getAssetsRoot().getCanonicalPath());
 			args.add("-DassetIndex=" + MinecraftInstallationToolkit.getAssetId(gameVersion));
 
