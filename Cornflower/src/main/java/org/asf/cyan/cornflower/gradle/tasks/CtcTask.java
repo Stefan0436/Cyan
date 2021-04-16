@@ -21,6 +21,7 @@ import org.asf.cyan.cornflower.gradle.utilities.ITaskExtender;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskProvider;
 import org.objectweb.asm.ClassReader;
@@ -57,15 +58,9 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 
 	private ArrayList<Credentials> credentials = new ArrayList<Credentials>();
 	public ArrayList<File> inputCache = new ArrayList<File>();
-	public Closure<File> postCompletePack = null;
 
 	public void credentials(Closure<?> closure) {
 		credentials.add(new Credentials().runClosure(closure));
-	}
-
-	public void postCompletePack(Closure<File> closure) {
-		closure.setDelegate(this);
-		postCompletePack = closure;
 	}
 
 	public String method = "";
@@ -78,6 +73,17 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 	public String uctc = "uctc";
 
 	public boolean createHash = false;
+	
+	public String version = null;
+	public File outputFile = null;
+
+	public String getVersion() {
+		return version;
+	}
+
+	public File getOutput() {
+		return outputFile;
+	}
 
 	public String genOutputName(File outputDir, String baseName) throws IOException {
 		return outputDir.getCanonicalPath() + "/" + baseName + "-%version%.ctc";
@@ -200,9 +206,8 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 							(sha256HEX(Files.readAllBytes(out.toPath())) + "  " + out.getName()).getBytes());
 				}
 
-				if (postCompletePack != null) {
-					postCompletePack.call(out);
-				}
+				this.version = version;
+				this.outputFile = out;
 			} finally {
 				Cornflower.getPluginInstance(Cornflower.class).deleteDir(input);
 			}

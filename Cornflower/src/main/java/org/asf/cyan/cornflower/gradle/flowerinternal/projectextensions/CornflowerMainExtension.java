@@ -7,6 +7,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.asf.cyan.api.config.Configuration;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 
@@ -18,6 +19,7 @@ import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.closu
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.closureowners.YarnPlatformClosureOwner;
 import org.asf.cyan.cornflower.gradle.tasks.RiftJarTask;
 import org.asf.cyan.cornflower.gradle.utilities.IProjectExtension;
+import org.asf.cyan.cornflower.gradle.utilities.modding.CyanModfileManifestGenerator;
 import org.asf.cyan.cornflower.gradle.utilities.modding.GameDependency;
 import org.asf.cyan.cornflower.gradle.utilities.modding.IPlatformConfiguration;
 import org.asf.cyan.cornflower.gradle.utilities.modding.ModloaderDependency;
@@ -95,6 +97,10 @@ public class CornflowerMainExtension implements IProjectExtension {
 
 	public static final GameSide SERVER = GameSide.SERVER;
 	public static final GameSide CLIENT = GameSide.CLIENT;
+
+	public static Configuration<?> modfileManifest(Closure<?> closure) {
+		return CyanModfileManifestGenerator.fromClosure(closure);
+	}
 
 	public static void platforms(Project proj, Closure<?> closure) {
 		PlatformConfiguration config = new PlatformConfiguration();

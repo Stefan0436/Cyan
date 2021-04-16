@@ -87,6 +87,7 @@ dependencies {
 	implementation project(":Fluid")
 	implementation project(":CCFG")
 	implementation project(":ClassTrust")
+	implementation project(":CyanLoader")
 	implementation project(":TrustExplorer")
 	
 	mavendependency group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.7'
@@ -114,6 +115,7 @@ dependencies {
 	mavendependency project(":CyanUtil")
 	mavendependency project(":Fluid")
 	mavendependency project(":CCFG")
+	mavendependency project(":CyanLoader")
 	mavendependency project(":ClassTrust")
 	mavendependency project(":TrustExplorer")
 }
