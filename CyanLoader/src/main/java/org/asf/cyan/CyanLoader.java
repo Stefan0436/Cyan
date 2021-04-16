@@ -264,7 +264,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 				if (file.startsWith("CM//") && developerMode == true) {
 					CyanModfileManifest mod = new CyanModfileManifest();
 					mod.readAll(new String(Files.readAllBytes(new File(file.substring(4)).toPath())));
-					ld.coreModManifests.put(mod.modGroup + "." + mod.modId, mod);
+					ld.coreModManifests.put(mod.modGroup + ":" + mod.modId, mod);
 					ld.coreModManifests.put(mod.modClassPackage + "." + mod.modClassName, mod);
 					CyanCore.addAllowedPackage(mod.modClassPackage);
 				} else if (file.startsWith("M//")) {
@@ -922,14 +922,14 @@ public class CyanLoader extends Modloader implements IModProvider {
 				}
 			}
 
-			if (coreModManifests.containsKey(manifest.modGroup + "." + manifest.modId)) {
+			if (coreModManifests.containsKey(manifest.modGroup + ":" + manifest.modId)) {
 				fatal("Coremod conflict!");
-				fatal("Coremod path '" + manifest.modGroup + "." + manifest.modId + "' was imported twice!");
+				fatal("Coremod path '" + manifest.modGroup + ":" + manifest.modId + "' was imported twice!");
 				System.exit(-1);
 			}
 
 			CyanCore.addAllowedPackage(manifest.modClassPackage);
-			coreModManifests.put(manifest.modGroup + "." + manifest.modId, manifest);
+			coreModManifests.put(manifest.modGroup + ":" + manifest.modId, manifest);
 			coreModManifests.put(manifest.modClassPackage + "." + manifest.modClassName, manifest);
 		});
 
