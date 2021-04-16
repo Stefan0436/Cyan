@@ -15,6 +15,7 @@ import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.ResolvedConfiguration;
 import org.gradle.api.artifacts.ResolvedDependency;
 
@@ -170,14 +171,21 @@ public class ModloaderHandler extends CyanComponent {
 		for (ResolvedDependency dep : dependencies) {
 			scanDeps(dep.getChildren(), remoteDependencies, deps);
 			if (dep.getModuleGroup() != null && !dep.getModuleGroup().startsWith("cornflower.internal.")) {
-
 				if (dep.getModuleName() != null
 						&& !remoteDependencies.stream()
 								.anyMatch(t -> t.startsWith(dep.getModuleGroup() + ":" + dep.getModuleName() + ":"))
 						&& !deps.stream()
 								.anyMatch(t -> t.startsWith(dep.getModuleGroup() + ":" + dep.getModuleName() + ":"))) {
-					remoteDependencies
-							.add(dep.getModuleGroup() + ":" + dep.getModuleName() + ":" + dep.getModuleVersion());
+					boolean containsNormalArtifact = false;
+					for (ResolvedArtifact arti : dep.getModuleArtifacts()) {
+						if (arti.getExtension().equals("jar") && arti.getClassifier() == null
+								&& !arti.getClassifier().isEmpty()) {
+							containsNormalArtifact = true;
+						}
+					}
+					if (containsNormalArtifact)
+						remoteDependencies
+								.add(dep.getModuleGroup() + ":" + dep.getModuleName() + ":" + dep.getModuleVersion());
 				}
 			}
 		}
