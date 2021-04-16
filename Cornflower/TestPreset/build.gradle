@@ -128,13 +128,16 @@ dependencies {
 cmf {
 	manifest {
 		modfileManifest {
-			modid "examplemod"
+			modid "examplecoremod"
 			modgroup "org.example"
+			
+			mod_class "ExampleCoremod"
+			mod_package "org.example.examplemod"
 
-			display_name "Example Mod"
+			display_name "Example Coremod"
 			mod_version project.version
 
-			description 'Example Mod'
+			description 'Example Coremod'
 			platform platforms
 
 			jar tasks.jar.getArchiveFile()
