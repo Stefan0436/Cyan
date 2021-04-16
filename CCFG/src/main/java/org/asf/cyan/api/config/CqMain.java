@@ -143,7 +143,7 @@ public class CqMain {
 			} else {
 				boolean escape = false;
 				boolean quote = false;
-				
+
 				StringBuilder buffer = new StringBuilder();
 				for (char ch : path.toCharArray()) {
 					if (!escape) {
@@ -154,7 +154,7 @@ public class CqMain {
 							quote = !quote;
 							continue;
 						}
-						
+
 						if (!quote) {
 							if (ch == '.') {
 								pathEntries.add(buffer.toString());
@@ -170,12 +170,12 @@ public class CqMain {
 						escape = false;
 					}
 				}
-				
+
 				if (!buffer.toString().isEmpty()) {
-					pathEntries.add(buffer.toString());					
+					pathEntries.add(buffer.toString());
 				}
 			}
-			
+
 			int index = 0;
 			int length = pathEntries.size();
 			for (String pathEntry : pathEntries) {
@@ -184,7 +184,7 @@ public class CqMain {
 					length--;
 					continue;
 				} else if (pathEntry.startsWith("\"")) {
-					
+
 				}
 
 				pathEntry = entryPrefix + pathEntry;
@@ -245,7 +245,8 @@ public class CqMain {
 		System.err.println("Usage: cq <config class> <input> [options] [entry path]");
 		System.err.println("Options:");
 		System.err.println("    --raw                   - output bash");
-		System.err.println("    --view                  - outputs values in human-readable format (specific keys only)");
+		System.err
+				.println("    --viewmode              - outputs values in human-readable format (specific keys only)");
 		System.err.println("    --output <output file>  - sets output");
 		System.err.println("    --source-jar <jar path> - adds source jars for the config class");
 		System.err.println("");
