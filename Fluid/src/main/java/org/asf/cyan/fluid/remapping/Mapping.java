@@ -664,7 +664,6 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 
 		for (Mapping<?> cls : classes.values()) {
 			cls.name = getNewName(cls.name, finalPackageMappings);
-			cls.obfuscated = getNewName(cls.obfuscated, finalPackageMappings);
 			
 			for (Mapping<?> member : cls.mappings) {
 				member.type = getNewName(member.type, finalPackageMappings);
