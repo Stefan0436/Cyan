@@ -7,7 +7,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A26'
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A28'
 	}
 }
 
@@ -243,7 +243,7 @@ if (project.hasProperty("overrideLaunchWrapperServer")) {
 	classWrapperServer=project.getProperty("overrideLaunchWrapperServer")
 }
 
-version="1.0.0.A6-cyan-"+cyanversion
+version="1.0.0.A7-cyan-"+cyanversion
 
 def netTestUrl = fallback_url
 def getServerConnection = {

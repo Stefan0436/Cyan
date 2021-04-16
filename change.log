@@ -48,3 +48,6 @@ Upcoming Cyan Update: Alpha 11, changes:
  - Rift Support (Cornflower A28)
  - CTC Tasks (Cornflower A28)
  - Fixed SPIGOT mappings (MTK A16)
+ - Cyan Modfile Manifest Generation (Cornflower A29) -- TODO
+ - Cyan Mod File Archive Task (Cornflower A29) -- TODO
+ - Supported modloader selection (publish.sh) -- TODO
