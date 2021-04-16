@@ -28,6 +28,7 @@ public abstract class AbstractCoremod extends AbstractMod implements ICoremod, I
 	@Override
 	public void setup(Modloader modloader, GameSide side, CyanModfileManifest manifest) {
 		super.setup(modloader, side, manifest);
+		setupCoremod();
 	}
 
 	/**
@@ -78,7 +79,6 @@ public abstract class AbstractCoremod extends AbstractMod implements ICoremod, I
 			return hookPackages.toArray(t -> new String[t]);
 		} else if (provider.equals("auto.init")) {
 			addTransformerPackage(getClass().getPackageName() + ".transformers");
-			setupCoremod();
 		} else if (provider.equals("mod.id")) {
 			return modid;
 		}
