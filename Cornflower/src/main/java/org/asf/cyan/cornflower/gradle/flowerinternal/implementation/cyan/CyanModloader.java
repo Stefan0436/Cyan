@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -144,32 +145,36 @@ public class CyanModloader implements IModloader {
 	}
 
 	@Override
-	public void addDependencies(ConfigurationContainer configurations) {
-		addDependency("org.asf.cyan", "CCFG", libraries.get("CCFG"));
-		addDependency("org.asf.cyan", "CyanComponents", libraries.get("CyanComponents"));
+	public String[] addDependencies(ConfigurationContainer configurations) {
+		ArrayList<String> deps = new ArrayList<String>();
+		addDependency("org.asf.cyan", "CCFG", libraries.get("CCFG"), deps);
+		addDependency("org.asf.cyan", "CyanComponents", libraries.get("CyanComponents"), deps);
 
 		if (hasAPI(FullCyanLoader))
-			addDependency("org.asf.cyan", "CyanLoader", libraries.get("CyanLoader"));
+			addDependency("org.asf.cyan", "CyanLoader", libraries.get("CyanLoader"), deps);
 
 		if (hasAPI(BaseModding) && !hasAPI(FullCyanLoader))
-			addDependency("org.asf.cyan", "CyanModding", libraries.get("CyanLoader"));
+			addDependency("org.asf.cyan", "CyanModding", libraries.get("CyanLoader"), deps);
 		if (hasAPI(CyanUtil))
-			addDependency("org.asf.cyan", "CyanUtil", libraries.get("CyanUtil"));
+			addDependency("org.asf.cyan", "CyanUtil", libraries.get("CyanUtil"), deps);
 		if (hasAPI(CoreMods) && !hasAPI(FullCyanLoader))
-			addDependency("org.asf.cyan", "CyanCoreModding", libraries.get("CyanLoader"));
+			addDependency("org.asf.cyan", "CyanCoreModding", libraries.get("CyanLoader"), deps);
 		if (hasAPI(FLUID))
-			addDependency("org.asf.cyan", "Fluid", libraries.get("Fluid"));
+			addDependency("org.asf.cyan", "Fluid", libraries.get("Fluid"), deps);
 		if (hasAPI(CyanCore))
-			addDependency("org.asf.cyan", "CyanCore", libraries.get("CyanCore"));
+			addDependency("org.asf.cyan", "CyanCore", libraries.get("CyanCore"), deps);
 
 		if (hasAPI(MTK))
-			addDependency("org.asf.cyan", "MTK", libraries.get("MTK"));
+			addDependency("org.asf.cyan", "MTK", libraries.get("MTK"), deps);
 		if (hasAPI(ClassTrust))
-			addDependency("org.asf.cyan", "ClassTrust", libraries.get("ClassTrust"));
+			addDependency("org.asf.cyan", "ClassTrust", libraries.get("ClassTrust"), deps);
+		
+		return deps.toArray(new String[0]);
 	}
 
-	private void addDependency(String group, String name, String version) {
+	private void addDependency(String group, String name, String version, ArrayList<String> deps) {
 		project.getDependencies().add("implementation", group + ":" + name + ":" + version);
+		deps.add(group + ":" + name + ":" + version);
 	}
 
 	public String getVersion() {

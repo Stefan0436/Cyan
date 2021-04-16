@@ -13,5 +13,5 @@ public interface IModloader {
 
 	public void addRepositories(RepositoryHandler repositories);
 
-	public void addDependencies(ConfigurationContainer configurations);
+	public String[] addDependencies(ConfigurationContainer configurations);
 }

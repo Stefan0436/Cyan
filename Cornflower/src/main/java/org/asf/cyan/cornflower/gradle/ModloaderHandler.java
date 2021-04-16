@@ -4,6 +4,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.function.Consumer;
 
 import org.asf.cyan.api.common.CyanComponent;
@@ -14,6 +15,8 @@ import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.ResolvedConfiguration;
+import org.gradle.api.artifacts.ResolvedDependency;
 
 /**
  * Cornflower Plugin ModloaderHandler Class, DO NOT USE OUTSIDE OF GRADLE
@@ -28,12 +31,19 @@ public class ModloaderHandler extends CyanComponent {
 		Log4jToGradleAppender.logInfo();
 		CornflowerCore.LOGGER.info("Loading Cornflower modloader and game dependencies...");
 
-		ArrayList<Dependency> remoteDependencies = new ArrayList<Dependency>();
+		ArrayList<String> remoteDependencies = new ArrayList<String>();
 		for (Configuration conf : proj.getConfigurations()) {
+			try {
+				conf.setCanBeResolved(true);
+			} catch (Exception e) {
+
+			}
+
 			for (Dependency dep : conf.getDependencies()) {
 				if (dep.getGroup() != null && !dep.getGroup().startsWith("cornflower.internal.")) {
-					if (dep.getName() != null) {
-						remoteDependencies.add(dep);
+					if (dep.getName() != null && !remoteDependencies.stream()
+							.anyMatch(t -> t.startsWith(dep.getGroup() + ":" + dep.getName() + ":"))) {
+						remoteDependencies.add(dep.getGroup() + ":" + dep.getName() + ":" + dep.getVersion());
 					}
 				}
 			}
@@ -77,12 +87,6 @@ public class ModloaderHandler extends CyanComponent {
 					.error("Cannot to find modloader: " + modloaderName + ", cornflower may not work properly.");
 		});
 
-		for (IModloader modloader : (ArrayList<IModloader>) proj.getExtensions().getExtraProperties()
-				.get("cornflowermodloaders")) {
-			modloader.addRepositories(proj.getRepositories());
-			modloader.addDependencies(proj.getConfigurations());
-		}
-
 		findDeps(proj, "game", (dep) -> {
 			Class<IGame>[] games = findClasses(getMainImplementation(), IGame.class);
 			for (Class<IGame> cls : games) {
@@ -115,6 +119,15 @@ public class ModloaderHandler extends CyanComponent {
 					+ ", make sure you have the modloader that provides it, cornflower may not work properly.");
 		});
 
+		ArrayList<String> deps = new ArrayList<String>();
+		for (IModloader modloader : (ArrayList<IModloader>) proj.getExtensions().getExtraProperties()
+				.get("cornflowermodloaders")) {
+			modloader.addRepositories(proj.getRepositories());
+
+			for (String dep : modloader.addDependencies(proj.getConfigurations()))
+				deps.add(dep);
+		}
+
 		for (IGame game : (ArrayList<IGame>) proj.getExtensions().getExtraProperties().get("cornflowergames")) {
 			game.addRepositories(proj.getRepositories());
 			game.addDependencies(proj.getConfigurations());
@@ -133,13 +146,41 @@ public class ModloaderHandler extends CyanComponent {
 					mainJar = context.gameJarDependency();
 
 				proj.getDependencies().add("implementation", mainJar);
-				for (String lib : context.libraries())
+				deps.add(mainJar);
+				for (String lib : context.libraries()) {
 					proj.getDependencies().add("implementation", lib);
+					deps.add(lib);
+				}
 			}
+		}
+
+		try {
+			Configuration conf = proj.getConfigurations().getByName("implementation");
+			ResolvedConfiguration config = conf.getResolvedConfiguration();
+			scanDeps(config.getFirstLevelModuleDependencies(), remoteDependencies, deps);
+		} catch (Exception e) {
 		}
 
 		proj.getExtensions().getExtraProperties().set("remoteDependencies", remoteDependencies);
 		Log4jToGradleAppender.noLogInfo();
+	}
+
+	private static void scanDeps(Collection<ResolvedDependency> dependencies, ArrayList<String> remoteDependencies,
+			ArrayList<String> deps) {
+		for (ResolvedDependency dep : dependencies) {
+			scanDeps(dep.getChildren(), remoteDependencies, deps);
+			if (dep.getModuleGroup() != null && !dep.getModuleGroup().startsWith("cornflower.internal.")) {
+
+				if (dep.getModuleName() != null
+						&& !remoteDependencies.stream()
+								.anyMatch(t -> t.startsWith(dep.getModuleGroup() + ":" + dep.getModuleName() + ":"))
+						&& !deps.stream()
+								.anyMatch(t -> t.startsWith(dep.getModuleGroup() + ":" + dep.getModuleName() + ":"))) {
+					remoteDependencies
+							.add(dep.getModuleGroup() + ":" + dep.getModuleName() + ":" + dep.getModuleVersion());
+				}
+			}
+		}
 	}
 
 	private static void findDeps(Project proj, String depType, Consumer<Dependency> handler) {

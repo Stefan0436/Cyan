@@ -61,29 +61,44 @@ public class CmfTask extends Zip implements ITaskExtender {
 			task.get().setDescription("Creates CMF archives");
 			task.get().setGroup("build");
 
-			task.get().getProject().afterEvaluate((proj) -> {
-				Configuration<?> manifest = this.manifest.call();
-				if (manifest instanceof IModManifest) {
-					((IModManifest) manifest).getJars().forEach((source, dest) -> {
-						if (dest.endsWith(source.getName()))
-							dest = dest.substring(0, dest.length() - source.getName().length());
+			task.get().getProject().afterEvaluate(new Closure<Object>(task) {
 
-						CopySpecInternal spec = (CopySpecInternal) getRootSpec().addFirst().into(dest);
-						spec.addChild().from(source);
-					});
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public Object call(Object... args) {
+					Configuration<?> manifest = CmfTask.this.manifest.call();
+					if (manifest instanceof IModManifest) {
+						((IModManifest) manifest).getJars().forEach((source, dest) -> {
+							if (dest.endsWith(source.getName()))
+								dest = dest.substring(0, dest.length() - source.getName().length());
+
+							CopySpecInternal spec = (CopySpecInternal) getRootSpec().addFirst().into(dest);
+							spec.addChild().from(source);
+						});
+					}
+
+					manifestConfig = manifest;
+					return task;
 				}
 
-				manifestConfig = manifest;
 			});
 
-			task.get().doFirst((tsk) -> {
-				try {
-					Files.write(manifestTmp.toPath(), manifestConfig.toString().getBytes());
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+			task.get().doFirst(new Closure<Object>(task) {
+
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public Object call(Object... args) {
+					try {
+						Files.write(manifestTmp.toPath(), manifestConfig.toString().getBytes());
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+					return task;
 				}
+
 			});
 		}
 	}
-
 }

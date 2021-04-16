@@ -88,6 +88,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 	// TODO: Coremod loading
 
 	private HashMap<String, String> mavenRepositories = new HashMap<String, String>();
+	private HashMap<String, Version> coremodMavenDependencies = new HashMap<String, Version>();
 
 	private static String platformVersion = "";
 
@@ -336,12 +337,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 
 		manifest.mavenRepositories.forEach((name, url) -> {
 			mavenRepositories.putIfAbsent(name, url);
-		});
-
-		manifest.mavenDependencies.forEach((group, item) -> {
-			item.forEach((name, version) -> {
-				name = name;
-			});
 		});
 
 		manifest.dependencies.forEach((id, version) -> {
@@ -649,6 +644,15 @@ public class CyanLoader extends Modloader implements IModProvider {
 
 			Files.writeString(modCache.toPath(), info.toString());
 		}
+
+		manifest.mavenDependencies.forEach((group, item) -> {
+			item.forEach((name, version) -> {
+				if (!coremodMavenDependencies.containsKey(group + ":" + name) || Version.fromString(version)
+						.isGreaterThan(coremodMavenDependencies.get(group + ":" + name))) {
+					coremodMavenDependencies.put(group + ":" + name, Version.fromString(version));
+				}
+			});
+		});
 
 		info("Loading mod jars...");
 		ZipEntry ent = strm.getNextEntry();
@@ -1492,8 +1496,57 @@ public class CyanLoader extends Modloader implements IModProvider {
 		}
 
 		createEventChannel("mod.loaded");
+
+		downloadMavenDependencies(coremodMavenDependencies);
+
 		loadCoreMods();
 		BaseEventController.work();
-
 	}
+
+	private void downloadMavenDependencies(HashMap<String, Version> mavenDependencies) {
+		mavenDependencies.forEach((dep, version) -> {
+			String group = dep.split(":")[0];
+			String name = dep.split(":")[1];
+
+			String path = group.replace(".", "/") + "/" + name + "/" + version.toString() + "/" + name + "-"
+					+ version.toString() + ".jar";
+			File libFile = new File("libraries/" + path);
+			if (!libFile.getParentFile().exists())
+				libFile.getParentFile().mkdirs();
+
+			if (!libFile.exists()) {
+				boolean downloaded = false;
+				for (String repo : mavenRepositories.keySet()) {
+					String url = mavenRepositories.get(repo);
+					info("Trying to download " + group + ":" + name + " from " + repo + " (" + url + ")...");
+					try {
+						URL u = new URL(url + "/" + path);
+						debug("Full URL: " + u);
+
+						InputStream strm = u.openStream();
+						FileOutputStream libOut = new FileOutputStream(libFile);
+						strm.transferTo(libOut);
+						strm.close();
+						libOut.close();
+						downloaded = true;
+						info("Done.");
+						break;
+					} catch (IOException e) {
+					}
+				}
+				if (!downloaded) {
+					fatal("Could not download dependency " + group + ":" + name + " from ANY maven repository!");
+					System.exit(1);
+				}
+			}
+
+			try {
+				CyanCore.addCoreUrl(libFile.toURI().toURL());
+			} catch (MalformedURLException e) {
+				fatal("Could not load dependency " + group + ":" + name, e);
+				System.exit(1);
+			}
+		});
+	}
+
 }

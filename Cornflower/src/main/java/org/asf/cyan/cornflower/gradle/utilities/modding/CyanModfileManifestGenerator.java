@@ -12,6 +12,7 @@ import org.asf.cyan.cornflower.gradle.tasks.CtcTask;
 import org.asf.cyan.cornflower.gradle.tasks.RiftJarTask;
 import org.asf.cyan.cornflower.gradle.utilities.modding.manifests.CyanModfileManifest;
 import org.asf.cyan.security.TrustContainer;
+import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.provider.Provider;
 
@@ -220,6 +221,26 @@ public class CyanModfileManifestGenerator {
 		deps.put(name, version);
 	}
 
+	public void maven_dependency(Dependency dep) {
+		HashMap<String, String> deps = manifest.mavenDependencies.get(dep.getGroup());
+		if (deps == null) {
+			deps = new HashMap<String, String>();
+			manifest.mavenDependencies.put(dep.getGroup(), deps);
+		}
+
+		deps.put(dep.getName(), dep.getVersion());
+	}
+
+	public void maven_dependency(Iterable<String> dependencies) {
+		for (String dep : dependencies)
+			maven_dependency(dep);
+	}
+
+	public void maven_dependency(Dependency[] dependencies) {
+		for (Dependency dep : dependencies)
+			maven_dependency(dep);
+	}
+
 	public void maven_dependency(String dependency) {
 		if (!dependency.matches(".*:.*:.*"))
 			throw new IllegalArgumentException(
@@ -230,11 +251,6 @@ public class CyanModfileManifestGenerator {
 	}
 
 	public void maven_dependency(String[] dependencies) {
-		for (String dep : dependencies)
-			maven_dependency(dep);
-	}
-
-	public void maven_dependency(Iterable<String> dependencies) {
 		for (String dep : dependencies)
 			maven_dependency(dep);
 	}

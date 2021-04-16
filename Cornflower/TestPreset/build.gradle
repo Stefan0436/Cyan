@@ -113,28 +113,6 @@ task ctcPack (type: CtcUtil) {
 	destination genOutputName(new File(buildDir, "ctcs"), "Main Trust")
 }
 
-cmf {
-	manifest modfileManifest {
-		modid "examplemod"
-		modgroup "org.example"
-		
-		display_name "Example Mod"
-		mod_version project.version
-		
-		description 'Example Mod'
-		platform platforms
-		
-		jar tasks.jar.getArchiveFile()
-		jar riftTasks
-
-		trust_container tasks.ctcPack, "https://aerialworks.ddns.net/cyan/trust/download"
-	}
-	
-	archiveVersion = project.version
-	archiveExtension = 'ccmf'
-	destinationDirectory = file("$buildDir/ccmf")
-}
-
 dependencies {
 	// Selects modloader dependencies:
 	// 2 = Base Moddidng
@@ -145,6 +123,32 @@ dependencies {
 
 	// Selects game dependencies
 	implementation Game.forGame("Minecraft", "1.16.5")
+}
+
+cmf {
+	manifest {
+		modfileManifest {
+			modid "examplemod"
+			modgroup "org.example"
+
+			display_name "Example Mod"
+			mod_version project.version
+
+			description 'Example Mod'
+			platform platforms
+
+			jar tasks.jar.getArchiveFile()
+			jar riftTasks
+
+			maven_dependency remoteDependencies
+
+			trust_container tasks.ctcPack, "https://aerialworks.ddns.net/cyan/trust/download"
+		}
+	}
+
+	archiveVersion = project.version
+	archiveExtension = 'ccmf'
+	destinationDirectory = file("$buildDir/ccmf")
 }
 
 rift.dependsOn jar
