@@ -92,7 +92,8 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 		}
 
 		for (Method mth : getClass().getDeclaredMethods()) {
-			if (mth.isAnnotationPresent(ModSupportHandler.class)) {
+			if (mth.isAnnotationPresent(ModSupportHandler.class)
+					&& mth.getAnnotation(ModSupportHandler.class).value().equals(mod.getManifest().id())) {
 				mth.setAccessible(true);
 				if (mth.getParameterCount() == 1) {
 					if (mth.getParameters()[0].getType().isAssignableFrom(mod.getClass())) {
