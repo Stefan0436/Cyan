@@ -1078,43 +1078,54 @@ public class CyanLoader extends Modloader implements IModProvider {
 				@Override
 				public void run() {
 					info("Loading FLUID transformers...");
+					Version minecraft = Version.fromString(CyanInfo.getMinecraftVersion());
+					Version last = Version.fromString("0.0.0");
+
+					String selectedPackage = "";
+					ArrayList<String> packages = new ArrayList<String>();
+					Class<?>[] classes = findAnnotatedClasses(getMainImplementation(), FluidTransformer.class);
+					for (Class<?> cls : classes) {
+						String pkg = cls.getPackageName();
+						if (!pkg.startsWith("org.asf.cyan.modifications."))
+							continue;
+
+						if (pkg.contains(".common")) {
+							pkg = pkg.substring(0, pkg.lastIndexOf(".common"));
+						} else if (pkg.contains(".client")) {
+							pkg = pkg.substring(0, pkg.lastIndexOf(".client"));
+						} else if (pkg.contains(".server")) {
+							pkg = pkg.substring(0, pkg.lastIndexOf(".server"));
+						}
+
+						String version = pkg.substring(pkg.lastIndexOf(".") + 1).substring(1).replace("_", ".");
+						if (Version.fromString(version).isGreaterThan(minecraft)
+								|| Version.fromString(version).isLessThan(last))
+							continue;
+
+						selectedPackage = pkg;
+					}
+
+					packages.sort((str1, str2) -> {
+						String version1 = str1.substring(str1.lastIndexOf(".") + 1).substring(1).replace("_", ".");
+						String version2 = str2.substring(str2.lastIndexOf(".") + 1).substring(1).replace("_", ".");
+						return -Version.fromString(version1).compareTo(Version.fromString(version2));
+					});
 
 					try {
-						switch (CyanInfo.getSide()) {
-						case CLIENT:
-							Fluid.registerTransformer("org.asf.cyan.modifications._1_15_2.client.MinecraftModification",
+						for (Class<?> transformer : classes) {
+							String pkg = transformer.getPackageName();
+							if (!pkg.startsWith("org.asf.cyan.modifications.")
+									|| (!pkg.equals(selectedPackage) && !pkg.startsWith(selectedPackage + ".")))
+								continue;
+
+							if (pkg.contains(".client") && CyanInfo.getSide() != GameSide.CLIENT) {
+								continue;
+							} else if (pkg.contains(".server") && CyanInfo.getSide() != GameSide.SERVER) {
+								continue;
+							}
+
+							Fluid.registerTransformer(transformer.getTypeName(),
 									CyanLoader.class.getProtectionDomain().getCodeSource().getLocation());
-							Fluid.registerTransformer(
-									"org.asf.cyan.modifications._1_15_2.client.TitleScreenModification",
-									CyanLoader.class.getProtectionDomain().getCodeSource().getLocation());
-							Fluid.registerTransformer(
-									"org.asf.cyan.modifications._1_15_2.client.LoadingOverlayModification",
-									CyanLoader.class.getProtectionDomain().getCodeSource().getLocation());
-							Fluid.registerTransformer("org.asf.cyan.modifications._1_15_2.client.WindowModification",
-									CyanLoader.class.getProtectionDomain().getCodeSource().getLocation());
-							Fluid.registerTransformer("org.asf.cyan.modifications._1_15_2.client.BrandModification",
-									CyanLoader.class.getProtectionDomain().getCodeSource().getLocation());
-						case SERVER:
-							Fluid.registerTransformer(
-									"org.asf.cyan.modifications._1_15_2.server.MinecraftServerGuiModification",
-									CyanLoader.class.getProtectionDomain().getCodeSource().getLocation());
-							Fluid.registerTransformer(
-									"org.asf.cyan.modifications._1_15_2.server.MinecraftServerGuiModification$1",
-									CyanLoader.class.getProtectionDomain().getCodeSource().getLocation());
-							Fluid.registerTransformer(
-									"org.asf.cyan.modifications._1_15_2.server.StatsComponentModification",
-									CyanLoader.class.getProtectionDomain().getCodeSource().getLocation());
-						default:
-							Fluid.registerTransformer(
-									"org.asf.cyan.modifications._1_15_2.common.MinecraftServerModification",
-									CyanLoader.class.getProtectionDomain().getCodeSource().getLocation());
-							Fluid.registerTransformer(
-									"org.asf.cyan.modifications._1_15_2.common.CrashReportModification",
-									CyanLoader.class.getProtectionDomain().getCodeSource().getLocation());
-							Fluid.registerTransformer(
-									"org.asf.cyan.modifications._1_15_2.common.CrashReportCategoryModification",
-									CyanLoader.class.getProtectionDomain().getCodeSource().getLocation());
-							break;
 						}
 					} catch (IllegalStateException | ClassNotFoundException e) {
 						throw new RuntimeException(e);
@@ -1497,7 +1508,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 
 		downloadMavenDependencies(coremodMavenDependencies);
 		loadCoreMods();
-		
+
 		BaseEventController.work();
 	}
 
