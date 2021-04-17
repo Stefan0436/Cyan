@@ -1,6 +1,7 @@
 package org.asf.cyan.api.modloader.information.providers;
 
+import org.asf.cyan.api.versioning.Version;
+
 public interface IVersionProvider extends IModloaderInfoProvider {
-	public String getModloaderVersion();
-	// TODO: change to version info, also add date and release date etc.
+	public Version getModloaderVersion();
 }

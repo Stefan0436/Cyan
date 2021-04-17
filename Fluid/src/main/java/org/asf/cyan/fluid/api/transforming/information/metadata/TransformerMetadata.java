@@ -13,13 +13,20 @@ import org.asf.cyan.api.reports.ReportCategory;
 import org.asf.cyan.api.reports.ReportNode;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.Transformer;
+import org.asf.cyan.fluid.Transformer.AnnotationInfo;
+import org.asf.cyan.fluid.Transformer.FluidMethodInfo;
+import org.asf.cyan.fluid.api.transforming.InjectAt;
+import org.asf.cyan.fluid.api.transforming.Reflect;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.enums.MemberType;
+import org.asf.cyan.fluid.bytecode.BytecodeExporter;
 import org.asf.cyan.fluid.bytecode.FluidClassPool;
 import org.asf.cyan.fluid.remapping.MAPTYPE;
 import org.asf.cyan.fluid.remapping.Mapping;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.LocalVariableNode;
+import org.objectweb.asm.tree.MethodNode;
 
 /**
  * 
@@ -40,44 +47,62 @@ public abstract class TransformerMetadata extends CyanComponent {
 	}
 
 	public abstract String getTransfomerOwner();
+
 	public abstract String getTransfomerClass();
+
 	public abstract String getTargetClass();
+
 	public abstract String getMappedTargetClass();
 
 	public abstract MemberMetadata[] getTransformedFields();
+
 	public abstract MemberMetadata[] getTransformedMethods();
 
 	protected abstract String getImplementationName();
+
 	protected abstract TransformerMetadata getNewInstance();
+
 	protected abstract void storeInstance(TransformerMetadata metadata);
+
 	protected abstract boolean validateNewInstane(TransformerMetadata metadata);
 
 	protected abstract TransformerMetadata[] internalGetLoadedTransformers();
+
 	protected abstract TransformerMetadata getMetadataByTransformer(String transformerName);
+
 	protected abstract TransformerMetadata[] getMetadataByObfusTarget(String targetObfus);
+
 	protected abstract TransformerMetadata[] getMetadataByDeobfTarget(String targetDeobf);
 
 	protected abstract String toDesc(String type, String[] types);
-	protected abstract MemberMetadata parseMethod(String owner, String transformerMemberName, String name, String[] types, String returnType, int oldModifier, int newModifier, boolean isNew);
-	protected abstract MemberMetadata parseField(String owner, String transformerMemberName, String name, String type, int oldModifier, int newModifier, boolean isNew);
+
+	protected abstract MemberMetadata parseMethod(String owner, String transformerMemberName, String name, String desc,
+			String[] types, String returnType, int oldModifier, int newModifier, boolean isNew);
+
+	protected abstract MemberMetadata parseField(String owner, String transformerMemberName, String name, String type,
+			int oldModifier, int newModifier, boolean isNew);
+
 	protected abstract void storeMember(MemberMetadata metadata);
-	
+
 	protected abstract String[] parseParams(String descriptor);
+
 	protected abstract String parseType(String descriptor);
 
 	protected abstract String mapClass(String className);
+
 	protected abstract String mapMethod(String className, String methodName, String[] types);
+
 	protected abstract String mapField(String className, String fieldName, String type);
 
 	protected abstract FluidClassPool getClassPool();
-	
+
 	protected abstract void assignTransformer(TransformerMetadata data, String transformerName, String owner,
 			String target, String mappedTarget, FluidClassPool pool);
 
 	/**
 	 * Should return the following: 0 = name, 1 = descriptor, 2 = owner, 3 =
-	 * internal member name, 4 = old modifier, 5 = new modifier, 6 = is new
-	 * (boolean).
+	 * internal member name and descriptor, 4 = old modifier, 5 = new modifier, 6 =
+	 * is new (boolean)
 	 */
 	protected abstract String[] parseIdentifier(String identifier, String owner);
 
@@ -123,6 +148,12 @@ public abstract class TransformerMetadata extends CyanComponent {
 			String desc = info[1];
 			String owner = info[2];
 			String memNameInternal = info[3];
+			String memDesc = "";
+			if (memNameInternal.contains("&")) {
+				memDesc = memNameInternal.substring(memNameInternal.indexOf("&") + 1);
+				memNameInternal = memNameInternal.substring(0, memNameInternal.indexOf("&"));
+			}
+
 			int oldModifier = Integer.parseInt(info[4]);
 			int newModifier = Integer.parseInt(info[5]);
 			boolean isNew = Boolean.parseBoolean(info[6]);
@@ -130,7 +161,7 @@ public abstract class TransformerMetadata extends CyanComponent {
 			String[] types = selectedImplementation.parseParams(desc);
 			String type = selectedImplementation.parseType(desc);
 
-			MemberMetadata member = data.parseMethod(owner, memNameInternal, name, types, type, oldModifier,
+			MemberMetadata member = data.parseMethod(owner, memNameInternal, name, memDesc, types, type, oldModifier,
 					newModifier, isNew);
 			data.storeMember(member);
 		}
@@ -285,8 +316,10 @@ public abstract class TransformerMetadata extends CyanComponent {
 		}
 
 		File classesDump = new File(output, "classes");
+		boolean classesNew = !classesDump.exists();
 		if (!classesDump.exists())
 			classesDump.mkdirs();
+
 		File metadataDump = new File(output, "metadata");
 		if (!metadataDump.exists())
 			metadataDump.mkdirs();
@@ -369,13 +402,75 @@ public abstract class TransformerMetadata extends CyanComponent {
 		}
 
 		dumpMappings(Fluid.getMappings(), output);
+		File readme = new File(classesDump, "README, VERY IMPORTANT.txt");
 
-		// TODO: dump all metadata in folder structure for backtrace.
-		// TODO: save classes to a folder for debugging (with readme stating: do not
-		// distribute)
-		//
-		// TODO: PseudoCode writing of both changed classes and transformers
-		// (transformers in single files, classes in folder structure)
+		StringBuilder readmeTxt = new StringBuilder();
+		readmeTxt.append("COPYTIGHT(c) AUTHORS OF PROGRAM AND AUTHORS OF TRANSFORMERS, DO NOT DISTRIBUTE!")
+				.append(System.lineSeparator());
+		readmeTxt.append("-------------------------------------------------------------------------------")
+				.append(System.lineSeparator());
+		readmeTxt.append("").append(System.lineSeparator());
+		readmeTxt.append("The PSEUDOCODE and BYTECODE files in this directory and sub-directories are not")
+				.append(System.lineSeparator());
+		readmeTxt.append("to be distributed, they have been exported directy from the FLUID class pools")
+				.append(System.lineSeparator());
+		readmeTxt.append("and may ONLY be used for debugging purposes.").append(System.lineSeparator());
+		readmeTxt.append("").append(System.lineSeparator());
+		readmeTxt.append("You have the permission to transfer a copy of the files to the author of the")
+				.append(System.lineSeparator());
+		readmeTxt.append("transformers so they can fix the crash, the files may not be used for anything")
+				.append(System.lineSeparator());
+		readmeTxt.append("other than debugging purposes and must be destroyed afterwards.")
+				.append(System.lineSeparator());
+
+		Files.writeString(readme.toPath(), readmeTxt.toString());
+		if (classesNew) {
+			info("Dumping transformer classes...");
+			for (TransformerMetadata md : getLoadedTransformers()) {
+				try {
+					File trPseudoCode = new File(classesDumpTransformersPC,
+							md.getTransfomerOwner().replace(":", ".") + "/" + md.getTransfomerClass() + ".pc.java");
+					File trClassFile = new File(classesDumpTransformersBIN, md.getTransfomerOwner().replace(":", ".")
+							+ "/" + md.getTransfomerClass().replace(".", "/") + ".class");
+
+					if (!trPseudoCode.exists()) {
+						trPseudoCode.getParentFile().mkdirs();
+						trClassFile.getParentFile().mkdirs();
+						debug("Dumping transformer " + md.getTransfomerClass() + " PseudoCode...");
+						Files.write(trPseudoCode.toPath(),
+								BytecodeExporter.classToString(pool.getClassNode(md.getTransfomerClass())).getBytes());
+
+						debug("Dumping transformer " + md.getTransfomerClass() + " bytecode class file...");
+						Files.write(trClassFile.toPath(), pool.getByteCode(md.getTransfomerClass()));
+					}
+				} catch (ClassNotFoundException | IOException e) {
+					error("Transformer class dump failed, transformer: " + md.getTransfomerClass(), e);
+				}
+			}
+
+			info("Dumping program class files...");
+			for (TransformerMetadata md : getLoadedTransformers()) {
+				try {
+					File clPseudoCode = new File(classesDumpProgramPC,
+							md.getTargetClass().replace(".", "/") + ".pc.java");
+					File clClassFile = new File(classesDumpProgramBIN,
+							md.getTargetClass().replace(".", "/") + ".class");
+
+					if (!clPseudoCode.exists()) {
+						clPseudoCode.getParentFile().mkdirs();
+						clClassFile.getParentFile().mkdirs();
+						debug("Dumping class " + md.getTargetClass() + " PseudoCode...");
+						Files.write(clPseudoCode.toPath(),
+								BytecodeExporter.classToString(pool.getClassNode(md.getTargetClass())).getBytes());
+
+						debug("Dumping class " + md.getTargetClass() + " bytecode class file...");
+						Files.write(clClassFile.toPath(), pool.getByteCode(md.getTargetClass()));
+					}
+				} catch (ClassNotFoundException | IOException e) {
+					error("Transformer class dump failed, transformer: " + md.getTargetClass(), e);
+				}
+			}
+		}
 	}
 
 	protected synchronized void dumpMappings(Mapping<?>[] mappings, File outputDir) throws IOException {
@@ -493,8 +588,10 @@ public abstract class TransformerMetadata extends CyanComponent {
 		}
 	}
 
-	protected synchronized void dumpMetadata(TransformerMetadata metadata, File output) throws IOException, ClassNotFoundException {
-		File transformerDir = new File(output, metadata.getTransfomerOwner() + "/" + metadata.getTransfomerClass());
+	protected synchronized void dumpMetadata(TransformerMetadata metadata, File output)
+			throws IOException, ClassNotFoundException {
+		File transformerDir = new File(output,
+				metadata.getTransfomerOwner().replace(":", ".") + "/" + metadata.getTransfomerClass());
 		if (!transformerDir.exists())
 			transformerDir.mkdirs();
 
@@ -542,13 +639,13 @@ public abstract class TransformerMetadata extends CyanComponent {
 			FieldNode trFieldNode = transformer.fields.stream()
 					.filter(t -> t.name.equals(fieldData.getTransformerMemberName())).findFirst().get();
 
-			String transformMethod = "reference (transformer usage)";
+			String transformMethod = "reflecting field (in-transformer usage)";
 			if (!fieldModOld.equals(fieldModNew)) {
-				transformMethod = "access transforming";
+				transformMethod = "access transformer (changes field access)";
 			}
 
 			if (fieldData.isNew()) {
-				transformMethod = "append (new field)";
+				transformMethod = "appending field (new field)";
 			}
 
 			ReportCategory basicInfo = builder.newCategory("Basic information");
@@ -572,16 +669,118 @@ public abstract class TransformerMetadata extends CyanComponent {
 	}
 
 	protected void dumpTransformerMethodInfo(TransformerMetadata metadata, File output, ClassNode transformer,
-			ClassNode targetClass) {
+			ClassNode targetClass) throws IOException {
 		if (output.exists())
 			return;
 
 		debug("Dumping transformer method metadata... Transformer: " + metadata.getTransfomerClass());
 		output.mkdirs();
 
-		// TODO: most of the field metadata,
-		// TODO: also include: inject location, offset, target call (and owner, if
-		// present) and finally, instruction count
+		for (MemberMetadata methodData : metadata.getTransformedMethods()) {
+			File methodOutput = new File(output, methodData.getTransformerMemberName() + ".tmd.txt");
+			ReportBuilder builder = ReportBuilder.create("Tansformer Metadata Format 1.0,\n"
+					+ "the following details are for a method named " + methodData.getTransformerMemberName() + ".");
+
+			String mthModOld = Modifier.toString(methodData.getOldModifier()).replaceAll(" ", ", ");
+			String mthModNew = Modifier.toString(methodData.getNewModifier()).replaceAll(" ", ", ");
+
+			MethodNode trMthNode = transformer.methods.stream()
+					.filter(t -> t.name.equals(methodData.getTransformerMemberName())
+							&& t.desc.equals(methodData.toTransformerDescriptor()))
+					.findFirst().get();
+
+			String transformMethod = "unrecognized";
+			if (methodData.isNew()) {
+				transformMethod = "appending method (new method)";
+			} else if (AnnotationInfo.isAnnotationPresent(InjectAt.class, trMthNode)) {
+				transformMethod = "injecting method (modifies methods)";
+			} else if (AnnotationInfo.isAnnotationPresent(Reflect.class, trMthNode)
+					|| (Modifier.isAbstract(trMthNode.access) && !Modifier.isInterface(transformer.access))) {
+				transformMethod = "reflecting method (in-transformer usage)";
+			} else if (mthModOld.equals(mthModNew)) {
+				transformMethod = "access transformer (changes method access)";
+			}
+
+			ReportCategory basicInfo = builder.newCategory("Basic information");
+			ReportNode details = builder.newNode(basicInfo, "Details").addAll("Method name",
+					methodData.getTransformerMemberName(), "In-transformer modifiers",
+					Modifier.toString(trMthNode.access).replaceAll(" ", ", "), "Transform method", transformMethod,
+					"Transformer return type", methodData.getType());
+
+			FluidMethodInfo mInfo = FluidMethodInfo.create(trMthNode);
+
+			if (AnnotationInfo.isAnnotationPresent(InjectAt.class, trMthNode)) {
+				ReportNode target = builder.newNode(basicInfo, "Inject target metadata");
+
+				AnnotationInfo info = AnnotationInfo.getAnnotation(InjectAt.class, trMthNode);
+				target.add("Inject location", info.values.get("location"));
+
+				if (info.values.containsKey("targetCall")) {
+					target.add("Target call", info.values.get("targetCall"));
+				}
+				if (info.values.containsKey("targetOwner")) {
+					target.add("Target owner", info.values.get("targetOwner"));
+				}
+
+				if (info.values.containsKey("offset")) {
+					target.add("Inject offset", info.values.get("offset"));
+				}
+			}
+
+			details.add("Parameter count", mInfo.types.length);
+
+			if (mInfo.types.length != 0) {
+				ReportNode params = builder.newNode(basicInfo, "Transformer parameters");
+
+				int offset = (Modifier.isStatic(trMthNode.access) ? 0 : 1);
+				for (int i = 0; i < mInfo.types.length; i++) {
+					String type = mInfo.types[i];
+					String name = "var" + i;
+					if (trMthNode.localVariables != null && trMthNode.localVariables.size() > (offset + i)) {
+						name = trMthNode.localVariables.get(offset + i).name;
+					}
+
+					for (AnnotationInfo anno : FluidMethodInfo.getParameterAnnotations(trMthNode, i)) {
+						if (anno.name.equals("org.asf.cyan.fluid.api.transforming.LocalVariable")) {
+							name += " (local variable reference)";
+						}
+					}
+
+					params.add(name, type);
+				}
+			}
+			if (trMthNode.localVariables != null && trMthNode.localVariables.size() != 0) {
+				details.add("Local variable count", trMthNode.localVariables.size());
+
+				ReportNode vars = builder.newNode(basicInfo, "Transformer local variables");
+				int index = 0;
+				int offset = (Modifier.isStatic(trMthNode.access) ? 0 : 1);
+				for (LocalVariableNode var : trMthNode.localVariables) {
+					if ((offset + mInfo.types.length) <= index) {
+						String type = Fluid.parseDescriptor(var.desc);
+						vars.add(var.name, "type: " + type + ", index: " + var.index);
+					}
+					index++;
+				}
+			}
+
+			if (trMthNode.instructions != null && !Modifier.isAbstract(trMthNode.access)) {
+				details.add("Instruction count", trMthNode.instructions.size());
+			}
+
+			ReportNode nd = builder.newNode(basicInfo, "Target information").addAll("Target name", methodData.getName(),
+					"Target type", methodData.getType(), "Target name (mapped)", methodData.getMappedName(),
+					"Target type (mapped)", methodData.getMappedType(), "Target descriptor", methodData.toDescriptor(),
+					"Target descriptor (mapped)", methodData.toMappedDescriptor(), "Target modifiers", mthModOld);
+
+			if (!mthModOld.equals(mthModNew)) {
+				nd.add("New target modifiers", mthModNew);
+			}
+
+			StringBuilder strBuilder = new StringBuilder();
+			builder.build(strBuilder);
+			Files.writeString(methodOutput.toPath(), strBuilder.toString());
+		}
 
 		debug("Dumped transformer metadata.");
 	}
@@ -693,9 +892,10 @@ public abstract class TransformerMetadata extends CyanComponent {
 	}
 
 	protected MemberMetadata assignMetadataValues(MemberMetadata data, MemberType memberType, String owner,
-			String transformerMemberName, String name, String type, String[] params, int oldModifier, int newModifier,
-			boolean isNew) {
-		data.assign(memberType, transformerMemberName, owner, name, type, params, oldModifier, newModifier, isNew);
+			String transformerMemberName, String name, String desc, String type, String[] params, int oldModifier,
+			int newModifier, boolean isNew) {
+		data.assign(memberType, transformerMemberName, owner, name, desc, type, params, oldModifier, newModifier,
+				isNew);
 		return data;
 	}
 }

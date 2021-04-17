@@ -12,6 +12,8 @@ public class MemberMetadata {
 	private String name;
 	private String type;
 	private String[] types;
+	
+	private String desc;
 
 	private String obfusName;
 	private String obfusType;
@@ -22,7 +24,7 @@ public class MemberMetadata {
 	private int oldMod = -1;
 	private int newMod = -1;
 
-	void assign(MemberType meberType, String transformerMemberName, String ownerDeobf, String name, String type, String[] types, int oldMod, int newMod, boolean appended) {
+	void assign(MemberType meberType, String transformerMemberName, String ownerDeobf, String name, String desc, String type, String[] types, int oldMod, int newMod, boolean appended) {
 		this.name = name;
 		this.type = type;
 		this.types = types;
@@ -31,6 +33,7 @@ public class MemberMetadata {
 		this.oldMod = oldMod;
 		this.newMod = newMod;
 		this.appended = appended;
+		this.desc = desc;
 		
 		if (memType == MemberType.METHOD) {
 			obfusName = TransformerMetadata.getImplmentationInstance().mapMethod(ownerDeobf, name, types);
@@ -103,5 +106,9 @@ public class MemberMetadata {
 		} else {
 			return TransformerMetadata.toDescriptor(obfusType, null);
 		}
+	}
+
+	public String toTransformerDescriptor() {
+		return desc;
 	}
 }

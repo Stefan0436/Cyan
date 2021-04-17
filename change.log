@@ -27,7 +27,7 @@ Upcoming Cyan Update: Alpha 11, changes:
  - Paper Support (CyanLoader 03/16/2021, CyanWrapper A5, MTK A14)
  - Added the SimpleMappings class for FLUID (FLUID A15)
  - Fixed FLUID local variable indexes (FLUID A15)
- - Transformer backtrace on crash, also saves modifications made to .cyan-data/transformer-backtrace/classes (FLUID A19) -- TODO
+ - Transformer backtrace on crash, also saves modifications made to .cyan-data/transformer-backtrace/classes (FLUID A19)
  - Implemented lambda support (FLUID A15)
  - Created a FLUID transformer metadata API (FLUID A15, the crash report uses this)
  - Implemented IINC support (and fixed arrays by doing so) (FLUID A15)
@@ -51,3 +51,5 @@ Upcoming Cyan Update: Alpha 11, changes:
  - Cyan Modfile Manifest Generation (Cornflower A29)
  - Cyan Mod File Archive Task (Cornflower A29)
  - Implemented maven dependencies (CyanLoader 04/16/2021, Cornflower A29)
+ - Mod Threads API (CyanModding 1.0.0.A11) -- TODO
+ 

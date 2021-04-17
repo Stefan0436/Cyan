@@ -4,13 +4,13 @@ import org.asf.cyan.api.modloader.information.providers.IVersionProvider;
 
 public class StringVersionProvider implements IVersionProvider {
 
-	private String version;
+	private Version version;
 	public StringVersionProvider(String version) {
-		this.version = version;
+		this.version = Version.fromString(version);
 	}
 	
  	@Override
-	public String getModloaderVersion() {
+	public Version getModloaderVersion() {
 		return version;
 	}
 

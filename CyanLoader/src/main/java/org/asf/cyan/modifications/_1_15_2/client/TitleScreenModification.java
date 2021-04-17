@@ -50,7 +50,6 @@ public class TitleScreenModification {
 
 		drawString(var1, font, modloaderStr, 2, height - 10, 16777215 | var10);
 		height = height - 10;
-		// throw new RuntimeException("test");
 	}
 	
 	@InjectAt(location = InjectLocation.TAIL, targetCall = "drawString(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.gui.Font, java.lang.String, int, int, int)")

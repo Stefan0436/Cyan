@@ -22,6 +22,7 @@ import org.asf.cyan.api.modloader.information.providers.IPhaseProvider;
 import org.asf.cyan.api.modloader.information.providers.IVersionProvider;
 import org.asf.cyan.api.modloader.information.providers.IVersionChangelogProvider;
 import org.asf.cyan.api.modloader.information.providers.IVersionStatusProvider;
+import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.api.versioning.VersionStatus;
 
 /**
@@ -134,7 +135,7 @@ public abstract class Modloader extends CyanComponent {
 	/**
 	 * Retrieves the version of the modlaoder.
 	 */
-	public static String getModloaderVersion() {
+	public static Version getModloaderVersion() {
 		return selectedImplementation.getVersion();
 	}
 
@@ -463,7 +464,7 @@ public abstract class Modloader extends CyanComponent {
 	/**
 	 * Retrieves the version of the modloader. (if present)
 	 */
-	public String getVersion() {
+	public Version getVersion() {
 		if (versionProvider == null && !noVersionProvider) {
 			for (IModloaderInfoProvider info : informationProviders) {
 				if (info instanceof IVersionProvider) {
@@ -476,7 +477,7 @@ public abstract class Modloader extends CyanComponent {
 			return versionProvider.getModloaderVersion();
 		}
 
-		return "";
+		return null;
 	}
 
 	/**
@@ -701,7 +702,7 @@ public abstract class Modloader extends CyanComponent {
 		if (tsCache != null)
 			return tsCache;
 
-		tsCache = getName() + (getVersion().isEmpty() ? "" : " " + getVersion());
+		tsCache = getName() + (getVersion() == null ? "" : " " + getVersion());
 		return tsCache;
 	}
 

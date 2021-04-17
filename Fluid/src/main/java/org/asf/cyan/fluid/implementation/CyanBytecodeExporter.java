@@ -156,23 +156,27 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 			value = "var: var" + ((IincInsnNode) insn).var + ", value: " + ((IincInsnNode) insn).incr;
 			break;
 		case "IntInsnNode":
-			IntInsnNode inode = (IntInsnNode)insn;
+			IntInsnNode inode = (IntInsnNode) insn;
 			value = "operand: " + inode.operand;
 			break;
 		case "InvokeDynamicInsnNode":
-			InvokeDynamicInsnNode dnode = (InvokeDynamicInsnNode)insn;			
+			InvokeDynamicInsnNode dnode = (InvokeDynamicInsnNode) insn;
 			String bsmArgs = "";
 			for (Object bsmArg : dnode.bsmArgs) {
 				if (!bsmArgs.isEmpty())
 					bsmArgs += ", ";
-				if (bsmArg instanceof Handle) {					
-					bsmArgs += "[ desc: \""+((Handle)bsmArg).getDesc()+"\", tag: "+((Handle)bsmArg).getTag()+", owner: \""+((Handle)bsmArg).getOwner()+"\", name: \""+((Handle)bsmArg).getName()+"\" ]";
+				if (bsmArg instanceof Handle) {
+					bsmArgs += "[ desc: \"" + ((Handle) bsmArg).getDesc() + "\", tag: " + ((Handle) bsmArg).getTag()
+							+ ", owner: \"" + ((Handle) bsmArg).getOwner() + "\", name: \""
+							+ ((Handle) bsmArg).getName() + "\" ]";
 				} else if (bsmArg instanceof Type) {
-					Type bArgType = (Type)bsmArg;
-					bsmArgs += "\""+bArgType.getDescriptor()+"\"";
+					Type bArgType = (Type) bsmArg;
+					bsmArgs += "\"" + bArgType.getDescriptor() + "\"";
 				}
 			}
-			value = "call: \""+dnode.name+"\", desc: \""+dnode.desc+"\", bsm: [ desc: \""+dnode.bsm.getDesc()+"\", tag: "+dnode.bsm.getTag()+", owner: \""+dnode.bsm.getOwner()+"\", name: \""+dnode.bsm.getName()+"\" ], bsmArgs: [ "+ bsmArgs + "]";
+			value = "call: \"" + dnode.name + "\", desc: \"" + dnode.desc + "\", bsm: [ desc: \"" + dnode.bsm.getDesc()
+					+ "\", tag: " + dnode.bsm.getTag() + ", owner: \"" + dnode.bsm.getOwner() + "\", name: \""
+					+ dnode.bsm.getName() + "\" ], bsmArgs: [ " + bsmArgs + "]";
 			break;
 		case "FrameNode":
 			type = "FrameNode";
@@ -186,11 +190,20 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 				for (Object item : fnode.stack) {
 					if (!first)
 						stack += ", ";
-					
+
 					first = false;
-					
+
 					if (item instanceof String) {
 						stack += "\"" + item + "\"";
+					} else if (item instanceof LabelNode) {
+						LabelNode label = (LabelNode) item;
+						String label_value = "";
+						if (label.getNext() instanceof TypeInsnNode) {
+							label_value = ((TypeInsnNode) label.getNext()).desc.replace("/", ".");
+						}
+
+						stack += "\"" + getOpcodeName(label.getOpcode(), OpcodeUseCase.ASM_STACKMAP) + " " + label_value
+								+ "\"";
 					} else {
 						stack += "\"" + getOpcodeName((Integer) item, OpcodeUseCase.STACK_FRAME) + "\"";
 					}
@@ -205,9 +218,9 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 				for (Object item : fnode.local) {
 					if (!first)
 						local += ", ";
-					
+
 					first = false;
-					
+
 					if (item instanceof String) {
 						local += "\"" + item + "\"";
 					} else {
@@ -366,7 +379,7 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 
 			result.append("\n\t");
 			result.append("// Method descriptor: " + meth.name + meth.toDescriptor());
-		} else 
+		} else
 			result.append(";");
 
 		return result.toString();
@@ -454,21 +467,20 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 		} else if (value instanceof Enum) {
 			return param + ": " + value.getClass().getTypeName() + "." + ((Enum<?>) value).name();
 		} else if (value instanceof UnrecognizedEnumInfo) {
-			return ((UnrecognizedEnumInfo)value).getType() + "." + ((UnrecognizedEnumInfo)value).getName();
+			return ((UnrecognizedEnumInfo) value).getType() + "." + ((UnrecognizedEnumInfo) value).getName();
 		} else if (value instanceof Integer || value instanceof Boolean) {
 			return param + ": " + value.toString();
 		} else if (value instanceof List) {
 			String strs = "";
-			for (Object obj : (List<?>)value) {
+			for (Object obj : (List<?>) value) {
 				if (!strs.isEmpty())
 					strs += ", ";
-				
+
 				strs += parseParam("dummy", obj).substring("dummy: ".length());
 			}
 			return param + ": [ " + strs + " ]";
 		} else {
-			return param + ": " + value.toString()
-					+ value.getClass().getSimpleName().substring(0, 1).toLowerCase();
+			return param + ": " + value.toString() + value.getClass().getSimpleName().substring(0, 1).toLowerCase();
 		}
 	}
 

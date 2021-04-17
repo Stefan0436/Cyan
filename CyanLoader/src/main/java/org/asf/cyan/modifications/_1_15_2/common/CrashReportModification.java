@@ -131,11 +131,12 @@ public class CrashReportModification {
 
 			modloaders += modloader.getSimpleName();
 			loaderversions += modloader.getName() + "; "
-					+ (modloader.getVersion().isEmpty() ? "Generic" : modloader.getVersion());
+					+ (modloader.getVersion() == null ? "Generic" : modloader.getVersion());
 		}
 
 		systemDetails.setDetail("Running Modloader(s)", modloaders);
 		systemDetails.setDetail("Modloader Version(s)", loaderversions);
+		systemDetails.setDetail("Modloader Phase", Modloader.getModloader().getPhase());
 		systemDetails.setDetail("Loaded " + Modloader.getModloader().getSimpleName().toUpperCase() + " Mods",
 				Modloader.getModloader().getLoadedMods().length);
 		systemDetails.setDetail("Loaded " + Modloader.getModloader().getSimpleName().toUpperCase() + " Coremods",

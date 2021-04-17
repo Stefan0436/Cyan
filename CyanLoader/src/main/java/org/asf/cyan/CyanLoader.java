@@ -80,12 +80,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 		mavenRepositories.put("Maven Central", "https://repo1.maven.org/maven2");
 	}
 
-	// TODO: crash-report modification with FLUID support, also state what CYAN
-	// threads are running and which have been suspended or unresponsive, list all
-	// coremods and then mods (TODO: mods and mod threads)
-	// TODO: Per-version modifications
-	// TODO: RifterToolkit
-	// TODO: Coremod loading
+	// TODO: Mod thread manager
 
 	private HashMap<String, String> mavenRepositories = new HashMap<String, String>();
 	private HashMap<String, Version> coremodMavenDependencies = new HashMap<String, Version>();
@@ -1033,8 +1028,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 								&& !getModloaderGameVersion().matches(cls.getAnnotation(VersionRegex.class).value())) {
 							continue;
 						} else if (cls.isAnnotationPresent(VersionRegex.class)
-								&& cls.getAnnotation(VersionRegex.class).modloaderVersion()
-								&& !getModloaderVersion().matches(cls.getAnnotation(VersionRegex.class).value())) {
+								&& cls.getAnnotation(VersionRegex.class).modloaderVersion() && !getModloaderVersion()
+										.toString().matches(cls.getAnnotation(VersionRegex.class).value())) {
 							continue;
 						}
 
@@ -1055,8 +1050,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 								&& !getModloaderGameVersion().matches(hook.getAnnotation(VersionRegex.class).value())) {
 							continue;
 						} else if (hook.isAnnotationPresent(VersionRegex.class)
-								&& hook.getAnnotation(VersionRegex.class).modloaderVersion()
-								&& !getModloaderVersion().matches(hook.getAnnotation(VersionRegex.class).value())) {
+								&& hook.getAnnotation(VersionRegex.class).modloaderVersion() && !getModloaderVersion()
+										.toString().matches(hook.getAnnotation(VersionRegex.class).value())) {
 							continue;
 						}
 
@@ -1160,7 +1155,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 								continue;
 							} else if (cls.isAnnotationPresent(VersionRegex.class)
 									&& cls.getAnnotation(VersionRegex.class).modloaderVersion()
-									&& !getModloaderVersion().matches(cls.getAnnotation(VersionRegex.class).value())) {
+									&& !getModloaderVersion().toString()
+											.matches(cls.getAnnotation(VersionRegex.class).value())) {
 								continue;
 							}
 
@@ -1186,7 +1182,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 							continue;
 						} else if (transformer.isAnnotationPresent(VersionRegex.class)
 								&& transformer.getAnnotation(VersionRegex.class).modloaderVersion()
-								&& !getModloaderVersion()
+								&& !getModloaderVersion().toString()
 										.matches(transformer.getAnnotation(VersionRegex.class).value())) {
 							continue;
 						}

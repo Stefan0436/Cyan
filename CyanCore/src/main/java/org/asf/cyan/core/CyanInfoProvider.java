@@ -9,10 +9,13 @@ import org.asf.cyan.api.modloader.information.providers.IVersionProvider;
 import org.asf.cyan.api.modloader.information.providers.IPhaseProvider;
 import org.asf.cyan.api.modloader.information.providers.IVersionChangelogProvider;
 import org.asf.cyan.api.modloader.information.providers.IVersionStatusProvider;
+import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.api.versioning.VersionStatus;
 
 public class CyanInfoProvider implements IVersionProvider, IVersionStatusProvider, IVersionChangelogProvider,
 		IGameProvider, ILaunchPlatformProvider, IPhaseProvider {
+
+	private Version ver = null;
 
 	@Override
 	public LoadPhase getPhase() {
@@ -50,8 +53,10 @@ public class CyanInfoProvider implements IVersionProvider, IVersionStatusProvide
 	}
 
 	@Override
-	public String getModloaderVersion() {
-		return CyanInfo.getCyanVersion();
+	public Version getModloaderVersion() {
+		if (ver == null)
+			ver = Version.fromString(CyanInfo.getCyanVersion());
+		return ver;
 	}
 
 	@Override

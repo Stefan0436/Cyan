@@ -487,6 +487,9 @@ public class CyanCore extends CyanComponent {
 		else
 			FluidAgent.initialize();
 
+		// TODO: move to game modification
+		Modloader.getModloader().dispatchEvent("mods.preinit");
+
 		Thread.currentThread().setContextClassLoader(loader);
 		info("Loading CYAN information container...");
 		CyanInfo.getDevStartDate();
@@ -511,8 +514,8 @@ public class CyanCore extends CyanComponent {
 				+ (loaderStr.isEmpty() ? "" : "-" + loaderStr.toLowerCase()) + "-cyan-" + CyanInfo.getCyanVersion());
 		info("");
 
-		setPhase(LoadPhase.INIT);
-		// TODO: Initialize mods and check dependencies etc
+		// TODO: move to game modification
+		Modloader.getModloader().dispatchEvent("mods.init");
 
 		debug("Securing mod classloader...");
 		openloader.secure();
@@ -520,22 +523,31 @@ public class CyanCore extends CyanComponent {
 		info("Loading class " + game + "...");
 		Class<?> clas = loader.loadClass(game);
 
+		// TODO: move to game modification
 		setPhase(LoadPhase.POSTINIT);
-		// TODO: Post-initialize mods
+		Modloader.getModloader().dispatchEvent("mods.postinit");
 
 		Method meth = clas.getMethod("main", String[].class);
 		Modloader.getModloader().dispatchEvent("game.beforestart", new Object[] { game, args });
 
 		info("Starting minecraft...");
-		setPhase(LoadPhase.RUNTIME);
-
 		meth.invoke(null, new Object[] { args });
 	}
 
 	private static GameSide side = null;
 	private static LoadPhase loadPhase = LoadPhase.NOT_READY;
 
-	private static void setPhase(LoadPhase phase) {
+	/**
+	 * Sets the current loading phase (internal use only, avoid usage, ignores if
+	 * past runtime)
+	 * 
+	 * @param phase Current phase
+	 */
+	public static void setPhase(LoadPhase phase) {
+		if (loadPhase == LoadPhase.RUNTIME) {
+			return;
+		}
+
 		loadPhase = phase;
 		if (Modloader.getModloader() != null)
 			Modloader.getModloader().dispatchEvent("phase.changed", phase);

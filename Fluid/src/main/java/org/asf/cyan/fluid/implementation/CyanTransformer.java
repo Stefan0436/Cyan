@@ -222,8 +222,8 @@ public class CyanTransformer extends Transformer {
 					throw new RuntimeException("Unable to apply access transformer (interface): " + typeName
 							+ ", could not apply method: " + method.name + ", its counterpart could not be found.");
 
-				transformedMethods.add(info.name + " " + info.toDescriptor() + " " + clName + " " + method.name + " "
-						+ oldMod + " " + newMod);
+				transformedMethods.add(info.name + " " + info.toDescriptor() + " " + clName + " " + method.name + "&"
+						+ method.desc + " " + oldMod + " " + newMod);
 			}
 			cls.interfaces.add(transformerNode.name);
 		} else {
@@ -804,7 +804,7 @@ public class CyanTransformer extends Transformer {
 					ninfo.remap(clName, transformerNode, ninfo, false, pool);
 
 					transformedMethods.add(ninfo.name + " " + ninfo.toDescriptor() + " " + clName + " " + meth.name
-							+ " " + oldMod + " " + newMod);
+							+ "&" + meth.desc + " " + oldMod + " " + newMod);
 				} else {
 					if (meth.name.equals("<init>"))
 						continue;
@@ -845,7 +845,7 @@ public class CyanTransformer extends Transformer {
 
 					debug("Created method " + ninfo.name);
 					transformedMethods.add(ninfo.name + " " + ninfo.toDescriptor() + " " + clName + " " + meth.name
-							+ " " + oldMod + " " + newMod + " true");
+							+ "&" + meth.desc + " " + oldMod + " " + newMod + " true");
 				}
 			}
 
@@ -999,11 +999,6 @@ public class CyanTransformer extends Transformer {
 		transformers.put(loadingName, arr);
 	}
 
-	//
-	//
-	// Field getters
-	//
-
 	@Override
 	protected boolean checkField(String fname, FluidClassPool pool, ClassNode cls) {
 		if (cls.fields.stream().anyMatch(t -> t.name.equals(fname)))
@@ -1019,6 +1014,11 @@ public class CyanTransformer extends Transformer {
 
 		return false;
 	}
+
+	//
+	//
+	// Field getters
+	//
 
 	@Override
 	protected FieldNode getField(String fname, FluidClassPool pool, ClassNode cls) {
