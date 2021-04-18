@@ -95,9 +95,9 @@ public class CqMain {
 								error();
 							}
 							key = "";
-							option = false;
-							continue;
 						}
+						option = false;
+						continue;
 					}
 				}
 
