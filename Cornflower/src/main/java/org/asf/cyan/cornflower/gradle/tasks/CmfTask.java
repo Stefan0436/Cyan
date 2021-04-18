@@ -67,18 +67,20 @@ public class CmfTask extends Zip implements ITaskExtender {
 
 				@Override
 				public Object call(Object... args) {
-					Configuration<?> manifest = CmfTask.this.manifest.call();
-					if (manifest instanceof IModManifest) {
-						((IModManifest) manifest).getJars().forEach((source, dest) -> {
-							if (dest.endsWith(source.getName()))
-								dest = dest.substring(0, dest.length() - source.getName().length());
+					if (CmfTask.this.manifest != null) {
+						Configuration<?> manifest = CmfTask.this.manifest.call();
+						if (manifest instanceof IModManifest) {
+							((IModManifest) manifest).getJars().forEach((source, dest) -> {
+								if (dest.endsWith(source.getName()))
+									dest = dest.substring(0, dest.length() - source.getName().length());
 
-							CopySpecInternal spec = (CopySpecInternal) getRootSpec().addFirst().into(dest);
-							spec.addChild().from(source);
-						});
+								CopySpecInternal spec = (CopySpecInternal) getRootSpec().addFirst().into(dest);
+								spec.addChild().from(source);
+							});
+						}
+
+						manifestConfig = manifest;
 					}
-
-					manifestConfig = manifest;
 					return task;
 				}
 
@@ -90,10 +92,12 @@ public class CmfTask extends Zip implements ITaskExtender {
 
 				@Override
 				public Object call(Object... args) {
-					try {
-						Files.write(manifestTmp.toPath(), manifestConfig.toString().getBytes());
-					} catch (IOException e) {
-						throw new RuntimeException(e);
+					if (CmfTask.this.manifest != null) {
+						try {
+							Files.write(manifestTmp.toPath(), manifestConfig.toString().getBytes());
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
 					}
 					return task;
 				}
