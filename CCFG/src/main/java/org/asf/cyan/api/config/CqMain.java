@@ -3,6 +3,7 @@ package org.asf.cyan.api.config;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -13,6 +14,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.stream.Stream;
+
+import org.asf.cyan.api.config.serializing.ObjectSerializer;
 
 /**
  * 
@@ -38,6 +42,10 @@ public class CqMain {
 			boolean view = false;
 			String output = "-";
 
+			String setKey = null;
+			String setVal = null;
+
+			boolean outputCCFG = false;
 			boolean noparse = false;
 			boolean option = false;
 			String key = "";
@@ -49,7 +57,8 @@ public class CqMain {
 					if (!option) {
 						if (arg.startsWith("--") && !arg.equals("--")) {
 							key = arg.substring(2);
-							if (!key.equals("raw") && !key.equals("viewmode")) {
+							if (!key.equals("raw") && !key.equals("viewmode") && !key.equals("ccfg-output")
+									&& !key.equals("ccfg")) {
 								option = true;
 								continue;
 							} else {
@@ -59,18 +68,38 @@ public class CqMain {
 								} else if (key.equals("viewmode")) {
 									view = true;
 									continue;
+								} else if (key.equals("ccfg-output")) {
+									outputCCFG = true;
+									continue;
+								} else if (key.equals("ccfg")) {
+									outputCCFG = true;
+									continue;
 								}
 							}
 						} else if (arg.equals("--")) {
 							noparse = true;
+						} else if (arg.equals("-s")) {
+							option = true;
+							key = "set";
+							continue;
 						}
 					} else {
 						if (key.equals("output")) {
 							output = arg;
 						} else if (key.equals("source-jar")) {
 							urls.add(new File(arg).toURI().toURL());
+						} else if (key.equals("set")) {
+							if (i + 1 < args.length) {
+								setKey = arg;
+								setVal = args[i + 1];
+								i++;
+							} else {
+								error();
+							}
+							key = "";
+							option = false;
+							continue;
 						}
-						continue;
 					}
 				}
 
@@ -136,60 +165,10 @@ public class CqMain {
 			Object arr = null;
 			Map<?, ?> mp = null;
 
-			String entryPrefix = "";
-			ArrayList<String> pathEntries = new ArrayList<String>();
-			if (getSelf) {
-				pathEntries.add("");
-			} else {
-				boolean escape = false;
-				boolean quote = false;
-
-				StringBuilder buffer = new StringBuilder();
-				for (char ch : path.toCharArray()) {
-					if (!escape) {
-						if (ch == '\\') {
-							escape = true;
-							continue;
-						} else if (ch == '\"') {
-							quote = !quote;
-							continue;
-						}
-
-						if (!quote) {
-							if (ch == '.') {
-								pathEntries.add(buffer.toString());
-								buffer = new StringBuilder();
-							} else {
-								buffer.append(ch);
-							}
-						} else {
-							buffer.append(ch);
-						}
-					} else {
-						buffer.append(ch);
-						escape = false;
-					}
-				}
-
-				if (!buffer.toString().isEmpty()) {
-					pathEntries.add(buffer.toString());
-				}
-			}
-
+			ArrayList<String> pathEntries = parsePath(path, getSelf);
 			int index = 0;
 			int length = pathEntries.size();
 			for (String pathEntry : pathEntries) {
-				if (pathEntry.endsWith("\\")) {
-					entryPrefix += pathEntry.substring(0, pathEntry.length() - 1) + ".";
-					length--;
-					continue;
-				} else if (pathEntry.startsWith("\"")) {
-
-				}
-
-				pathEntry = entryPrefix + pathEntry;
-				entryPrefix = "";
-
 				if (index + 1 == length) {
 					Object value;
 					if (array) {
@@ -207,7 +186,73 @@ public class CqMain {
 							value = mp.get(pathEntry);
 						}
 					}
-					String outputTxt = serialize(value, raw, 0, view);
+
+					if (setKey != null) {
+						boolean setSelf = false;
+						if (setKey.equals("."))
+							setSelf = true;
+
+						if (setKey.startsWith("."))
+							setKey = setKey.substring(1);
+						ArrayList<String> setPath = parsePath(setKey, setSelf);
+
+						Object setting = value;
+						if (setting instanceof Map<?, ?> || value instanceof Configuration<?>) {
+							int ind = 0;
+							for (String pth : setPath) {
+								if (setting instanceof Map<?, ?>) {
+									if (!((Map) setting).containsKey(pth) || ind + 1 == setPath.size()) {
+										String targetKey = pth;
+										if (ind != setPath.size()) {
+											for (int i = ind + 1; i < setPath.size(); i++) {
+												targetKey += "." + setPath.get(i);
+											}
+										}
+
+										Class<?> type = String.class;
+										if (((Map) setting).containsKey(pth)) {
+											type = ((Map) setting).get(pth).getClass();
+										}
+
+										if (type.getTypeName().equals(String.class.getTypeName()))
+											((Map) setting).put(targetKey, setVal);
+										else
+											((Map) setting).put(targetKey, ObjectSerializer.deserialize(setVal, type));
+
+										break;
+									} else {
+										setting = ((Map) setting).get(pth);
+									}
+								} else if (setting instanceof Configuration<?>) {
+									if (ind + 1 == setPath.size()) {
+										Field f = setting.getClass().getField(pth);
+										if (f.getType().getTypeName().equals(String.class.getTypeName()))
+											f.set(setVal, setting);
+										else
+											((Configuration) setting).setProp(f, setVal, false);
+									} else {
+										if (Stream.of(setting.getClass().getFields())
+												.anyMatch(t -> t.getName().equals(pth))) {
+											setting = setting.getClass().getField(pth).get(setting);
+										} else {
+											error();
+										}
+									}
+								} else {
+									error();
+								}
+								ind++;
+							}
+						} else if (setSelf) {
+							value = ObjectSerializer.deserialize(setVal, value.getClass());
+						}
+					}
+
+					String outputTxt;
+					if (outputCCFG) {
+						outputTxt = ObjectSerializer.serialize(value);
+					} else
+						outputTxt = serialize(value, raw, 0, view);
 					if (output.equals("-")) {
 						if (raw) {
 							System.out.print(outputTxt);
@@ -241,6 +286,48 @@ public class CqMain {
 
 	}
 
+	private static ArrayList<String> parsePath(String path, boolean getSelf) {
+		ArrayList<String> pathEntries = new ArrayList<String>();
+		if (getSelf) {
+			pathEntries.add("");
+		} else {
+			boolean escape = false;
+			boolean quote = false;
+
+			StringBuilder buffer = new StringBuilder();
+			for (char ch : path.toCharArray()) {
+				if (!escape) {
+					if (ch == '\\') {
+						escape = true;
+						continue;
+					} else if (ch == '\"') {
+						quote = !quote;
+						continue;
+					}
+
+					if (!quote) {
+						if (ch == '.') {
+							pathEntries.add(buffer.toString());
+							buffer = new StringBuilder();
+						} else {
+							buffer.append(ch);
+						}
+					} else {
+						buffer.append(ch);
+					}
+				} else {
+					buffer.append(ch);
+					escape = false;
+				}
+			}
+
+			if (!buffer.toString().isEmpty()) {
+				pathEntries.add(buffer.toString());
+			}
+		}
+		return pathEntries;
+	}
+
 	private static void error() {
 		System.err.println("Usage: cq <config class> <input> [options] [entry path]");
 		System.err.println("Options:");
@@ -249,6 +336,8 @@ public class CqMain {
 				.println("    --viewmode              - outputs values in human-readable format (specific keys only)");
 		System.err.println("    --output <output file>  - sets output");
 		System.err.println("    --source-jar <jar path> - adds source jars for the config class");
+		System.err.println("    --set -s <key> <value>  - sets properties");
+		System.err.println("    --ccfg-output           - outputs CCFG");
 		System.err.println("");
 		System.err.println("Entry path format examples:");
 		System.err.println("[key], [key].[subkey], [key].[array-index] or [key].[mapkey]");
