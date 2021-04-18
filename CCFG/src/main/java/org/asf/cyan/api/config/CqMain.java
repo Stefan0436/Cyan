@@ -11,6 +11,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -42,9 +43,7 @@ public class CqMain {
 			boolean view = false;
 			String output = "-";
 
-			String setKey = null;
-			String setVal = null;
-
+			HashMap<String, String> propChanges = new HashMap<String, String>();
 			boolean outputCCFG = false;
 			boolean noparse = false;
 			boolean option = false;
@@ -90,8 +89,7 @@ public class CqMain {
 							urls.add(new File(arg).toURI().toURL());
 						} else if (key.equals("set")) {
 							if (i + 1 < args.length) {
-								setKey = arg;
-								setVal = args[i + 1];
+								propChanges.put(arg, args[i + 1]);
 								i++;
 							} else {
 								error();
@@ -187,7 +185,8 @@ public class CqMain {
 						}
 					}
 
-					if (setKey != null) {
+					for (String setKey : propChanges.keySet()) {
+						String setVal = propChanges.get(setKey);
 						boolean setSelf = false;
 						if (setKey.equals("."))
 							setSelf = true;
