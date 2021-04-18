@@ -142,13 +142,6 @@ public class Version {
 	}
 
 	public boolean isGreaterThan(Version other) {
-		if (!segments.stream().anyMatch(t -> isSnapshot(t)) && !other.segments.stream().anyMatch(t -> isSnapshot(t))) {
-			if (other.segments.size() < segments.size())
-				return true;
-			if (other.segments.size() > segments.size())
-				return false;
-		}
-
 		int i = 0;
 		for (VersionSegment segment : segments) {
 			if (i >= other.segments.size())
@@ -174,13 +167,6 @@ public class Version {
 	}
 
 	public boolean isLessThan(Version other) {
-		if (!segments.stream().anyMatch(t -> isSnapshot(t)) && !other.segments.stream().anyMatch(t -> isSnapshot(t))) {
-			if (other.segments.size() > segments.size())
-				return true;
-			if (other.segments.size() < segments.size())
-				return false;
-		}
-
 		int i = 0;
 		for (VersionSegment segment : segments) {
 			if (i >= other.segments.size()) {

@@ -32,7 +32,11 @@ public class VersionTest {
 		Version ver7 = Version.fromString("BETA-1.0.0.B3");
 		Version ver8 = Version.fromString("1.15.2");
 		Version ver9 = Version.fromString("1.16.5");
+		
+		Version ver10 = Version.fromString("5.1.4");
+		Version ver11 = Version.fromString("5.0");
 
+		assertTrue(ver10.isGreaterThan(ver11));
 		assertTrue(ver9.isGreaterThan(ver8));
 		assertTrue(ver5.isGreaterThan(ver));
 		assertTrue(ver6.isGreaterThan(ver5));
@@ -54,6 +58,10 @@ public class VersionTest {
 		Version ver9 = Version.fromString("1.16.5");
 		Version ver10 = Version.fromString("1.0.0.B1");
 
+		Version ver11 = Version.fromString("5.1.4");
+		Version ver12 = Version.fromString("5.0");
+
+		assertTrue(ver12.isLessThan(ver11));
 		assertTrue(ver8.isLessThan(ver9));
 		assertTrue(ver.isLessThan(ver5));
 		assertTrue(ver5.isLessThan(ver6));
