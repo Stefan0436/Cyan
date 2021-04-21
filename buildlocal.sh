@@ -63,7 +63,7 @@ if [ "$modloader" != "" ]; then
         ;;
         paper)
         BUILDCMD="publish serverJar"
-        if [ "$modloaderversion" == "" ]; then paperversion="$(curl "https://papermc.io/api/v2/projects/paper/versions/$gameversion" -s --output - | jq -r ".builds[-1]")"
+        if [ "$modloaderversion" == "" ]; then paperversion="latestsupported"
         else
             if [ "$mappings" == "auto" ]; then
 	        	1>&2 echo Cannot set paper version without specifying the EXACT mappings version

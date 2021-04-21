@@ -801,6 +801,40 @@ if (!modloader.equals("")) {
 	if (modloader.startsWith("forge-")) {
 		loadfirst.add("log4j-core")
 		loadfirst.add("log4j-api")
+	} else if (modloader.startsWith("paper-")) {
+		def paperversion = modloader.substring("paper-".length())
+		if (paperversion.equals("latestsupported")) {
+			def useurl = fallback_url
+			if (fallback_url.equals(""))
+			useurl = netTestUrl
+			
+			StringBuilder conf = new StringBuilder();
+			URL u = new URL(useurl + infoPath);
+			Scanner sc = new Scanner(u.openStream());
+			while (sc.hasNext())
+			conf.append(sc.nextLine()+System.lineSeparator());
+			sc.close();
+	
+			CyanUpdateInfo info = new CyanUpdateInfo(conf.toString())
+			mappingsVersion = info.spigotTestingMappings.get(minecraft)
+			def paper = ""
+			
+			if (mappingsVersion == null) {
+				mappingsVersion = getLatestSpigotMappings(minecraft)	
+			}
+			
+			paper = info.paperByMappings.get(mappingsVersion)
+			if (paper == null) {
+				URL url = new URL("https://papermc.io/api/v2/projects/paper/versions/" + minecraft);
+				InputStream strm = url.openStream()
+				JsonArray builds = JsonParser.parseString(new String(strm.readAllBytes())).getAsJsonObject().get("builds").getAsJsonArray();
+				strm.close()
+				
+				paper = builds.get(builds.size() - 1).getAsString();
+			}
+			
+			modloader = "paper-" + paper
+		}
 	}
 }
 
@@ -1447,12 +1481,15 @@ processResources {
 		if (!modloader.equals("")) {
 			if (modloader.startsWith("forge-")) {
 				forgeSupportVersions.put("testing-forge", minecraft + "-" + loaderversion)
+				forgeSupportVersions.put("testing-forge-" + minecraft, loaderversion)
 				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-testing", cyanversion);
 			} else if (modloader.startsWith("fabric-loader-")) {
 				fabricSupportVersions.put("testing-fabric", minecraft + "-" + loaderversion)
+				fabricSupportVersions.put("testing-fabric-" + minecraft, loaderversion)
 				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-testing", cyanversion);
 			} else if (modloader.startsWith("paper-")) {
-				paperSupportVersions.put("testing-paper", minecraft + "-" + loaderversion + "-testing",)
+				paperSupportVersions.put("testing-paper", minecraft + "-" + loaderversion)
+				paperSupportVersions.put("testing-paper-" + minecraft, loaderversion)
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-testing", cyanversion);
 				
 				testingSpigotMappings.put(minecraft, mappingsVersion)
@@ -1470,12 +1507,15 @@ processResources {
 		if (!modloader.equals("")) {
 			if (modloader.startsWith("forge-")) {
 				forgeSupportVersions.put("latest-paper", minecraft + "-" + loaderversion)
+				forgeSupportVersions.put("latest-paper-" + minecraft, loaderversion)
 				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 			} else if (modloader.startsWith("fabric-loader-")) {
 				fabricSupportVersions.put("latest-fabric", minecraft + "-" + loaderversion)
+				fabricSupportVersions.put("latest-fabric-" + minecraft, loaderversion)
 				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);				
 			}  else if (modloader.startsWith("paper-")) {
 				paperSupportVersions.put("latest-paper", minecraft + "-" + loaderversion)
+				paperSupportVersions.put("latest-paper-" + minecraft, loaderversion)
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 				
 				testingSpigotMappings.put(minecraft, mappingsVersion)
@@ -1490,18 +1530,24 @@ processResources {
 			if (modloader.startsWith("forge-")) {
 				forgeSupportVersions.put("stable-forge", minecraft + "-" + loaderversion)
 				forgeSupportVersions.put("latest-forge", minecraft + "-" + loaderversion)
+				forgeSupportVersions.put("stable-forge-" + minecraft, loaderversion)
+				forgeSupportVersions.put("latest-forge-" + minecraft, loaderversion)
 				
 				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-stable", cyanversion);
 			} else if (modloader.startsWith("fabric-loader-")) {
 				fabricSupportVersions.put("stable-fabric", minecraft + "-" + loaderversion)
-				fabricSupportVersions.put("latest-fabric", minecraft + "-" + loaderversion)
+				fabricSupportVersions.put("latest-fabric", minecraft + "-" + loaderversion)				
+				fabricSupportVersions.put("stable-fabric-" + minecraft, loaderversion)
+				fabricSupportVersions.put("latest-fabric-" + minecraft, loaderversion)
 				
 				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-stable", cyanversion);
 			}  else if (modloader.startsWith("paper-")) {
 				paperSupportVersions.put("stable-paper", minecraft + "-" + loaderversion)
 				paperSupportVersions.put("latest-paper", minecraft + "-" + loaderversion)
+				paperSupportVersions.put("stable-paper-" + minecraft, loaderversion)
+				paperSupportVersions.put("latest-paper-" + minecraft, loaderversion)
 				
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-stable", cyanversion);
