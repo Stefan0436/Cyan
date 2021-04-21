@@ -1119,6 +1119,27 @@ public class CyanLoader extends Modloader implements IModProvider {
 								continue;
 							}
 
+							if (transformer.isAnnotationPresent(SideOnly.class)
+									&& transformer.getAnnotation(SideOnly.class).value() != getModloaderGameSide()) {
+								continue;
+							} else if (transformer.isAnnotationPresent(PlatformOnly.class)
+									&& transformer.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
+								continue;
+							} else if (transformer.isAnnotationPresent(PlatformExclude.class) && transformer
+									.getAnnotation(PlatformExclude.class).value() == getModloaderLaunchPlatform()) {
+								continue;
+							} else if (transformer.isAnnotationPresent(VersionRegex.class)
+									&& !transformer.getAnnotation(VersionRegex.class).modloaderVersion()
+									&& !getModloaderGameVersion()
+											.matches(transformer.getAnnotation(VersionRegex.class).value())) {
+								continue;
+							} else if (transformer.isAnnotationPresent(VersionRegex.class)
+									&& transformer.getAnnotation(VersionRegex.class).modloaderVersion()
+									&& !getModloaderVersion().toString()
+											.matches(transformer.getAnnotation(VersionRegex.class).value())) {
+								continue;
+							}
+
 							Fluid.registerTransformer(transformer.getTypeName(),
 									CyanLoader.class.getProtectionDomain().getCodeSource().getLocation());
 						}

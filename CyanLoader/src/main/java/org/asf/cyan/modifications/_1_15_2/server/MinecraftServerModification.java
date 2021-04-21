@@ -2,9 +2,12 @@ package org.asf.cyan.modifications._1_15_2.server;
 
 import java.net.Proxy;
 
+import org.asf.cyan.api.fluid.annotations.PlatformExclude;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.modloader.LoadPhase;
 import org.asf.cyan.core.CyanCore;
+
+import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.Constructor;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
@@ -14,6 +17,7 @@ import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
 @FluidTransformer
 @TargetClass(target = "net.minecraft.server.MinecraftServer")
+@PlatformExclude(LaunchPlatform.SPIGOT)
 public class MinecraftServerModification {
 
 	private static boolean firstLoad;

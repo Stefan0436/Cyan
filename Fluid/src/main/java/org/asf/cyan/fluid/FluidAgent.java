@@ -1,5 +1,7 @@
 package org.asf.cyan.fluid;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.InvocationTargetException;
@@ -14,6 +16,7 @@ import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.fluid.Transformer.AnnotationInfo;
 import org.asf.cyan.fluid.api.ClassLoadHook;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
+import org.asf.cyan.fluid.api.transforming.information.metadata.TransformerMetadata;
 import org.asf.cyan.fluid.bytecode.FluidClassPool;
 import org.asf.cyan.fluid.bytecode.sources.LoaderClassSourceProvider;
 import org.asf.cyan.fluid.remapping.Mapping;
@@ -50,9 +53,9 @@ public class FluidAgent extends CyanComponent {
 	private static ArrayList<String> transformedClasses = new ArrayList<String>();
 	private static boolean initialized = false;
 	private static boolean loaded = false;
-	
+
 	public static void addChildAgent() {
-		
+
 	}
 
 	public static void initialize() {
@@ -101,7 +104,7 @@ public class FluidAgent extends CyanComponent {
 		}
 
 		initialized = true;
-		
+
 		for (Runnable hook : Fluid.getPostInitHooks()) {
 			hook.run();
 		}
@@ -109,7 +112,7 @@ public class FluidAgent extends CyanComponent {
 
 	static boolean ranHooks = false;
 	private static boolean loadedAgents = false;
-	
+
 	/**
 	 * Main agent startup method
 	 * 
@@ -119,10 +122,10 @@ public class FluidAgent extends CyanComponent {
 	public static void agentmain(final String args, final Instrumentation inst) {
 		if (loaded)
 			return;
-		
+
 		loaded = true;
 		ClassLoader ld = FluidAgent.class.getClassLoader();
-		
+
 		inst.addTransformer(new ClassFileTransformer() {
 			@Override
 			public synchronized byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
@@ -130,7 +133,7 @@ public class FluidAgent extends CyanComponent {
 				try {
 					if (pool == null)
 						return null;
-					
+
 					if (!loadedAgents) {
 						loadedAgents = true;
 						Fluid.getAgents().forEach((cls, meth) -> {
@@ -140,11 +143,12 @@ public class FluidAgent extends CyanComponent {
 									Method mth = agent.getMethod(meth, String.class, Instrumentation.class);
 									mth.invoke(null, args, inst);
 								}
-							} catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+							} catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException
+									| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 							}
 						});
 					}
-					
+
 					if (loader != null && !knownLoaders.contains(loader)) {
 						knownLoaders.add(loader);
 						pool.addSource(new LoaderClassSourceProvider(loader));
@@ -208,7 +212,7 @@ public class FluidAgent extends CyanComponent {
 								else {
 									trace("Applying hook " + hook.getClass().getTypeName() + " to class " + className);
 								}
-								
+
 								hook.apply(cc, pool, loader, classBeingRedefined, protectionDomain, classfileBuffer);
 							} catch (ClassNotFoundException e) {
 								error("FLUID hook apply failed, hook type: " + hook.getClass().getTypeName(), e);
@@ -253,11 +257,17 @@ public class FluidAgent extends CyanComponent {
 						}
 					}
 					return bytecode;
-				} catch (Exception e) {
-					error("FLUID transformation failed, class: " + className, e);
+				} catch (IOException ex) {
+					fatal("FLUID transformation failed! Class: " + className, ex);
+					File output = new File("transformer-backtrace");
+					try {
+						TransformerMetadata.dumpErrorBacktrace(ex.getClass().getTypeName() + ": " + ex.getMessage(),
+								ex.getStackTrace(), output);
+					} catch (Exception e) {
+						error("Could not dump FLUID transformer metadata, an exception was thrown.", e);
+					}
+					throw new RuntimeException(ex);
 				}
-
-				return null;
 			}
 		});
 	}

@@ -1,5 +1,6 @@
 package org.asf.cyan.fluid.implementation;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -34,7 +35,6 @@ import org.objectweb.asm.tree.TryCatchBlockNode;
 
 import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
 import org.asf.cyan.api.common.CYAN_COMPONENT;
-
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.Transformer;
 import org.asf.cyan.fluid.api.transforming.ASM;
@@ -115,7 +115,15 @@ public class CyanTransformer extends Transformer {
 						transformerOwners, transformerIndex, arr, transformers);
 				transformerIndex++;
 			} catch (Exception ex) {
-				error("FLUID transformation failed! Transformer: " + typeName, ex);
+				fatal("FLUID transformation failed! Transformer: " + typeName, ex);
+				File output = new File("transformer-backtrace");
+				try {
+					TransformerMetadata.dumpErrorBacktrace(ex.getClass().getTypeName() + ": " + ex.getMessage(),
+							ex.getStackTrace(), output);
+				} catch (Exception e) {
+					error("Could not dump FLUID transformer metadata, an exception was thrown.", e);
+				}
+				throw new RuntimeException(ex);
 			}
 		}
 	}
