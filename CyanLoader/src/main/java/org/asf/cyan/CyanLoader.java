@@ -155,6 +155,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 		String cPath = cyanDir.getCanonicalPath();
 		info("Starting CYAN in: " + cPath);
 		MinecraftInstallationToolkit.setMinecraftDirectory(cyanDir);
+		Fluid.setDumpDir(MinecraftInstallationToolkit.getMinecraftDirectory());
 
 		if (new File(cyanDir, "transformer-backtrace").exists())
 			deleteDir(new File(cyanDir, "transformer-backtrace"));

@@ -52,6 +52,15 @@ import com.sun.tools.attach.VirtualMachine;
  *
  */
 public class Fluid extends CyanComponent {
+	
+	private static File dumpDir = new File(".");
+	
+	/**
+	 * Sets the transformer dump directory
+	 */
+	public static void setDumpDir(File dir) {
+		dumpDir = dir;
+	}
 
 	public static String getVersion() {
 		URL info = Fluid.class.getResource("/fluid.info");
@@ -1036,5 +1045,9 @@ public class Fluid extends CyanComponent {
 	@SuppressWarnings("unchecked")
 	public static HashMap<String, String> getAgents() {
 		return (HashMap<String, String>) extraAgents.clone();
+	}
+
+	public static File getDumpDir() {
+		return dumpDir;
 	}
 }

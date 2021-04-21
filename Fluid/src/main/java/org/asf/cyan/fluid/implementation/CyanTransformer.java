@@ -116,14 +116,14 @@ public class CyanTransformer extends Transformer {
 				transformerIndex++;
 			} catch (Exception ex) {
 				fatal("FLUID transformation failed! Transformer: " + typeName, ex);
-				File output = new File("transformer-backtrace");
+				File output = new File(Fluid.getDumpDir(), "transformer-backtrace");
 				try {
 					TransformerMetadata.dumpErrorBacktrace(ex.getClass().getTypeName() + ": " + ex.getMessage(),
 							ex.getStackTrace(), output);
 				} catch (Exception e) {
 					error("Could not dump FLUID transformer metadata, an exception was thrown.", e);
 				}
-				throw new RuntimeException(ex);
+				System.exit(1);
 			}
 		}
 	}
