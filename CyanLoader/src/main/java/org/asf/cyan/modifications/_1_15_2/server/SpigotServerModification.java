@@ -32,7 +32,7 @@ public class SpigotServerModification {
 	@InjectAt(location = InjectLocation.TAIL)
 	public static void ctor(@TargetType(target = "joptsimple.OptionSet") Object var1,
 			@TargetType(target = "net.minecraft.world.level.DataPackConfig") Object var2, Thread var3,
-			@TargetType(target = "net.minecraft.core.RegistryAccess$OptionSet") Object var4,
+			@TargetType(target = "net.minecraft.core.RegistryAccess$RegistryHolder") Object var4,
 			@TargetType(target = "net.minecraft.world.level.storage.LevelStorageSource$LevelStorageAccess") Object var5,
 			@TargetType(target = "net.minecraft.world.level.storage.WorldData") Object var6,
 			@TargetType(target = "net.minecraft.server.packs.repository.PackRepository") Object var7, Proxy var8,
