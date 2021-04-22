@@ -26,7 +26,10 @@ public class CtcUtil {
 			throws IOException {
 
 		int value = 1;
-		output.getParentFile().mkdirs();
+		
+		if (output.getPath().startsWith(".") || output.getPath().startsWith("/"))
+			output.getParentFile().mkdirs();		
+		
 		if (!new File(input, "main.header").exists())
 			throw new IOException("Invalid UCTC directory!");
 
@@ -73,8 +76,13 @@ public class CtcUtil {
 						}
 						ArrayList<String> hashes = new ArrayList<String>();
 						for (String line : Files.readAllLines(cls.toPath())) {
-							if (!line.isEmpty())
-								hashes.add(line.trim());
+							line = line.trim().replace("\t", "    ");
+							if (line.contains(" "))
+								line = line.substring(0, line.indexOf(" "));
+
+							if (!line.isEmpty()) {
+								hashes.add(line);
+							}
 						}
 						if (pkg.getName().equals("(default)")) {
 							builder.addClass("", clname, hashes.toArray(t -> new String[t]));
@@ -122,7 +130,7 @@ public class CtcUtil {
 				for (String hash : cls.getHashes()) {
 					hashFile.append(hash).append(System.lineSeparator());
 				}
-				
+
 				Files.writeString(new File(packageDir, cls.getName() + ".cls").toPath(), hashFile.toString());
 				setValue.accept(value++);
 			}
