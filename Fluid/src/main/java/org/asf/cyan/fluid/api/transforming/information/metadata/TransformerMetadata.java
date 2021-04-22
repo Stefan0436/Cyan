@@ -437,8 +437,14 @@ public abstract class TransformerMetadata extends CyanComponent {
 						trPseudoCode.getParentFile().mkdirs();
 						trClassFile.getParentFile().mkdirs();
 						debug("Dumping transformer " + md.getTransfomerClass() + " PseudoCode...");
-						Files.write(trPseudoCode.toPath(),
-								BytecodeExporter.classToString(pool.getClassNode(md.getTransfomerClass())).getBytes());
+
+						ClassNode targetClass = null;
+						try {
+							targetClass = pool.getClassNode(md.getMappedTargetClass());
+						} catch (ClassNotFoundException e) {
+							targetClass = pool.getClassNode(md.getTargetClass());
+						}
+						Files.write(trPseudoCode.toPath(), BytecodeExporter.classToString(targetClass).getBytes());
 
 						debug("Dumping transformer " + md.getTransfomerClass() + " bytecode class file...");
 						Files.write(trClassFile.toPath(), pool.getByteCode(md.getTransfomerClass()));
@@ -460,8 +466,13 @@ public abstract class TransformerMetadata extends CyanComponent {
 						clPseudoCode.getParentFile().mkdirs();
 						clClassFile.getParentFile().mkdirs();
 						debug("Dumping class " + md.getTargetClass() + " PseudoCode...");
-						Files.write(clPseudoCode.toPath(),
-								BytecodeExporter.classToString(pool.getClassNode(md.getTargetClass())).getBytes());
+						ClassNode targetClass = null;
+						try {
+							targetClass = pool.getClassNode(md.getMappedTargetClass());
+						} catch (ClassNotFoundException e) {
+							targetClass = pool.getClassNode(md.getTargetClass());
+						}
+						Files.write(clPseudoCode.toPath(), BytecodeExporter.classToString(targetClass).getBytes());
 
 						debug("Dumping class " + md.getTargetClass() + " bytecode class file...");
 						Files.write(clClassFile.toPath(), pool.getByteCode(md.getTargetClass()));
