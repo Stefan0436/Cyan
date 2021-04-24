@@ -130,7 +130,7 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 		case "MethodInsnNode":
 			type = "MethodNode";
 			value = "owner: \"" + ((MethodInsnNode) insn).owner + "\", name: \"" + ((MethodInsnNode) insn).name
-					+ "\", desc: \"" + ((MethodInsnNode) insn).desc + "\"";
+					+ "\", desc: \"" + ((MethodInsnNode) insn).desc + "\", opcode: "+ getOpcodeName(insn.getOpcode(), OpcodeUseCase.JVM_OPCODE).toLowerCase();
 			break;
 		case "FieldInsnNode":
 			type = "FieldNode";
