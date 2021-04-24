@@ -1,0 +1,25 @@
+<html>
+<head>
+<link rel="stylesheet" href="css/Home.css">
+</head>
+<body>
+	<?jcil 
+	install "org.asf.cyan.Home"
+	install "org.asf.cyan.webcomponents.AnimatedFadein"; run installFadein()
+	install "org.asf.cyan.webcomponents.Menubar"; run installMenubar()
+	set page "Home"
+	run init()
+	?>
+	<div id="content">
+		<div id="banner">
+			<div id="title">
+				Cyan Mod Loader<br />The Compatible Modloader
+			</div>
+		</div>
+		<div id="latest-news">
+			<iframe src="News.java.html?viewsingle=latest" id="latestnews-iframe">
+			</iframe>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,15 @@
+# Gradle
+build/
+.gradle
+
+# Eclipse
+bin/
+.settings/
+.classpath
+.project
+
+# Run files
+server/*
+!server/server.ccfg
+!server/modules/
+Launch ConnectiveStandalone Server**.launch

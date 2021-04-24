@@ -1,0 +1,43 @@
+# WARNING!
+# At the time of writing, CCFG does not support value overwriting!
+# When a configuration changes programmatically, it will be re-generated entirely, comments will get lost!
+# 
+# Main server configuration file.
+# This is the base configuration used by ConnectiveHTTP.
+
+# Default HTTP Server Port
+httpPort> 8080
+
+# Default HTTP Server IP
+httpIp> '0.0.0.0'
+
+# HTTP Context Configuration
+# Format: context-root> 'contextfile'
+context> {
+    ../src/main/jazzcode> '
+    
+    virtualroot "/"
+    extension "class:org.asf.jazzcode.internal.extensions.JazzCodeFileExtension"
+    virtualfile "class:org.asf.jazzcode.internal.virtualfiles.JazzCodeJCILHandler"
+    
+    '
+}
+
+# Normal get/post processors, specify module classes here.
+processors> '
+'
+
+# Rewrite tasks for the rewrite contextfile instruction
+tasks> {
+}
+
+# Module configuration, modules should use this map for configuration.
+# Format goes as following:
+# 
+# module> {
+#     (config map)
+# }
+modules> {
+    JazzCode> {
+    }
+}

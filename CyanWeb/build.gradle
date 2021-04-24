@@ -1,0 +1,118 @@
+buildscript {
+	repositories {
+		mavenCentral()
+		maven {
+			name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven"
+		}
+	}
+	dependencies {
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A30'
+	}
+}
+
+plugins {
+	id 'java'
+}
+
+version="1.0.0.A1"
+group="org.asf.cyan"
+
+def authorname="AerialWorks Software Foundation"
+
+apply plugin: 'eclipse'
+apply plugin: 'org.asf.cyan.cornflower'
+
+repositories {
+	mavenCentral()
+	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
+	flatDir {
+		dirs 'libraries'
+	}
+}
+
+jar {
+	manifest {
+		attributes([
+			"Specification-Title": project.name,
+			"Specification-Vendor": "${authorname}",
+			"Specification-Version": project.version,
+			"Implementation-Title": project.name,
+			"Implementation-Version": project.version,
+			"Implementation-Vendor" :"${authorname}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+	exclude "**/**.java.html"
+	exclude "**.java.html"
+	includeEmptyDirs = false
+}
+
+sourceSets {
+	main {
+		java {
+			srcDirs = ['src/main/jazzcode', 'src/main/java']
+		}
+	}
+}
+
+dependencies {
+	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+
+	implementation name: "RatsMemory"
+	implementation name: "ConnectiveHTTP"
+	implementation name: "HttpBasicFileModule"
+
+	implementation group: 'org.asf.jazzcode', name: 'JazzCode', version: '1.0.0.A6'
+	implementation group: 'org.asf.cyan', name: 'CyanComponents', version: '1.0.0.A4'
+	implementation group: 'org.asf.cyan', name: 'CCFG', version: '1.0.0.A12'
+}
+
+createEclipseLaunches {
+	name "Launch ConnectiveStandalone Server (${project.name})"
+	mainClass "org.asf.connective.standalone.main.ConnectiveStandalone"
+	workingDir "server"
+	jvm "-DideMode"
+
+	classpath project
+	classpath {
+		if (sourceSets.main.output.resourcesDir.exists())
+			add sourceSets.main.output.resourcesDir
+
+		for (File file : new File("libraries").listFiles()) {
+			archive file
+		}
+		for (File file : new File("server/libs").listFiles()) {
+			archive file
+		}
+		archive new File("server/ConnectiveStandalone.jar")
+	}
+
+	sourceLookup {
+		for (File file : new File("libraries").listFiles()) {
+			archive file
+		}
+		for (File file : new File("server/libs").listFiles()) {
+			archive file
+		}
+		archive new File("server/ConnectiveStandalone.jar")
+	}
+}
+createEclipseLaunches.dependsOn 'eclipse'
+createEclipseLaunches.dependsOn processResources
+
+task packageJazzCode(dependsOn: jar) {
+	doLast {
+		if (new File("$buildDir/jazzcode/$version").exists())
+			delete "$buildDir/jazzcode/$version"
+		copy {
+			from tasks.jar.getArchiveFile()
+			into "$buildDir/jazzcode/$version/libs"
+		}
+		copy {
+			exclude "**.java"
+			from new File("src/main/jazzcode", project.group.replace(".", "/"))
+			into "$buildDir/jazzcode/$version/root"
+		}
+	}
+}
+build.finalizedBy packageJazzCode

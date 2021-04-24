@@ -1,0 +1,50 @@
+/* Menu bar  */
+#menu {
+	background: linear-gradient(to left, #5c5c5c, #5c5c5c, 20%, black 100%);
+	position: -webkit-sticky;
+	position: sticky;
+	top: 0;
+}
+
+ul {
+	height: 45px;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+li {
+	height: 45px;
+	float: left;
+	text-align: center;
+	border-right: 0.5px solid #bbb;
+}
+
+.rightmenu {
+	float: right;
+	border-right: 0px;
+	border-left: 0.5px solid #bbb;
+}
+
+li a {
+	height: 100%;
+	display: block;
+	color: white;
+	text-align: center;
+	padding: 14px 16px;
+	text-decoration: none;
+}
+
+li a:hover {
+	background-color: #006c6e;
+	transition: 0.5s;
+}
+
+.logo {
+	width: 20px;
+	background-image: url(images/logo.jpg);
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
