@@ -91,7 +91,7 @@ createEclipseLaunches {
 		for (File file : new File("libraries").listFiles()) {
 			archive file
 		}
-		for (File file : new File("server/modules").listFiles()) {
+		for (File file : new File("server/libs").listFiles()) {
 			archive file
 		}
 		archive new File("server/ConnectiveStandalone.jar")
@@ -106,10 +106,11 @@ task packageJazzCode(dependsOn: jar) {
 			delete "$buildDir/jazzcode/$version"
 		copy {
 			from tasks.jar.getArchiveFile()
-			into "$buildDir/jazzcode/$version/libs"
+			into "$buildDir/jazzcode/$version/modules"
 		}
 		copy {
 			exclude "**.java"
+			exclude "**/**.java"
 			from new File("src/main/jazzcode", project.group.replace(".", "/"))
 			into "$buildDir/jazzcode/$version/root"
 		}
