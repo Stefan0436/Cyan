@@ -30,6 +30,7 @@ AerialWorks Maven Server: https://aerialworks.ddns.net/maven
 | MixinSupport          | LGPL v3             | Mixin Support for CYAN - Soon-to-become-library-mod                                           | Copyright (c) 2021<br/>AerialWorks Software Foundation | INACTIVE                       |
 | Cornflower            | GPL v2              | Cornflower Gradle Plugin - Upcoming gradle plugin for building CYAN mods, contains APIs.      | Copyright (c) 2021<br/>AerialWorks Software Foundation | Alpha Stage                    |
 | ClassTrust API        | LGPL v3             | Cyan Software Protection Library for CTC                                                      | Copyright (c) 2021<br/>AerialWorks Software Foundation | Alpha Stage                    |
+| CyanWeb               | GPL v2              | Website for the Cyan mod loader                                                               | Copyright (c) 2021<br/>AerialWorks Software Foundation | Alpha Stage                    |
 | Cyan API              | LGPL v3             | Cyan Modding API - Version-shared api for creating mods.                                      | Copyright (c) 2021<br/>AerialWorks Software Foundation | DEVELOPMENT NOT YET STARTED    |
 
 # Projects used
