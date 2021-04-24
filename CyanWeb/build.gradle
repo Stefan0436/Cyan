@@ -91,7 +91,7 @@ createEclipseLaunches {
 		for (File file : new File("libraries").listFiles()) {
 			archive file
 		}
-		for (File file : new File("server/libs").listFiles()) {
+		for (File file : new File("server/modules").listFiles()) {
 			archive file
 		}
 		archive new File("server/ConnectiveStandalone.jar")
