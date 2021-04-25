@@ -4,8 +4,10 @@
 }
 
 #authorImage {
-	width: 200px;
-	height: 200px;
+	max-width: 80%;
+	max-height: 80%;
+	width: auto;
+	height: auto;
 	border-radius: 50%;
 }
 
@@ -28,11 +30,13 @@
 
 hr.ln {
 	border-top: 2px solid #bbb;
+	width: 88%;
+	margin-left: 0.15%;
 }
 
 #messageDiv {
 	width: 99%;
-	margin-left: 10px;
+	margin-left: 10%;
 }
 
 #msgTitle {
