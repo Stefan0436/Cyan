@@ -95,7 +95,9 @@ public class NewsBackend extends JWebService {
 		}
 		while (refreshing) {
 		}
+
 		ArrayList<NewsMessage> messages = new ArrayList<NewsMessage>(newsMessages);
+		messages.sort((a, b) -> -a.time.compareTo(b.time));
 		int start = Integer.valueOf(function.namedParameters.getOrDefault("viewstart", "0"));
 		int end = Integer.valueOf(function.namedParameters.getOrDefault("viewend", "-1"));
 		if (end != -1)
@@ -115,7 +117,7 @@ public class NewsBackend extends JWebService {
 			try {
 				new MessageEntry().installSingleMessage(func);
 			} catch (IOException | InvocationTargetException e) {
-				i=i;
+				i = i;
 			}
 		}
 	}
