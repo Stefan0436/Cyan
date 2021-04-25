@@ -30,13 +30,13 @@
 
 hr.ln {
 	border-top: 2px solid #bbb;
-	width: 88%;
+	width: 100%;
 	margin-left: 0.15%;
 }
 
 #messageDiv {
-	width: 99%;
-	margin-left: 10%;
+	width: 84%;
+	margin-left: 15%;
 }
 
 #msgTitle {
@@ -46,6 +46,6 @@ hr.ln {
 #message {
 	margin-left: 0.2%;
 	height: 70%;
-	width: 88%;
+	width: 100%;
 	resize: none;
 }
