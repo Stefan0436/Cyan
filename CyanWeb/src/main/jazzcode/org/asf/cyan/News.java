@@ -30,6 +30,17 @@ public class News extends AbstractWebComponent {
 	}
 
 	@Function
+	public void preInit(FunctionInfo function) throws InvocationTargetException, IOException {
+		Map<String, String> query = QueryUtil.parseQuery(function.getRequest().query);
+		if (!query.containsKey("viewsingle")) {
+			function.getComponent(Menubar.class).installMenubar(function);
+		} else {
+			function.addNamedParams(Map.of("viewstart", "0"));
+			function.addNamedParams(Map.of("viewend", "3"));
+		}
+	}
+
+	@Function
 	public void init(FunctionInfo function) throws InvocationTargetException, IOException {
 		boolean ready = true;
 		if (!NewsBackend.isReady()) {
@@ -40,11 +51,13 @@ public class News extends AbstractWebComponent {
 		} catch (IOException e) {
 		}
 		Map<String, String> query = QueryUtil.parseQuery(function.getRequest().query);
-		if (!query.containsKey("viewsingle")) {
-			function.getComponent(Menubar.class).installMenubar(function);
+		if (query.containsKey("viewsingle")) {
+			function.addNamedParams(Map.of("viewstart", "0"));
+			function.addNamedParams(Map.of("viewend", "3"));
 		}
+		
 		if (ready) {
-			backend.getNews(function);
+			backend.getNews(new FunctionInfo(function).setNamedParams(Map.of("execPath", getRequest().path)));
 		} else {
 			function.writeLine("<script>");
 			function.writeLine("\tfunction checkBackend() {");
@@ -65,5 +78,4 @@ public class News extends AbstractWebComponent {
 			function.writeLine("<br /><center>Please wait, our news backend is still starting up...</center>");
 		}
 	}
-
 }

@@ -1,6 +1,12 @@
 <html>
 <head>
 <link rel="stylesheet" href="css/Home.css">
+<script>
+	function resizeIframe(obj) {
+		obj.style.height = (obj.contentWindow.document.documentElement.scrollHeight + 100)
+		'px';
+	}
+</script>
 </head>
 <body>
 	<?jcil 
@@ -17,8 +23,10 @@
 			</div>
 		</div>
 		<div id="latest-news">
-			<iframe src="News.java.html?viewsingle=latest" id="latestnews-iframe">
-			</iframe>
+			<a id="latest-news-head">Latest news</a>
+			<hr class="ln">
+			<iframe src="News.java.html?viewsingle=latest" id="latestnews-iframe"
+				style="border: 0;" onload="resizeIframe(this)"> </iframe>
 		</div>
 	</div>
 </body>

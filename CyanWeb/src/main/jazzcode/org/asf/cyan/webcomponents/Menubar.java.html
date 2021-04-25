@@ -1,39 +1,44 @@
 <link rel="stylesheet" href="css/Menubar.css">
 <style>
-body {	
+body {
 	margin: 0px;
 }
 
-.${page} {
+.active {
 	background-color: #006c5e;
 }
 
-.${page}:hover {
+.active:hover {
 	background-color: #006c7e;
 	transition: 0.5s;
 }
-
 </style>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-function nav(dest) {
-	$("#content").fadeOut(700);
-	setTimeout('navFinish(\''+dest+'\')', 700);
-}
-function navFinish(dest) {
-	window.location.href = dest + ".java.html";
-}
+	function nav(dest) {
+		$("#content").fadeOut(700);
+		setTimeout('navFinish(\'' + dest + '\')', 700);
+	}
+	function navFinish(dest) {
+		window.location.href = dest + ".java.html";
+	}
 </script>
 
 <div id="menu">
 	<ul>
-		<li><a class="logo"></a></li>
-		<li><a class="Home" href="javascript:nav('index')">Home</a></li>
-		<li><a class="News" href="javascript:nav('News')">News</a></li>
-		<li><a class="Downloads" href="javascript:nav('Downloads')">Downloads</a></li>
-		<li><a class="Docs" href="javascript:nav('Docs')">Documentation</a></li>
-		<li class="rightmenu"><a class="Forums" href="javascript:nav('Forums')">Forums</a></li>
-		<li class="rightmenu"><a class="About" href="javascript:nav('About')">About</a></li>
+		<li><a id="logo"></a></li>
+		<li><a id="Home" href="javascript:nav('index')">Home</a></li>
+		<li><a id="News" href="javascript:nav('News')">News</a></li>
+		<li><a id="Downloads" href="javascript:nav('Downloads')">Downloads</a></li>
+		<li><a id="Docs" href="javascript:nav('Docs')">Documentation</a></li>
+		<li class="rightmenu"><a class="Forums"
+			href="javascript:nav('Forums')">Forums</a></li>
+		<li class="rightmenu"><a id="About"
+			href="javascript:nav('About')">About</a></li>
 	</ul>
 </div>
+
+<script>
+	document.getElementById("${page}").className = "active";
+</script>

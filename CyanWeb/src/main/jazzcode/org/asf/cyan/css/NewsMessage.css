@@ -1,0 +1,47 @@
+#newsmessage {
+	margin: 1%;
+	border: 2px inset;
+}
+
+#authorImage {
+	width: 200px;
+	height: 200px;
+	border-radius: 50%;
+}
+
+#authorDiv {
+	margin-top: 1%;
+	width: 12%;
+	height: 70%;
+	float: left;
+	text-align: center;
+}
+
+#date {
+	font-size: 14px;
+}
+
+#author {
+	font-size: 20px;
+	height: 50%;
+}
+
+hr.ln {
+	border-top: 2px solid #bbb;
+}
+
+#messageDiv {
+	width: 99%;
+	margin-left: 10px;
+}
+
+#msgTitle {
+	font-size: 30px;
+}
+
+#message {
+	margin-left: 0.2%;
+	height: 50%;
+	width: 88%;
+	resize: none;
+}

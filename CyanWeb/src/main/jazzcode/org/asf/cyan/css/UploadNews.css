@@ -1,0 +1,63 @@
+#content {
+	margin-top: 6%;
+}
+
+#title {
+	font-size: 28px;
+}
+
+#username {
+  	float: right;
+  	margin-top: 8px;
+  	margin-right: 7px;
+	font-size: 20px;
+}
+
+#image {
+	float: right;
+    display: none;
+}
+
+#upload-file {
+    border: 1px solid #ccc;
+    display: block;
+    width: 20%;
+    text-align: center;
+    cursor: pointer;
+    float: right;
+	margin-right: 0.5%;
+}
+
+#message {
+	resize: none;
+	width: 99%;
+	height: 50%;
+	margin-left: 0.5%;
+}
+
+#text {
+	width: 99%;
+	margin-left: 0.5%;
+	height: 20px;
+	font-size: 14px;
+}
+
+hr.ln {
+	border-top: 2px solid #bbb;
+}
+
+#logout {
+	width: 200px;
+	float: right;
+	height: 30px;
+	margin-right: 0.5%;
+	margin-top: -8px;
+}
+
+#publish {
+	width: 200px;
+	float: left;
+	height: 30px;
+	margin-left: 0.5%;
+	margin-top: 10px;
+}

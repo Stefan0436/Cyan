@@ -18,6 +18,7 @@ context> {
     
     virtualroot "/"
     extension "class:org.asf.jazzcode.internal.extensions.JazzCodeFileExtension"
+    virtualfile "class:org.asf.connective.usermanager.basicfile.MainVirtualFile"
     virtualfile "class:org.asf.jazzcode.internal.virtualfiles.JazzCodeJCILHandler"
     
     '
@@ -38,6 +39,56 @@ tasks> {
 #     (config map)
 # }
 modules> {
+    UserManager> {
+        product-key-segment-length> '5'
+        authenticate> '/authenticate'
+        cancel-activation> '/cancel'
+        activation-key-segments> '10'
+        product-key-segments> '5'
+        product-key-data> 'cache/usermanager/product-keys'
+        admin-commands> '/admin'
+        activation-key-segment-length> '7'
+        auth-frontend> 'html-internal'
+        cancel-key-segment-length> '7'
+        update-user> '/update'
+        mailcommand> '/usr/bin/sendmail'
+        activated-users-storage> 'cache/usermanager/activated-users'
+        base-uri> '/users'
+        cancel-key-segments> '10'
+        authentication-backend> 'credtool'
+        allowed-groups> 'users'
+        auth-secure-storage> 'storage/users'
+        create-user> '/create'
+        admin-group> 'server'
+        mail-template-activation> '
+        From: %sender%
+        Subject: Account Activation Key
+        Dear user, at %date% you have requested a %group% account.
+        Your username is %username%, in this mail, you will find an account activation key.
+        
+        You can cancel the request at any time by using the cancel key
+        
+        Cancel key: %cancelkey%
+        Activation key: %activationkey%
+        
+        NOTE: they keys are only valid until %expiry-date%.
+        '
+        activation-period> '30'
+        product-groups> 'premium maven git'
+        mailarguments> '%recipient%'
+        remove-user> '/delete'
+        user-activation-data> 'cache/usermanager/user-activation'
+        activate-user> '/activate'
+        mail-sender> 'noreply@localhost'
+    }
+    
+    UserManager-AuthServices> {
+    }
+    
     JazzCode> {
+    }
+    
+    newsConfiguration> {
+        news-group> 'cyannews'
     }
 }

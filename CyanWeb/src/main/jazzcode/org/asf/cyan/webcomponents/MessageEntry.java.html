@@ -1,0 +1,21 @@
+<?jcil
+install "org.asf.cyan.webcomponents.MessageEntry"
+run init()
+?>
+<div id="newsmessage">
+	<div id="authorDiv">
+		<div id="imgDiv">
+			<img src="/${authorimg}" id="authorImage"></img>
+		</div>
+		<br /> <a id="author">${author}</a><br />
+		<time datetime="${datecp}" id="date">${datepretty}</time>
+	</div>
+	<div id="messageDiv">
+		<br /> <a id="msgTitle">${title}</a>
+		<hr class="ln">
+		<textarea name="message" id="message" readonly>${message}</textarea>
+	</div>
+	<br />
+	<br />
+	<br />
+</div>

@@ -17,10 +17,24 @@
 	font-family: Arial, Helvetica, sans-serif;
 }
 
+hr.ln {
+	border-top: 2px solid #bbb;
+}
+
 #latest-news {
 	margin: 1%;
+	border: 2px inset;
 }
 
 #latestnews-iframe {
 	width: 100%;
+	height: auto;
+	margin-top: 1%;
+	margin-bottom: 1%;
+}
+
+#latest-news-head {
+	font-size: 30px;
+	margin-top: 2%;
+	margin-left: 0.5%;
 }

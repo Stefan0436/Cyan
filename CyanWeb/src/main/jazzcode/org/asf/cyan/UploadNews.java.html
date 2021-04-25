@@ -1,0 +1,47 @@
+<html>
+<head>
+<link rel="stylesheet" href="css/UploadNews.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+	<?jcil
+	install "org.asf.cyan.UploadNews"
+	install "org.asf.cyan.webcomponents.AnimatedFadein"; run installFadein()
+	install "org.asf.cyan.webcomponents.Menubar"
+	set page "UploadNews"
+	run initPre()
+	?>
+	<div id=content>
+		<?jcil
+		run init()
+		?>
+
+		<form action="jc:upload(${http.location})" method="post" enctype="multipart/form-data">
+			<a id="title">Upload News Message</a> <a id="username">Logged in
+				as: ${username}</a>
+			<hr class="ln"><br />
+			<label for="image" id="upload-file"> Select JPG... </label>
+			
+			<a>User image file (optional):</a>		
+			<input type="file" name="image" id="image" size="60" accept=".jpg"></input><br /><br />
+			
+			<a>Author Nickname (optional):</a><br />
+			<input type="text" name="author" id="text"></input><br /><br />
+			
+			<a>Message Title:</a><br />
+			<input type="text" name="title" id="text"></input><br /><br />
+			
+			<a>News message:</a><br />
+			<textarea name="message" id="message" cols="40" rows="5"></textarea>
+			
+			<input type="submit" value="Publish" id="publish" />
+		</form>
+			
+		<form action="jc:logout(${http.location})">
+		    <input type="submit" value="Logout" id="logout" />
+		</form>
+		<br />
+		<br />
+	</div>
+</body>
+</html>

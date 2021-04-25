@@ -1,0 +1,53 @@
+<html>
+<head>
+<link rel="stylesheet" href="css/UploadPreview.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+	<?jcil
+	install "org.asf.cyan.UploadPreview"
+	install "org.asf.cyan.webcomponents.AnimatedFadein"; run installFadein()
+	install "org.asf.cyan.webcomponents.Menubar"; run installMenubar()
+	set page "UploadPreview"
+	run initPre()
+	?>
+	<div id=content>
+		<?jcil
+		run init()
+		?>
+
+		<a id="title">Upload Preview</a> <a id="username">Logged in as:
+			${username}</a>
+		<hr class="ln">
+		
+		<div id="authorDiv">
+			<div id="imgDiv">
+				<img src="/news-cyan/imgs/author.${username}.jpg" id="authorImage"></img>
+			</div>
+			<br />
+			<a id="author">${author}</a><br/>
+			<time datetime="${datecp}" id="date">${datepretty}</time>
+		</div>
+		<div id="messageDiv">
+			<br />
+			<a id="msgTitle">${title}</a>
+			<hr class="ln">
+			<textarea name="message" id="message" readonly>${message}</textarea>
+		</div>
+		
+		<form
+			action="jc:confirm(${http.location}, publishpage: ${publishpage}, file: ${file})"
+			method="post" enctype="multipart/form-data">
+			<input type="submit" value="Publish" id="confirm" />
+		</form>
+		<form action="jc:back(${http.location}, publishpage: ${publishpage})">
+			<input type="submit" value="Back" id="back" />
+		</form>
+		<br /><br />
+	</div>
+	<script>
+	var d = new Date(document.getElementById("date").getAttribute("datetime"));
+	document.getElementById("date").innerHTML = d.toLocaleDateString() + " " + d.toLocaleTimeString();
+	</script>
+</body>
+</html>
