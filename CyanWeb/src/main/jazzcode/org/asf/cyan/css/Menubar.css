@@ -41,9 +41,10 @@ li a:hover {
 	transition: 0.5s;
 }
 
-.logo {
+#logo {
 	width: 20px;
-	background-image: url(images/logo.jpg);
+	height: 20px;
+	background-image: url(../images/logo.jpg);
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: cover;
