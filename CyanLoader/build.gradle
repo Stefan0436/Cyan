@@ -190,14 +190,16 @@ configurePublish {
 		}
 	}
 	
-	artifact {
-		name 'CyanLoader-Sources'
-		artifact_description 'Source artifact for the Cyan project, contains the entire source tree'
-		artifact_version project.version
-		
-		task {
-			artifact tasks.createCyanSourceZip
-			classifier 'full'
+	if (!project.file("nogit").exists()) {
+		artifact {
+			name 'CyanLoader-Sources'
+			artifact_description 'Source artifact for the Cyan project, contains the entire source tree'
+			artifact_version project.version
+			
+			task {
+				artifact tasks.createCyanSourceZip
+				classifier 'full'
+			}
 		}
 	}
 	
