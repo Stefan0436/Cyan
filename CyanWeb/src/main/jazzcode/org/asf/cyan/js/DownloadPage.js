@@ -7,14 +7,15 @@ function updateLog(platform, repo, game, modloader) {
 			document.getElementById("compilestatus").innerHTML = "Compiler status: " +json.status;
 			document.getElementById("log").innerHTML = json.log;
    			document.getElementById("log").scrollTop = document.getElementById("log").scrollHeight;
-			document.getElementById("loader").style.display = "none";
    			
    			if (document.getElementById("compilestatus").innerHTML === "Compiler status: Done" || document.getElementById("compilestatus").innerHTML === "Compiler status: Fatal Error") {
+			document.getElementById("loader").style.display = "none";
 				for (var id of intervals)
 					window.clearInterval(id);
 					
-				if (document.getElementById("compilestatus").innerHTML.equals("Compiler status: Done")) {
+				if (document.getElementById("compilestatus").innerHTML === "Compiler status: Done") {
 					document.getElementById("download").style.display = "block";
+					document.getElementById("contentd").style.marginTop = "3%";
 					if (platform === "paper") {
 						document.getElementsByClassName("clientbtn")[0].style.display = "none";
 					}

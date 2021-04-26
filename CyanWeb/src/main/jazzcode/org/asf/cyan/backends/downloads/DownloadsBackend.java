@@ -2,6 +2,7 @@ package org.asf.cyan.backends.downloads;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +21,7 @@ import java.util.stream.LongStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 import org.asf.cyan.webcomponents.downloads.DownloadPage;
 import org.asf.cyan.webcomponents.downloads.GameVersionSelection;
@@ -108,17 +110,17 @@ public class DownloadsBackend extends JWebService {
 
 			}
 
-			runFunction("compilerOne", function.getRequest(), function.getResponse(), function.getPagePath(),
+			runFunction("compiler", function.getRequest(), function.getResponse(), function.getPagePath(),
 					(str) -> function.write(str), function.variables, (obj) -> {
 					}, function.getServer(), function.getContextRoot(), function.getServerContext(),
 					function.getClient(), null, null, null);
 
-			runFunction("compilerTwo", function.getRequest(), function.getResponse(), function.getPagePath(),
+			runFunction("compiler", function.getRequest(), function.getResponse(), function.getPagePath(),
 					(str) -> function.write(str), function.variables, (obj) -> {
 					}, function.getServer(), function.getContextRoot(), function.getServerContext(),
 					function.getClient(), null, null, null);
 
-			runFunction("compilerThree", function.getRequest(), function.getResponse(), function.getPagePath(),
+			runFunction("compiler", function.getRequest(), function.getResponse(), function.getPagePath(),
 					(str) -> function.write(str), function.variables, (obj) -> {
 					}, function.getServer(), function.getContextRoot(), function.getServerContext(),
 					function.getClient(), null, null, null);
@@ -147,7 +149,7 @@ public class DownloadsBackend extends JWebService {
 	}
 
 	@Function
-	private void compilerOne(FunctionInfo function) throws InterruptedException {
+	private void compiler(FunctionInfo function) throws InterruptedException {
 		while (selecting) {
 			Thread.sleep(100);
 		}
@@ -156,9 +158,9 @@ public class DownloadsBackend extends JWebService {
 		if (this.compileQueue.size() != 0) {
 			CompileInfo info = compileQueue.remove(0);
 			selecting = false;
-			
-			File dir = new File(function.getServerContext().getSourceDirectory(),
-				"cyan/versions/" + info.cyanVersion + "/" + info.gameVersion + "/" + info.platform + "/" + info.platformVersion);
+
+			File dir = new File(function.getServerContext().getSourceDirectory(), "cyan/versions/" + info.cyanVersion
+					+ "/" + info.gameVersion + "/" + info.platform + "/" + info.platformVersion);
 			if (dir.exists()) {
 				info.status = "Done";
 				while (true) {
@@ -177,7 +179,7 @@ public class DownloadsBackend extends JWebService {
 				output.writeLine("Preparing to compile...");
 				info.status = "Preparing...";
 
-				runCompiler(info, output);
+				runCompiler(info, output, function);
 
 				output.close();
 			} catch (Exception e) {
@@ -202,13 +204,14 @@ public class DownloadsBackend extends JWebService {
 
 		selecting = false;
 		Thread.sleep(10000);
-		runFunction("compilerOne", function.getRequest(), function.getResponse(), function.getPagePath(),
+		runFunction("compiler", function.getRequest(), function.getResponse(), function.getPagePath(),
 				(str) -> function.write(str), function.variables, (obj) -> {
 				}, function.getServer(), function.getContextRoot(), function.getServerContext(), function.getClient(),
 				null, null, null);
 	}
 
-	private void runCompiler(CompileInfo info, CompilerOutputStream output) throws IOException, InterruptedException {
+	private void runCompiler(CompileInfo info, CompilerOutputStream output, FunctionInfo function)
+			throws IOException, InterruptedException {
 		File tmp = new File(compileDir, info.id + "-" + System.currentTimeMillis());
 		while (tmp.exists()) {
 			deleteDir(tmp);
@@ -251,7 +254,7 @@ public class DownloadsBackend extends JWebService {
 					Version target = Version.fromString(info.platformVersion);
 					Version mappingsMin = null;
 					Version mappingsMax = null;
-					
+
 					HashMap<String, String> mappings = manifest.paperByMappings;
 					ArrayList<String> keys = new ArrayList<String>(manifest.paperByMappings.keySet());
 					keys.sort((a, b) -> {
@@ -259,7 +262,7 @@ public class DownloadsBackend extends JWebService {
 						String ver2 = mappings.get(b);
 						return Version.fromString(ver1).compareTo(Version.fromString(ver2));
 					});
-					
+
 					Version last = null;
 					for (String ver : keys) {
 						String paper = manifest.paperByMappings.get(ver);
@@ -271,13 +274,13 @@ public class DownloadsBackend extends JWebService {
 							last = paperVer;
 						}
 					}
-					
+
 					keys.sort((a, b) -> {
 						String ver1 = mappings.get(a);
 						String ver2 = mappings.get(b);
 						return -Version.fromString(ver1).compareTo(Version.fromString(ver2));
 					});
-					
+
 					last = null;
 					for (String ver : keys) {
 						String paper = manifest.paperByMappings.get(ver);
@@ -293,7 +296,7 @@ public class DownloadsBackend extends JWebService {
 						mappingsMin = last;
 					else if (mappingsMin == null)
 						mappingsMin = target;
-					
+
 					for (String ver : keys) {
 						String paper = manifest.paperByMappings.get(ver);
 						if (paper.equals(mappingsMin.toString())) {
@@ -308,6 +311,8 @@ public class DownloadsBackend extends JWebService {
 			output.writeLine("Compiling...");
 			info.status = "Compiling...";
 			File sourcesDir = new File(tmp, "sources");
+			new File(sourcesDir, "CyanLoader/nogit").createNewFile();
+
 			runProcess(new String[] { "chmod", "+x", "gradlew" }, output, sourcesDir);
 			int exit = runProcess(cmd.toArray(t -> new String[t]), output, sourcesDir);
 			if (exit != 0)
@@ -315,6 +320,56 @@ public class DownloadsBackend extends JWebService {
 
 			output.writeLine("Installing build...");
 			info.status = "Installing...";
+			File outputBase = new File(function.getServerContext().getSourceDirectory(), "cyan/versions/"
+					+ info.cyanVersion + "/" + info.gameVersion + "/" + info.platform + "/" + info.platformVersion);
+			outputBase.mkdirs();
+
+			try {
+				File buildDir = new File(sourcesDir, "build/Wrapper");
+				File modkit = new File(sourcesDir, "modkit");
+				File coremodkit = new File(sourcesDir, "coremodkit");
+				File server = new File(buildDir, "Server jars");
+				server = server.listFiles(f -> f.isDirectory())[0];
+
+				File client = new File(buildDir, manifest.libraryVersions.get("CyanWrapper") + "/.minecraft");
+				deleteDir(new File(client, "versions")
+						.listFiles(f -> f.isDirectory() && f.getName().endsWith("-dbg"))[0]);
+
+				if (server.exists()) {
+					File serverZip = new File(outputBase, "server.zip");
+					Zipper zipper = new Zipper(info, server, serverZip, output);
+					zipper.start();
+				}
+				if (client.exists()) {
+					File clientZip = new File(outputBase, "client.zip");
+					Zipper zipper = new Zipper(info, client, clientZip, output);
+					zipper.start();
+				}
+				if (modkit.exists()) {
+					File modkitZip = new File(outputBase, "modkit.zip");
+					Zipper zipper = new Zipper(info, modkit, modkitZip, output);
+					zipper.start();
+				}
+				if (coremodkit.exists()) {
+					File modkitZip = new File(outputBase, "coremodkit.zip");
+					Zipper zipper = new Zipper(info, coremodkit, modkitZip, output);
+					zipper.start();
+				}
+
+				info.status = "Done";
+				Thread.sleep(6000);
+				while (true) {
+					try {
+						if (compilingVersions.containsKey(info.id))
+							compilingVersions.remove(info.id);
+						break;
+					} catch (ConcurrentModificationException ex) {
+					}
+				}
+			} catch (Exception e) {
+				deleteDir(outputBase);
+				throw e;
+			}
 		} finally {
 			deleteDir(tmp);
 		}
@@ -361,6 +416,7 @@ public class DownloadsBackend extends JWebService {
 		readAll(proc.getErrorStream(), output, proc);
 		readAll(proc.getInputStream(), output, proc);
 		proc.waitFor();
+		output.writeLine("");
 		return proc.exitValue();
 	}
 
@@ -881,6 +937,70 @@ public class DownloadsBackend extends JWebService {
 				message += "...";
 			}
 			progressMessage = message;
+		}
+
+	}
+
+	public static class Zipper extends ProgressUtil {
+
+		private File input;
+		private ZipOutputStream output;
+		private CompilerOutputStream log;
+
+		private int count(File dir) {
+			int i = 0;
+			File[] listFiles = dir.listFiles(t -> !t.isDirectory());
+			for (int j = 0; j < listFiles.length; j++) {
+				i++;
+			}
+			for (File d : dir.listFiles(t -> t.isDirectory())) {
+				i += count(d);
+				i++;
+			}
+			return i;
+		}
+
+		public Zipper(CompileInfo info, File input, File output, CompilerOutputStream log)
+				throws ZipException, IOException {
+			super(info);
+			this.output = new ZipOutputStream(new FileOutputStream(output));
+			this.input = input;
+			this.log = log;
+		}
+
+		public void start() throws IOException {
+			setProgressMessage("Zipping " + input.getName() + "...");
+			int val = 0;
+			int max = count(input);
+			setProgress(val++, max);
+
+			zip(input, "", val, max);
+
+			setProgress(max, max);
+			output.close();
+			log.writeLine("");
+		}
+
+		private int zip(File input, String prefix, int val, int max) throws IOException {
+			if (input.isDirectory()) {
+				for (File f : input.listFiles(t -> t.isDirectory())) {
+					ZipEntry entry = new ZipEntry(prefix + f.getName() + "/");
+					output.putNextEntry(entry);
+					output.closeEntry();
+					val = zip(f, prefix + f.getName() + "/", val, max);
+				}
+				for (File f : input.listFiles(t -> !t.isDirectory()))
+					val = zip(f, prefix, val, max);
+				return val;
+			}
+			ZipEntry entry = new ZipEntry(prefix + input.getName() + (input.isDirectory() ? "/" : ""));
+			output.putNextEntry(entry);
+			FileInputStream strm = new FileInputStream(input);
+			strm.transferTo(output);
+			strm.close();
+			output.closeEntry();
+			setProgress(val++, max);
+			return val;
 		}
 
 	}
