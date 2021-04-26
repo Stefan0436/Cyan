@@ -1,4 +1,4 @@
-package org.asf.cyan.backends;
+package org.asf.cyan.backends.news;
 
 import java.io.File;
 import java.io.FileInputStream;

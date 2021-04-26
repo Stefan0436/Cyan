@@ -1,0 +1,39 @@
+<?jcil
+install "org.asf.cyan.webcomponents.downloads.Home"
+run init()
+?>
+
+<style>
+#downloadselect {
+	text-align: center;
+	margin-top: 16%;
+}
+
+#downloads-btn {
+	height: 3%;
+	border: 1px outset;
+	transition: 0.1s;
+	border-radius: 10px;
+	background-color: cyan;
+	height: 30px;
+	width: 250px;
+	font-size: 20px;
+}
+
+#downloads-btn:hover {
+	border: 1px inset;
+}
+
+#downloads-btn:active {
+	border: 2px inset;
+	background-color: blue;
+}
+</style>
+
+<div id="downloadselect">
+	<h1>For which platform would you like to download Cyan?</h1>
+	<button onclick="javascript:goNav('${repository}, page: gameversion, platform: vanilla')" id="downloads-btn">Vanilla Minecraft</button>
+	<button onclick="javascript:goNav('${repository}, page: platform')" id="downloads-btn">Specific Modloader</button>
+	<br />
+	<br />
+</div>

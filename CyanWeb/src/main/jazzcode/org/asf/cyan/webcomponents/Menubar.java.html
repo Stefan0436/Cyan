@@ -20,8 +20,15 @@ body {
 		$("#content").fadeOut(700);
 		setTimeout('navFinish(\'' + dest + '\')', 700);
 	}
+	function navDirect(dest) {
+		$("#content").fadeOut(700);
+		setTimeout('navFinishDirect(\'' + dest + '\')', 700);
+	}
 	function navFinish(dest) {
 		window.location.href = dest + ".java.html";
+	}
+	function navFinishDirect(dest) {
+		window.location.href = dest;
 	}
 </script>
 

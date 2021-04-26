@@ -1,4 +1,4 @@
-package org.asf.cyan.backends;
+package org.asf.cyan.backends.news;
 
 import java.io.File;
 import java.io.IOException;
@@ -117,7 +117,6 @@ public class NewsBackend extends JWebService {
 			try {
 				new MessageEntry().installSingleMessage(func);
 			} catch (IOException | InvocationTargetException e) {
-				i = i;
 			}
 		}
 	}

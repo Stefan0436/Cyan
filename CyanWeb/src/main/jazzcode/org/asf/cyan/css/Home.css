@@ -21,6 +21,20 @@ hr.ln {
 	border-top: 2px solid #bbb;
 }
 
+#about-simple {
+	margin: 1%;
+	border: 2px inset;
+	text-align: center;
+}
+
+#title-about {
+	font-size: 28px;
+}
+
+#title-web {
+	font-size: 20px;	
+}
+
 #latest-news {
 	margin: 1%;
 	border: 2px inset;
@@ -37,4 +51,21 @@ hr.ln {
 	font-size: 30px;
 	margin-top: 2%;
 	margin-left: 0.5%;
+}
+
+#downloads-btn {
+	height: 3%;
+	border: 1px outset;
+	transition: 0.1s;
+	border-radius: 10px;
+	background-color: cyan;
+}
+
+#downloads-btn:hover {
+	border: 1px inset;
+}
+
+#downloads-btn:active {
+	border: 2px inset;
+	background-color: blue;
 }

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
-import org.asf.cyan.backends.NewsBackend;
+import org.asf.cyan.backends.news.NewsBackend;
 import org.asf.cyan.webcomponents.Menubar;
 import org.asf.jazzcode.components.AbstractWebComponent;
 import org.asf.jazzcode.components.FunctionInfo;

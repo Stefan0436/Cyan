@@ -1,0 +1,37 @@
+<?jcil
+install "org.asf.cyan.webcomponents.downloads.DownloadPage"
+run init()
+?>
+
+<style>
+#contentd {
+	text-align: center;
+	margin-top: 16%;
+}
+
+#downloads-btn {
+	height: 3%;
+	border: 1px outset;
+	transition: 0.1s;
+	border-radius: 10px;
+	background-color: cyan;
+	height: 30px;
+	width: 250px;
+	font-size: 20px;
+}
+
+#downloads-btn:hover {
+	border: 1px inset;
+}
+
+#downloads-btn:active {
+	border: 2px inset;
+	background-color: blue;
+}
+</style>
+
+<div id="contentd">
+	<h1>Download:</h1>
+	<button onclick="javascript:go('${repository}')" id="downloads-btn">Go
+		back</button>
+</div>

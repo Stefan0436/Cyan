@@ -1,0 +1,67 @@
+<html>
+<head>
+<link rel="stylesheet" href="css/Downloads.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+	<?jcil 
+	install "org.asf.cyan.Downloads"
+	install "org.asf.cyan.webcomponents.AnimatedFadein"; run installFadein()
+	install "org.asf.cyan.webcomponents.Menubar"; run installMenubar()
+	set page "Downloads"
+	?>
+	
+	<div id=content>
+		<a id="title">Cyan Downloads</a>
+		<ul id="menu-downloads">
+			<li id="stable" class="menu-entry"><a href="javascript:go('stable')">Stable releases</a></li>
+			<li id="latest" class="menu-entry"><a href="javascript:go('latest')">Latest releases</a></li>
+			<li id="testing" class="menu-entry"><a href="javascript:go('testing')">Testing releases</a></li>
+		</ul>
+		<hr class="ln">
+		<div id="downloadcontent">No page</div>
+		
+		<?jcil
+		run init()
+		?>
+		
+		<script>
+			function go(dest) {
+				$("#downloadcontent").animate({opacity: 0}, 1000);
+				setTimeout('pullDownloads(\'' + dest + '\')', 1200);
+			}
+			function goNav(dest) {
+				$("#downloadcontent").animate({opacity: 0}, 1000);
+				setTimeout('pullDownloadsNav(\'' + dest + '\')', 1200);
+			}
+			function pullDownloads(dest) {
+				$.ajax({
+					type : "GET",
+					url : "jc:pullDownloads(" + dest + ", execPath: ${http.path})",
+					success : function(result) {
+						document.getElementsByClassName("active-entry")[0].className = "menu-entry";
+						document.getElementById(dest).className = "active-entry";
+						
+						document.getElementById("downloadcontent").innerHTML = result;
+						$("#downloadcontent").animate({opacity: 1}, 1000);
+					}
+				});
+			}
+			function pullDownloadsNav(dest) {
+				$.ajax({
+					type : "GET",
+					url : "jc:pullDownloads(" + dest + ", execPath: ${http.path})",
+					success : function(result) {						
+						document.getElementById("downloadcontent").innerHTML = result;
+						$("#downloadcontent").animate({opacity: 1}, 1000);
+					}
+				});
+			}
+			document.getElementById("${menuentry}").className = "active-entry";
+			$(document).ready(function() {
+				go("${menuentry}");
+			})
+		</script>
+	</div>
+</body>
+</html>
