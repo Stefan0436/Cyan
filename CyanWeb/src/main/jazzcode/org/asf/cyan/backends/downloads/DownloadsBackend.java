@@ -332,15 +332,15 @@ public class DownloadsBackend extends JWebService {
 				server = server.listFiles(f -> f.isDirectory())[0];
 
 				File client = new File(buildDir, manifest.libraryVersions.get("CyanWrapper") + "/.minecraft");
-				deleteDir(new File(client, "versions")
-						.listFiles(f -> f.isDirectory() && f.getName().endsWith("-dbg"))[0]);
-
 				if (server.exists()) {
 					File serverZip = new File(outputBase, "server.zip");
 					Zipper zipper = new Zipper(info, server, serverZip, output);
 					zipper.start();
 				}
 				if (client.exists()) {
+					deleteDir(new File(client, "versions")
+							.listFiles(f -> f.isDirectory() && f.getName().endsWith("-dbg"))[0]);
+
 					File clientZip = new File(outputBase, "client.zip");
 					Zipper zipper = new Zipper(info, client, clientZip, output);
 					zipper.start();
