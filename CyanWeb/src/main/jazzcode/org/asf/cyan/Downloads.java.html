@@ -2,6 +2,7 @@
 <head>
 <link rel="stylesheet" href="css/Downloads.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="js/DownloadPage.js"></script>
 </head>
 <body>
 	<?jcil 
@@ -26,11 +27,19 @@
 		?>
 		
 		<script>
+			window.intervals = new Set();
+			
 			function go(dest) {
+				for (var id of intervals)
+					window.clearInterval(id);
+				
 				$("#downloadcontent").animate({opacity: 0}, 1000);
 				setTimeout('pullDownloads(\'' + dest + '\')', 1200);
 			}
 			function goNav(dest) {
+				for (var id of intervals)
+					window.clearInterval(id);
+				
 				$("#downloadcontent").animate({opacity: 0}, 1000);
 				setTimeout('pullDownloadsNav(\'' + dest + '\')', 1200);
 			}
@@ -53,6 +62,9 @@
 					url : "jc:pullDownloads(" + dest + ", execPath: ${http.path})",
 					success : function(result) {						
 						document.getElementById("downloadcontent").innerHTML = result;
+						if (document.getElementById("compiler") != null) {
+							runDownloadScripts();
+						}
 						$("#downloadcontent").animate({opacity: 1}, 1000);
 					}
 				});

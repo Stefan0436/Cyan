@@ -1,12 +1,11 @@
 <?jcil
 install "org.asf.cyan.webcomponents.downloads.DownloadPage"
-run init()
 ?>
 
 <style>
 #contentd {
 	text-align: center;
-	margin-top: 16%;
+	margin-top: 12%;
 }
 
 #downloads-btn {
@@ -28,10 +27,65 @@ run init()
 	border: 2px inset;
 	background-color: blue;
 }
+
+#log {
+	height: 30%;
+	width: 99%;
+	resize: none;
+	font-family: monospace;
+}
+
+#loader {
+	float: right;
+	margin: 0;
+	margin-top: 0.5%;
+	margin-right: 1%;
+	display: block;
+  	border: 5px solid;
+  	border-radius: 50%;
+	border-top: 5px solid #3498db;
+	width: 25px;
+	height: 25px;
+	-webkit-animation: spin 2s linear infinite;
+	animation: spin 2s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 </style>
 
-<div id="contentd">
-	<h1>Download:</h1>
+<div id="contentd">	
+	<a id="compiler-info" data-platform="${platform}" data-version="${version}" data-modloader="${modloaderversion}" data-repository="${repository}" />
+	<div id="compiler" style="${style.compiler}">
+	
+		${elements}
+		<h1 id="compilestatus">Compiler status: ${compile.status}</h1>
+
+		<?jcil
+		run init()
+		?>
+
+		<textarea id="log" readonly></textarea>
+
+		<br /> <br />
+	</div>
+	<div id="download" style="${style.download}">
+		<h1>Download Cyan (${platform} ${modloaderversion}):</h1>
+		<button onclick="window.location.href='${downloadlink}/client.zip'" id="downloads-btn" class="clientbtn">Download client</button>
+		<button onclick="window.location.href='${downloadlink}/server.zip'" id="downloads-btn" class="serverbtn">Download server</button>
+		<br/>
+		<br/>
+	</div>
+	
 	<button onclick="javascript:go('${repository}')" id="downloads-btn">Go
 		back</button>
+	<br/>
 </div>

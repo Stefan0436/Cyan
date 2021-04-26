@@ -1,15 +1,27 @@
 package org.asf.cyan.backends.downloads;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.LongStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
+import org.asf.cyan.webcomponents.downloads.DownloadPage;
 import org.asf.cyan.webcomponents.downloads.GameVersionSelection;
 import org.asf.cyan.webcomponents.downloads.Home;
 import org.asf.cyan.webcomponents.downloads.ModloaderVersionSelection;
@@ -29,9 +41,12 @@ public class DownloadsBackend extends JWebService {
 		public String gameVersion;
 		public String cyanVersion;
 		public String outputLog;
+
+		public String id;
 		public File dir;
 	}
 
+	private ArrayList<CompileInfo> compileQueue = new ArrayList<CompileInfo>();
 	private HashMap<String, CompileInfo> compilingVersions = new HashMap<String, CompileInfo>();
 
 	private static boolean ready = false;
@@ -92,7 +107,261 @@ public class DownloadsBackend extends JWebService {
 			while (refreshing) {
 
 			}
+
+			runFunction("compilerOne", function.getRequest(), function.getResponse(), function.getPagePath(),
+					(str) -> function.write(str), function.variables, (obj) -> {
+					}, function.getServer(), function.getContextRoot(), function.getServerContext(),
+					function.getClient(), null, null, null);
+
+			runFunction("compilerTwo", function.getRequest(), function.getResponse(), function.getPagePath(),
+					(str) -> function.write(str), function.variables, (obj) -> {
+					}, function.getServer(), function.getContextRoot(), function.getServerContext(),
+					function.getClient(), null, null, null);
+
+			runFunction("compilerThree", function.getRequest(), function.getResponse(), function.getPagePath(),
+					(str) -> function.write(str), function.variables, (obj) -> {
+					}, function.getServer(), function.getContextRoot(), function.getServerContext(),
+					function.getClient(), null, null, null);
 		}
+	}
+
+	private boolean selecting = false;
+
+	class CompilerOutputStream extends OutputStream {
+
+		private CompileInfo info;
+
+		public CompilerOutputStream(CompileInfo compile) {
+			this.info = compile;
+		}
+
+		@Override
+		public void write(int arg0) throws IOException {
+			info.outputLog += (char) arg0;
+		}
+
+		public void writeLine(String line) throws IOException {
+			write((line + System.lineSeparator()).getBytes());
+		}
+
+	}
+
+	@Function
+	private void compilerOne(FunctionInfo function) throws InterruptedException {
+		while (selecting) {
+			Thread.sleep(100);
+		}
+		selecting = true;
+
+		if (this.compileQueue.size() != 0) {
+			CompileInfo info = compileQueue.remove(0);
+			selecting = false;
+			
+			File dir = new File(function.getServerContext().getSourceDirectory(),
+				"cyan/versions/" + info.cyanVersion + "/" + info.gameVersion + "/" + info.platform + "/" + info.platformVersion);
+			if (dir.exists()) {
+				info.status = "Done";
+				while (true) {
+					try {
+						if (compilingVersions.containsKey(info.id))
+							compilingVersions.remove(info.id);
+						break;
+					} catch (ConcurrentModificationException ex) {
+					}
+				}
+			}
+
+			try {
+				info.outputLog += System.lineSeparator();
+				CompilerOutputStream output = new CompilerOutputStream(info);
+				output.writeLine("Preparing to compile...");
+				info.status = "Preparing...";
+
+				runCompiler(info, output);
+
+				output.close();
+			} catch (Exception e) {
+				info.outputLog += "Compilation process failed!" + System.lineSeparator();
+				info.outputLog += "Exception was thrown: " + e.getClass().getTypeName() + ": " + e.getMessage()
+						+ System.lineSeparator();
+				for (StackTraceElement ele : e.getStackTrace()) {
+					info.outputLog += "    at " + ele + System.lineSeparator();
+				}
+				info.status = "Fatal Error";
+				Thread.sleep(6000);
+				while (true) {
+					try {
+						if (compilingVersions.containsKey(info.id))
+							compilingVersions.remove(info.id);
+						break;
+					} catch (ConcurrentModificationException ex) {
+					}
+				}
+			}
+		}
+
+		selecting = false;
+		Thread.sleep(10000);
+		runFunction("compilerOne", function.getRequest(), function.getResponse(), function.getPagePath(),
+				(str) -> function.write(str), function.variables, (obj) -> {
+				}, function.getServer(), function.getContextRoot(), function.getServerContext(), function.getClient(),
+				null, null, null);
+	}
+
+	private void runCompiler(CompileInfo info, CompilerOutputStream output) throws IOException, InterruptedException {
+		File tmp = new File(compileDir, info.id + "-" + System.currentTimeMillis());
+		while (tmp.exists()) {
+			deleteDir(tmp);
+			tmp = new File(compileDir, info.id + "-" + System.currentTimeMillis());
+		}
+		tmp.mkdirs();
+		try {
+			output.writeLine("Compile ID: " + tmp.getName());
+			UpdateInfo manifest = null;
+
+			info.status = "Downloading manifest...";
+			String url = maven + "/org/asf/cyan/CyanVersionHolder/" + info.cyanVersion + "/CyanVersionHolder-"
+					+ info.cyanVersion + "-versions.ccfg";
+			ByteArrayOutputStream strm = new ByteArrayOutputStream();
+			download(new URL(url), strm, info, output);
+			manifest = new UpdateInfo(new String(strm.toByteArray()));
+
+			info.status = "Downloading sources...";
+			url = maven + "/org/asf/cyan/CyanLoader-Sources/" + info.cyanVersion + "/CyanLoader-Sources-"
+					+ info.cyanVersion + "-full.zip";
+			download(new URL(url), new File(tmp, "sources.zip"), info, output);
+
+			info.status = "Extracting sources...";
+			Unzipper zip = new Unzipper(info, new File(tmp, "sources.zip"), new File(tmp, "sources"), output);
+			zip.start();
+
+			info.status = "Preparing build command...";
+			output.writeLine("Generating build command...");
+			ArrayList<String> cmd = new ArrayList<String>();
+			cmd.add("bash");
+			cmd.add("buildlocal.sh");
+			cmd.add("--version");
+			cmd.add(info.gameVersion);
+			if (!info.platform.equals("vanilla")) {
+				cmd.add("--modloader");
+				cmd.add(info.platform);
+				cmd.add("--modloader-version");
+				cmd.add(info.platformVersion);
+				if (info.platform.equals("paper")) {
+					Version target = Version.fromString(info.platformVersion);
+					Version mappingsMin = null;
+					Version mappingsMax = null;
+					
+					HashMap<String, String> mappings = manifest.paperByMappings;
+					ArrayList<String> keys = new ArrayList<String>(manifest.paperByMappings.keySet());
+					keys.sort((a, b) -> {
+						String ver1 = mappings.get(a);
+						String ver2 = mappings.get(b);
+						return Version.fromString(ver1).compareTo(Version.fromString(ver2));
+					});
+					
+					Version last = null;
+					for (String ver : keys) {
+						String paper = manifest.paperByMappings.get(ver);
+						Version paperVer = Version.fromString(paper);
+						if (last != null && last.isGreaterThan(target) && paperVer.isGreaterThan(last)) {
+							mappingsMax = last;
+							break;
+						} else if (last == null && paperVer.isGreaterThan(target)) {
+							last = paperVer;
+						}
+					}
+					
+					keys.sort((a, b) -> {
+						String ver1 = mappings.get(a);
+						String ver2 = mappings.get(b);
+						return -Version.fromString(ver1).compareTo(Version.fromString(ver2));
+					});
+					
+					last = null;
+					for (String ver : keys) {
+						String paper = manifest.paperByMappings.get(ver);
+						Version paperVer = Version.fromString(paper);
+						if (paperVer.isLessThan(target)) {
+							mappingsMin = last;
+							break;
+						} else if (mappingsMax == null || paperVer.isLessOrEqualTo(mappingsMax)) {
+							last = paperVer;
+						}
+					}
+					if (mappingsMin == null && last != null)
+						mappingsMin = last;
+					else if (mappingsMin == null)
+						mappingsMin = target;
+					
+					for (String ver : keys) {
+						String paper = manifest.paperByMappings.get(ver);
+						if (paper.equals(mappingsMin.toString())) {
+							cmd.add("--mappings-version");
+							cmd.add(ver);
+							break;
+						}
+					}
+				}
+			}
+
+			output.writeLine("Compiling...");
+			info.status = "Compiling...";
+			File sourcesDir = new File(tmp, "sources");
+			runProcess(new String[] { "chmod", "+x", "gradlew" }, output, sourcesDir);
+			int exit = runProcess(cmd.toArray(t -> new String[t]), output, sourcesDir);
+			if (exit != 0)
+				throw new IOException("Non-zero exit code of build process	");
+
+			output.writeLine("Installing build...");
+			info.status = "Installing...";
+		} finally {
+			deleteDir(tmp);
+		}
+	}
+
+	private void download(URL u, File outputFile, CompileInfo info, CompilerOutputStream output) throws IOException {
+		FileOutputStream fileOut = new FileOutputStream(outputFile);
+		Downloader downloader = new Downloader(u.openConnection(), fileOut, info);
+		downloader.download();
+		fileOut.close();
+		output.writeLine("");
+	}
+
+	private void download(URL u, OutputStream outStrm, CompileInfo info, CompilerOutputStream output)
+			throws IOException {
+		Downloader downloader = new Downloader(u.openConnection(), outStrm, info);
+		downloader.download();
+		output.writeLine("");
+	}
+
+	private void readAll(InputStream inp, CompilerOutputStream output, Process proc) {
+		new Thread(() -> {
+			while (true) {
+				try {
+					if (!proc.isAlive())
+						break;
+					int i = inp.read();
+					if (i == -1)
+						break;
+
+					output.write(i);
+				} catch (IOException e) {
+					break;
+				}
+			}
+		}).start();
+	}
+
+	private int runProcess(String[] process, CompilerOutputStream output, File dir)
+			throws IOException, InterruptedException {
+		ProcessBuilder builder = new ProcessBuilder(process);
+		builder.directory(dir);
+		Process proc = builder.start();
+		readAll(proc.getErrorStream(), output, proc);
+		readAll(proc.getInputStream(), output, proc);
+		proc.waitFor();
+		return proc.exitValue();
 	}
 
 	@Function
@@ -160,6 +429,8 @@ public class DownloadsBackend extends JWebService {
 			new Platform().install(function);
 		else if (page.equals("modloaderversions"))
 			new ModloaderVersionSelection().install(function);
+		else if (page.equals("downloads"))
+			new DownloadPage().install(function);
 	}
 
 	@Function
@@ -221,12 +492,61 @@ public class DownloadsBackend extends JWebService {
 		String game = function.parameters[2];
 		String version = function.parameters[3];
 		String cyan = getCyanVersion(new FunctionInfo(function).setParams(function.parameters));
+		if (cyan == null)
+			return null;
 
 		File dir = new File(function.getServerContext().getSourceDirectory(),
 				"cyan/versions/" + cyan + "/" + game + "/" + platform + "/" + version);
 		if (!dir.exists())
 			return null;
 		return dir;
+	}
+
+	@Function
+	public String getCompiledVersionURI(FunctionInfo function) {
+		if (function.parameters.length != 4) {
+			return null;
+		}
+
+		String platform = function.parameters[0];
+		String game = function.parameters[2];
+		String version = function.parameters[3];
+		String cyan = getCyanVersion(new FunctionInfo(function).setParams(function.parameters));
+
+		return "/cyan/versions/" + cyan + "/" + game + "/" + platform + "/" + version;
+	}
+
+	@Function
+	public void queueCompilation(FunctionInfo function) {
+		setup(function);
+		if (function.parameters.length != 4) {
+			return;
+		}
+
+		String platform = function.parameters[0];
+		String repository = function.parameters[1];
+		String gameversion = function.parameters[2];
+		String modloader = function.parameters[3];
+
+		if (getCompiledVersion(function) == null && getCompilingVersion(function) == null) {
+			CompileInfo info = new CompileInfo();
+			info.status = "In Queue...";
+			info.gameVersion = gameversion;
+			info.cyanVersion = getCyanVersion(function);
+			if (info.cyanVersion == null)
+				return;
+
+			info.platform = platform;
+			info.platformVersion = modloader;
+			info.outputLog = "In queue... Waiting for compiler slot...";
+			if (modloader == null) {
+				modloader = gameversion;
+			}
+			info.id = gameversion + "-" + platform + "-" + modloader + "-" + repository;
+
+			compileQueue.add(info);
+			compilingVersions.put(gameversion + "-" + platform + "-" + modloader + "-" + repository, info);
+		}
 	}
 
 	@Function
@@ -505,4 +825,235 @@ public class DownloadsBackend extends JWebService {
 		}
 
 	}
+
+	public abstract static class ProgressUtil {
+
+		private String lastLine = "";
+
+		public ProgressUtil(CompileInfo info) {
+			this.info = info;
+		}
+
+		private CompileInfo info;
+		protected String progressMessage = "";
+
+		protected void setProgress(long value, long size) {
+			progress(progressMessage, value, size);
+		}
+
+		protected void progress(String message, double value, double max) {
+			info.outputLog = info.outputLog.substring(0, info.outputLog.length() - lastLine.length());
+
+			StringBuilder progressMsg = new StringBuilder();
+			progressMsg.append(message + "  ");
+			for (int i = message.length(); i < 130 - 62; i++) {
+				progressMsg.append(" ");
+			}
+			String msg = (int) ((100 / max) * value) + "";
+
+			progressMsg.append(msg);
+			for (int i = msg.length(); i < 3; i++) {
+				progressMsg.append(" ");
+			}
+			progressMsg.append(" %  ");
+			progressMsg.append(" ");
+
+			progressMsg.append("[");
+			double step = max / 50;
+			double i = 0;
+
+			double v = (value / step);
+			for (i = 0; i < v; i++) {
+				progressMsg.append("=");
+			}
+			for (double i2 = i; i2 < 50; i2++) {
+				progressMsg.append(" ");
+			}
+			progressMsg.append("]");
+
+			info.outputLog += progressMsg.toString();
+			lastLine = progressMsg.toString();
+		}
+
+		protected void setProgressMessage(String message) {
+			if (message.length() >= 130 - 62) {
+				message = message.substring(0, 130 - 67);
+				message += "...";
+			}
+			progressMessage = message;
+		}
+
+	}
+
+	public static class Unzipper extends ProgressUtil {
+
+		private ZipFile input;
+		private File output;
+		private CompilerOutputStream log;
+
+		public Unzipper(CompileInfo info, File input, File output, CompilerOutputStream log)
+				throws ZipException, IOException {
+			super(info);
+			this.input = new ZipFile(input);
+			this.output = output;
+			this.log = log;
+		}
+
+		public void start() throws IOException {
+			setProgressMessage("Unzipping " + input.getName() + "...");
+			int val = 0;
+			int max = input.size();
+			setProgress(val++, max);
+
+			output.mkdirs();
+			Enumeration<? extends ZipEntry> entries = input.entries();
+			while (entries.hasMoreElements()) {
+				ZipEntry entry = entries.nextElement();
+				if (entry.getName().replace("\\", "/").endsWith("/")) {
+					File dir = new File(output, entry.getName());
+					dir.mkdirs();
+					setProgress(val++, max);
+					continue;
+				}
+
+				InputStream strm = input.getInputStream(entry);
+				FileOutputStream outStrm = new FileOutputStream(new File(output, entry.getName()));
+				strm.transferTo(outStrm);
+				outStrm.close();
+				setProgress(val++, max);
+			}
+
+			setProgress(max, max);
+			input.close();
+			log.writeLine("");
+		}
+
+	}
+
+	public static class Downloader extends ProgressUtil {
+
+		private String fileName = "";
+		private boolean done = false;
+		private boolean completedThread = false;
+
+		private long value = 0;
+		private long size = 0;
+
+		private OutputStream output;
+		private InputStream input;
+
+		private long start = System.currentTimeMillis();
+
+		private long[] durations = new long[15];
+		private long eta = -1;
+
+		private int checkNum = 0;
+
+		private Thread downloadThread = new Thread(() -> {
+			while (!done) {
+				checkDownload();
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					break;
+				}
+			}
+			completedThread = true;
+		}, "Download progress thread");
+
+		public Downloader(URLConnection conn, OutputStream output, CompileInfo info) throws IOException {
+			super(info);
+			fileName = new File(URLDecoder.decode(conn.getURL().getFile(), "UTF-8")).getName();
+			setProgressMessage("Downloading '" + fileName + "' (? KB/s)");
+			setProgress(value, size);
+			this.output = output;
+			input = conn.getInputStream();
+			size = conn.getContentLengthLong();
+			downloadThread.start();
+		}
+
+		private long valueLast = 0;
+
+		public void checkDownload() {
+			long end = System.currentTimeMillis();
+
+			if ((end - start) > 1000) {
+				long val = value - valueLast;
+				valueLast = value;
+
+				long bS = val;
+				String unit = "B";
+				if (val > 1024) {
+					val = val / 1024;
+					unit = "KB";
+					if (val > 1024) {
+						val = val / 1024;
+						unit = "MB";
+						if (val > 1024) {
+							val = val / 1024;
+							unit = "GB";
+							if (val > 1024) {
+								val = val / 1024;
+								unit = "TB";
+							}
+						}
+					}
+				}
+
+				start = System.currentTimeMillis();
+				long remainingSec = 0;
+				if (bS != 0)
+					remainingSec = (size - value) / bS;
+
+				if (checkNum == 15) {
+					checkNum = 0;
+					eta = LongStream.of(durations).sorted().findFirst().getAsLong();
+					for (int i = 0; i < durations.length; i++)
+						durations[i] = 0;
+				} else {
+					durations[checkNum] = remainingSec;
+					checkNum++;
+				}
+
+				if (eta != -1) {
+					setProgressMessage("Downloading '" + fileName + "' (" + val + " " + unit + "/s - ETA: "
+							+ String.format("%d:%02d:%02d", eta / 3600, (eta % 3600) / 60, (eta % 60)) + ")");
+					if (eta != 0 && bS != 0)
+						eta--;
+				} else {
+					setProgressMessage(
+							"Downloading '" + fileName + "' (" + val + " " + unit + "/s - ETA: CALCULATING)");
+				}
+			}
+
+			setProgress(value, size);
+		}
+
+		public void download() throws IOException {
+			while (!done) {
+				try {
+					int b = input.read();
+					switch (b) {
+					case -1:
+						done = true;
+						break;
+					default:
+						output.write(b);
+						value++;
+					}
+				} catch (IOException e) {
+					done = true;
+					throw e;
+				}
+			}
+			while (!completedThread) {
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+				}
+			}
+			progress(progressMessage, 100, 100);
+		}
+	}
+
 }
