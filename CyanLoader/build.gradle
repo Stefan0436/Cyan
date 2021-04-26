@@ -205,6 +205,9 @@ configurePublish {
 }
 
 task prepareSourceZip {
+	onlyIf {
+		return !file("nogit").exists()
+	}
 	doLast {
 		if (!file("../.git").exists()) {
 			def gitcmd = [ 'git', 'init', '-b', 'main' ].execute(null, file(".."))
