@@ -104,6 +104,11 @@ public class DownloadPage extends AbstractWebComponent {
 		FunctionInfo inter = new FunctionInfo(function).setParams(platform, repository, gameversion, modloaderversion);
 		function.variables.put("downloadlink", backend.getCompiledVersionURI(inter));
 		function.variables.put("elements", "");
+		
+		if (platform.equals("vanilla"))
+			function.variables.put("targetpage", "gameversion");
+		else
+			function.variables.put("targetpage", "modloaderversions");
 
 		if (backend.getCompiledVersion(inter) == null) {
 			CompileInfo info = backend.getCompilingVersion(inter);
