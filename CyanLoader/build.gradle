@@ -265,7 +265,10 @@ artifacts {
 	archives javadocJar
 	archives modAPIJar
 	archives coremodAPIJar
-	archives createCyanSourceZip
+	
+	if (!file("nogit").exists()) {
+		archives createCyanSourceZip
+	}
 }
 
 test {
