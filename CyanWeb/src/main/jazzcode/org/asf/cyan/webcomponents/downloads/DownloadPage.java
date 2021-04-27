@@ -37,7 +37,7 @@ public class DownloadPage extends AbstractWebComponent {
 			String repository = function.parameters[1];
 			String gameversion = function.parameters[2];
 			String modloaderversion = function.parameters[3];
-			
+
 			if (!DownloadsBackend.isReady())
 				return;
 
@@ -47,15 +47,30 @@ public class DownloadPage extends AbstractWebComponent {
 			} catch (IOException e) {
 			}
 
-			FunctionInfo inter = new FunctionInfo(function).setParams(platform, repository, gameversion, modloaderversion);
+			FunctionInfo inter = new FunctionInfo(function).setParams(platform, repository, gameversion,
+					modloaderversion);
 			CompileInfo info = backend.getCompilingVersion(inter);
 			if (info == null) {
 				return;
 			}
-			
-			String json = "{\"status\": \"%s\", \"log\": \"%l\"}";
-			json = json.replace("%s", info.status.replace("\\", "\\\\").replace("\r", "").replace("\t", "    ").replace("\n", "\\n").replace("\"", "\\\""));
-			json = json.replace("%l", info.outputLog.replace(System.getProperty("user.name"), "****").replace("\t", "    ").replaceAll("\u001B\\[[\\d;]*[^\\d;]","").replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\"", "\\\""));
+
+			String json = "{\"status\": \"%s\", \"log\": \"%l\", \"coremodkit\": \"%cmk\", \"modkit\": \"%ck\"}";
+			if (info.dir != null) {
+				json = json.replace("%cmk", new File(info.dir, "cyan-coremodkit-" + gameversion + "-" + platform + "-"
+						+ modloaderversion + "-" + info.cyanVersion + ".zip").exists() + "");
+				json = json.replace("%ck", new File(info.dir, "cyan-modkit-" + gameversion + "-" + platform + "-"
+						+ modloaderversion + "-" + info.cyanVersion + ".zip").exists() + "");
+			} else {
+				json = json.replace("%cmk", "false");
+				json = json.replace("%ck", "false");
+			}
+
+			json = json.replace("%s", info.status.replace("\\", "\\\\").replace("\r", "").replace("\t", "    ")
+					.replace("\n", "\\n").replace("\"", "\\\""));
+			json = json.replace("%l",
+					info.outputLog.replace(System.getProperty("user.name"), "****").replace("\t", "    ")
+							.replaceAll("\u001B\\[[\\d;]*[^\\d;]", "").replace("\\", "\\\\").replace("\r", "")
+							.replace("\n", "\\n").replace("\"", "\\\""));
 			function.getResponse().setContent("application/json", json);
 		}
 	}
@@ -104,7 +119,8 @@ public class DownloadPage extends AbstractWebComponent {
 		FunctionInfo inter = new FunctionInfo(function).setParams(platform, repository, gameversion, modloaderversion);
 		function.variables.put("downloadlink", backend.getCompiledVersionURI(inter));
 		function.variables.put("elements", "");
-		
+		function.variables.put("cyanversion", backend.getCyanVersion(inter));
+
 		if (platform.equals("vanilla"))
 			function.variables.put("targetpage", "gameversion");
 		else
@@ -137,6 +153,33 @@ public class DownloadPage extends AbstractWebComponent {
 				function.writeLine("\tdisplay: none;");
 				function.writeLine("}");
 				function.writeLine("</style>");
+			}
+
+			String cyanVersion = backend.getCyanVersion(inter);
+			File baseDir = backend.getCompiledVersion(inter);
+			File coremodkit = new File(baseDir, "cyan-coremodkit-" + gameversion + "-" + platform + "-"
+					+ modloaderversion + "-" + cyanVersion + ".zip");
+			File modkit = new File(baseDir, "cyan-coremodkit-" + gameversion + "-" + platform + "-" + modloaderversion
+					+ "-" + cyanVersion + ".zip");
+
+			function.variables.put("style.modkits", "display: block;");
+			if (!coremodkit.exists() && !modkit.exists()) {
+				function.variables.put("style.modkits", "display: none;");
+			} else {
+				if (!modkit.exists()) {
+					function.writeLine("<style>");
+					function.writeLine(".modkitbtn {");
+					function.writeLine("\tdisplay: none;");
+					function.writeLine("}");
+					function.writeLine("</style>");
+				}
+				if (!coremodkit.exists()) {
+					function.writeLine("<style>");
+					function.writeLine(".coremodkitbtn {");
+					function.writeLine("\tdisplay: none;");
+					function.writeLine("}");
+					function.writeLine("</style>");
+				}
 			}
 		}
 	}

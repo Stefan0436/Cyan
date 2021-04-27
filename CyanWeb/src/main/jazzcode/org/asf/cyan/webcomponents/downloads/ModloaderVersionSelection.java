@@ -3,8 +3,10 @@ package org.asf.cyan.webcomponents.downloads;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +27,7 @@ public class ModloaderVersionSelection extends AbstractWebComponent {
 	}
 
 	@Function
-	public void init(FunctionInfo function) {
+	public void init(FunctionInfo function) throws UnsupportedEncodingException {
 		if (!DownloadsBackend.isReady() || !function.variables.containsKey("platform")
 				|| !function.variables.containsKey("repository") || !function.variables.containsKey("version"))
 			return;
@@ -41,17 +43,23 @@ public class ModloaderVersionSelection extends AbstractWebComponent {
 				.getModloaderVersions(new FunctionInfo(function).setParams(function.variables.get("version"),
 						function.variables.get("repository"), function.variables.get("platform")));
 
+		String backpage = URLEncoder.encode(URLEncoder.encode(
+				"modloaderversions, platform: " + function.variables.get("platform") + ", version: "
+						+ function.variables.get("version") + ", backpage: " + function.variables.get("backpage"),
+				"UTF-8"), "UTF-8");
+
 		String button = "\t<button onclick=\"javascript:goNav('${repository}, page: " + target + ", version: "
 				+ function.variables.get("version") + ", platform: " + function.variables.get("platform")
-				+ "')\" id=\"downloads-btn\">#%v</button>\n";
+				+ ", backpage: " + backpage + "')\" id=\"downloads-btn\">#%v</button>\n";
 
 		String buttonCompiling = "\t<button onclick=\"javascript:goNav('${repository}, page: " + target + ", version: "
 				+ function.variables.get("version") + ", platform: " + function.variables.get("platform")
-				+ "')\" id=\"downloads-btn-compiling\">#%v</button>\n";
+				+ ", backpage: " + backpage + "')\" id=\"downloads-btn-compiling\">#%v</button>\n";
 
 		String buttonNonCompiled = "\t<button onclick=\"javascript:goNav('${repository}, page: " + target
 				+ ", version: " + function.variables.get("version") + ", platform: "
-				+ function.variables.get("platform") + "')\" id=\"downloads-btn-noncompiled\">#%v</button>\n";
+				+ function.variables.get("platform") + ", backpage: " + backpage
+				+ "')\" id=\"downloads-btn-noncompiled\">#%v</button>\n";
 
 		StringBuilder versionString = new StringBuilder();
 		for (String version : new ArrayList<String>(versions)) {

@@ -28,12 +28,36 @@ run init()
 	border: 2px inset;
 	background-color: blue;
 }
+
+#downloads-btn-noncompiled {
+	height: 3%;
+	border: 1px outset;
+	transition: 0.1s;
+	border-radius: 10px;
+	background-color: #0718f2;
+	height: 30px;
+	width: 250px;
+	font-size: 20px;
+	color: white;
+}
+
+#downloads-btn-noncompiled:hover {
+	border: 1px inset;
+}
+
+#downloads-btn-noncompiled:active {
+	border: 2px inset;
+	background-color: #020fbd;
+}
 </style>
 
 <div id="downloadselect">
 	<h1>For which platform would you like to download Cyan?</h1>
-	<button onclick="javascript:goNav('${repository}, page: gameversion, platform: vanilla')" id="downloads-btn">Vanilla Minecraft</button>
-	<button onclick="javascript:goNav('${repository}, page: platform')" id="downloads-btn">Specific Modloader</button>
+	<button onclick="javascript:goNav('${repository}, page: gameversion, platform: vanilla, backpage: home')" id="downloads-btn">Vanilla Minecraft</button>
+	<button onclick="javascript:goNav('${repository}, page: platform, backpage: home')" id="downloads-btn">Specific Modloader</button>
 	<br />
 	<br />
+	<?jcil
+	run select()
+	?>
 </div>

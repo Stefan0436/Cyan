@@ -3,8 +3,10 @@ package org.asf.cyan.webcomponents.downloads;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.List;
 
 import org.asf.cyan.backends.downloads.DownloadsBackend;
@@ -24,7 +26,7 @@ public class GameVersionSelection extends AbstractWebComponent {
 	}
 
 	@Function
-	public void init(FunctionInfo function) {
+	public void init(FunctionInfo function) throws UnsupportedEncodingException {
 		if (!DownloadsBackend.isReady() || !function.variables.containsKey("platform")
 				|| !function.variables.containsKey("repository"))
 			return;
@@ -39,11 +41,15 @@ public class GameVersionSelection extends AbstractWebComponent {
 		List<String> versions = backend.getVersions(new FunctionInfo(function)
 				.setParams(function.variables.get("platform"), function.variables.get("repository")));
 		String button = "\t<button onclick=\"javascript:goNav('${repository}, page: " + target
-				+ ", version: %v, platform: " + function.variables.get("platform")
+				+ ", version: %v, platform: " + function.variables.get("platform") + ", backpage: %b"
 				+ "')\" id=\"downloads-btn\">%v</button>\n";
+
 		StringBuilder versionString = new StringBuilder();
 		for (String version : versions) {
-			versionString.append(button.replace("%v", version));
+			versionString.append(button.replace("%v", version).replace("%b",
+					URLEncoder.encode("gameversion, redirect: " + target.replace("%v", version) + ", version: "
+							+ version + ", platform: " + function.variables.get("platform") + ", backpage: "
+							+ URLEncoder.encode(function.variables.get("backpage"), "UTF-8"), "UTF-8")));
 		}
 		function.variables.put("versionbuttons", versionString.toString());
 	}

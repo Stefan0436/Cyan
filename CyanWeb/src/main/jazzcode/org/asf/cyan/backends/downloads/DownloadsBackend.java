@@ -124,6 +124,11 @@ public class DownloadsBackend extends JWebService {
 					(str) -> function.write(str), function.variables, (obj) -> {
 					}, function.getServer(), function.getContextRoot(), function.getServerContext(),
 					function.getClient(), null, null, null);
+
+			runFunction("compiler", function.getRequest(), function.getResponse(), function.getPagePath(),
+					(str) -> function.write(str), function.variables, (obj) -> {
+					}, function.getServer(), function.getContextRoot(), function.getServerContext(),
+					function.getClient(), null, null, null);
 		}
 	}
 
@@ -326,14 +331,15 @@ public class DownloadsBackend extends JWebService {
 
 			try {
 				File buildDir = new File(sourcesDir, "build/Wrapper");
-				File modkit = new File(sourcesDir, "modkit");
-				File coremodkit = new File(sourcesDir, "coremodkit");
+				File modkit = new File(sourcesDir, "modkit-" + info.gameVersion);
+				File coremodkit = new File(sourcesDir, "coremodkit-" + info.gameVersion);
 				File server = new File(buildDir, "Server jars");
 				server = server.listFiles(f -> f.isDirectory())[0];
 
 				File client = new File(buildDir, manifest.libraryVersions.get("CyanWrapper") + "/.minecraft");
 				if (server.exists()) {
-					File serverZip = new File(outputBase, "server.zip");
+					File serverZip = new File(outputBase, "cyan-server-" + info.gameVersion + "-" + info.platform + "-"
+							+ info.platformVersion + "-" + info.cyanVersion + ".zip");
 					Zipper zipper = new Zipper(info, server, serverZip, output);
 					zipper.start();
 				}
@@ -341,21 +347,25 @@ public class DownloadsBackend extends JWebService {
 					deleteDir(new File(client, "versions")
 							.listFiles(f -> f.isDirectory() && f.getName().endsWith("-dbg"))[0]);
 
-					File clientZip = new File(outputBase, "client.zip");
+					File clientZip = new File(outputBase, "cyan-client-" + info.gameVersion + "-" + info.platform + "-"
+							+ info.platformVersion + "-" + info.cyanVersion + ".zip");
 					Zipper zipper = new Zipper(info, client, clientZip, output);
 					zipper.start();
 				}
 				if (modkit.exists()) {
-					File modkitZip = new File(outputBase, "modkit.zip");
+					File modkitZip = new File(outputBase, "cyan-modkit-" + info.gameVersion + "-" + info.platform + "-"
+							+ info.platformVersion + "-" + info.cyanVersion + ".zip");
 					Zipper zipper = new Zipper(info, modkit, modkitZip, output);
 					zipper.start();
 				}
 				if (coremodkit.exists()) {
-					File modkitZip = new File(outputBase, "coremodkit.zip");
+					File modkitZip = new File(outputBase, "cyan-coremodkit-" + info.gameVersion + "-" + info.platform
+							+ "-" + info.platformVersion + "-" + info.cyanVersion + ".zip");
 					Zipper zipper = new Zipper(info, coremodkit, modkitZip, output);
 					zipper.start();
 				}
 
+				info.dir = outputBase;
 				info.status = "Done";
 				Thread.sleep(6000);
 				while (true) {
@@ -522,6 +532,19 @@ public class DownloadsBackend extends JWebService {
 				}
 			}
 		}
+
+		versions.sort((a, b) -> -Version.fromString(a).compareTo(Version.fromString(b)));
+		return versions;
+	}
+
+	@Function
+	public List<String> getCyanLTSVersions(FunctionInfo function) {
+		setup(function);
+		ArrayList<String> versions = new ArrayList<String>();
+		for (String version : manifest.longTermSupportVersions) {
+			versions.add(version);
+		}
+		versions.sort((a, b) -> -Version.fromString(a).compareTo(Version.fromString(b)));
 		return versions;
 	}
 

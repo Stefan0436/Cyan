@@ -28,6 +28,7 @@ public class Platform extends AbstractWebComponent {
 			return;
 
 		DocumentController controller = DocumentController.getNewController();
+		function.variables.putAll(function.namedParameters);
 		function.variables.put("repository", function.parameters[0]);
 		FileInputStream strm = new FileInputStream(new File(
 				new File(function.getServerContext().getSourceDirectory(),

@@ -14,7 +14,6 @@ import org.asf.connective.usermanager.UserManagerModule;
 import org.asf.connective.usermanager.api.AuthResult;
 import org.asf.connective.usermanager.api.IAuthFrontend;
 import org.asf.cyan.api.packet.PacketBuilder;
-import org.asf.cyan.backends.MultipartFormdata;
 import org.asf.cyan.backends.news.NewsBackend;
 import org.asf.cyan.backends.news.NewsMessage;
 import org.asf.cyan.webcomponents.Menubar;
@@ -26,6 +25,7 @@ import org.asf.jazzcode.cookies.Cookie;
 import org.asf.jazzcode.cookies.Cookie.CookieOption;
 import org.asf.jazzcode.util.QueryUtil;
 import org.asf.jazzcode.util.ServiceManager;
+import org.asf.jazzcode.util.MultipartFormdata;
 import org.asf.rats.Memory;
 
 public class UploadNews extends AbstractWebComponent {

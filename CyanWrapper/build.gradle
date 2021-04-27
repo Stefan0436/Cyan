@@ -1232,6 +1232,7 @@ processResources {
 	println "Logging file SHA1: "+logSha
 	println ""
 
+	boolean wasLTS = false
 	def ltscyanversions=[]
 	def unsupportedcyan=[]
 	def unsupported = ""
@@ -1316,7 +1317,10 @@ processResources {
 		}
 
 		for (def ltsver : info.longTermSupportVersions) {
-			if (ltsver.equals(cyanversion)) continue
+			if (ltsver.equals(cyanversion)) {
+				wasLTS = true
+				continue;
+			}
 			ltscyanversions.add(ltsver)
 		}
 
@@ -1364,6 +1368,50 @@ processResources {
 		}
 	}
 	
+	if (project.hasProperty("removeLTSVersions")) {
+		for (String ltsver : project.getProperty("removeLTSVersions").split(" ")) {
+			def ltsid = "lts-" + ltsver
+			def ltsgameversions = new ArrayList<String>()
+			
+			for (String key : new ArrayList<String>(gameVersions.keySet())) {
+				String val = gameVersions.get(key)
+				if (val.equals(ltsver) && key.endsWith("-" + ltsid)) {
+					gameVersions.remove(key)
+					ltsgameversions.add(key)
+				}
+			}
+			
+			for (String key : paperSupportVersions.keySet()) {
+				String val = paperSupportVersions.get(key)
+				if (val.equals(ltsver) && (key.endsWith("-" + ltsid) || key.startsWith(ltsid + "-"))) {
+					paperSupportVersions.remove(key)
+					break
+				}
+			}
+			for (String key : forgeSupportVersions.keySet()) {
+				String val = forgeSupportVersions.get(key)
+				if (val.equals(ltsver) && key.endsWith("-" + ltsid) || key.startsWith(ltsid + "-")) {
+					forgeSupportVersions.remove(key)
+					break
+				}
+			}
+			for (String key : fabricSupportVersions.keySet()) {
+				String val = fabricSupportVersions.get(key)
+				if (val.equals(ltsver) && key.endsWith("-" + ltsid) || key.startsWith(ltsid + "-")) {
+					fabricSupportVersions.remove(key)
+					break
+				}
+			}
+			for (String key : paperSupportVersions.keySet()) {
+				String val = paperSupportVersions.get(key)
+				if (val.equals(ltsver) && key.endsWith("-" + ltsid) || key.startsWith(ltsid + "-")) {
+					paperSupportVersions.remove(key)
+					break
+				}
+			}
+		}
+	}
+	
 	if (project.hasProperty("removeFromLatest")) {
 		for (String key : gameVersions.keySet()) {
 			String val = gameVersions.get(key)
@@ -1374,21 +1422,21 @@ processResources {
 		}
 		for (String key : paperSupportVersions.keySet()) {
 			String val = paperSupportVersions.get(key)
-			if (val.equals(cyanversion) && (key.endsWith("-latest") || key.startsWith("latest-") || key.equals("latest"))) {
+			if (val.equals(cyanversion) && (key.endsWith("-latest") || key.startsWith("latest-paper-") || key.equals("latest-paper"))) {
 				paperSupportVersions.remove(key)
 				break
 			}
 		}
 		for (String key : forgeSupportVersions.keySet()) {
 			String val = forgeSupportVersions.get(key)
-			if (val.equals(cyanversion) && key.endsWith("-latest") || key.startsWith("latest-")) {
+			if (val.equals(cyanversion) && key.endsWith("-latest") || key.startsWith("latest-forge-") || key.equals("latest-forge")) {
 				forgeSupportVersions.remove(key)
 				break
 			}
 		}
 		for (String key : fabricSupportVersions.keySet()) {
 			String val = fabricSupportVersions.get(key)
-			if (val.equals(cyanversion) && key.endsWith("-latest") || key.startsWith("latest-")) {
+			if (val.equals(cyanversion) && key.endsWith("-latest") || key.startsWith("latest-fabric-") || key.equals("latest-fabric")) {
 				fabricSupportVersions.remove(key)
 				break
 			}
@@ -1409,21 +1457,21 @@ processResources {
 		}
 		for (String key : paperSupportVersions.keySet()) {
 			String val = paperSupportVersions.get(key)
-			if (val.equals(cyanversion) && (key.endsWith("-stable") || key.startsWith("stable-") || key.equals("stable"))) {
+			if (val.equals(cyanversion) && (key.endsWith("-stable") || key.startsWith("stable-paper-") || key.equals("stable-paper"))) {
 				paperSupportVersions.remove(key)
 				break
 			}
 		}
 		for (String key : forgeSupportVersions.keySet()) {
 			String val = forgeSupportVersions.get(key)
-			if (val.equals(cyanversion) && key.endsWith("-stable") || key.startsWith("stable-")) {
+			if (val.equals(cyanversion) && key.endsWith("-stable") || key.startsWith("stable-forge-") || key.equals("stable-forge")) {
 				forgeSupportVersions.remove(key)
 				break
 			}
 		}
 		for (String key : fabricSupportVersions.keySet()) {
 			String val = fabricSupportVersions.get(key)
-			if (val.equals(cyanversion) && key.endsWith("-stable") || key.startsWith("stable-")) {
+			if (val.equals(cyanversion) && key.endsWith("-stable") || key.startsWith("stable-fabric-") || key.equals("stable-fabric")) {
 				fabricSupportVersions.remove(key)
 				break
 			}
@@ -1444,21 +1492,21 @@ processResources {
 		}
 		for (String key : paperSupportVersions.keySet()) {
 			String val = paperSupportVersions.get(key)
-			if (val.equals(cyanversion) && (key.endsWith("-testing") || key.startsWith("testing-") || key.equals("testing"))) {
+			if (val.equals(cyanversion) && (key.endsWith("-testing") || key.startsWith("testing-paper-") || key.equals("testing-paper"))) {
 				paperSupportVersions.remove(key)
 				break
 			}
 		}
 		for (String key : forgeSupportVersions.keySet()) {
 			String val = forgeSupportVersions.get(key)
-			if (val.equals(cyanversion) && key.endsWith("-testing") || key.startsWith("testing-")) {
+			if (val.equals(cyanversion) && key.endsWith("-testing") || key.startsWith("testing-forge-") || key.equals("testing-forge")) {
 				forgeSupportVersions.remove(key)
 				break
 			}
 		}
 		for (String key : fabricSupportVersions.keySet()) {
 			String val = fabricSupportVersions.get(key)
-			if (val.equals(cyanversion) && key.endsWith("-testing") || key.startsWith("testing-")) {
+			if (val.equals(cyanversion) && key.endsWith("-testing") || key.startsWith("testing-fabric-") || || key.equals("testing-fabric")) {
 				fabricSupportVersions.remove(key)
 				break
 			}
@@ -1522,7 +1570,7 @@ processResources {
 				latestSpigotMappings.put(minecraft, mappingsVersion)
 			}
 		}
-	} else if (project.hasProperty("addToStable")) {
+	} else if (project.hasProperty("addToStable") || (project.hasProperty("LTS") && project.getProperty("LTS").equals("true"))) {
 		gameVersions.put(minecraft + "-stable", cyanversion)
 		gameVersions.put(minecraft + "-latest", cyanversion)
 		
@@ -1551,6 +1599,25 @@ processResources {
 				
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-stable", cyanversion);
+				
+				testingSpigotMappings.put(minecraft, mappingsVersion)
+				latestSpigotMappings.put(minecraft, mappingsVersion)
+				stableSpigotMappings.put(minecraft, mappingsVersion)
+			}
+		}
+		
+		if (project.hasProperty("LTS") && project.getProperty("LTS").equals("true")) {
+			gameVersions.put(minecraft + "-lts-" + cyanversion, cyanversion)
+			
+			if (modloader.startsWith("forge-")) {
+				forgeSupportVersions.put("lts-"+cyanversion+"-forge-" + minecraft, loaderversion);
+				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-lts-"+cyanversion, cyanversion);
+			} else if (modloader.startsWith("fabric-loader-")) {
+				fabricSupportVersions.put("lts-"+cyanversion+"-fabric-" + minecraft, loaderversion);
+				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-lts-"+cyanversion, cyanversion);
+			}  else if (modloader.startsWith("paper-")) {
+				paperSupportVersions.put("lts-"+cyanversion+"-paper-" + minecraft, loaderversion);				
+				paperSupportVersions.put(minecraft + "-" + loaderversion + "-lts-"+cyanversion, cyanversion);
 				
 				testingSpigotMappings.put(minecraft, mappingsVersion)
 				latestSpigotMappings.put(minecraft, mappingsVersion)
@@ -1619,7 +1686,7 @@ processResources {
 		paperByMappings += "    $key> '${val}'\n"
 	}
 
-	if (project.hasProperty("LTS") && project.getProperty("LTS").equals("true")) {
+	if ((project.hasProperty("LTS") && project.getProperty("LTS").equals("true")) || (wasLTS && (!project.hasProperty("LTS") || project.getProperty("LTS").equals("true")))) {
 		ltscyanversions.add(cyanversion)
 	}
 

@@ -5,7 +5,7 @@ install "org.asf.cyan.webcomponents.downloads.DownloadPage"
 <style>
 #contentd {
 	text-align: center;
-	margin-top: 12%;
+	margin-top: 8%;
 }
 
 #downloads-btn {
@@ -79,13 +79,18 @@ install "org.asf.cyan.webcomponents.downloads.DownloadPage"
 	</div>
 	<div id="download" style="${style.download}">
 		<h1>Download Cyan (${platform} ${modloaderversion}):</h1>
-		<button onclick="window.location.href='${downloadlink}/client.zip'" id="downloads-btn" class="clientbtn">Download client</button>
-		<button onclick="window.location.href='${downloadlink}/server.zip'" id="downloads-btn" class="serverbtn">Download server</button>
+		<button onclick="window.location.href='${downloadlink}/cyan-client-${version}-${platform}-${modloaderversion}.zip'" id="downloads-btn" class="clientbtn">Download client</button>
+		<button onclick="window.location.href='https://aerialworks.ddns.net/maven/org/asf/cyan/CyanLoader-Sources/${cyanversion}/CyanLoader-Sources-${cyanversion}-full.zip'" id="downloads-btn" class="sourcesrbtn">Download sources</button>
+		<button onclick="window.location.href='${downloadlink}/cyan-server-${version}-${platform}-${modloaderversion}.zip'" id="downloads-btn" class="serverbtn">Download server</button>
+		<div id="modkits" style="${style.modkits}">
+			<button onclick="window.location.href='${downloadlink}/cyan-modkit-${version}-${platform}-${modloaderversion}.zip'" id="downloads-btn" class="modkitbtn">Download ModKit</button>
+			<button onclick="window.location.href='${downloadlink}/cyan-coremodkit-${version}-${platform}-${modloaderversion}.zip'" id="downloads-btn" class="coremodkitbtn">Download CoreModKit</button>
+		</div>
 		<br/>
 		<br/>
 	</div>
 	
-	<button onclick="javascript:goNav('${repository}, page: ${targetpage}, version: ${version}, platform: ${platform}')" id="downloads-btn">Go
+	<button onclick="javascript:goNav('${repository}, page: ${targetpage}, version: ${version}, platform: ${platform}, backpage: ${backpage}')" id="downloads-btn">Go
 		back</button>
 	<br/>
 </div>

@@ -19,6 +19,13 @@ function updateLog(platform, repo, game, modloader) {
 					if (platform === "paper") {
 						document.getElementsByClassName("clientbtn")[0].style.display = "none";
 					}
+					
+					if (json.coremodkit === "false") {
+						document.getElementsByClassName("coremodkitbtn")[0].style.display = "none";
+					}
+					if (json.modkit === "false") {
+						document.getElementsByClassName("modkitbtn")[0].style.display = "none";
+					}
 				}
    			}
 		}
