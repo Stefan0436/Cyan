@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLEncoder;
+import java.util.Map;
 
 import org.asf.cyan.backends.downloads.DownloadsBackend;
 import org.asf.jazzcode.components.AbstractWebComponent;
 import org.asf.jazzcode.components.FunctionInfo;
 import org.asf.jazzcode.components.annotations.Function;
 import org.asf.jazzcode.components.annotations.Referenceable;
+import org.asf.jazzcode.util.QueryUtil;
 import org.asf.jazzcode.util.ServiceManager;
 
 public class Downloads extends AbstractWebComponent {
@@ -39,7 +41,94 @@ public class Downloads extends AbstractWebComponent {
 	}
 
 	@Function
+	public boolean setToSpecificPage(FunctionInfo function) {
+		boolean ready = true;
+		if (!DownloadsBackend.isReady()) {
+			ready = false;
+		}
+		try {
+			backend = ServiceManager.getDefault().getSyntheticService(DownloadsBackend.class,
+					getGenericServiceInterface());
+		} catch (IOException e) {
+		}
+		if (ready) {
+			Map<String, String> query = QueryUtil.parseQuery(function.getRequest().query);
+			if (query.containsKey("modloader")) {
+				String loader = query.get("modloader");
+				String repo = backend.getFirstType(function);
+				if (query.containsKey("repository") && (query.get("repository").equals("testing")
+						|| query.get("repository").equals("latest") || query.get("repository").equals("stable")
+						|| query.get("repository").equals("lts") || query.get("repository").startsWith("lts-"))) {
+					repo = query.get("repository");
+				}
+				if (loader.equals("vanilla") || loader.equals("fabric") || loader.equals("forge")
+						|| loader.equals("paper")) {
+					String gameVersion = null;
+					if (query.containsKey("gameversion")) {
+						gameVersion = query.get("gameversion");
+					}
+
+					if (gameVersion == null) {
+						if (loader.equals("vanilla")) {
+							function.variables.put("manuallyAssignedPage",
+									repo + ", page: gameversion, platform: vanilla, backpage: home");
+						} else {
+							function.variables.put("manuallyAssignedPage",
+									repo + ", page: gameversion, redirect: modloaderversions, platform: " + loader
+											+ ", backpage: home");
+						}
+					} else {
+						FunctionInfo inter = new FunctionInfo(function).setParams(loader, repo);
+
+						final String gameFinal = gameVersion;
+						if (!backend.getVersions(inter).stream().anyMatch(t -> t.equals(gameFinal)))
+							return false;
+
+						String loaderVersion = null;
+						if (query.containsKey("loaderversion")) {
+							loaderVersion = query.get("loaderversion");
+						}
+
+						final String loaderFinal = loaderVersion;
+						inter = new FunctionInfo(function).setParams(gameVersion, repo, loader);
+						if (loaderVersion != null
+								&& !backend.getModloaderVersions(inter).stream().anyMatch(t -> t.equals(loaderFinal))) {
+							return false;
+						}
+
+						if (loader.equals("vanilla")) {
+							function.variables.put("manuallyAssignedPage",
+									repo + ", page: downloads, version: " + gameVersion + ", modloaderversion: "
+											+ gameVersion + ", platform: vanilla, backpage: home");
+						} else {
+							if (loaderVersion == null) {
+								function.variables.put("manuallyAssignedPage",
+										repo + ", page: modloaderversions, version: " + gameVersion + ", platform: "
+												+ loader + ", backpage: home");
+							} else {
+								function.variables.put("manuallyAssignedPage",
+										repo + ", page: downloads, version: " + gameVersion + ", modloaderversion: "
+												+ loaderVersion + ", platform: " + loader + ", backpage: home");
+							}
+						}
+					}
+
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	@Function
 	public void init(FunctionInfo function) throws UnsupportedEncodingException {
+		Map<String, String> query = QueryUtil.parseQuery(function.getRequest().query);
+		if (query.containsKey("repository") && (query.get("repository").equals("testing")
+				|| query.get("repository").equals("latest") || query.get("repository").equals("stable")
+				|| query.get("repository").equals("lts") || query.get("repository").startsWith("lts-"))) {
+			function.variables.put("menuentry", query.get("repository"));
+		}
 		boolean ready = true;
 		if (!DownloadsBackend.isReady()) {
 			ready = false;
@@ -52,7 +141,7 @@ public class Downloads extends AbstractWebComponent {
 		if (ready) {
 			function.variables.put("http.path",
 					URLEncoder.encode(URLEncoder.encode(getRequest().path, "UTF-8"), "UTF-8"));
-			function.variables.put("menuentry", backend.getFirstType(function));
+			function.variables.putIfAbsent("menuentry", backend.getFirstType(function));
 		} else {
 			function.writeLine("<script>");
 			function.writeLine("\tfunction checkBackend() {");

@@ -26,14 +26,16 @@ public class Platform extends AbstractWebComponent {
 		if (function.parameters.length != 1)
 			return;
 
+		File source = new File(function.getServerContext().getSourceDirectory());
+		File f = new File(function.getServerContext().getSourceDirectory(), function.namedParameters.get("execPath"))
+				.getParentFile();
+		if (!f.getCanonicalPath().startsWith(source.getCanonicalPath()))
+			return;
+
 		DocumentController controller = DocumentController.getNewController();
 		function.variables.putAll(function.namedParameters);
 		function.variables.put("repository", function.parameters[0]);
-		FileInputStream strm = new FileInputStream(
-				new File(
-						new File(function.getServerContext().getSourceDirectory(),
-								function.namedParameters.get("execPath")).getParentFile(),
-						"/webcomponents/downloads/Platform.java.html"));
+		FileInputStream strm = new FileInputStream(new File(f, "/webcomponents/downloads/Platform.java.html"));
 		controller.connectServer(function).addDefaultCommands().attachReader(() -> {
 			try {
 				return strm.read();

@@ -91,14 +91,17 @@ public class ModloaderVersionSelection extends AbstractWebComponent {
 		if (function.parameters.length != 1)
 			return;
 
+		File source = new File(function.getServerContext().getSourceDirectory());
+		File f = new File(function.getServerContext().getSourceDirectory(), function.namedParameters.get("execPath"))
+				.getParentFile();
+		if (!f.getCanonicalPath().startsWith(source.getCanonicalPath()))
+			return;
+
 		DocumentController controller = DocumentController.getNewController();
 		function.variables.put("repository", function.parameters[0]);
 		function.variables.putAll(function.namedParameters);
 		FileInputStream strm = new FileInputStream(
-				new File(
-						new File(function.getServerContext().getSourceDirectory(),
-								function.namedParameters.get("execPath")).getParentFile(),
-						"/webcomponents/downloads/ModloaderVersionSelection.java.html"));
+				new File(f, "/webcomponents/downloads/ModloaderVersionSelection.java.html"));
 		controller.connectServer(function).addDefaultCommands().attachReader(() -> {
 			try {
 				return strm.read();

@@ -76,6 +76,18 @@
 				go("${menuentry}");
 			})
 		</script>
+			
+		<?jcil
+		if setToSpecificPage() do writeline >>>
+		
+		<script>
+		$(document).ready(function() {
+			goNav("${manuallyAssignedPage}");
+		})
+		</script>
+
+		!EOF
+		?>
 	</div>
 </body>
 </html>

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URLDecoder;
 
 import org.asf.cyan.backends.downloads.DownloadsBackend;
 import org.asf.cyan.backends.downloads.DownloadsBackend.CompileInfo;
@@ -189,13 +188,16 @@ public class DownloadPage extends AbstractWebComponent {
 		if (function.parameters.length != 1)
 			return;
 
+		File source = new File(function.getServerContext().getSourceDirectory());
+		File f = new File(function.getServerContext().getSourceDirectory(), function.namedParameters.get("execPath"))
+				.getParentFile();
+		if (!f.getCanonicalPath().startsWith(source.getCanonicalPath()))
+			return;
+
 		DocumentController controller = DocumentController.getNewController();
 		function.variables.put("repository", function.parameters[0]);
 		function.variables.putAll(function.namedParameters);
-		FileInputStream strm = new FileInputStream(new File(
-				new File(function.getServerContext().getSourceDirectory(),
-						URLDecoder.decode(function.namedParameters.get("execPath"), "UTF-8")).getParentFile(),
-				"/webcomponents/downloads/DownloadPage.java.html"));
+		FileInputStream strm = new FileInputStream(new File(f, "/webcomponents/downloads/DownloadPage.java.html"));
 		controller.connectServer(function).addDefaultCommands().attachReader(() -> {
 			try {
 				return strm.read();

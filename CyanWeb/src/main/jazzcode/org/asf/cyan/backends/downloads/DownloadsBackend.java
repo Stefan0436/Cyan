@@ -689,6 +689,9 @@ public class DownloadsBackend extends JWebService {
 					versionMap = manifest.fabricSupport;
 				else if (platform.equals("paper"))
 					versionMap = manifest.paperSupport;
+				if (versionMap == null) {
+					return versions;
+				}
 
 				for (String version : versionMap.keySet()) {
 					if (version.startsWith(gameversion + "-") && version.endsWith("-" + repository)) {
