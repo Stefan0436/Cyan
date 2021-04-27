@@ -33,32 +33,6 @@ public class UploadPreview extends AbstractWebComponent {
 
 	@Function
 	@Referenceable
-	public void back(FunctionInfo function) throws IOException {
-		boolean ready = true;
-		if (!NewsBackend.isReady()) {
-			ready = false;
-		}
-		try {
-			backend = ServiceManager.getDefault().getSyntheticService(NewsBackend.class, getGenericServiceInterface());
-		} catch (IOException e) {
-		}
-		if (ready && function.parameters.length == 1) {
-			String group = backend.getUploadGroup(function);
-			IAuthFrontend frontend = Memory.getInstance().get("usermanager.auth.frontend")
-					.getValue(IAuthFrontend.class);
-
-			if (frontend.check(group, getRequest(), getResponse())
-					&& function.namedParameters.containsKey("publishpage")) {
-				getResponse().status = 302;
-				getResponse().message = "File found";
-				getResponse().headers.put("Location",
-						URLDecoder.decode(function.namedParameters.get("publishpage"), "UTF-8"));
-			}
-		}
-	}
-
-	@Function
-	@Referenceable
 	public void confirm(FunctionInfo function) throws IOException {
 		boolean ready = true;
 		if (!NewsBackend.isReady()) {
