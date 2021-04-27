@@ -5,8 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,22 +41,18 @@ public class ModloaderVersionSelection extends AbstractWebComponent {
 				.getModloaderVersions(new FunctionInfo(function).setParams(function.variables.get("version"),
 						function.variables.get("repository"), function.variables.get("platform")));
 
-		String backpage = URLEncoder.encode(URLEncoder.encode(
-				"modloaderversions, platform: " + function.variables.get("platform") + ", version: "
-						+ function.variables.get("version") + ", backpage: " + function.variables.get("backpage"),
-				"UTF-8"), "UTF-8");
+		String backpage = "modloaderversions, platform: " + function.variables.get("platform") + ", version: "
+				+ function.variables.get("version") + ", backpage: "
+				+ DownloadsBackend.jcEncodeParam(function.variables.get("backpage"));
 
-		String button = "\t<button onclick=\"javascript:goNav('${repository}, page: " + target + ", version: "
-				+ function.variables.get("version") + ", platform: " + function.variables.get("platform")
-				+ ", backpage: " + backpage + "')\" id=\"downloads-btn\">#%v</button>\n";
+		String dest = "${repository}, page: " + target
+				+ DownloadsBackend.jcEncode(", version: " + function.variables.get("version") + ", platform: "
+						+ function.variables.get("platform") + ", backpage: " + DownloadsBackend.jcEncode(backpage));
 
-		String buttonCompiling = "\t<button onclick=\"javascript:goNav('${repository}, page: " + target + ", version: "
-				+ function.variables.get("version") + ", platform: " + function.variables.get("platform")
-				+ ", backpage: " + backpage + "')\" id=\"downloads-btn-compiling\">#%v</button>\n";
-
-		String buttonNonCompiled = "\t<button onclick=\"javascript:goNav('${repository}, page: " + target
-				+ ", version: " + function.variables.get("version") + ", platform: "
-				+ function.variables.get("platform") + ", backpage: " + backpage
+		String button = "\t<button onclick=\"javascript:goNav('" + dest + "')\" id=\"downloads-btn\">#%v</button>\n";
+		String buttonCompiling = "\t<button onclick=\"javascript:goNav('" + dest
+				+ "')\" id=\"downloads-btn-compiling\">#%v</button>\n";
+		String buttonNonCompiled = "\t<button onclick=\"javascript:goNav('" + dest
 				+ "')\" id=\"downloads-btn-noncompiled\">#%v</button>\n";
 
 		StringBuilder versionString = new StringBuilder();
@@ -100,23 +94,18 @@ public class ModloaderVersionSelection extends AbstractWebComponent {
 		DocumentController controller = DocumentController.getNewController();
 		function.variables.put("repository", function.parameters[0]);
 		function.variables.putAll(function.namedParameters);
-		FileInputStream strm = new FileInputStream(new File(
-				new File(function.getServerContext().getSourceDirectory(),
-						URLDecoder.decode(function.namedParameters.get("execPath"), "UTF-8")).getParentFile(),
-				"/webcomponents/downloads/ModloaderVersionSelection.java.html"));
+		FileInputStream strm = new FileInputStream(
+				new File(
+						new File(function.getServerContext().getSourceDirectory(),
+								function.namedParameters.get("execPath")).getParentFile(),
+						"/webcomponents/downloads/ModloaderVersionSelection.java.html"));
 		controller.connectServer(function).addDefaultCommands().attachReader(() -> {
 			try {
 				return strm.read();
 			} catch (IOException e) {
 				return -1;
 			}
-		}).attachStringWriter();
-		controller.attachResultEvent((output) -> {
-			for (String key : function.variables.keySet()) {
-				output = output.replace("${" + key + "}", function.variables.get(key));
-			}
-			return output;
-		});
+		}).attachDocumentStringWriter();
 		controller.getProcessor().process();
 		function.write(controller.getStringWriterResult());
 		strm.close();

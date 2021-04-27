@@ -5,8 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.List;
 
 import org.asf.cyan.backends.downloads.DownloadsBackend;
@@ -40,16 +38,17 @@ public class GameVersionSelection extends AbstractWebComponent {
 		String target = function.variables.getOrDefault("redirect", "downloads, modloaderversion: %v");
 		List<String> versions = backend.getVersions(new FunctionInfo(function)
 				.setParams(function.variables.get("platform"), function.variables.get("repository")));
-		String button = "\t<button onclick=\"javascript:goNav('${repository}, page: " + target
-				+ ", version: %v, platform: " + function.variables.get("platform") + ", backpage: %b"
-				+ "')\" id=\"downloads-btn\">%v</button>\n";
+		String url = ", page: " + target + ", version: %v, platform: " + function.variables.get("platform")
+				+ ", backpage: %b";
+		String button = "\t<button onclick=\"javascript:goNav('%u')\" id=\"downloads-btn\">%v</button>\n";
 
 		StringBuilder versionString = new StringBuilder();
 		for (String version : versions) {
-			versionString.append(button.replace("%v", version).replace("%b",
-					URLEncoder.encode("gameversion, redirect: " + target.replace("%v", version) + ", version: "
-							+ version + ", platform: " + function.variables.get("platform") + ", backpage: "
-							+ URLEncoder.encode(function.variables.get("backpage"), "UTF-8"), "UTF-8")));
+			String backpage = "gameversion, platform: " + function.variables.get("platform") + ", redirect: " + target
+					+ ", backpage: " + DownloadsBackend.jcEncodeParam(function.variables.get("backpage"));
+			String btnU = url.replace("%v", version).replace("%b", DownloadsBackend.jcEncode(backpage));
+			versionString.append(
+					button.replace("%v", version).replace("%u", "${repository}" + DownloadsBackend.jcEncode(btnU)));
 		}
 		function.variables.put("versionbuttons", versionString.toString());
 	}
@@ -62,23 +61,18 @@ public class GameVersionSelection extends AbstractWebComponent {
 		DocumentController controller = DocumentController.getNewController();
 		function.variables.put("repository", function.parameters[0]);
 		function.variables.putAll(function.namedParameters);
-		FileInputStream strm = new FileInputStream(new File(
-				new File(function.getServerContext().getSourceDirectory(),
-						URLDecoder.decode(function.namedParameters.get("execPath"), "UTF-8")).getParentFile(),
-				"/webcomponents/downloads/GameVersionSelection.java.html"));
+		FileInputStream strm = new FileInputStream(
+				new File(
+						new File(function.getServerContext().getSourceDirectory(),
+								function.namedParameters.get("execPath")).getParentFile(),
+						"/webcomponents/downloads/GameVersionSelection.java.html"));
 		controller.connectServer(function).addDefaultCommands().attachReader(() -> {
 			try {
 				return strm.read();
 			} catch (IOException e) {
 				return -1;
 			}
-		}).attachStringWriter();
-		controller.attachResultEvent((output) -> {
-			for (String key : function.variables.keySet()) {
-				output = output.replace("${" + key + "}", function.variables.get(key));
-			}
-			return output;
-		});
+		}).attachDocumentStringWriter();
 		controller.getProcessor().process();
 		function.write(controller.getStringWriterResult());
 		strm.close();

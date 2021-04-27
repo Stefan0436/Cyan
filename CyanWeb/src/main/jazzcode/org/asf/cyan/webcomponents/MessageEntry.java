@@ -30,13 +30,7 @@ public class MessageEntry extends AbstractWebComponent {
 			} catch (IOException e) {
 				return -1;
 			}
-		}).attachStringWriter();
-		controller.attachResultEvent((output) -> {
-			for (String key : function.variables.keySet()) {
-				output = output.replace("${" + key + "}", function.variables.get(key));
-			}
-			return output;
-		});
+		}).attachDocumentStringWriter();
 		controller.getProcessor().process();
 		function.write(controller.getStringWriterResult());
 		strm.close();

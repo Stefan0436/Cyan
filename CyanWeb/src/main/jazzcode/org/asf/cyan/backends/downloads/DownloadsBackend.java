@@ -7,10 +7,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Enumeration;
@@ -46,6 +48,15 @@ public class DownloadsBackend extends JWebService {
 
 		public String id;
 		public File dir;
+	}
+
+	public static String jcEncodeParam(String input) throws UnsupportedEncodingException {
+		return input.replace("%", "%25").replace(":", "%3A").replace(",", "%2C");
+	}
+
+	public static String jcEncode(String input) throws UnsupportedEncodingException {
+		return URLEncoder.encode(input.replace("%", "%25").replace("?", "%3F").replace("&", "%26").replace("/", "%2F"),
+				"UTF-8");
 	}
 
 	private ArrayList<CompileInfo> compileQueue = new ArrayList<CompileInfo>();
@@ -124,11 +135,6 @@ public class DownloadsBackend extends JWebService {
 					(str) -> function.write(str), function.variables, (obj) -> {
 					}, function.getServer(), function.getContextRoot(), function.getServerContext(),
 					function.getClient(), null, null, null);
-
-			runFunction("compiler", function.getRequest(), function.getResponse(), function.getPagePath(),
-					(str) -> function.write(str), function.variables, (obj) -> {
-					}, function.getServer(), function.getContextRoot(), function.getServerContext(),
-					function.getClient(), null, null, null);
 		}
 	}
 
@@ -155,64 +161,62 @@ public class DownloadsBackend extends JWebService {
 
 	@Function
 	private void compiler(FunctionInfo function) throws InterruptedException {
-		while (selecting) {
-			Thread.sleep(100);
-		}
-		selecting = true;
+		while (true) {
+			while (selecting) {
+				Thread.sleep(100);
+			}
+			selecting = true;
 
-		if (this.compileQueue.size() != 0) {
-			CompileInfo info = compileQueue.remove(0);
+			if (this.compileQueue.size() != 0) {
+				CompileInfo info = compileQueue.remove(0);
+				selecting = false;
+
+				File dir = new File(function.getServerContext().getSourceDirectory(), "cyan/versions/"
+						+ info.cyanVersion + "/" + info.gameVersion + "/" + info.platform + "/" + info.platformVersion);
+				if (dir.exists()) {
+					info.status = "Done";
+					while (true) {
+						try {
+							if (compilingVersions.containsKey(info.id))
+								compilingVersions.remove(info.id);
+							break;
+						} catch (ConcurrentModificationException ex) {
+						}
+					}
+				}
+
+				try {
+					info.outputLog += System.lineSeparator();
+					CompilerOutputStream output = new CompilerOutputStream(info);
+					output.writeLine("Preparing to compile...");
+					info.status = "Preparing...";
+
+					runCompiler(info, output, function);
+
+					output.close();
+				} catch (Exception e) {
+					info.outputLog += "Compilation process failed!" + System.lineSeparator();
+					info.outputLog += "Exception was thrown: " + e.getClass().getTypeName() + ": " + e.getMessage()
+							+ System.lineSeparator();
+					for (StackTraceElement ele : e.getStackTrace()) {
+						info.outputLog += "    at " + ele + System.lineSeparator();
+					}
+					info.status = "Fatal Error";
+					Thread.sleep(6000);
+					while (true) {
+						try {
+							if (compilingVersions.containsKey(info.id))
+								compilingVersions.remove(info.id);
+							break;
+						} catch (ConcurrentModificationException ex) {
+						}
+					}
+				}
+			}
+
 			selecting = false;
-
-			File dir = new File(function.getServerContext().getSourceDirectory(), "cyan/versions/" + info.cyanVersion
-					+ "/" + info.gameVersion + "/" + info.platform + "/" + info.platformVersion);
-			if (dir.exists()) {
-				info.status = "Done";
-				while (true) {
-					try {
-						if (compilingVersions.containsKey(info.id))
-							compilingVersions.remove(info.id);
-						break;
-					} catch (ConcurrentModificationException ex) {
-					}
-				}
-			}
-
-			try {
-				info.outputLog += System.lineSeparator();
-				CompilerOutputStream output = new CompilerOutputStream(info);
-				output.writeLine("Preparing to compile...");
-				info.status = "Preparing...";
-
-				runCompiler(info, output, function);
-
-				output.close();
-			} catch (Exception e) {
-				info.outputLog += "Compilation process failed!" + System.lineSeparator();
-				info.outputLog += "Exception was thrown: " + e.getClass().getTypeName() + ": " + e.getMessage()
-						+ System.lineSeparator();
-				for (StackTraceElement ele : e.getStackTrace()) {
-					info.outputLog += "    at " + ele + System.lineSeparator();
-				}
-				info.status = "Fatal Error";
-				Thread.sleep(6000);
-				while (true) {
-					try {
-						if (compilingVersions.containsKey(info.id))
-							compilingVersions.remove(info.id);
-						break;
-					} catch (ConcurrentModificationException ex) {
-					}
-				}
-			}
+			Thread.sleep(10000);
 		}
-
-		selecting = false;
-		Thread.sleep(10000);
-		runFunction("compiler", function.getRequest(), function.getResponse(), function.getPagePath(),
-				(str) -> function.write(str), function.variables, (obj) -> {
-				}, function.getServer(), function.getContextRoot(), function.getServerContext(), function.getClient(),
-				null, null, null);
 	}
 
 	private void runCompiler(CompileInfo info, CompilerOutputStream output, FunctionInfo function)
@@ -432,28 +436,25 @@ public class DownloadsBackend extends JWebService {
 
 	@Function
 	private void refresh(FunctionInfo function) throws InterruptedException, IOException {
-		refreshing = true;
-		try {
-			URL u = new URL(url);
-			InputStream strm = u.openStream();
-			manifest = new UpdateInfo(new String(strm.readAllBytes()));
-			strm.close();
-		} catch (IOException e) {
-
-		}
-		refreshing = false;
-		int i = 0;
 		while (true) {
-			i++;
-			Thread.sleep(1);
-			if (i == 1000 * 60 * 10)
-				break;
-		}
+			refreshing = true;
+			try {
+				URL u = new URL(url);
+				InputStream strm = u.openStream();
+				manifest = new UpdateInfo(new String(strm.readAllBytes()));
+				strm.close();
+			} catch (IOException e) {
 
-		runFunction("refresh", function.getRequest(), function.getResponse(), function.getPagePath(),
-				(str) -> function.write(str), function.variables, (obj) -> {
-				}, function.getServer(), function.getContextRoot(), function.getServerContext(), function.getClient(),
-				null, null, null);
+			}
+			refreshing = false;
+			int i = 0;
+			while (true) {
+				i++;
+				Thread.sleep(1);
+				if (i == 1000 * 60 * 10)
+					break;
+			}
+		}
 	}
 
 	@Function
