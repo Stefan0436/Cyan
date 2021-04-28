@@ -618,7 +618,7 @@ public class DownloadsBackend extends JWebService {
 
 			info.platform = platform;
 			info.platformVersion = modloader;
-			info.outputLog = "In queue... Waiting for compiler slot...";
+			info.outputLog = "In queue... Waiting for compiler slot...\n\nCyan will be compiled on our remote server, your downloads will be available shortly...\n\n";
 			if (modloader == null) {
 				modloader = gameversion;
 			}
