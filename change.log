@@ -1,13 +1,28 @@
-Upcoming Cyan Update: Alpha 12, changes:
- - FLUID Transformer is now an API, when using CyanComponents, CyanTransformer will automatically be used. (FLUID A19) -- TODO: finish up; make the transform method a call chain with an extensive API
- - MTK MSA Account Support (MTK A18) -- TODO
- - Mod Threads API (CyanModding 1.0.0.A12) -- TODO
- - ResourceManager modification to allow mods to set textures -- TODO
- - Mod loading(Cyan 1.0.0.A12) -- TODO
- - Mod listing on crash(Cyan 1.0.0.A12) -- TODO
- - Mod check on login (server/client) -- TODO
- - Debugging environment (Cornflower 1.0.0.A31)
- - CoreModKit Download (Cyan 1.0.0.A12) -- TODO
- - ModKit Download (Cyan 1.0.0.A12) -- TODO
+Cyan Update Changelog: 1.0.0 (Alpha 12):
+
+ // A12
  - 1.15.2 support (Cyan 1.0.0.A12)
- - Multiple platforms/versions (Cornflower 1.0.0.A31) -- TODO
+ - Multiple platforms/versions (Cornflower 1.0.0.A31)
+ - CoreModKit Download (Cyan 1.0.0.A12) -- TODO
+ - Mod listing on crash (Cyan 1.0.0.A12) -- TODO
+ - Debugging environment (Cornflower 1.0.0.A31)
+ 
+ // A13
+ - Instantiated Event Provider (less overhead, CyanUtil 1.0.0.A11) -- TODO
+ - Mod Threads API (CyanModding 1.0.0.A13, count of threads is displayed in crash logs) -- TODO
+ - The FLUID transformer system is now an API. (FLUID A22) -- TODO
+ - MTK MSA Account Support (MTK A18) -- TODO
+ 
+ // A14
+ - ResourceManager modification to allow mods to set textures (Cyan 1.0.0.A14) -- TODO
+ - Packet channel for mods (Cyan 1.0.0.A14) -- TODO
+ - Network events (Cyan 1.0.0.A14) -- TODO
+ - Server-client mod checking (Cyan 1.0.0.A14, mods have annotated methods check their versions, if implemented) -- TODO
+ 
+ // A15
+ - Utility Event Hooks (CyanAPI) -- TODO
+ - Mod loading(Cyan 1.0.0.A12) -- TODO
+ - ModKit Download (Cyan 1.0.0.A12) -- TODO
+ 
+ // B1: LTS
+ 

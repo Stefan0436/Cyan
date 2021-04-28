@@ -753,6 +753,17 @@ public class CyanLoader extends Modloader implements IModProvider {
 									allow = false;
 									break;
 								}
+							} else if (type.startsWith("mappingsversion:")) {
+								String version = type.substring("mappingsversion:".length());
+								boolean found = false;
+								for (Mapping<?> mapping : Fluid.getMappings()) {
+									if (mapping.mappingsVersion != null && mapping.mappingsVersion.equals(version)) {
+										found = true;
+										break;
+									}
+								}
+								if (found)
+									allow = true;
 							} else if (type.equals("any")) {
 								allow = true;
 							}

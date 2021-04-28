@@ -111,7 +111,7 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> impl
 	public HashMap<String, String> platforms = new HashMap<String, String>();
 
 	@Override
-	public void addJar(File jar, String platform, String side, String outDir) {
+	public void addJar(File jar, String platform, String side, String outDir, String loaderVersion, String gameVersion, String mappingsVersion) {
 		String checkString = "any";
 
 		if (platform != null) {
@@ -127,6 +127,30 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> impl
 				checkString += " &";
 
 			checkString += " side:" + side;
+		}
+		if (loaderVersion != null) {
+			if (checkString.equals("any"))
+				checkString = "";
+			else
+				checkString += " &";
+
+			checkString += " loaderversion:" + loaderVersion;
+		}
+		if (gameVersion != null) {
+			if (checkString.equals("any"))
+				checkString = "";
+			else
+				checkString += " &";
+
+			checkString += " gameversion:" + gameVersion;
+		}
+		if (mappingsVersion != null) {
+			if (checkString.equals("any"))
+				checkString = "";
+			else
+				checkString += " &";
+
+			checkString += " mappingsversion:" + mappingsVersion;
 		}
 		if (!checkString.equals("any"))
 			checkString += " ";

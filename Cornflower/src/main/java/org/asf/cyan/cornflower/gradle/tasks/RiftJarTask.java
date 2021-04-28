@@ -10,7 +10,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import org.asf.cyan.api.modloader.information.game.GameSide;
-import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
+import org.asf.cyan.cornflower.gradle.utilities.modding.IPlatformConfiguration;
 import org.asf.cyan.cornflower.gradle.utilities.ITaskExtender;
 import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender;
 import org.asf.cyan.fluid.bytecode.FluidClassPool;
@@ -36,10 +36,10 @@ public class RiftJarTask extends AbstractArchiveTask implements ITaskExtender {
 	public String mappings_identifier = null;
 	public File mappings_savedir = null;
 
-	public LaunchPlatform platform;
+	public IPlatformConfiguration platform;
 	public GameSide side;
 
-	public void platform(LaunchPlatform platform) {
+	public void platform(IPlatformConfiguration platform) {
 		this.platform = platform;
 	}
 

@@ -135,26 +135,76 @@ public class CyanModfileManifestGenerator {
 		jar(jarfile.get(), platform, side, outputDir);
 	}
 
+	public void jar(RegularFile jarfile, IPlatformConfiguration platform, GameSide side, String outputDir) {
+		jar(jarfile.getAsFile(), platform, side, outputDir);
+	}
+
+	public void jar(Provider<RegularFile> jarfile, IPlatformConfiguration platform, GameSide side, String outputDir) {
+		jar(jarfile.get(), platform, side, outputDir);
+	}
+
+	public void jar(RegularFile jarfile, IPlatformConfiguration platform, GameSide side) {
+		jar(jarfile.getAsFile(), platform, side);
+	}
+
+	public void jar(Provider<RegularFile> jarfile, IPlatformConfiguration platform, GameSide side) {
+		jar(jarfile.get(), platform, side);
+	}
+
+	public void jar(RegularFile jarfile, IPlatformConfiguration platform) {
+		jar(jarfile.getAsFile(), platform);
+	}
+
+	public void jar(Provider<RegularFile> jarfile, IPlatformConfiguration platform) {
+		jar(jarfile.get(), platform);
+	}
+
+	public void jar(File jarfile, IPlatformConfiguration platform) {
+		jar(jarfile, platform, "jars");
+	}
+
+	public void jar(File jarfile, IPlatformConfiguration platform, GameSide side) {
+		jar(jarfile, platform, side, "jars");
+	}
+
+	public void jar(File jarfile, IPlatformConfiguration platform, String outputDir) {
+		if (platform != null) {
+			manifest.addJar(jarfile, platform.getPlatform().toString(), null, outputDir, null, null,
+					(platform.getModloaderVersion() != null ? platform.getCommonMappingsVersion() : null));
+		} else {
+			jar(jarfile, (LaunchPlatform) null, outputDir);
+		}
+	}
+
+	public void jar(File jarfile, IPlatformConfiguration platform, GameSide side, String outputDir) {
+		if (platform != null) {
+			manifest.addJar(jarfile, platform.getPlatform().toString(), (side == null ? null : side.toString()),
+					outputDir,
+					null, null, (platform.getModloaderVersion() != null ? platform.getCommonMappingsVersion() : null));
+		} else {
+			jar(jarfile, (LaunchPlatform) null, outputDir);
+		}
+	}
+
 	public void jar(File jarfile, String outputDir) {
-		manifest.addJar(jarfile, null, null, outputDir);
+		manifest.addJar(jarfile, null, null, outputDir, null, null, null);
 	}
 
 	public void jar(File jarfile, LaunchPlatform platform, String outputDir) {
-		manifest.addJar(jarfile, (platform == null ? null : platform.toString()), null, outputDir);
+		manifest.addJar(jarfile, (platform == null ? null : platform.toString()), null, outputDir, null, null, null);
 	}
 
 	public void jar(File jarfile, LaunchPlatform platform, GameSide side, String outputDir) {
 		manifest.addJar(jarfile, (platform == null ? null : platform.toString()),
-				(side == null ? null : side.toString()), outputDir);
+				(side == null ? null : side.toString()), outputDir, null, null, null);
 	}
 
 	public void jar(File jarfile, LaunchPlatform platform) {
-		manifest.addJar(jarfile, (platform == null ? null : platform.toString()), null, "jars");
+		jar(jarfile, platform, "jars");
 	}
 
 	public void jar(File jarfile, LaunchPlatform platform, GameSide side) {
-		manifest.addJar(jarfile, (platform == null ? null : platform.toString()),
-				(side == null ? null : side.toString()), "jars");
+		jar(jarfile, platform, side, "jars");
 	}
 
 	public void trust_container(CtcTask task, String remote) throws IOException {
@@ -283,11 +333,14 @@ public class CyanModfileManifestGenerator {
 	}
 
 	public void platform(LaunchPlatform platform, String version) {
-		manifest.platforms.put(platform.toString().toUpperCase(), version);
+		String checkStr = version;
+		if (manifest.platforms.containsKey(platform.toString().toUpperCase()))
+			checkStr = manifest.platforms.get(platform.toString().toUpperCase()) + " | " + checkStr;
+		manifest.platforms.put(platform.toString().toUpperCase(), checkStr);
 	}
 
 	public void platform(IPlatformConfiguration platform) {
-		manifest.platforms.put(platform.getPlatform().toString().toUpperCase(), platform.getCommonMappingsVersion());
+		platform(platform.getPlatform(), platform.getCommonMappingsVersion());
 	}
 
 	public void platform(IPlatformConfiguration[] platforms) {

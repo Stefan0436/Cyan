@@ -23,6 +23,7 @@ import org.gradle.api.file.RegularFile;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskProvider;
+import org.gradle.api.tasks.bundling.AbstractArchiveTask;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 
@@ -103,6 +104,11 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 	public void source(File[] input) {
 		for (File file : input)
 			inputCache.add(file);
+	}
+
+	public void source(AbstractArchiveTask[] input) {
+		for (AbstractArchiveTask task : input)
+			inputCache.add(task.getArchiveFile().get().getAsFile());
 	}
 
 	private void addInput(Iterable<File> input) throws IOException {

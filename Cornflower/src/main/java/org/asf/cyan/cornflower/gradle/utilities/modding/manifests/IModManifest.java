@@ -5,5 +5,5 @@ import java.util.Map;
 
 public interface IModManifest {
 	public Map<File, String> getJars();
-	public void addJar(File jar, String outDir, String platform, String side);
+	public void addJar(File jar, String outDir, String platform, String side, String loaderVersion, String gameVersion, String mappingsVersion);
 }

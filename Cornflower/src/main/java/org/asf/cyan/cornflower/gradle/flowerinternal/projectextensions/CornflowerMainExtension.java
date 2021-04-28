@@ -41,39 +41,22 @@ import groovy.lang.Closure;
 public class CornflowerMainExtension implements IProjectExtension {
 
 	public static class PlatformConfiguration {
-		public IPlatformConfiguration MCP;
-		public IPlatformConfiguration SPIGOT;
-		public IPlatformConfiguration VANILLA;
-		public IPlatformConfiguration YARN;
-
 		public ArrayList<IPlatformConfiguration> all = new ArrayList<IPlatformConfiguration>();
 
-		public PlatformConfiguration() {
-			MCP = new McpPlatform();
-			SPIGOT = new SpigotPlatform();
-			YARN = new YarnPlatform();
-			VANILLA = new VanillaPlatform();
-
-			all.add(MCP);
-			all.add(SPIGOT);
-			all.add(VANILLA);
-			all.add(YARN);
-		}
-
 		public void MCP(Closure<?> closure) {
-			MCP.importClosure(PlatformClosureOwner.fromClosure(closure));
+			all.add(new McpPlatform().importClosure(PlatformClosureOwner.fromClosure(closure)));
 		}
 
 		public void SPIGOT(Closure<?> closure) {
-			SPIGOT.importClosure(SpigotPlatformClosureOwner.fromClosure(closure));
+			all.add(new SpigotPlatform().importClosure(SpigotPlatformClosureOwner.fromClosure(closure)));
 		}
 
 		public void VANILLA(Closure<?> closure) {
-			VANILLA.importClosure(PlatformClosureOwner.fromClosure(closure));
+			all.add(new VanillaPlatform().importClosure(PlatformClosureOwner.fromClosure(closure)));
 		}
 
 		public void YARN(Closure<?> closure) {
-			YARN.importClosure(YarnPlatformClosureOwner.fromClosure(closure));
+			all.add(new YarnPlatform().importClosure(YarnPlatformClosureOwner.fromClosure(closure)));
 		}
 	}
 
@@ -134,8 +117,11 @@ public class CornflowerMainExtension implements IProjectExtension {
 		PlatformConfiguration platforms = (PlatformConfiguration) project.getExtensions().getExtraProperties()
 				.get("platforms");
 
-		String vanillaVersion = platforms.VANILLA.getMappingsVersion(side);
+		String vanillaVersion = "undefined";
 		for (IPlatformConfiguration conf : platforms.all) {
+			if (conf instanceof VanillaPlatform)
+				vanillaVersion = conf.getCommonMappingsVersion();
+
 			if (conf.getPlatform() == platform) {
 				MinecraftVersionInfo gameVersion = MinecraftVersionToolkit.getVersion(vanillaVersion);
 				if (gameVersion == null)
@@ -199,15 +185,17 @@ public class CornflowerMainExtension implements IProjectExtension {
 		private void add(Project project) {
 			ArrayList<RiftJarTask> tasks = new ArrayList<RiftJarTask>();
 			for (IPlatformConfiguration platform : platforms) {
+				String verName = platform.getCommonMappingsVersion().replaceAll("[^A-Za-z0-9.\\-]", "");
+				verName = verName.toLowerCase();
+				verName = verName.substring(0, 1).toUpperCase() + verName.substring(1);
+				String name = platform.getPlatform().toString().toLowerCase() + "Rift" + verName;
 				if (platform.getMappingsVersion(GameSide.CLIENT) != null) {
-					tasks.add((RiftJarTask) project.task(Map.of("type", RiftJar),
-							platform.getPlatform().toString().toLowerCase() + "Rift",
-							new TaskClosure(project, project, platform.getPlatform(), GameSide.CLIENT)));
+					tasks.add((RiftJarTask) project.task(Map.of("type", RiftJar), name,
+							new TaskClosure(project, project, platform, GameSide.CLIENT)));
 				}
 				if (platform.getMappingsVersion(GameSide.SERVER) != null) {
-					tasks.add((RiftJarTask) project.task(Map.of("type", RiftJar),
-							platform.getPlatform().toString().toLowerCase() + "RiftServer",
-							new TaskClosure(project, project, platform.getPlatform(), GameSide.SERVER)));
+					tasks.add((RiftJarTask) project.task(Map.of("type", RiftJar), name + "Server",
+							new TaskClosure(project, project, platform, GameSide.SERVER)));
 				}
 			}
 			project.getExtensions().getExtraProperties().set("riftTasks", tasks.toArray(new RiftJarTask[0]));
@@ -215,13 +203,13 @@ public class CornflowerMainExtension implements IProjectExtension {
 
 		private class TaskClosure extends Closure<RiftJarTask> {
 			private Project project;
-			private LaunchPlatform platform;
+			private IPlatformConfiguration config;
 			private GameSide side;
 
-			public TaskClosure(Object owner, Project project, LaunchPlatform platform, GameSide side) {
+			public TaskClosure(Object owner, Project project, IPlatformConfiguration config, GameSide side) {
 				super(owner);
 				this.project = project;
-				this.platform = platform;
+				this.config = config;
 				this.side = side;
 			}
 
@@ -230,18 +218,17 @@ public class CornflowerMainExtension implements IProjectExtension {
 			@Override
 			public RiftJarTask call() {
 				RiftJarTask tsk = (RiftJarTask) getDelegate();
-				tsk.provider(getPlatformRiftProvider(project, platform, side));
+				tsk.provider(getPlatformRiftProvider(project, config.getPlatform(), side));
 
-				PlatformConfiguration platforms = (PlatformConfiguration) project.getExtensions().getExtraProperties()
-						.get("platforms");
-				IPlatformConfiguration config = platforms.all.stream().filter(t -> t.getPlatform() == platform)
-						.findFirst().get();
-
-				tsk.mappings_identifier(platform.toString().toLowerCase() + "-" + config.getDisplayVersion());
+				tsk.mappings_identifier(
+						config.getPlatform().toString().toLowerCase() + "-" + config.getDisplayVersion());
 				tsk.getArchiveClassifier()
-						.set("RIFT-" + platform.toString().toUpperCase() + (side == GameSide.SERVER ? "-SERVER" : ""));
+						.set("RIFT-" + config.getPlatform().toString().toUpperCase() + "-"
+								+ config.getCommonMappingsVersion().replaceAll("[!?/:\\\\]", "-")
+								+ (side == GameSide.SERVER ? "-SERVER" : ""));
+
 				tsk.from(sources);
-				tsk.platform(platform);
+				tsk.platform(config);
 				tsk.side(side);
 				providers.forEach((prov) -> tsk.provider(prov));
 

@@ -13,21 +13,91 @@ plugins {
 	id 'java'
 }
 
-version="1.0.0.A1"
-
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.asf.cyan.cornflower'
 
+
+// Mod information
+group="org.example"
+version="1.0.0.A1"
+
+def mod_class_name = "ExampleCoremod"
+def mod_package_name = "org.example.examplemod"
+
+def mod_display_name = "Example Coremod"
+
+def mod_description = '''
+Example Coremod
+'''
+
+// Automatically assigned
+def mod_id = project.name
+def mod_group = project.group
+
+// Mod Debugging Manifest
+task runManifest() {
+	def conf = modfileManifest {
+		modid mod_id
+		modgroup mod_group
+
+		mod_class mod_class_name
+		mod_package mod_package_name
+
+		display_name mod_display_name
+		mod_version project.version
+
+		description mod_description
+	}
+	doLast {
+		File dest = new File("${project.buildDir}/run/mod.manifest.ccfg")
+		if (!dest.getParentFile().exists())
+			dest.getParentFile().mkdirs()
+
+		java.nio.file.Files.writeString(dest.toPath(), conf.toString());
+	}
+}
+createEclipseLaunches.dependsOn runManifest
+
+// Instructs Cyan to load the coremod in the debug enviroment
+project.afterEvaluate {
+	createServerLaunch {
+		jvm "-DdebugModfileManifests=CM//${project.buildDir}/run/mod.manifest.ccfg";
+		jvm "-DauthorizeDebugPackages=${mod_package_name}";
+	}
+
+	createClientLaunch {
+		jvm "-DdebugModfileManifests=CM//${project.buildDir}/run/mod.manifest.ccfg";
+		jvm "-DauthorizeDebugPackages=${mod_package_name}";
+	}
+}
+
+// Dependency configuration
+dependencies {
+	// Selects modloader dependencies:
+	// 2 = Base Moddidng
+	// 4 = CyanUtil
+	// 8 = Core Modding (includes modding)
+	// 16 = FLUID
+	implementation Modloader.forModloader("cyan", 4 | 8 | 16)
+
+	// Selects game dependencies
+	implementation Game.forGame("Minecraft", "1.16.5")
+	
+	// Adds 1.15 as secondary version
+//	implementation Game.forGame("Minecraft", "1.15.2")
+}
+
+// Platform configuration
 platforms {
-	// Needs to be present when using RIFT.
-	// Minecraft VANILLA platform
+	// Needs to be present as FIRST entry when using other modding platforms.
+	// Minecraft VANILLA platform, configures the base version.
 	VANILLA {
 		// Game version
 		version "1.16.5"
 	}
 
-	// MCP platform, for forge support
+	// MCP Platform, for forge support
 	MCP {
 		// YYYYMMDD.HHMMSS, should match upstream forge
 		version "20210115.111550"
@@ -36,7 +106,7 @@ platforms {
 		modloader "36.1.4"
 	}
 
-	// Yarn platform, for fabric support
+	// Yarn Platform, for fabric support
 	YARN {
 		// Build version for YARN,
 		// Search for matching game version in http://maven.modmuss50.me/net/fabricmc/yarn/maven-metadata.xml
@@ -48,7 +118,7 @@ platforms {
 		modloader "0.11.3" // getLatestFabricVersion("1.16.5")
 	}
 
-	// Spigot platform, for paper support
+	// Spigot Platform, for paper support
 	SPIGOT {
 		// SPIGOT mappings version, it is best to only use mappings that have been given a green light by the Cyan team.
 		//
@@ -76,8 +146,34 @@ platforms {
 		// AND RECURSES THROUGH PAPER VERSIONS TO FIND THE UPDATE, PLEASE STORE VALUE AND USE AS LEAST AS POSSIBLE)
 		//
 		// Paper version
-		modloader "593" // getPaperVersion("f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3")
+		modloader "629" // getPaperVersion("f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3")
 	}
+
+
+	
+	// You can try to support multiple versions of minecraft,
+	// Multiple platform blocks will add alternate versions to the modfile manifest.
+//	VANILLA {
+//		version "1.15.2"
+//	}
+	
+	// MCP Platform (1.15.2)
+//	MCP {
+//		version "20200515.085601"
+//		modloader "31.2.50"
+//	}
+	
+	// Yarn Platform (1.15.2)
+//	YARN {
+//		version "1.15.2+build.17"
+//		modloader "0.11.3"
+//	}
+
+	// Spigot Platform (1.15.2)
+//	SPIGOT {
+//		version "455d45a4244894335cd07451bdda79ccd380aff6:1_15_R1"
+//		modloader "391"
+//	}
 }
 
 // Adds RIFT tasks for the platforms
@@ -88,20 +184,7 @@ addPlatformRiftTasks {
 
 ctc {
 	method uctc
-
-	source tasks.jar.getArchiveFile()
-
-	source tasks.vanillaRift.getArchiveFile()
-	source tasks.vanillaRiftServer.getArchiveFile()
-
-	source tasks.mcpRift.getArchiveFile()
-	source tasks.mcpRiftServer.getArchiveFile()
-
-	source tasks.yarnRift.getArchiveFile()
-	source tasks.yarnRiftServer.getArchiveFile()
-
-	source tasks.spigotRiftServer.getArchiveFile()
-
+	source riftTasks
 	destination "$buildDir/uctc/Main Trust"
 }
 
@@ -113,38 +196,25 @@ task ctcPack (type: CtcUtil) {
 	destination genOutputName(new File(buildDir, "ctcs"), "Main Trust")
 }
 
-dependencies {
-	// Selects modloader dependencies:
-	// 2 = Base Moddidng
-	// 4 = CyanUtil
-	// 8 = Core Modding (includes modding)
-	// 16 = FLUID
-	implementation Modloader.forModloader("cyan", 4 | 8 | 16)
-
-	// Selects game dependencies
-	implementation Game.forGame("Minecraft", "1.16.5")
-}
-
 cmf {
 	manifest {
 		modfileManifest {
-			modid "examplecoremod"
-			modgroup "org.example"
-			
-			mod_class "ExampleCoremod"
-			mod_package "org.example.examplemod"
+			modid mod_id
+			modgroup mod_group
 
-			display_name "Example Coremod"
+			mod_class mod_class_name
+			mod_package mod_package_name
+
+			display_name mod_display_name
 			mod_version project.version
 
-			description 'Example Coremod'
+			description mod_description
 			platform platforms
 
 			jar tasks.jar.getArchiveFile()
 			jar riftTasks
 
 			maven_dependency remoteDependencies
-
 			trust_container tasks.ctcPack, "https://aerialworks.ddns.net/cyan/trust/download"
 		}
 	}
