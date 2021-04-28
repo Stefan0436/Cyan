@@ -1,5 +1,6 @@
 package org.asf.cyan.modifications._1_15_2.server;
 
+import java.io.File;
 import java.net.Proxy;
 
 import org.asf.cyan.api.fluid.annotations.PlatformExclude;
@@ -17,10 +18,10 @@ import org.asf.cyan.fluid.api.transforming.TargetType;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
 @FluidTransformer
-@VersionRegex("^[0-9]\\.[0-9][^5](\\..*)?$")
+@VersionRegex("^1\\.15\\.2$")
 @TargetClass(target = "net.minecraft.server.MinecraftServer")
 @PlatformExclude(LaunchPlatform.SPIGOT)
-public class MinecraftServerModification {
+public class MinecraftServerModification_1_15_2 {
 
 	private static boolean firstLoad;
 
@@ -32,17 +33,14 @@ public class MinecraftServerModification {
 
 	@Constructor
 	@InjectAt(location = InjectLocation.TAIL)
-	public static void ctor(Thread var1,
-			@TargetType(target = "net.minecraft.core.RegistryAccess$RegistryHolder") Object var2,
-			@TargetType(target = "net.minecraft.world.level.storage.LevelStorageSource$LevelStorageAccess") Object var3,
-			@TargetType(target = "net.minecraft.world.level.storage.WorldData") Object var4,
-			@TargetType(target = "net.minecraft.server.packs.repository.PackRepository") Object var5, Proxy var6,
-			@TargetType(target = "com.mojang.datafixers.DataFixer") Object var7,
-			@TargetType(target = "net.minecraft.server.ServerResources") Object var8,
-			@TargetType(target = "com.mojang.authlib.minecraft.MinecraftSessionService") Object var9,
-			@TargetType(target = "com.mojang.authlib.GameProfileRepository") Object var10,
-			@TargetType(target = "net.minecraft.server.players.GameProfileCache") Object var11,
-			@TargetType(target = "net.minecraft.server.level.progress.ChunkProgressListenerFactory") Object var12) {
+	public static void ctor(File var1, Proxy var2, @TargetType(target = "com.mojang.datafixers.DataFixer") Object var3,
+			@TargetType(target = "net.minecraft.commands.Commands") Object var4,
+			@TargetType(target = "com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService") Object var5,
+			@TargetType(target = "com.mojang.authlib.minecraft.MinecraftSessionService") Object var6,
+			@TargetType(target = "com.mojang.authlib.GameProfileRepository") Object var7,
+			@TargetType(target = "net.minecraft.server.players.GameProfileCache") Object var8,
+			@TargetType(target = "net.minecraft.server.level.progress.ChunkProgressListenerFactory") Object var9,
+			String var10) {
 		if (firstLoad) {
 			CyanCore.setPhase(LoadPhase.RUNTIME);
 			Modloader.getModloader().dispatchEvent("mods.runtimestart");

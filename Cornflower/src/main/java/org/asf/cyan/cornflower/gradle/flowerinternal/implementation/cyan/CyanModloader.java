@@ -13,7 +13,6 @@ import org.asf.cyan.core.CyanUpdateInfo;
 import org.asf.cyan.cornflower.gradle.Cornflower;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IModloader;
 import org.asf.cyan.cornflower.gradle.utilities.GradleUtil;
-
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
@@ -137,7 +136,7 @@ public class CyanModloader implements IModloader {
 	@Override
 	public void addRepositories(RepositoryHandler repositories) {
 		repositories.mavenCentral();
-		
+
 		repositories.maven((repo) -> {
 			repo.setName("AerialWorks");
 			repo.setUrl(maven);
@@ -168,7 +167,7 @@ public class CyanModloader implements IModloader {
 			addDependency("org.asf.cyan", "MTK", libraries.get("MTK"), deps);
 		if (hasAPI(ClassTrust))
 			addDependency("org.asf.cyan", "ClassTrust", libraries.get("ClassTrust"), deps);
-		
+
 		return deps.toArray(new String[0]);
 	}
 

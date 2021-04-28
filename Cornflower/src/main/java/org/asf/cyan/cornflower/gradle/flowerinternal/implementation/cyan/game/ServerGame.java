@@ -16,7 +16,7 @@ import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType;
 import org.gradle.api.Project;
 
-public class ServerGame implements IGameExecutionContext {
+public class ServerGame implements IGameExecutionContext, ILaunchProvider {
 
 	private String version;
 	private MinecraftVersionInfo gameVersion;
@@ -110,7 +110,7 @@ public class ServerGame implements IGameExecutionContext {
 
 	@Override
 	public String mainClass() {
-		return "org.asf.cyan.CyanIDEWrapper";
+		return "org.asf.cyan.cornflower.gradle.flowerinternal.implementation.cyan.game.CornflowerLaunchWrapper";
 	}
 
 	@Override
@@ -126,7 +126,7 @@ public class ServerGame implements IGameExecutionContext {
 		}
 
 		try {
-			return new String[] { "-javaagent:" + jar.getCanonicalPath(), "-Dcyan.side=SERVER" };
+			return new String[] { "-javaagent:" + jar.getCanonicalPath(), "-Dcyan.side=SERVER", "-Dcyan.deobfuscated=true" };
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -144,7 +144,27 @@ public class ServerGame implements IGameExecutionContext {
 
 	@Override
 	public String[] libraries() {
-		return new String[0];
+		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion);
 	}
 
+	@Override
+	public File[] libraryJars() {
+		prepare();
+		return MinecraftInstallationToolkit.getLibraries(cyanVersion);
+	}
+
+	@Override
+	public File mainJar() {
+		prepare();
+		try {
+			return MinecraftModdingToolkit.deobfuscateJar(gameVersion, GameSide.SERVER);
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public String launchName() {
+		return "createServerLaunch";
+	}
 }

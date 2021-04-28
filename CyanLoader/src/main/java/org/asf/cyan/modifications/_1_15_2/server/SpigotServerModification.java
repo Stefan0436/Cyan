@@ -3,6 +3,7 @@ package org.asf.cyan.modifications._1_15_2.server;
 import java.net.Proxy;
 
 import org.asf.cyan.api.fluid.annotations.PlatformOnly;
+import org.asf.cyan.api.fluid.annotations.VersionRegex;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.modloader.LoadPhase;
 import org.asf.cyan.core.CyanCore;
@@ -17,6 +18,7 @@ import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
 @FluidTransformer
 @TargetClass(target = "net.minecraft.server.MinecraftServer")
+@VersionRegex("^[0-9]\\.[0-9][^5](\\..*)?$")
 @PlatformOnly(LaunchPlatform.SPIGOT)
 public class SpigotServerModification {
 

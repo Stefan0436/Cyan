@@ -32,6 +32,8 @@ public class ModloaderHandler extends CyanComponent {
 		Log4jToGradleAppender.logInfo();
 		CornflowerCore.LOGGER.info("Loading Cornflower modloader and game dependencies...");
 
+		ArrayList<File> remoteDependencyLst = new ArrayList<File>();
+		ArrayList<File> remoteDependencySrcLst = new ArrayList<File>();
 		ArrayList<String> remoteDependencies = new ArrayList<String>();
 		for (Configuration conf : proj.getConfigurations()) {
 			try {
@@ -40,14 +42,14 @@ public class ModloaderHandler extends CyanComponent {
 
 			}
 
-			for (Dependency dep : conf.getDependencies()) {
-				if (dep.getGroup() != null && !dep.getGroup().startsWith("cornflower.internal.")) {
-					if (dep.getName() != null && !remoteDependencies.stream()
-							.anyMatch(t -> t.startsWith(dep.getGroup() + ":" + dep.getName() + ":"))) {
-						remoteDependencies.add(dep.getGroup() + ":" + dep.getName() + ":" + dep.getVersion());
-					}
-				}
-			}
+//			for (Dependency dep : conf.getDependencies()) {
+//				if (dep.getGroup() != null && !dep.getGroup().startsWith("cornflower.internal.")) {
+//					if (dep.getName() != null && !remoteDependencies.stream()
+//							.anyMatch(t -> t.startsWith(dep.getGroup() + ":" + dep.getName() + ":"))) {
+//						remoteDependencies.add(dep.getGroup() + ":" + dep.getName() + ":" + dep.getVersion());
+//					}
+//				}
+//			}
 		}
 
 		// Search for modloaders
@@ -132,6 +134,7 @@ public class ModloaderHandler extends CyanComponent {
 		for (IGame game : (ArrayList<IGame>) proj.getExtensions().getExtraProperties().get("cornflowergames")) {
 			game.addRepositories(proj.getRepositories());
 			game.addDependencies(proj.getConfigurations());
+			ArrayList<IGameExecutionContext> contexts = new ArrayList<IGameExecutionContext>();
 
 			for (IGameExecutionContext ctx : game.getContexts()) {
 				IGameExecutionContext context = ctx.newInstance(proj, game.getVersion());
@@ -152,14 +155,22 @@ public class ModloaderHandler extends CyanComponent {
 					proj.getDependencies().add("implementation", lib);
 					deps.add(lib);
 				}
+				contexts.add(context);
 			}
+			game.saveContexts(contexts);
 		}
 
 		try {
 			Configuration conf = proj.getConfigurations().getByName("implementation");
 			ResolvedConfiguration config = conf.getResolvedConfiguration();
-			scanDeps(config.getFirstLevelModuleDependencies(), remoteDependencies, deps);
+			scanDeps(config.getFirstLevelModuleDependencies(), remoteDependencies, deps, remoteDependencyLst,
+					remoteDependencySrcLst);
 		} catch (Exception e) {
+		}
+
+		for (IGame game : (ArrayList<IGame>) proj.getExtensions().getExtraProperties().get("cornflowergames")) {
+			game.addTasks(proj, game.getContextsList().toArray(t -> new IGameExecutionContext[t]), remoteDependencyLst,
+					remoteDependencySrcLst);
 		}
 
 		proj.getExtensions().getExtraProperties().set("remoteDependencies", remoteDependencies);
@@ -167,9 +178,9 @@ public class ModloaderHandler extends CyanComponent {
 	}
 
 	private static void scanDeps(Collection<ResolvedDependency> dependencies, ArrayList<String> remoteDependencies,
-			ArrayList<String> deps) {
+			ArrayList<String> deps, ArrayList<File> depOut, ArrayList<File> srcOut) {
 		for (ResolvedDependency dep : dependencies) {
-			scanDeps(dep.getChildren(), remoteDependencies, deps);
+			scanDeps(dep.getChildren(), remoteDependencies, deps, depOut, srcOut);
 			if (dep.getModuleGroup() != null && !dep.getModuleGroup().startsWith("cornflower.internal.")) {
 				if (dep.getModuleName() != null
 						&& !remoteDependencies.stream()
@@ -178,14 +189,19 @@ public class ModloaderHandler extends CyanComponent {
 								.anyMatch(t -> t.startsWith(dep.getModuleGroup() + ":" + dep.getModuleName() + ":"))) {
 					boolean containsNormalArtifact = false;
 					for (ResolvedArtifact arti : dep.getModuleArtifacts()) {
-						if (arti.getExtension().equals("jar") && arti.getClassifier() == null
-								&& !arti.getClassifier().isEmpty()) {
+						if (arti.getExtension().equals("jar")
+								&& (arti.getClassifier() == null || arti.getClassifier().isEmpty())) {
 							containsNormalArtifact = true;
-						}
+							depOut.add(arti.getFile());
+						} else if (arti.getClassifier() != null
+								&& (arti.getExtension().equals("jar") || arti.getExtension().equals("zip"))
+								&& arti.getClassifier().toLowerCase().contains("sources"))
+							srcOut.add(arti.getFile());
 					}
-					if (containsNormalArtifact)
+					if (containsNormalArtifact) {
 						remoteDependencies
 								.add(dep.getModuleGroup() + ":" + dep.getModuleName() + ":" + dep.getModuleVersion());
+					}
 				}
 			}
 		}

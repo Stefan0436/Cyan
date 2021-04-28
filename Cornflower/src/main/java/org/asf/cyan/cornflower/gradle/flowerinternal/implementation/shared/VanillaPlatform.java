@@ -3,9 +3,10 @@ package org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.cornflower.gradle.utilities.modding.IPlatformConfiguration;
+import org.asf.cyan.cornflower.gradle.utilities.modding.IPrimaryPlatform;
 import org.asf.cyan.cornflower.gradle.utilities.modding.PlatformClosureOwner;
 
-public class VanillaPlatform implements IPlatformConfiguration {
+public class VanillaPlatform implements IPlatformConfiguration, IPrimaryPlatform {
 
 	public String version = null;
 

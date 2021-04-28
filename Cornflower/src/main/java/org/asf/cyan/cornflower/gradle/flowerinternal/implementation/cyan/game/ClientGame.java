@@ -18,7 +18,7 @@ import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType;
 import org.gradle.api.Project;
 
-public class ClientGame implements IGameExecutionContext {
+public class ClientGame implements IGameExecutionContext, ILaunchProvider {
 
 	private String version;
 	private MinecraftVersionInfo gameVersion;
@@ -52,7 +52,7 @@ public class ClientGame implements IGameExecutionContext {
 
 	@Override
 	public String name() {
-		return "Cyan " + version;
+		return "Cyan " + version + " Client";
 	}
 
 	@Override
@@ -85,7 +85,7 @@ public class ClientGame implements IGameExecutionContext {
 
 	@Override
 	public String mainClass() {
-		return "org.asf.cyan";
+		return "org.asf.cyan.cornflower.gradle.flowerinternal.implementation.cyan.game.CornflowerLaunchWrapper";
 	}
 
 	@Override
@@ -94,10 +94,13 @@ public class ClientGame implements IGameExecutionContext {
 
 		ArrayList<String> args = new ArrayList<String>();
 		try {
+			args.add("-Djdk.attach.allowAttachSelf=true");
+			args.add("-Dcyan.deobfuscated=true");
 			args.add("-Dcyan.side=CLIENT");
 			args.add("-DassetRoot=" + MinecraftInstallationToolkit.getAssetsRoot().getCanonicalPath());
 			args.add("-DassetIndex=" + MinecraftInstallationToolkit.getAssetId(gameVersion));
 
+			MinecraftInstallationToolkit.setIDE();
 			return MinecraftInstallationToolkit.generateJvmArguments(gameVersion, args);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -122,8 +125,8 @@ public class ClientGame implements IGameExecutionContext {
 			if (!MinecraftInstallationToolkit.isVersionManifestSaved(gameVersion))
 				MinecraftInstallationToolkit.saveVersionManifest(gameVersion);
 
-			if (!MinecraftInstallationToolkit.checkVersion(gameVersion))
-				MinecraftInstallationToolkit.downloadVersionAndLibraries(gameVersion);
+			if (!MinecraftInstallationToolkit.checkVersion(cyanVersion))
+				MinecraftInstallationToolkit.downloadVersionAndLibraries(cyanVersion);
 
 			if (MinecraftInstallationToolkit.getVersionJar(gameVersion, GameSide.CLIENT) == null)
 				MinecraftInstallationToolkit.downloadVersionJar(gameVersion, GameSide.CLIENT);
@@ -156,5 +159,26 @@ public class ClientGame implements IGameExecutionContext {
 	public String[] runtimeLibraries() {
 		prepare();
 		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion);
+	}
+
+	@Override
+	public File[] libraryJars() {
+		prepare();
+		return MinecraftInstallationToolkit.getLibraries(cyanVersion);
+	}
+
+	@Override
+	public File mainJar() {
+		prepare();
+		try {
+			return MinecraftModdingToolkit.deobfuscateJar(gameVersion, GameSide.CLIENT);
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public String launchName() {
+		return "createClientLaunch";
 	}
 }

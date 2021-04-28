@@ -263,6 +263,13 @@ public class CyanLoader extends Modloader implements IModProvider {
 					ld.coreModManifests.put(mod.modGroup + ":" + mod.modId, mod);
 					ld.coreModManifests.put(mod.modClassPackage + "." + mod.modClassName, mod);
 					CyanCore.addAllowedPackage(mod.modClassPackage);
+					classesMap.put(mod.modGroup + ":" + mod.modId,
+							new String[] { mod.modClassPackage + "." + mod.modClassName });
+					try {
+						CyanCore.addAdditionalClass(Class.forName(mod.modClassPackage + "." + mod.modClassName));
+					} catch (ClassNotFoundException e) {
+						throw new RuntimeException(e);
+					}
 				} else if (file.startsWith("M//")) {
 					CyanModfileManifest mod = new CyanModfileManifest();
 					mod.readAll(new String(Files.readAllBytes(new File(file.substring(3)).toPath())));
@@ -393,67 +400,77 @@ public class CyanLoader extends Modloader implements IModProvider {
 		}
 	}
 
-	private void checkDependencyVersion(String checkVersion, String cVersion, Version ver, String message) {
-		for (String version : checkVersion.split(" & ")) {
-			version = version.trim();
-			if (version.startsWith("~=")) {
-				String regex = version.substring(2);
-				if (regex.startsWith(" "))
-					regex = regex.substring(1);
-				if (!cVersion.matches(regex)) {
-					fatal(message + " (incompatible version installed)");
-					System.exit(-1);
-				}
-			} else if (version.startsWith(">=")) {
-				String str = version.substring(2);
-				if (str.startsWith(" "))
-					str = str.substring(1);
+	private void checkDependencyVersion(String check, String cVersion, Version ver, String message) {
+		String error = null;
+		for (String checkVersion : check.split(" | ")) {
+			error = null;
+			for (String version : checkVersion.split(" & ")) {
+				version = version.trim();
+				if (version.startsWith("~=")) {
+					String regex = version.substring(2);
+					if (regex.startsWith(" "))
+						regex = regex.substring(1);
+					if (!cVersion.matches(regex)) {
+						error = message + " (incompatible version installed)";
+						break;
+					}
+				} else if (version.startsWith(">=")) {
+					String str = version.substring(2);
+					if (str.startsWith(" "))
+						str = str.substring(1);
 
-				Version min = Version.fromString(str);
+					Version min = Version.fromString(str);
 
-				if (!ver.isGreaterOrEqualTo(min)) {
-					fatal(message + " (outdated version installed)");
-					System.exit(-1);
-				}
-			} else if (version.startsWith("<=")) {
-				String str = version.substring(2);
-				if (str.startsWith(" "))
-					str = str.substring(1);
+					if (!ver.isGreaterOrEqualTo(min)) {
+						error = message + " (outdated version installed)";
+						break;
+					}
+				} else if (version.startsWith("<=")) {
+					String str = version.substring(2);
+					if (str.startsWith(" "))
+						str = str.substring(1);
 
-				Version min = Version.fromString(str);
+					Version min = Version.fromString(str);
 
-				if (!ver.isLessOrEqualTo(min)) {
-					fatal(message + " (incompatible newer version installed)");
-					System.exit(-1);
-				}
-			} else if (version.startsWith(">")) {
-				String str = version.substring(1);
-				if (str.startsWith(" "))
-					str = str.substring(1);
+					if (!ver.isLessOrEqualTo(min)) {
+						error = message + " (incompatible newer version installed)";
+						break;
+					}
+				} else if (version.startsWith(">")) {
+					String str = version.substring(1);
+					if (str.startsWith(" "))
+						str = str.substring(1);
 
-				Version min = Version.fromString(str);
+					Version min = Version.fromString(str);
 
-				if (!ver.isGreaterThan(min)) {
-					fatal(message + " (outdated version installed)");
-					System.exit(-1);
-				}
-			} else if (version.startsWith("<")) {
-				String str = version.substring(1);
-				if (str.startsWith(" "))
-					str = str.substring(1);
+					if (!ver.isGreaterThan(min)) {
+						error = message + " (outdated version installed)";
+						break;
+					}
+				} else if (version.startsWith("<")) {
+					String str = version.substring(1);
+					if (str.startsWith(" "))
+						str = str.substring(1);
 
-				Version min = Version.fromString(str);
+					Version min = Version.fromString(str);
 
-				if (!ver.isLessThan(min)) {
-					fatal(message + " (incompatible newer version installed)");
-					System.exit(-1);
-				}
-			} else {
-				if (!ver.isEqualTo(Version.fromString(version.trim()))) {
-					fatal(message + " (incompatible version installed)");
-					System.exit(-1);
+					if (!ver.isLessThan(min)) {
+						error = message + " (incompatible newer version installed)";
+						break;
+					}
+				} else {
+					if (!ver.isEqualTo(Version.fromString(version.trim()))) {
+						error = message + " (incompatible version installed)";
+						break;
+					}
 				}
 			}
+			if (error == null)
+				break;
+		}
+		if (error != null) {
+			fatal(error);
+			System.exit(-1);
 		}
 	}
 
@@ -1099,6 +1116,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 							continue;
 
 						selectedPackage = pkg;
+						last = Version.fromString(version);
 					}
 
 					packages.sort((str1, str2) -> {
@@ -1123,8 +1141,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 							if (transformer.isAnnotationPresent(SideOnly.class)
 									&& transformer.getAnnotation(SideOnly.class).value() != getModloaderGameSide()) {
 								continue;
-							} else if (transformer.isAnnotationPresent(PlatformOnly.class)
-									&& transformer.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
+							} else if (transformer.isAnnotationPresent(PlatformOnly.class) && transformer
+									.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
 								continue;
 							} else if (transformer.isAnnotationPresent(PlatformExclude.class) && transformer
 									.getAnnotation(PlatformExclude.class).value() == getModloaderLaunchPlatform()) {
@@ -1281,7 +1299,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 
 	@Override
 	public int getAllKnownModsLength() {
-		return modManifests.size() + coreModManifests.size();
+		return modManifests.size() + (int) coreModManifests.keySet().stream().filter(t -> t.contains(":")).count();
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package org.asf.cyan.modifications._1_15_2.client;
 
+import org.asf.cyan.api.fluid.annotations.VersionRegex;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.LocalVariable;
@@ -17,6 +18,7 @@ import org.asf.cyan.modifications._1_15_2.typereplacers.MinecraftMock;
  *
  */
 @FluidTransformer
+@VersionRegex("^[0-9]\\.[0-9][^5](\\..*)?$")
 @TargetClass(target = "net.minecraft.client.gui.screens.LoadingOverlay")
 public class LoadingOverlayModification {
 

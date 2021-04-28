@@ -10,7 +10,7 @@ Use `gradle createEclipseLaunches` to setup the environment. (gradlew.bat on win
 
 # Compiling
 Use `./buildlocal.sh` on linux to quickly build the project, argument `--version` can be used to specify game version,
-please note that CYAN is 1.15.2+ but that it has not been tested, we cannot support < 1.15 because of mapping issues.  See [BUILDING](BUILDING.md) for more details on how to compile.
+please note that CYAN is 1.15.2+, we cannot support < 1.15 because of mapping issues.  See [BUILDING](BUILDING.md) for more details on how to compile.
 
 # AerialWorks Maven Server
 Because we are writing a modloader, we have set up a maven server, here is the url:<br />

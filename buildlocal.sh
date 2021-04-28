@@ -72,7 +72,7 @@ if [ "$modloader" != "" ]; then
             fi
         	paperversion=$modloaderversion
         fi
-        extraargs+=" -PoverrideLaunchWrapperServer=CyanPaperServerWrapper -PsetModLoader=\"paper-$paperversion\" -PsetInheritsFromVersion=\"$gameversion-paper-$paperversion\""
+        extraargs+=" -PoverrideLaunchWrapperServer=CyanPaperServerWrapper -PsetModLoader=\"paper-$paperversion\" -PsetInheritsFromVersion=\"$gameversion-paper-%modloader%\""
         ;;
     esac
 fi

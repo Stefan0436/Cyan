@@ -5,7 +5,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.Scanner;
 
+import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.core.CyanCore;
+import org.asf.cyan.core.CyanInfo;
 
 public class CyanServerWrapper {
 	/**
@@ -30,7 +32,11 @@ public class CyanServerWrapper {
 		sc.close();
 		CyanCore.setEntryMethod("CyanWrapper Version " + builder.toString().trim());
 		CyanLoader.initializeGame("SERVER");
-		String wrapper = System.getProperty("cyan.launcher.server.wrapper", "net.minecraft.server.Main");
+		String defaultMain = "net.minecraft.server.Main";
+		if (Version.fromString(CyanInfo.getMinecraftVersion()).isLessOrEqualTo(Version.fromString("1.15.2"))) {
+			defaultMain = "net.minecraft.server.MinecraftServer";
+		}
+		String wrapper = System.getProperty("cyan.launcher.server.wrapper", defaultMain);
 		CyanCore.startGame(wrapper, args);
 	}
 }

@@ -26,7 +26,7 @@ public class VersionTest {
 		Version ver = Version.fromString("1.0.0.0");
 		Version ver2 = Version.fromString("BETA-1.0.0.B2");
 		Version ver3 = Version.fromString("1.0.0.A3");
-		Version ver4 = Version.fromString("1.0.0.AA3");
+		Version ver4 = Version.fromString("1.0.0.AA3"); // matches ver3 because the second letter is discarted
 		Version ver5 = Version.fromString("1.0.0.0-SNAPSHOT-1");
 		Version ver6 = Version.fromString("1.0.0.2");
 		Version ver7 = Version.fromString("BETA-1.0.0.B3");
@@ -43,7 +43,7 @@ public class VersionTest {
 		assertTrue(ver2.isGreaterThan(ver));
 		assertTrue(!ver3.isLessThan(ver7));
 		assertTrue(ver.isLessThan(ver6));
-		assertTrue(ver4.isGreaterThan(ver3));
+		assertTrue(!ver4.isGreaterThan(ver3));
 	}
 
 	@Test

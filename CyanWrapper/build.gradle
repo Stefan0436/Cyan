@@ -145,8 +145,46 @@ public String getLatestYarnVersion(String version) throws IOException {
 	return mappingsVersion;
 }
 
+def mappingsVersion = minecraft
+if (project.hasProperty("overrideMappingsVersion"))
+	mappingVersion = project.getProperty("overrideMappingsVersion")
+
 ext.craftBukkitPOMUrl = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit/raw/pom.xml?at=%commit%"
 ext.spigotInfoUrl = "https://hub.spigotmc.org/versions/%mcver%.json";
+
+if (modloader.startsWith("paper-")) {
+	def paperversion = modloader.substring("paper-".length())
+	if (paperversion.equals("latestsupported")) {
+		def useurl = "https://aerialworks.ddns.net/maven"
+		StringBuilder conf = new StringBuilder();
+		URL u = new URL(useurl + infoPath);
+		Scanner sc = new Scanner(u.openStream());
+		while (sc.hasNext())
+		conf.append(sc.nextLine()+System.lineSeparator());
+		sc.close();
+
+		CyanUpdateInfo info = new CyanUpdateInfo(conf.toString())
+		mappingsVersion = info.spigotTestingMappings.get(minecraft)
+		def paper = ""
+		
+		if (mappingsVersion == null) {
+			mappingsVersion = getLatestSpigotMappings(minecraft)
+		}
+		
+		paper = info.paperByMappings.get(mappingsVersion)
+		if (paper == null) {
+			URL url = new URL("https://papermc.io/api/v2/projects/paper/versions/" + minecraft);
+			InputStream strm = url.openStream()
+			JsonArray builds = JsonParser.parseString(new String(strm.readAllBytes())).getAsJsonObject().get("builds").getAsJsonArray();
+			strm.close()
+			
+			paper = builds.get(builds.size() - 1).getAsString();
+		}
+		
+		modloader = "paper-" + paper
+	}
+}
+exactgameversion = exactgameversion.replace("%modloader%", modloader)
 
 private JsonObject getRefs(String version) throws IOException {
 	if (!MinecraftToolkit.hasMinecraftDownloadConnection())
@@ -784,10 +822,6 @@ createEclipseLaunches.finalizedBy createDeobfServerLaunch
 createEclipseLaunches.finalizedBy createObfusLaunch
 createEclipseLaunches.finalizedBy createDeobfLaunch
 
-def mappingsVersion = minecraft
-if (project.hasProperty("overrideMappingsVersion"))
-	mappingVersion = project.getProperty("overrideMappingsVersion")
-
 def bootlibs = ["javassist", "reflections"]
 def libnames = []
 def remotelibs = new HashMap<String, URL>()
@@ -801,40 +835,6 @@ if (!modloader.equals("")) {
 	if (modloader.startsWith("forge-")) {
 		loadfirst.add("log4j-core")
 		loadfirst.add("log4j-api")
-	} else if (modloader.startsWith("paper-")) {
-		def paperversion = modloader.substring("paper-".length())
-		if (paperversion.equals("latestsupported")) {
-			def useurl = fallback_url
-			if (fallback_url.equals(""))
-			useurl = netTestUrl
-			
-			StringBuilder conf = new StringBuilder();
-			URL u = new URL(useurl + infoPath);
-			Scanner sc = new Scanner(u.openStream());
-			while (sc.hasNext())
-			conf.append(sc.nextLine()+System.lineSeparator());
-			sc.close();
-	
-			CyanUpdateInfo info = new CyanUpdateInfo(conf.toString())
-			mappingsVersion = info.spigotTestingMappings.get(minecraft)
-			def paper = ""
-			
-			if (mappingsVersion == null) {
-				mappingsVersion = getLatestSpigotMappings(minecraft)	
-			}
-			
-			paper = info.paperByMappings.get(mappingsVersion)
-			if (paper == null) {
-				URL url = new URL("https://papermc.io/api/v2/projects/paper/versions/" + minecraft);
-				InputStream strm = url.openStream()
-				JsonArray builds = JsonParser.parseString(new String(strm.readAllBytes())).getAsJsonObject().get("builds").getAsJsonArray();
-				strm.close()
-				
-				paper = builds.get(builds.size() - 1).getAsString();
-			}
-			
-			modloader = "paper-" + paper
-		}
 	}
 }
 
@@ -1506,7 +1506,7 @@ processResources {
 		}
 		for (String key : fabricSupportVersions.keySet()) {
 			String val = fabricSupportVersions.get(key)
-			if (val.equals(cyanversion) && key.endsWith("-testing") || key.startsWith("testing-fabric-") || || key.equals("testing-fabric")) {
+			if (val.equals(cyanversion) && key.endsWith("-testing") || key.startsWith("testing-fabric-") || key.equals("testing-fabric")) {
 				fabricSupportVersions.remove(key)
 				break
 			}
@@ -2160,7 +2160,7 @@ task serverJar (type: Jar, dependsOn: build) {
 
 		println " |"
 		println " | Downloading vanilla server..."
-		File server = org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit.downloadVersionJar(org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit.getLatestReleaseVersion(), org.asf.cyan.api.modloader.information.game.GameSide.SERVER)
+		File server = org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit.downloadVersionJar(org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit.getVersion(minecraft), org.asf.cyan.api.modloader.information.game.GameSide.SERVER)
 		if (new File(dest, "vanilla-server.jar").exists()) new File(dest, "vanilla-server.jar").delete()
 		println " +-- Installing vanilla server..."
 		Files.copy(server.toPath(), new File(dest, "vanilla-server.jar").toPath())

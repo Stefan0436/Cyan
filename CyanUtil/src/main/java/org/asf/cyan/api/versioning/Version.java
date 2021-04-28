@@ -142,6 +142,8 @@ public class Version {
 	}
 
 	public boolean isGreaterThan(Version other) {
+		if (isEqualTo(other))
+			return false;
 		int i = 0;
 		for (VersionSegment segment : segments) {
 			if (i >= other.segments.size())
@@ -167,6 +169,9 @@ public class Version {
 	}
 
 	public boolean isLessThan(Version other) {
+		if (isEqualTo(other))
+			return false;
+		
 		int i = 0;
 		for (VersionSegment segment : segments) {
 			if (i >= other.segments.size()) {
