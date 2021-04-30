@@ -158,8 +158,8 @@ public class DownloadPage extends AbstractWebComponent {
 			File baseDir = backend.getCompiledVersion(inter);
 			File coremodkit = new File(baseDir, "cyan-coremodkit-" + gameversion + "-" + platform + "-"
 					+ modloaderversion + "-" + cyanVersion + ".zip");
-			File modkit = new File(baseDir, "cyan-coremodkit-" + gameversion + "-" + platform + "-" + modloaderversion
-					+ "-" + cyanVersion + ".zip");
+			File modkit = new File(baseDir, "cyan-modkit-" + gameversion + "-" + platform + "-" + modloaderversion + "-"
+					+ cyanVersion + ".zip");
 
 			function.variables.put("style.modkits", "display: block;");
 			if (!coremodkit.exists() && !modkit.exists()) {
