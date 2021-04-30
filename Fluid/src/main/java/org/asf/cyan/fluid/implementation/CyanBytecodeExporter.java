@@ -99,11 +99,7 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 			value = "var: " + "var" + ((VarInsnNode) insn).var;
 
 			String opcode = getOpcodeName(insn.getOpcode(), OpcodeUseCase.JVM_OPCODE);
-			if (opcode.contains("ALOAD")) {
-				value += ", method: load";
-			} else if (opcode.contains("ASTORE")) {
-				value += ", method: store";
-			}
+			value += ", method: " + opcode;
 			break;
 		case "LdcInsnNode":
 			type = "LdcNode";
@@ -130,7 +126,8 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 		case "MethodInsnNode":
 			type = "MethodNode";
 			value = "owner: \"" + ((MethodInsnNode) insn).owner + "\", name: \"" + ((MethodInsnNode) insn).name
-					+ "\", desc: \"" + ((MethodInsnNode) insn).desc + "\", opcode: "+ getOpcodeName(insn.getOpcode(), OpcodeUseCase.JVM_OPCODE).toLowerCase();
+					+ "\", desc: \"" + ((MethodInsnNode) insn).desc + "\", opcode: "
+					+ getOpcodeName(insn.getOpcode(), OpcodeUseCase.JVM_OPCODE).toLowerCase();
 			break;
 		case "FieldInsnNode":
 			type = "FieldNode";
@@ -231,7 +228,8 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 				local += " ";
 			}
 
-			value = "stack: [" + stack + "], local: [" + local + "]";
+			value = "stack: [" + stack + "], local: [" + local + "], type: "
+					+ getOpcodeName(fnode.type, OpcodeUseCase.ASM_STACKMAP);
 			break;
 		}
 		if (output.equals("")) {

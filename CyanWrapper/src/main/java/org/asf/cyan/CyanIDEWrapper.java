@@ -21,6 +21,7 @@ import org.asf.cyan.minecraft.toolkits.mtk.auth.YggdrasilAuthentication;
 import org.asf.cyan.minecraft.toolkits.mtk.auth.windowed.YggdrasilAuthenticationWindow;
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType;
+import org.asf.cyan.api.classloading.DynamicClassLoader;
 
 // Large wrapper for the IDE, needed or CYAN won't run correctly.
 // Half of it is for authenticating the game.
@@ -51,6 +52,11 @@ public class CyanIDEWrapper {
 		String serverMAIN = System.getProperty("cyan.launcher.server.wrapper", "%def");
 
 		CyanCore.initLoader();
+		if (System.getProperty("mainJar") != null) {
+			((DynamicClassLoader) CyanCore.getCoreClassLoader()).setOptions(DynamicClassLoader.OPTION_ALLOW_DEFINE);
+			CyanCore.addCoreUrl(new File(System.getProperty("mainJar")).toURI().toURL());
+		}
+
 		if (deobf) {
 			CyanInfo.setDeobfuscated();
 			CyanLoader.disableVanillaMappings();

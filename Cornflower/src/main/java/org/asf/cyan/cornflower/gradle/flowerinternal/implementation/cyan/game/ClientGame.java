@@ -101,7 +101,11 @@ public class ClientGame implements IGameExecutionContext, ILaunchProvider {
 			args.add("-DassetIndex=" + MinecraftInstallationToolkit.getAssetId(gameVersion));
 
 			MinecraftInstallationToolkit.setIDE();
-			return MinecraftInstallationToolkit.generateJvmArguments(gameVersion, args);
+			return MinecraftInstallationToolkit.generateJvmArguments(gameVersion, args,
+					MinecraftInstallationToolkit.getLibraries(cyanVersion),
+					MinecraftInstallationToolkit.getNativesDirectory(gameVersion), mainJar(),
+					MinecraftInstallationToolkit.getAssetsRoot(), MinecraftInstallationToolkit.getAssetId(gameVersion),
+					null, false);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

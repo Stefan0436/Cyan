@@ -335,8 +335,9 @@ public class DownloadsBackend extends JWebService {
 
 			try {
 				File buildDir = new File(sourcesDir, "build/Wrapper");
-				File modkit = new File(sourcesDir, "modkit-" + info.gameVersion);
-				File coremodkit = new File(sourcesDir, "coremodkit-" + info.gameVersion);
+				File modkit = new File(sourcesDir, "modkits/modkit-" + info.gameVersion + "-" + info.cyanVersion);
+				File coremodkit = new File(sourcesDir,
+						"coremodkits/coremodkit-" + info.gameVersion + "-" + info.cyanVersion);
 				File server = new File(buildDir, "Server jars");
 				server = server.listFiles(f -> f.isDirectory())[0];
 

@@ -64,7 +64,7 @@ public abstract class AbstractCoremod extends AbstractMod implements ICoremod, I
 	@Override
 	public String[] providers() {
 		return new String[] { "transformers", "transformer-packages", "class-hooks", "class-hook-packages",
-				"auto.init" };
+				"auto.init", "mod.id" };
 	}
 
 	@Override

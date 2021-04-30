@@ -42,11 +42,11 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 	 * Main implementation, used to create class pool instances
 	 */
 	protected static FluidClassPool implementation = new FluidClassPool();
-	
+
 	protected FluidClassPool newInstance() {
 		return new FluidClassPool();
 	}
-	
+
 	private class ClassEntry {
 		public ClassNode node;
 		public String firstName;
@@ -507,12 +507,13 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 	// Re-generates the variable names if they have unusable names
 	private static void fixLocalVariableNames(ClassNode cls) {
 		for (MethodNode meth : cls.methods) {
-			int varIndex = 1;
 			if (meth.localVariables != null) {
+				int varIndex = 0;
 				for (LocalVariableNode var : meth.localVariables) {
-					if (var.name == null || !var.name.matches("^[A-Za-z0-9_$]+$")) {
-						var.name = "var" + varIndex++;
+					if (var.name != null && !var.name.matches("^[A-Za-z0-9_$]+$")) {
+						var.name = "var" + varIndex;
 					}
+					varIndex++;
 				}
 			}
 		}

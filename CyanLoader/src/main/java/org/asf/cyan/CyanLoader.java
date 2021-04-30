@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -45,6 +46,7 @@ import org.asf.cyan.core.SimpleModloader;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.api.ClassLoadHook;
 import org.asf.cyan.fluid.api.FluidTransformer;
+import org.asf.cyan.fluid.api.transforming.information.metadata.TransformerMetadata;
 import org.asf.cyan.fluid.remapping.Mapping;
 import org.asf.cyan.loader.configs.SecurityConfiguration;
 import org.asf.cyan.loader.eventbus.CyanEventBridge;
@@ -81,6 +83,71 @@ public class CyanLoader extends Modloader implements IModProvider {
 	}
 
 	// TODO: Mod thread manager
+
+	public static void appendCyanInfo(BiConsumer<String, Object> setDetail1, BiConsumer<String, Object> setDetail2) {
+		int mods = Modloader.getModloader().getLoadedCoremods().length;
+		if (mods != 0) {
+			setDetail1.accept("Coremods", mods);
+			for (IModManifest coremod : Modloader.getModloader().getLoadedCoremods()) {
+				setDetail1.accept(coremod.id(), displayMod(coremod, true));
+			}
+		} else
+			setDetail1.accept("Mods", "No mods loaded");
+
+		mods = Modloader.getModloader().getLoadedMods().length;
+		if (mods != 0) {
+			setDetail2.accept("Mods", mods);
+			for (IModManifest mod : Modloader.getModloader().getLoadedMods()) {
+				setDetail2.accept(mod.id(), displayMod(mod, false));
+			}
+		} else
+			setDetail2.accept("Mods", "No mods loaded");
+	}
+
+	public static String displayMod(IModManifest mod, boolean coremod) {
+		try {
+			// TODO: thread manager:
+			// suspended = not running queued instructions
+			// in-memory = not running at all, killed and queue has been stored for when the
+			// thread is re-opened
+			// repeating = re-running tasks
+
+			HashMap<String, Object> entries = new HashMap<String, Object>();
+			entries.put("Version", mod.version());
+			entries.put("Display Name", mod.displayName());
+			entries.put("Dependencies", (mod.dependencies().length + mod.optionalDependencies().length) + " ("
+					+ mod.optionalDependencies().length + " optional)");
+			entries.put("Mod Threads", "0 (0 suspended, 0 in memory, 0 repeating)");
+
+			if (coremod) {
+				int transformers = 0;
+				int applied = 0;
+				for (String[] data : CyanLoader.transformers.keySet()) {
+					if (data[1].equals(mod.id()))
+						transformers++;
+				}
+
+				for (TransformerMetadata md : TransformerMetadata.getLoadedTransformers()) {
+					if (md.getTransfomerOwner().equals(mod.id()))
+						applied++;
+				}
+
+				entries.put("Transformers", transformers + " (" + applied + " applied)");
+			}
+
+			StringBuilder value = new StringBuilder();
+			for (String name : entries.keySet()) {
+				value.append("\n\t\t");
+				value.append(name);
+				value.append(": ");
+				value.append(entries.get(name));
+			}
+
+			return value.toString();
+		} catch (Exception e) {
+			return "~~ ERROR ~~ " + e.getMessage();
+		}
+	}
 
 	private HashMap<String, String> mavenRepositories = new HashMap<String, String>();
 	private HashMap<String, Version> coremodMavenDependencies = new HashMap<String, Version>();
@@ -1244,6 +1311,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 							if (transformer.getPackageName().equals(pkg)
 									|| transformer.getPackageName().startsWith(pkg + ".")) {
 								try {
+									transformers.put(new String[] { transformer.getTypeName(), owner }, source);
 									Fluid.registerTransformer(transformer.getTypeName(), owner, source);
 								} catch (IllegalStateException | ClassNotFoundException e) {
 								}

@@ -32,7 +32,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
-
+import org.objectweb.asm.tree.TypeInsnNode;
 import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
 import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.cyan.fluid.Fluid;
@@ -413,6 +413,20 @@ public class CyanTransformer extends Transformer {
 						indexTmp--;
 						tnode = tnode.getPrevious();
 					}
+					if (methodEndLabel == null) {
+						tnode = targetNode.instructions.getLast();
+						indexTmp = targetNode.instructions.size();
+						while (tnode != null) {
+							if (tnode instanceof LabelNode && methodEndLabel == null) {
+								methodEndLabel = (LabelNode) tnode;
+								methodEndIndex = indexTmp;
+								break;
+							}
+
+							indexTmp--;
+							tnode = tnode.getPrevious();
+						}
+					}
 
 					boolean lineless = false;
 					if (methodStart == -1) {
@@ -573,6 +587,18 @@ public class CyanTransformer extends Transformer {
 						}
 					}
 
+					String[] actualParams = Fluid
+							.parseMultipleDescriptors(meth.desc.substring(1, meth.desc.lastIndexOf(")")));
+
+					int min = actualParams.length;
+					if (!Modifier.isStatic(meth.access) && Modifier.isStatic(targetNode.access))
+						min--;
+					else if (Modifier.isStatic(meth.access) && !Modifier.isStatic(targetNode.access))
+						min++;
+
+					int appendVarLength = meth.maxLocals
+							- (actualParams.length + (Modifier.isStatic(meth.access) ? 0 : 1));
+
 					int injectCodeStart = -1;
 					int injectCodeEnd = -1;
 
@@ -583,37 +609,31 @@ public class CyanTransformer extends Transformer {
 							if (index == injectNodeIndex)
 								break;
 							if (node instanceof VarInsnNode) {
-								if (((VarInsnNode) node).var > addVarStart)
-									addVarStart = ((VarInsnNode) node).var;
+								addVarStart = ((VarInsnNode) node).var;
 							} else if (node instanceof IincInsnNode) {
-								if (((IincInsnNode) node).var > addVarStart)
-									addVarStart = ((IincInsnNode) node).var;
+								addVarStart = ((IincInsnNode) node).var;
 							}
 							index++;
 						}
 					}
 
-					String[] actualParams = Fluid
-							.parseMultipleDescriptors(meth.desc.substring(1, meth.desc.lastIndexOf(")")));
-					int appendVarLength = meth.maxLocals
-							- (actualParams.length + (Modifier.isStatic(meth.access) ? 0 : 1));
-
 					if (addVarStart == 0)
-						addVarStart = info.types.length;
+						addVarStart = info.types.length + (Modifier.isStatic(targetNode.access) ? 0 : 1);
 
 					targetNode.maxLocals += appendVarLength;
 					InsnList newNodes = new InsnList();
+
 					for (AbstractInsnNode node : meth.instructions) {
 						if (node instanceof VarInsnNode) {
 							VarInsnNode vnode = (VarInsnNode) node;
-							if (vnode.var > actualParams.length) {
-								int varIndex = vnode.var - actualParams.length;
+							if (vnode.var > min) {
+								int varIndex = vnode.var - min;
 								vnode.var = addVarStart + varIndex;
 							}
 						} else if (node instanceof IincInsnNode) {
 							IincInsnNode inode = (IincInsnNode) node;
-							if (inode.var > actualParams.length) {
-								int varIndex = inode.var - actualParams.length;
+							if (inode.var > min) {
+								int varIndex = inode.var - min;
 								inode.var = addVarStart + varIndex;
 							}
 						}
@@ -622,6 +642,12 @@ public class CyanTransformer extends Transformer {
 							newNodes.add(node);
 					}
 					AbstractInsnNode nd = newNodes.getLast();
+
+					AbstractInsnNode endLabel = injectNode;
+					while (endLabel != null && !(endLabel instanceof LabelNode)) {
+						endLabel = endLabel.getPrevious();
+					}
+
 					while (nd != null) {
 						boolean stop = false;
 						switch (nd.getOpcode()) {
@@ -632,9 +658,48 @@ public class CyanTransformer extends Transformer {
 						case Opcodes.LRETURN:
 						case Opcodes.RETURN:
 							stop = true;
-							if (nd.getNext() != null && nd.getNext() instanceof LineNumberNode) {
-								newNodes.remove(((LineNumberNode) nd.getNext()).start);
-								newNodes.remove(nd.getNext());
+							if (nd.getNext() != null && nd.getNext() instanceof LabelNode) {
+								LabelNode label = (LabelNode) nd.getNext();
+								if (injectNode != null && meth.localVariables != null && endLabel != null) {
+									for (LocalVariableNode var : meth.localVariables) {
+										if (meth.instructions.indexOf(label) == meth.instructions.indexOf(var.end)) {
+											var.end = (LabelNode) endLabel;
+										}
+									}
+									for (AbstractInsnNode node : newNodes) {
+										if (node instanceof JumpInsnNode) {
+											JumpInsnNode jump = (JumpInsnNode) node;
+											if (meth.instructions.indexOf(label) == meth.instructions
+													.indexOf(jump.label)) {
+												jump.label = (LabelNode) endLabel;
+											}
+										}
+									}
+								}
+								newNodes.remove(label);
+							}
+							if (nd.getPrevious() != null && nd.getPrevious() instanceof LineNumberNode) {
+								LineNumberNode line = (LineNumberNode) nd.getPrevious();
+								injectCodeEnd = line.line;
+								LabelNode label = line.start;
+								if (injectNode != null && meth.localVariables != null && endLabel != null) {
+									for (LocalVariableNode var : meth.localVariables) {
+										if (meth.instructions.indexOf(label) == meth.instructions.indexOf(var.end)) {
+											var.end = (LabelNode) endLabel;
+										}
+									}
+									for (AbstractInsnNode node : newNodes) {
+										if (node instanceof JumpInsnNode) {
+											JumpInsnNode jump = (JumpInsnNode) node;
+											if (meth.instructions.indexOf(label) == meth.instructions
+													.indexOf(jump.label)) {
+												jump.label = (LabelNode) endLabel;
+											}
+										}
+									}
+								}
+								newNodes.remove(label);
+								newNodes.remove(line);
 							}
 							newNodes.remove(nd);
 							break;
@@ -645,7 +710,8 @@ public class CyanTransformer extends Transformer {
 					}
 
 					if (targetNode.localVariables != null && meth.localVariables != null) {
-						if (meth.localVariables.size() > actualParams.length) {
+						if (meth.localVariables.size() > actualParams.length
+								+ (Modifier.isStatic(targetNode.access) ? 0 : 1)) {
 							LocalVariableNode[] mthLocalVars = new LocalVariableNode[meth.localVariables.size()
 									- (actualParams.length + (Modifier.isStatic(meth.access) ? 0 : 1))];
 							int index = 0;
@@ -662,48 +728,41 @@ public class CyanTransformer extends Transformer {
 								if (targetNode.localVariables.size() == 0) {
 									for (int i = 0; i < mthLocalVars.length; i++) {
 										mthLocalVars[i].index = i;
+										AbstractInsnNode start = mthLocalVars[i].start;
+										while (start != null) {
+											start = start.getPrevious();
+											if (start instanceof LabelNode) {
+												mthLocalVars[i].start = (LabelNode) start;
+												break;
+											}
+										}
 									}
 									targetNode.localVariables = Arrays.asList(mthLocalVars);
 								} else {
-									for (int i = 0; i < mthLocalVars.length; i++) {
-										mthLocalVars[i].index = addVarStart + (Modifier.isStatic(meth.access) ? 0 : 1)
-												+ i;
-									}
+									index = 0;
 									LocalVariableNode[] oldVars = new LocalVariableNode[targetNode.localVariables
 											.size()];
-									for (int i = 0; i < targetNode.localVariables.size(); i++) {
-										oldVars[i] = targetNode.localVariables.get(i);
-										if (i > addVarStart) {
-											oldVars[i].index += mthLocalVars.length;
+									for (LocalVariableNode var : targetNode.localVariables) {
+										if (var.index > addVarStart)
+											var.index += appendVarLength;
+										oldVars[index++] = var;
+									}
+
+									for (int i = 0; i < mthLocalVars.length; i++) {
+										mthLocalVars[i].index = addVarStart
+												+ (mthLocalVars[i].index - actualParams.length);
+										AbstractInsnNode start = mthLocalVars[i].start;
+										while (start != null) {
+											start = start.getPrevious();
+											if (start instanceof LabelNode) {
+												mthLocalVars[i].start = (LabelNode) start;
+												break;
+											}
 										}
 									}
-									int insertAt = 0;
-									int ind = 0;
-									for (LocalVariableNode var : targetNode.localVariables) {
-										if (var.index == addVarStart)
-											insertAt = ind;
-										ind++;
-									}
-									LocalVariableNode[] vars = ArrayUtil.insert(oldVars,
-											insertAt + (Modifier.isStatic(meth.access) ? 0 : 1), mthLocalVars);
+									LocalVariableNode[] vars = ArrayUtil.append(oldVars, mthLocalVars);
 									targetNode.localVariables = Arrays.asList(vars);
 								}
-							}
-						}
-					}
-
-					for (AbstractInsnNode node : targetNode.instructions) {
-						if (node instanceof VarInsnNode) {
-							VarInsnNode vnode = (VarInsnNode) node;
-							if (vnode.var > addVarStart) {
-								int varIndex = vnode.var - addVarStart;
-								vnode.var = addVarStart + appendVarLength + varIndex;
-							}
-						} else if (node instanceof IincInsnNode) {
-							IincInsnNode inode = (IincInsnNode) node;
-							if (inode.var > addVarStart) {
-								int varIndex = inode.var - addVarStart;
-								inode.var = addVarStart + appendVarLength + varIndex;
 							}
 						}
 					}
@@ -713,16 +772,6 @@ public class CyanTransformer extends Transformer {
 							LineNumberNode lnNode = (LineNumberNode) node;
 							injectCodeStart = lnNode.line;
 						}
-					}
-
-					nd = newNodes.getLast();
-					while (nd != null) {
-						AbstractInsnNode node = nd;
-						if (node instanceof LineNumberNode && injectCodeEnd == -1) {
-							LineNumberNode lnNode = (LineNumberNode) node;
-							injectCodeEnd = lnNode.line;
-						}
-						nd = nd.getPrevious();
 					}
 
 					int ind = 1;
@@ -787,6 +836,19 @@ public class CyanTransformer extends Transformer {
 								instrs.remove(node);
 						}
 					}
+					for (AbstractInsnNode node : instrs) {
+						if (node instanceof VarInsnNode) {
+							VarInsnNode vnode = (VarInsnNode) node;
+							if (vnode.var > addVarStart) {
+								vnode.var += appendVarLength;
+							}
+						} else if (node instanceof IincInsnNode) {
+							IincInsnNode vnode = (IincInsnNode) node;
+							if (vnode.var > addVarStart) {
+								vnode.var += appendVarLength;
+							}
+						}
+					}
 					if (injectNode != null) {
 						instrs.insertBefore(injectNode, newNodes);
 					} else {
@@ -846,10 +908,17 @@ public class CyanTransformer extends Transformer {
 					mth.transform(meth.instructions, transformerNode, clName, cls, pool);
 					mth.apply(meth);
 					meth.access = newMod;
-					cls.methods.add(meth);
 
 					FluidMethodInfo ninfo = FluidMethodInfo.create(meth);
 					ninfo.remap(clName, transformerNode, ninfo, false, pool);
+
+					InsnList instrs = new InsnList();
+					for (AbstractInsnNode nd : meth.instructions) {
+						if (!(nd instanceof FrameNode))
+							instrs.add(nd);
+					}
+					meth.instructions = instrs;
+					cls.methods.add(meth);
 
 					debug("Created method " + ninfo.name);
 					transformedMethods.add(ninfo.name + " " + ninfo.toDescriptor() + " " + clName + " " + meth.name
@@ -1555,7 +1624,7 @@ public class CyanTransformer extends Transformer {
 				if (((FrameNode) node).stack != null) {
 					int index = 0;
 					for (Object stackEntry : ((FrameNode) node).stack) {
-						if (stackEntry.equals(transformerNode.name)) {
+						if (stackEntry != null && stackEntry.equals(transformerNode.name)) {
 							((FrameNode) node).stack.set(index, cls.name);
 						}
 						index++;
@@ -1564,10 +1633,23 @@ public class CyanTransformer extends Transformer {
 				if (((FrameNode) node).local != null) {
 					int index = 0;
 					for (Object localEntry : ((FrameNode) node).local) {
-						if (localEntry.equals(transformerNode.name)) {
+						if (localEntry != null && localEntry.equals(transformerNode.name)) {
 							((FrameNode) node).local.set(index, cls.name);
 						}
 						index++;
+					}
+				}
+			} else if (node instanceof TypeInsnNode) {
+				TypeInsnNode tnode = (TypeInsnNode) node;
+				ClassNode clsT = null;
+				try {
+					clsT = pool.getClassNode(tnode.desc);
+				} catch (ClassNotFoundException e1) {
+				}
+				if (clsT != null) {
+					if (AnnotationInfo.isAnnotationPresent(TargetClass.class, clsT)) {
+						String newClName = AnnotationInfo.getAnnotation(TargetClass.class, clsT).get("target");
+						tnode.desc = Fluid.mapClass(newClName).replace(".", "/");
 					}
 				}
 			}

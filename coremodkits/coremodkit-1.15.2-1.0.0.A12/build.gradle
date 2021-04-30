@@ -1,0 +1,211 @@
+buildscript {
+	repositories {
+		jcenter()
+		mavenCentral()
+		maven {
+			name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven"
+		}
+	}
+	dependencies {
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A31'
+	}
+}
+
+plugins {
+	id 'java'
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.asf.cyan.cornflower'
+
+
+// Mod information
+group="org.example"
+version="1.0.0.A1"
+
+def mod_class_name = "ExampleCoremod"
+def mod_package_name = "org.example.examplemod"
+
+def mod_display_name = "Example Coremod"
+
+def mod_description = '''
+Example Coremod
+'''
+
+// Automatically assigned
+def mod_id = project.name
+def mod_group = project.group
+
+// Mod Debugging Manifest
+task runManifest() {
+	def conf = modfileManifest {
+		modid mod_id
+		modgroup mod_group
+
+		mod_class mod_class_name
+		mod_package mod_package_name
+
+		display_name mod_display_name
+		mod_version project.version
+
+		description mod_description
+	}
+	doLast {
+		File dest = new File("${project.buildDir}/run/mod.manifest.ccfg")
+		if (!dest.getParentFile().exists())
+			dest.getParentFile().mkdirs()
+
+		java.nio.file.Files.writeString(dest.toPath(), conf.toString());
+	}
+}
+createEclipseLaunches.dependsOn runManifest
+
+// Instructs Cyan to load the coremod in the debug enviroment
+project.afterEvaluate {
+	createServerLaunch {
+		jvm "-DdebugModfileManifests=CM//${project.buildDir}/run/mod.manifest.ccfg";
+		jvm "-DauthorizeDebugPackages=${mod_package_name}";
+	}
+
+	createClientLaunch {
+		jvm "-DdebugModfileManifests=CM//${project.buildDir}/run/mod.manifest.ccfg";
+		jvm "-DauthorizeDebugPackages=${mod_package_name}";
+	}
+}
+
+// Dependency configuration
+dependencies {
+	// Selects modloader dependencies:
+	// 2 = Base Moddidng
+	// 4 = CyanUtil
+	// 8 = Core Modding (includes modding)
+	// 16 = FLUID
+	implementation Modloader.forModloader("cyan", 4 | 8 | 16)
+
+	// Selects game dependencies
+	implementation Game.forGame("Minecraft", "1.15.2")
+	
+	// Adds 1.15 as secondary version
+//	implementation Game.forGame("Minecraft", "1.15.2")
+}
+
+// Platform configuration
+platforms {
+	// Needs to be present as FIRST entry when using other modding platforms.
+	// Minecraft VANILLA platform, configures the base version.
+	VANILLA {
+		// Game version
+		version "1.15.2"
+	}
+
+	// MCP Platform, for forge support
+	MCP {
+		// YYYYMMDD.HHMMSS, should match upstream forge
+		version "20200515.085601"
+
+		// Forge version
+		modloader "31.2.50"
+	}
+
+	// Yarn Platform, for fabric support
+	YARN {
+		// Build version for YARN,
+		// Search for matching game version in http://maven.modmuss50.me/net/fabricmc/yarn/maven-metadata.xml
+		// Or use getYarnVersion("game-version") to do so automatically
+		version "1.15.2+build.17" // getYarnVersion("1.15.2")
+
+		// Fabric version
+		// For latest, use getLatestFabricVersion("game-version")
+		modloader "0.11.3" // getLatestFabricVersion("1.15.2")
+	}
+
+	// Spigot Platform, for paper support
+	SPIGOT {
+		// SPIGOT mappings version, it is best to only use mappings that have been given a green light by the Cyan team.
+		//
+		// Use getRecommendedSpigotMappings("game-version") for the mappings that have been given a green light
+		// Use getLatestSpigotMappings("game-version") for mappings in pre-release testing stage
+		// Use getTestingSpigotMappings("game-version") for mappings in early testing stage (unrecommended, can really break things)
+		//
+		//
+		// If you really want the latest version, you can use the following.
+		// USE AT YOUR OWN RISK, CYAN WON'T BE HELD RESPONSIBLE FOR DAMAGED WORLDS.
+		//
+		// For the latest remote, use getRemoteSpigotMappingsVersion("game-version")
+		//
+		//
+		// Commit hash and craftbukkit build for mappings version (commit:craftbukkit)
+		version "455d45a4244894335cd07451bdda79ccd380aff6:1_15_R1" // getRecommendedSpigotMappings("1.15.2")
+
+		// Paper version, only use paper version compatible with the mappings,
+		//
+		// Use getPaperVersion("mappings-version") to retrieve the latest paper version that has been
+		// registered as 'compatible with mappings' in the generic version manifest of CYAN.
+		//
+		// Use getPaperVersionByDate("game-vesion", "mappings-version") to retrieve the paper version with date
+		// aproximatly matching the mappings publish date. (USE AT YOUR OWN RISK, SCRAPES SPIGOT WEB PAGE FOR DATE
+		// AND RECURSES THROUGH PAPER VERSIONS TO FIND THE UPDATE, PLEASE STORE VALUE AND USE AS LEAST AS POSSIBLE)
+		//
+		// Paper version
+		modloader "391" // getPaperVersion("f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3")
+	}
+}
+
+// Adds RIFT tasks for the platforms
+addPlatformRiftTasks {
+	platform platforms
+	from tasks.jar.getArchiveFile()
+}
+
+ctc {
+	method uctc
+	source tasks.jar.getArchiveFile()
+	source riftTasks
+	destination "$buildDir/uctc/Main Trust"
+}
+
+task ctcPack (type: CtcUtil) {
+	method pack
+	createHash true
+
+	source "$buildDir/uctc/Main Trust"
+	destination genOutputName(new File(buildDir, "ctcs"), "Main Trust")
+}
+
+cmf {
+	manifest {
+		modfileManifest {
+			modid mod_id
+			modgroup mod_group
+
+			mod_class mod_class_name
+			mod_package mod_package_name
+
+			display_name mod_display_name
+			mod_version project.version
+
+			description mod_description
+			platform platforms
+
+			jar tasks.jar.getArchiveFile()
+			jar riftTasks
+
+			maven_dependency remoteDependencies
+			trust_container tasks.ctcPack, "https://aerialworks.ddns.net/cyan/trust/download"
+		}
+	}
+
+	archiveVersion = project.version
+	archiveExtension = 'ccmf'
+	destinationDirectory = file("$buildDir/ccmf")
+}
+
+rift.dependsOn jar
+build.finalizedBy rift
+rift.finalizedBy ctc
+ctc.dependsOn rift
+ctc.finalizedBy ctcPack
+ctcPack.dependsOn ctc
+ctcPack.finalizedBy cmf
+cmf.dependsOn ctcPack

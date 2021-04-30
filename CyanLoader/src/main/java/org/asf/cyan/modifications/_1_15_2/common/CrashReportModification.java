@@ -2,7 +2,9 @@ package org.asf.cyan.modifications._1_15_2.common;
 
 import java.io.File;
 
+import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.modloader.Modloader;
+import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
@@ -27,7 +29,14 @@ public class CrashReportModification {
 	@TargetType(target = "net.minecraft.CrashReportCategory")
 	private final CrashReportCategoryMock systemDetails = null;
 
+	@TargetType(target = "net.minecraft.CrashReportCategory")
+	private CrashReportCategoryMock modsCategoryCyanLoader = null;
+
+	@TargetType(target = "net.minecraft.CrashReportCategory")
+	private CrashReportCategoryMock coremodsCategoryCyanLoader = null;
+
 	private boolean areCyanTransformersPresent = false;
+	private boolean trackingStackTrace = false;
 	private StackTraceElement[] uncategorizedStackTrace = new StackTraceElement[0];
 
 	private final Throwable exception = null;
@@ -142,7 +151,36 @@ public class CrashReportModification {
 		systemDetails.setDetail("Loaded " + Modloader.getModloader().getSimpleName().toUpperCase() + " Coremods",
 				Modloader.getModloader().getLoadedCoremods().length);
 		systemDetails.setDetail("Applied transformers", TransformerMetadata.getLoadedTransformers().length);
+	}
 
-		// TODO: add cyan category to tail
+	@TargetName(target = "getDetails")
+	@InjectAt(location = InjectLocation.TAIL)
+	public void getDetails3(StringBuilder var1) {
+		var1.append("\n\n\n");
+		var1.append("-- IMPORTANT --\n");
+		var1.append(
+				"\tCYAN has been installed, please verify that CYAN's modifications didn't cause this crash before reporting.\n");
+		var1.append("\t\n");
+		var1.append(
+				"\tModifications made by CYAN and/or its mods are NOT influenced by minecraft or any other modloader unless\n");
+		var1.append("\texplicitly stated otherwise.");
+		var1.append("\n\n");
+		coremodsCategoryCyanLoader.getDetails(var1);
+		var1.append("\n\n");
+		modsCategoryCyanLoader.getDetails(var1);
+		var1.append("\n");
+	}
+
+	@TargetName(target = "initDetails")
+	@InjectAt(location = InjectLocation.TAIL)
+	private void initDetails2() {
+		boolean trackOld = trackingStackTrace;
+		trackingStackTrace = false;
+		coremodsCategoryCyanLoader = new CrashReportCategoryMock(this, "Loaded CYAN Coremods");
+		modsCategoryCyanLoader = new CrashReportCategoryMock(this, "Loaded CYAN Mods");
+		trackingStackTrace = trackOld;
+
+		CyanLoader.appendCyanInfo((str, obj) -> coremodsCategoryCyanLoader.setDetail(str, obj),
+				(str, obj) -> modsCategoryCyanLoader.setDetail(str, obj));
 	}
 }

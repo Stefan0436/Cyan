@@ -1319,7 +1319,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		downloadVersionAndLibraries(version, overwrite, true);
 	}
 
-	static enum OsInfo {
+	public static enum OsInfo {
 		windows, linux, osx, other;
 
 		public static OsInfo getCurrent() {
