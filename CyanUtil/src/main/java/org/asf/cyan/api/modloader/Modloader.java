@@ -3,6 +3,7 @@ package org.asf.cyan.api.modloader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -262,7 +263,8 @@ public abstract class Modloader extends CyanComponent {
 					|| (!componentCls.getAnnotation(TargetModloader.class).value().getTypeName()
 							.equals(modloader.getClass().getTypeName())
 							&& !(modloader.acceptsAnonymousComponent()
-									&& componentCls.getAnnotation(TargetModloader.class).any()))) {
+									&& componentCls.getAnnotation(TargetModloader.class).any()))
+					|| Modifier.isAbstract(componentCls.getModifiers()) || componentCls.isInterface()) {
 				continue;
 			}
 			if (modloader.presentComponent(componentCls)) {
@@ -333,13 +335,13 @@ public abstract class Modloader extends CyanComponent {
 		return getBus(modloaderEventBus.getChannel() + "." + name);
 	}
 
-	protected void createEventChannel(String name) {
+	protected EventBus createEventChannel(String name) {
 		name = name.toLowerCase();
 		if (getBus(modloaderEventBus.getChannel() + "." + name) != null)
 			throw new IllegalStateException("Event channel " + name + " already registered. Modloader: " + getName());
 
 		debug("Creating modloader event channel " + modloaderEventBus.getChannel() + "." + name + "...");
-		eventBusFactory.createBus(modloaderEventBus.getChannel() + "." + name);
+		return eventBusFactory.createBus(modloaderEventBus.getChannel() + "." + name);
 	}
 
 	protected EventBus getSharedEventChannel(String name) {
@@ -352,7 +354,7 @@ public abstract class Modloader extends CyanComponent {
 		return getSharedBus(name);
 	}
 
-	protected void createSharedEventChannel(String name) {
+	protected EventBus createSharedEventChannel(String name) {
 		name = name.toLowerCase();
 
 		if (getBus(name) != null)
@@ -360,7 +362,7 @@ public abstract class Modloader extends CyanComponent {
 					"Shared event channel " + name + " already registered. Modloader: " + getName());
 
 		debug("Creating shared event channel " + name + "...");
-		sharedEventBusFactory.createBus(name);
+		return sharedEventBusFactory.createBus(name);
 	}
 
 	protected EventBus getBus(String channel) {

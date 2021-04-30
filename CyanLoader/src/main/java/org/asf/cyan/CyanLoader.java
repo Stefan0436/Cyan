@@ -27,6 +27,7 @@ import java.util.zip.ZipInputStream;
 
 import org.asf.cyan.api.events.IEventProvider;
 import org.asf.cyan.api.events.core.EventBusFactory;
+import org.asf.cyan.api.events.extended.IExtendedEvent;
 import org.asf.cyan.api.fluid.annotations.PlatformExclude;
 import org.asf.cyan.api.fluid.annotations.PlatformOnly;
 import org.asf.cyan.api.fluid.annotations.SideOnly;
@@ -1404,6 +1405,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 	}
 
 	private ArrayList<String> events = new ArrayList<String>();
+	private ArrayList<IExtendedEvent<?>> extEvents = new ArrayList<IExtendedEvent<?>>();
 	private CyanEventBridge bridger = null;
 
 	private static ArrayList<String> classHookPackages = new ArrayList<String>();
@@ -1416,7 +1418,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 	protected boolean presentComponent(Class<IModloaderComponent> component) {
 		if (CyanEventBridge.class.isAssignableFrom(component)) {
 			return true;
-		} else if (IEventProvider.class.isAssignableFrom(component)) {
+		} else if (IEventProvider.class.isAssignableFrom(component)
+				|| IExtendedEvent.class.isAssignableFrom(component)) {
 			return true;
 		} else if (CyanErrorHandlers.class.isAssignableFrom(component)) {
 			return true;
@@ -1499,6 +1502,15 @@ public class CyanLoader extends Modloader implements IModProvider {
 				return false;
 
 			events.add(((IEventProvider) component).getChannelName());
+
+			return true;
+		} else if (component instanceof IExtendedEvent) {
+			if (events.contains(((IExtendedEvent<?>) component).channelName()))
+				return false;
+
+			IExtendedEvent<?> event = (IExtendedEvent<?>) component;
+			extEvents.add(event);
+			events.add(event.channelName());
 
 			return true;
 		} else if (component instanceof CyanErrorHandlers) {
@@ -1614,11 +1626,19 @@ public class CyanLoader extends Modloader implements IModProvider {
 	protected void postRegister() {
 		for (String event : events) {
 			try {
-				createEventChannel(event);
+				Optional<IExtendedEvent<?>> optEvent = extEvents.stream().filter(t -> t.channelName().equals(event))
+						.findFirst();
+				if (optEvent.isPresent()) {
+					IExtendedEvent<?> extEvent = optEvent.get();
+
+					extEvent.afterInstantiation();
+					extEvent.assign(createEventChannel(event));
+				} else {
+					createEventChannel(event);
+				}
 			} catch (IllegalStateException e) {
 			}
 		}
-
 		createEventChannel("mod.loaded");
 
 		downloadMavenDependencies(coremodMavenDependencies);

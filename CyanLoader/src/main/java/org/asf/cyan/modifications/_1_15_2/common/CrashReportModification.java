@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.modloader.Modloader;
-import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
