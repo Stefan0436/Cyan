@@ -1,5 +1,5 @@
 Cyan Update Changelog: 1.0.0 (Alpha 13):
- - Instantiated Event Provider (less overhead, CyanUtil 1.0.0.A11)
+ - Extended Event Provider (less overhead, CyanUtil 1.0.0.A11)
  - Mod Threads API (CyanModding 1.0.0.A13, count of threads is displayed in crash logs) -- TODO
  - The FLUID transformer system is now an API. (FLUID A22) -- TODO
  - MTK MSA Account Support (MTK A19) -- TODO
