@@ -105,7 +105,7 @@ platforms {
 		version "20210115.111550"
 
 		// Forge version
-		modloader "36.1.4"
+		modloader "36.1.13"
 	}
 
 	// Yarn Platform, for fabric support
