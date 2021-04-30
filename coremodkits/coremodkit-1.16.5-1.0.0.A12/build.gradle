@@ -113,7 +113,7 @@ platforms {
 		// Build version for YARN,
 		// Search for matching game version in http://maven.modmuss50.me/net/fabricmc/yarn/maven-metadata.xml
 		// Or use getYarnVersion("game-version") to do so automatically
-		version "1.16.5+build.6" // getYarnVersion("1.16.5")
+		version "1.16.5+build.8" // getYarnVersion("1.16.5")
 
 		// Fabric version
 		// For latest, use getLatestFabricVersion("game-version")
