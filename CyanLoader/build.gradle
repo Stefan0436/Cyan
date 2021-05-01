@@ -5,20 +5,21 @@ buildscript {
 		maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
 	}
 	dependencies {
-		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A25'
-		classpath 'org.asf.cyan:CCFG:1.0.0.A2'
-		classpath 'com.google.code.gson:gson:2.8.6'
-		classpath group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A32'
 	}
 }
 
 plugins {
-    id 'java'
+	id 'java'
 	id 'maven-publish'
 }
+
 apply from: '../asf.mvn.publish.gradle'
 apply from: '../config.gradle'
+
 apply plugin: 'eclipse'
+apply plugin: 'org.asf.cyan.cornflower'
+
 buildDir = '../build/CyanLoader'
 
 group="org.asf.cyan"
@@ -37,13 +38,12 @@ task createCyanSourceZip(type: Zip, dependsOn: 'prepareSourceZip') {
 jar.dependsOn('processResources')
 
 repositories {
-    mavenCentral()
-    jcenter()
+	mavenCentral()
 	maven { url = 'https://repo.spongepowered.org/maven' }
 	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
 }
 
-dependencies {
+dependencies {	
 	implementation project(':CyanComponents')
 	implementation project(':CyanCore')
 	implementation project(':MTK')
@@ -51,14 +51,14 @@ dependencies {
 	implementation project(':CyanUtil')
 	implementation project(':CCFG')
 	implementation project(':ClassTrust')
-	
+
 	implementation 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.13'
-	
+
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
-	
+
 	implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
-    testImplementation 'junit:junit:4.12'
+	testImplementation 'junit:junit:4.12'
 }
 
 jar {
@@ -159,50 +159,50 @@ configurePublish {
 	description "Cyan main startup system - called from the wrappers"
 	page "https://aerialworks.ddns.net/maven"
 	address "https://aerialworks.ddns.net/maven"
-	
+
 	author {
 		name "$authorname"
 		id "ASF"
 	}
-	
+
 	license {
 		name "GNU General Public License v2.0"
 		url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
 	}
-	
+
 	artifact {
 		name 'CyanCoreModding'
 		artifact_description 'Cyan Coremod Toolkit (stripped-down cyanloader for development purposes)'
 		artifact_version project.version
-		
+
 		task {
 			artifact tasks.coremodAPIJar
 		}
 	}
-	
+
 	artifact {
 		name 'CyanModding'
 		artifact_description 'Cyan Modding Toolkit (stripped-down cyanloader for development purposes)'
 		artifact_version project.version
-		
+
 		task {
 			artifact tasks.modAPIJar
 		}
 	}
-	
+
 	if (!project.file("nogit").exists()) {
 		artifact {
 			name 'CyanLoader-Sources'
 			artifact_description 'Source artifact for the Cyan project, contains the entire source tree'
 			artifact_version project.version
-			
+
 			task {
 				artifact tasks.createCyanSourceZip
 				classifier 'full'
 			}
 		}
 	}
-	
+
 	resource "/log4j2.xml"
 }
 
@@ -212,47 +212,66 @@ task prepareSourceZip {
 	}
 	doLast {
 		if (!file("../.git").exists()) {
-			def gitcmd = [ 'git', 'init', '-b', 'main' ].execute(null, file(".."))
+			def gitcmd = ['git', 'init', '-b', 'main'].execute(null, file(".."))
 			gitcmd.waitFor()
 			def errorg = gitcmd.errorStream.text.trim()
 			if (gitcmd.exitValue() != 0) throw new Exception("Git command failed to execute: "+errorg)
-				
-			gitcmd = [ 'git', 'add', '-A' ].execute(null, file(".."))
+
+			gitcmd = ['git', 'add', '-A'].execute(null, file(".."))
 			gitcmd.waitFor()
 			errorg = gitcmd.errorStream.text.trim()
 			if (gitcmd.exitValue() != 0) throw new Exception("Git command failed to execute: "+errorg)
-			
-			gitcmd = [ 'git', 'commit', '-m', 'Automated intial commit by Cyan Init for maven zip' ].execute(null, file(".."))
+
+			gitcmd = [
+				'git',
+				'commit',
+				'-m',
+				'Automated intial commit by Cyan Init for maven zip'
+			].execute(null, file(".."))
 			gitcmd.waitFor()
 			errorg = gitcmd.errorStream.text.trim()
 			if (gitcmd.exitValue() != 0) throw new Exception("Git command failed to execute: "+errorg)
 		}
-		def git = [ 'git', 'status', '--porcelain' ].execute(null, file(".."))
+		def git = [
+			'git',
+			'status',
+			'--porcelain'
+		].execute(null, file(".."))
 		git.waitFor()
 		def error = git.errorStream.text.trim()
 		if (git.exitValue() != 0) throw new Exception("Git command failed to execute: "+error)
 		def commited = git.text.trim().equals("")
-		
+
 		if (!commited) {
-			git = [ 'git', 'add', '-A' ].execute(null, file(".."))
+			git = ['git', 'add', '-A'].execute(null, file(".."))
 			git.waitFor()
 			error = git.errorStream.text.trim()
 			if (git.exitValue() != 0) throw new Exception("Git command failed to execute: "+error)
-			
-			git = [ 'git', 'commit', '-m', 'Automated commit by Cyan Publish' ].execute(null, file(".."))
+
+			git = [
+				'git',
+				'commit',
+				'-m',
+				'Automated commit by Cyan Publish'
+			].execute(null, file(".."))
 			git.waitFor()
 			error = git.errorStream.text.trim()
 			if (git.exitValue() != 0) throw new Exception("Git command failed to execute: "+error)
 		}
-		
+
 		if (file(buildDir.getCanonicalPath()+"/git-output").exists()) delete file(buildDir.getCanonicalPath()+"/git-output")
-		git = ['git', 'clone', file("..").getCanonicalPath(), file(buildDir.getCanonicalPath()+"/git-output").getCanonicalPath()].execute()
+		git = [
+			'git',
+			'clone',
+			file("..").getCanonicalPath(),
+			file(buildDir.getCanonicalPath()+"/git-output").getCanonicalPath()
+		].execute()
 		git.waitFor()
 		error = git.errorStream.text.trim()
 		if (git.exitValue() != 0) throw new Exception("Git command failed to execute: "+error)
-		
+
 		if (!commited) {
-			git = [ 'git', 'reset', 'HEAD^' ].execute(null, file(".."))
+			git = ['git', 'reset', 'HEAD^'].execute(null, file(".."))
 			git.waitFor()
 			error = git.errorStream.text.trim()
 			if (git.exitValue() != 0) throw new Exception("Git command failed to execute: "+error)
@@ -265,23 +284,23 @@ artifacts {
 	archives javadocJar
 	archives modAPIJar
 	archives coremodAPIJar
-	
+
 	if (!file("nogit").exists()) {
 		archives createCyanSourceZip
 	}
 }
 
 test {
-    include "**/**Test**"
-    exclude "**/**SpecialTest**"
-    minHeapSize = "128m"
-  	maxHeapSize = "2G"
+	include "**/**Test**"
+	exclude "**/**SpecialTest**"
+	minHeapSize = "128m"
+	maxHeapSize = "2G"
 }
 
 task specialTest (type: Test, dependsOn: test) {
-    include "**/**SpecialTest**"
-    minHeapSize = "128m"
-  	maxHeapSize = "2G"
+	include "**/**SpecialTest**"
+	minHeapSize = "128m"
+	maxHeapSize = "2G"
 }
 
 initializeASFMVNPublish()

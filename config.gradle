@@ -15,8 +15,66 @@ ext.timeRelease=OffsetDateTime.now().withNano(0).toString()
 ext.forgeurltemplate="https://files.minecraftforge.net/maven/net/minecraftforge/forge/%game%-%forgeversion%/forge-%game%-%forgeversion%-installer.jar"
 
 ext.modloader=""
-gradle.allprojects {
+
+buildscript {
+	repositories {
+		jcenter()
+		mavenCentral()
+		maven {
+			name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven"
+		}
+	}
+	dependencies {
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A32'
+	}
+}
+
+import com.google.gson.JsonParser
+import com.google.gson.JsonArray
+
+import org.asf.cyan.api.config.Configuration;
+public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
+	public String latestStableVersion;
+	public String latestAlphaVersion;
+	public String latestBetaVersion;
+	public String latestPreviewVersion;
+
+	public String[] longTermSupportVersions;
+	public String[] requiredUpgrade;
 	
+	public HashMap<String, String> libraryVersions = new HashMap<String, String>();
+	
+	public HashMap<String, String> changelogs = new HashMap<String, String>();
+	public HashMap<String, String> allVersions = new HashMap<String, String>();
+	public HashMap<String, String> byGameVersions = new HashMap<String, String>();
+	
+	public HashMap<String, String> forgeSupport = new HashMap<String, String>();
+	public HashMap<String, String> fabricSupport = new HashMap<String, String>();
+	public HashMap<String, String> paperSupport = new HashMap<String, String>();
+	
+	
+	public HashMap<String, String> paperByMappings = new HashMap<String, String>();
+	
+	public HashMap<String, String> spigotStableMappings = new HashMap<String, String>();
+	public HashMap<String, String> spigotLatestMappings = new HashMap<String, String>();
+	public HashMap<String, String> spigotTestingMappings = new HashMap<String, String>();
+	
+	public CyanUpdateInfo(String content) {
+		readAll(content);
+	}
+
+	@Override
+	public String filename() {
+		return null;
+	}
+
+	@Override
+	public String folder() {
+		return null;
+	}
+}
+
+gradle.allprojects {	
 	if (project.hasProperty("overrideGameVersion")) {
 		ext.minecraft=project.getProperty("overrideGameVersion")
 	}
@@ -35,7 +93,54 @@ gradle.allprojects {
 	}
 	if (project.hasProperty("overrideMinMixinVersion")) {
 		ext.minmixin=project.getProperty("overrideMinMixinVersion")
-	}
+	}	
+	
+    ext.craftBukkitPOMUrl = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit/raw/pom.xml?at=%commit%"
+    ext.spigotInfoUrl = "https://hub.spigotmc.org/versions/%mcver%.json";
+
+    if (modloader.startsWith("paper-")) {
+        def infoPath = "/org/asf/cyan/CyanVersionHolder/generic/CyanVersionHolder-generic-versions.ccfg";
+        def paperversion = modloader.substring("paper-".length())
+        if (paperversion.equals("latestsupported")) {
+            def useurl = "https://aerialworks.ddns.net/maven"
+            StringBuilder conf = new StringBuilder();
+            URL u = new URL(useurl + infoPath);
+            Scanner sc = new Scanner(u.openStream());
+            while (sc.hasNext())
+            conf.append(sc.nextLine()+System.lineSeparator());
+            sc.close();
+
+            CyanUpdateInfo info = new CyanUpdateInfo(conf.toString())
+            def mappingsVersion = info.spigotTestingMappings.get(minecraft)
+            def paper = ""
+            
+            if (mappingsVersion == null) {
+                mappingsVersion = getLatestSpigotMappings(minecraft)
+            }
+            
+            paper = info.paperByMappings.get(mappingsVersion)
+            if (paper == null) {
+                URL url = new URL("https://papermc.io/api/v2/projects/paper/versions/" + minecraft);
+                InputStream strm = url.openStream()
+                JsonArray builds = JsonParser.parseString(new String(strm.readAllBytes())).getAsJsonObject().get("builds").getAsJsonArray();
+                strm.close()
+                
+                paper = builds.get(builds.size() - 1).getAsString();
+            }
+            
+            modloader = "paper-" + paper
+        }
+    }
+    
+    def modloaderVersion = minecraft
+    if (modloader.startsWith("paper-")) {
+        modloaderVersion = modloader.substring("paper-".length());
+    } else if (modloader.startsWith("forge-")) {
+        modloaderVersion = modloader.substring("forge-".length());
+    } else if (modloader.startsWith("fabric-loader-")) {
+        modloaderVersion = modloader.substring("fabric-loader-".length());
+    }
+    ext.exactgameversion = exactgameversion.replace("%modloader%", modloaderVersion)
 	
 	ext.getCacheRoot = { ->
 		return getGradle().getGradleUserHomeDir().listFiles(new FilenameFilter() {

@@ -194,6 +194,8 @@ public class RiftJarTask extends AbstractArchiveTask implements ITaskExtender {
 					}
 
 					riftInst.apply();
+					if (output.exists())
+						output.delete();
 					riftInst.export(output);
 					riftInst.close();
 				} catch (ClassNotFoundException | IOException e) {
@@ -202,7 +204,7 @@ public class RiftJarTask extends AbstractArchiveTask implements ITaskExtender {
 					} catch (IOException e2) {
 					}
 					Log4jToGradleAppender.noLogInfo();
-					return WorkResults.didWork(false);
+					throw new RuntimeException(e);
 				}
 
 				try {

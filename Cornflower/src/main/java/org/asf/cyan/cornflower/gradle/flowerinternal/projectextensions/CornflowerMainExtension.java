@@ -19,6 +19,7 @@ import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.closu
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.closureowners.YarnPlatformClosureOwner;
 import org.asf.cyan.cornflower.gradle.tasks.RiftJarTask;
 import org.asf.cyan.cornflower.gradle.utilities.IProjectExtension;
+import org.asf.cyan.cornflower.gradle.utilities.modding.ApiDependency;
 import org.asf.cyan.cornflower.gradle.utilities.modding.CyanModfileManifestGenerator;
 import org.asf.cyan.cornflower.gradle.utilities.modding.GameDependency;
 import org.asf.cyan.cornflower.gradle.utilities.modding.IPlatformConfiguration;
@@ -70,6 +71,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 
 	public static final ModloaderDependency Modloader = new ModloaderDependency();
 	public static final GameDependency Game = new GameDependency();
+	public static final ApiDependency API = new ApiDependency();
 
 	public static final LaunchPlatform DEOBFUSCATED = LaunchPlatform.DEOBFUSCATED;
 	public static final LaunchPlatform UNKNOWN = LaunchPlatform.UNKNOWN;
@@ -220,8 +222,8 @@ public class CornflowerMainExtension implements IProjectExtension {
 				RiftJarTask tsk = (RiftJarTask) getDelegate();
 				tsk.provider(getPlatformRiftProvider(project, config.getPlatform(), side));
 
-				tsk.mappings_identifier(
-						config.getPlatform().toString().toLowerCase() + "-" + config.getDisplayVersion());
+				tsk.mappings_identifier(config.getPlatform().toString().toLowerCase() + "-" + config.getDisplayVersion()
+						+ "-" + config.getPlatform().toString().toLowerCase());
 				tsk.getArchiveClassifier()
 						.set("RIFT-" + config.getPlatform().toString().toUpperCase() + "-"
 								+ config.getCommonMappingsVersion().replaceAll("[!?/:\\\\]", "-")

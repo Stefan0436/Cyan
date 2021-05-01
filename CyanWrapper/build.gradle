@@ -7,7 +7,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A30'
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A32'
 	}
 }
 
@@ -18,62 +18,6 @@ plugins {
 
 apply plugin: 'eclipse'
 apply plugin: 'org.asf.cyan.cornflower'
-
-project(":").childProjects.each { proj ->
-	if (!proj.value.name.equals(project.name)) {
-		project.evaluationDependsOn ":"+proj.value.name
-	}
-}
-
-sourceCompatibility = '1.9'
-targetCompatibility = '1.9'
-
-apply from: '../asf.mvn.publish.gradle'
-apply from: '../config.gradle'
-
-import org.asf.cyan.api.config.Configuration;
-public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
-	public String latestStableVersion;
-	public String latestAlphaVersion;
-	public String latestBetaVersion;
-	public String latestPreviewVersion;
-
-	public String[] longTermSupportVersions;
-	public String[] requiredUpgrade;
-	
-	public HashMap<String, String> libraryVersions = new HashMap<String, String>();
-	
-	public HashMap<String, String> changelogs = new HashMap<String, String>();
-	public HashMap<String, String> allVersions = new HashMap<String, String>();
-	public HashMap<String, String> byGameVersions = new HashMap<String, String>();
-	
-	public HashMap<String, String> forgeSupport = new HashMap<String, String>();
-	public HashMap<String, String> fabricSupport = new HashMap<String, String>();
-	public HashMap<String, String> paperSupport = new HashMap<String, String>();
-	
-	
-	public HashMap<String, String> paperByMappings = new HashMap<String, String>();
-	
-	public HashMap<String, String> spigotStableMappings = new HashMap<String, String>();
-	public HashMap<String, String> spigotLatestMappings = new HashMap<String, String>();
-	public HashMap<String, String> spigotTestingMappings = new HashMap<String, String>();
-	
-	public CyanUpdateInfo(String content) {
-		readAll(content);
-	}
-
-	@Override
-	public String filename() {
-		return null;
-	}
-
-	@Override
-	public String folder() {
-		return null;
-	}
-}
-
-def infoPath = "/org/asf/cyan/CyanVersionHolder/generic/CyanVersionHolder-generic-versions.ccfg";
 
 import sun.security.ec.point.ProjectivePoint
 import java.time.OffsetDateTime
@@ -113,6 +57,63 @@ import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit
 import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender
 import org.asf.cyan.core.CyanCore
 import org.asf.cyan.api.modloader.information.game.GameSide
+import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType
+
+apply from: '../config.gradle'
+project(":").childProjects.each { proj ->
+	if (!proj.value.name.equals(project.name) && !proj.value.name.equals("CyanAPI")) {
+		project.evaluationDependsOn ":"+proj.value.name
+	}
+}
+
+sourceCompatibility = '1.9'
+targetCompatibility = '1.9'
+
+apply from: '../asf.mvn.publish.gradle'
+
+import org.asf.cyan.api.config.Configuration;
+public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
+	public String latestStableVersion;
+	public String latestAlphaVersion;
+	public String latestBetaVersion;
+	public String latestPreviewVersion;
+
+	public String[] longTermSupportVersions;
+	public String[] requiredUpgrade;
+
+	public HashMap<String, String> libraryVersions = new HashMap<String, String>();
+
+	public HashMap<String, String> changelogs = new HashMap<String, String>();
+	public HashMap<String, String> allVersions = new HashMap<String, String>();
+	public HashMap<String, String> byGameVersions = new HashMap<String, String>();
+
+	public HashMap<String, String> forgeSupport = new HashMap<String, String>();
+	public HashMap<String, String> fabricSupport = new HashMap<String, String>();
+	public HashMap<String, String> paperSupport = new HashMap<String, String>();
+
+
+	public HashMap<String, String> paperByMappings = new HashMap<String, String>();
+
+	public HashMap<String, String> spigotStableMappings = new HashMap<String, String>();
+	public HashMap<String, String> spigotLatestMappings = new HashMap<String, String>();
+	public HashMap<String, String> spigotTestingMappings = new HashMap<String, String>();
+
+	public CyanUpdateInfo(String content) {
+		readAll(content);
+	}
+
+	@Override
+	public String filename() {
+		return null;
+	}
+
+	@Override
+	public String folder() {
+		return null;
+	}
+}
+
+def infoPath = "/org/asf/cyan/CyanVersionHolder/generic/CyanVersionHolder-generic-versions.ccfg";
 
 public String getLatestYarnVersion(String version) throws IOException {
 	if (!MinecraftToolkit.hasMinecraftDownloadConnection())
@@ -145,7 +146,7 @@ public String getLatestYarnVersion(String version) throws IOException {
 	return mappingsVersion;
 }
 
-def mappingsVersion = minecraft
+ext.mappingsVersion = minecraft
 if (project.hasProperty("overrideMappingsVersion"))
 	mappingVersion = project.getProperty("overrideMappingsVersion")
 
@@ -160,31 +161,30 @@ if (modloader.startsWith("paper-")) {
 		URL u = new URL(useurl + infoPath);
 		Scanner sc = new Scanner(u.openStream());
 		while (sc.hasNext())
-		conf.append(sc.nextLine()+System.lineSeparator());
+			conf.append(sc.nextLine()+System.lineSeparator());
 		sc.close();
 
 		CyanUpdateInfo info = new CyanUpdateInfo(conf.toString())
 		mappingsVersion = info.spigotTestingMappings.get(minecraft)
 		def paper = ""
-		
+
 		if (mappingsVersion == null) {
 			mappingsVersion = getLatestSpigotMappings(minecraft)
 		}
-		
+
 		paper = info.paperByMappings.get(mappingsVersion)
 		if (paper == null) {
 			URL url = new URL("https://papermc.io/api/v2/projects/paper/versions/" + minecraft);
 			InputStream strm = url.openStream()
 			JsonArray builds = JsonParser.parseString(new String(strm.readAllBytes())).getAsJsonObject().get("builds").getAsJsonArray();
 			strm.close()
-			
+
 			paper = builds.get(builds.size() - 1).getAsString();
 		}
-		
+
 		modloader = "paper-" + paper
 	}
 }
-exactgameversion = exactgameversion.replace("%modloader%", modloader)
 
 private JsonObject getRefs(String version) throws IOException {
 	if (!MinecraftToolkit.hasMinecraftDownloadConnection())
@@ -375,7 +375,7 @@ dependencies {
 
 	wrapper project(":MTK")
 	implementation project(":MTK")
-		
+
 	wrapper project(":ClassTrust")
 	implementation project(":ClassTrust")
 
@@ -475,8 +475,7 @@ if (libSourceCache.exists() && !project.hasProperty("resetLibSourceCache")) {
 	for (String line : Files.readAllLines(libSourceCache.toPath())) {
 		def key = line.substring(0, line.indexOf(" = "));
 		def url = line.substring(line.indexOf(" = ")+3);
-		configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each {
-			dep ->
+		configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each { dep ->
 			def lpath = (!dep.moduleGroup.isEmpty() ? dep.moduleGroup+":" : "")+dep.moduleName+(!dep.moduleVersion.isEmpty() ? ":"+dep.moduleVersion : "")
 			if (lpath.equals(key)) {
 				librarysources.put(key, url)
@@ -488,10 +487,9 @@ if (libSourceCache.exists() && !project.hasProperty("resetLibSourceCache")) {
 
 for (def repo : project.repositories) {
 	if (repo.getName().equals("AerialWorks")) continue;
-	configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each {
-		dep ->
+	configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each { dep ->
 		def lpath = (!dep.moduleGroup.isEmpty() ? dep.moduleGroup+":" : "")+dep.moduleName+(!dep.moduleVersion.isEmpty() ? ":"+dep.moduleVersion : "")
-		if (!librarysources.containsKey(lpath)) {
+		if (!librarysources.containsKey(lpath) && !(repo instanceof FlatDirectoryArtifactRepository)) {
 			def path = (!dep.moduleGroup.isEmpty() ? dep.moduleGroup.replaceAll("\\.", "/")+"/" : "")+dep.moduleName+(!dep.moduleVersion.isEmpty() ? "/"+dep.moduleVersion : "")+"/"+dep.getModuleArtifacts()[0].file.getName()
 			def url = repo.getUrl().toString()+"/"+path
 			try {
@@ -514,8 +512,7 @@ for (def repo : project.repositories) {
 		}
 	}
 }
-configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each {
-	dep ->
+configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each { dep ->
 	def lpath = (!dep.moduleGroup.isEmpty() ? dep.moduleGroup+":" : "")+dep.moduleName+(!dep.moduleVersion.isEmpty() ? ":"+dep.moduleVersion : "")
 	if (!librarysources.containsKey(lpath)) {
 		librarysources.put(lpath, fallback_url)
@@ -523,24 +520,22 @@ configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each {
 	}
 }
 String filedata = "";
-librarysources.each {
-	k, v ->
+librarysources.each { k, v ->
 	filedata += k+" = "+v+System.lineSeparator();
 }
 Files.writeString(libSourceCache.toPath(), filedata)
 
 def index=0
-configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each {
-	dep ->
+configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each { dep ->
 	def path = (!dep.moduleGroup.isEmpty() ? dep.moduleGroup+":" : "")+dep.moduleName+(!dep.moduleVersion.isEmpty() ? ":"+dep.moduleVersion : "")
 	libraries.put path, dep.getModuleArtifacts()[0].file
 	index++
 }
 
 def template="\t\t{"+System.lineSeparator()+
-"\t\t\t"+'"name": "%lib%",'+System.lineSeparator()+
-"\t\t\t"+'"url": "%url%"'+System.lineSeparator()+
-"\t\t}"
+		"\t\t\t"+'"name": "%lib%",'+System.lineSeparator()+
+		"\t\t\t"+'"url": "%url%"'+System.lineSeparator()+
+		"\t\t}"
 
 import java.security.MessageDigest
 def calcSha1(file) // credits to dagezi: https://gist.github.com/dagezi/9594839
@@ -568,7 +563,7 @@ configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each {
 		if (add) {
 			for (def artifact : dep.getModuleArtifacts()) {
 				if (artifact.classifier != null && artifact.classifier.equals("sources"))
-				source = artifact.file
+					source = artifact.file
 				else if (artifact.classifier == null) {
 					lib = artifact.file
 				}
@@ -578,7 +573,7 @@ configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each {
 		if (source == null && lib != null && add) {
 			def str = lib.getName()
 			if (str.endsWith(".jar") || str.endsWith(".jar"))
-			str = str.substring(0, str.lastIndexOf("."))
+				str = str.substring(0, str.lastIndexOf("."))
 			if (new File(lib.getParentFile(), str+"-sources.jar").exists()) {
 				source = new File(lib.getParentFile(), str+"-sources.jar")
 			} else if (new File(lib.getParentFile(), str+"-src.jar").exists()) {
@@ -591,11 +586,11 @@ configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each {
 				def file = lib.getParentFile().getParentFile()
 				if (file != null) {
 					for (File dir : file.listFiles(new FileFilter() {
-						@Override
-						public boolean accept(File f2) {
-							return f2.isDirectory()
-						}
-					})) {
+								@Override
+								public boolean accept(File f2) {
+									return f2.isDirectory()
+								}
+							})) {
 						file = dir
 						if (new File(file, str+"-sources.jar").exists()) {
 							source = new File(file, str+"-sources.jar")
@@ -635,9 +630,9 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 
 		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(minecraft)
 		if (!MinecraftInstallationToolkit.checkVersion(version))
-		MinecraftInstallationToolkit.downloadVersionAndLibraries(version)
+			MinecraftInstallationToolkit.downloadVersionAndLibraries(version)
 		if (MinecraftInstallationToolkit.getVersionJar(version, GameSide.CLIENT) == null)
-		MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.CLIENT)
+			MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.CLIENT)
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, GameSide.CLIENT)) {
 			MinecraftMappingsToolkit.downloadVanillaMappings(version, GameSide.CLIENT)
 			MinecraftMappingsToolkit.saveMappingsToDisk(version, GameSide.CLIENT)
@@ -664,7 +659,7 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 		sourceLookup MinecraftModdingToolkit.sourcesJar(version, GameSide.CLIENT)
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "clients/cyan/"+minecraft)
-		
+
 		classpath jar
 		jvm "-DassetRoot="+MinecraftInstallationToolkit.getAssetsRoot().getCanonicalPath()
 		jvm "-DassetIndex="+MinecraftInstallationToolkit.getAssetId(version)
@@ -672,7 +667,7 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 		jvm "-Djdk.attach.allowAttachSelf=true"
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
 		jvm MinecraftInstallationToolkit.generateJvmArguments(version, null,
-		new File[0], MinecraftInstallationToolkit.getNativesDirectory(version), jar, null, false)
+				new File[0], MinecraftInstallationToolkit.getNativesDirectory(version), jar, null, false)
 
 		Log4jToGradleAppender.noLogInfo()
 	}
@@ -688,9 +683,9 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 
 		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(minecraft)
 		if (!MinecraftInstallationToolkit.checkVersion(version))
-		MinecraftInstallationToolkit.downloadVersionAndLibraries(version)
+			MinecraftInstallationToolkit.downloadVersionAndLibraries(version)
 		if (MinecraftInstallationToolkit.getVersionJar(version, GameSide.CLIENT) == null)
-		MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.CLIENT)
+			MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.CLIENT)
 		MinecraftInstallationToolkit.extractNatives(version)
 
 		mainClass project.group+".CyanIDEWrapper"
@@ -711,7 +706,7 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 		classpath MinecraftInstallationToolkit.getLibraries(version)
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "clients/cyan/"+minecraft)
-		
+
 		classpath jar
 		jvm "-DassetRoot="+MinecraftInstallationToolkit.getAssetsRoot().getCanonicalPath()
 		jvm "-DassetIndex="+MinecraftInstallationToolkit.getAssetId(version)
@@ -719,7 +714,7 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 		jvm "-Djdk.attach.allowAttachSelf=true"
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
 		jvm MinecraftInstallationToolkit.generateJvmArguments(version, null,
-		new File[0], MinecraftInstallationToolkit.getNativesDirectory(version), jar, null, false)
+				new File[0], MinecraftInstallationToolkit.getNativesDirectory(version), jar, null, false)
 
 
 		Log4jToGradleAppender.noLogInfo()
@@ -736,7 +731,7 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 
 		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(minecraft)
 		if (MinecraftInstallationToolkit.getVersionJar(version, GameSide.SERVER) == null)
-		MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.SERVER)
+			MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.SERVER)
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, GameSide.SERVER)) {
 			MinecraftMappingsToolkit.downloadVanillaMappings(version, GameSide.SERVER)
 			MinecraftMappingsToolkit.saveMappingsToDisk(version, GameSide.SERVER)
@@ -762,11 +757,11 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft)
 		if (!new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft).exists())
-		new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft).mkdirs()
+			new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft).mkdirs()
 
 		if (!new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").exists())
-		Files.writeString(new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").toPath(), "eula=true")
-		
+			Files.writeString(new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").toPath(), "eula=true")
+
 		classpath jar
 		jvm "-javaagent:"+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
@@ -785,7 +780,7 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 
 		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(minecraft)
 		if (MinecraftInstallationToolkit.getVersionJar(version, GameSide.SERVER) == null)
-		MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.SERVER)
+			MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.SERVER)
 
 		mainClass project.group+".CyanIDEWrapper"
 
@@ -805,11 +800,11 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft)
 		if (!new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft).exists())
-		new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft).mkdirs()
+			new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft).mkdirs()
 
 		if (!new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").exists())
-		Files.writeString(new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").toPath(), "eula=true")
-		
+			Files.writeString(new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").toPath(), "eula=true")
+
 		classpath jar
 		jvm "-javaagent:"+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
@@ -862,7 +857,6 @@ libraries.forEach { k, v ->
 
 		def lib = "libraries/"+group.replaceAll("\\.", "/")
 
-		if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
 		lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
 		filepaths.put(lib, v.toPath())
 
@@ -873,7 +867,6 @@ libraries.forEach { k, v ->
 
 		def lib = "libraries/"+group.replaceAll("\\.", "/")
 
-		if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
 		lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
 		filepaths.put(lib, v.toPath())
 
@@ -890,7 +883,7 @@ if (!modloader.equals("")) {
 		URL url = new URL(forgeurltemplate.replaceAll("\\%game\\%", minecraft).replaceAll("\\%forgeversion\\%", forgeversion))
 		if (!forgeInstaller.exists() || downloadmarker.exists()) {
 			if (!forgeInstaller.getParentFile().exists())
-			forgeInstaller.getParentFile().mkdirs()
+				forgeInstaller.getParentFile().mkdirs()
 			if (downloadmarker.exists()) downloadmarker.delete()
 			downloadmarker.createNewFile()
 
@@ -903,7 +896,7 @@ if (!modloader.equals("")) {
 			inp.close()
 			downloadmarker.delete()
 		}
-		
+
 		println "Searching for MCP version in forge jar..."
 		String mcpVersion = "";
 		ZipFile installerZip = new ZipFile(forgeInstaller);
@@ -922,7 +915,7 @@ if (!modloader.equals("")) {
 		installerZip.close();
 		if (!project.hasProperty("overrideMappingsVersion"))
 			mappingsVersion = mcpVersion;
-		
+
 		if (!serverFolder.exists()) {
 			println "Installing forge server for dependencies..."
 			javaexec {
@@ -1024,7 +1017,6 @@ if (!modloader.equals("")) {
 
 				def lib = "libraries/"+group.replaceAll("\\.", "/")
 
-				if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
 				lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
 				remotelibs.put(lib, new URL(url))
 
@@ -1057,7 +1049,6 @@ if (!modloader.equals("")) {
 
 				def lib = "libraries/"+group.replaceAll("\\.", "/")
 
-				if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
 				lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
 				remotelibs.put(lib, new URL(url))
 
@@ -1088,7 +1079,6 @@ if (!modloader.equals("")) {
 
 			def lib = "libraries/"+group.replaceAll("\\.", "/")
 
-			if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
 			lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
 			remotelibs.put(lib, new URL(url))
 
@@ -1119,7 +1109,6 @@ if (!modloader.equals("")) {
 
 			def lib = "libraries/"+group.replaceAll("\\.", "/")
 
-			if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
 			lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
 			remotelibs.put(lib, new URL(url))
 
@@ -1127,7 +1116,7 @@ if (!modloader.equals("")) {
 		}
 
 		println "Done."
-		
+
 		if (!project.hasProperty("overrideMappingsVersion")) {
 			println "Resolving latest YARN mappings..."
 			String version = getLatestYarnVersion(minecraft)
@@ -1158,7 +1147,7 @@ if (msg4.length() > l)
 def bar = "------"
 for (int i = 0; i < l; i++)
 	bar += "-"
-	
+
 println ""
 println bar
 println ""
@@ -1178,13 +1167,12 @@ processResources {
 	def logSize = "0"
 	def useurl = fallback_url
 	if (fallback_url.equals(""))
-	useurl = netTestUrl
+		useurl = netTestUrl
 
 	def url = useurl+"/"+cyanloader_package+"/"+cyanloader_logconf_version+"/CyanLoader-${cyanloader_logconf_version}-log4j2.xml"
 
 	File logShaFile = new File(cyanCache, "logsha.info")
 	File logSizeFile = new File(cyanCache, "logsize.info")
-
 	if (!project.hasProperty("noDownload") && !project.hasProperty("currentXML")) {
 		if (getServerConnection()) {
 			println "Downloading CyanLoader logging context..."
@@ -1197,7 +1185,7 @@ processResources {
 			Scanner scanner = new Scanner(sha.openStream())
 			StringBuilder builder = new StringBuilder()
 			while (scanner.hasNext())
-			builder.append(scanner.next())
+				builder.append(scanner.next())
 
 			logSha = builder.toString()
 			scanner.close()
@@ -1243,37 +1231,37 @@ processResources {
 	def cyanforgesupportversions = ""
 	def cyanfabricsupportversions = ""
 	def cyanpapersupportversions = ""
-	
+
 	def paperByMappings = ""
 	def spigotStableMappings = ""
 	def spigotLatestMappings = ""
 	def spigotTestingMappings = ""
-	
+
 	def lateststable = ""
 	def latestalpha = ""
 	def latestbeta = ""
 	def latestpreview = ""
-	
+
 	def libraryVersions = ""
-	
+
 	HashMap<String, String> libraryVersionMap = new HashMap<String, String>();
-	HashMap<String, String> gameVersions = new HashMap<String, String>(); 
+	HashMap<String, String> gameVersions = new HashMap<String, String>();
 	HashMap<String, String> forgeSupportVersions = new HashMap<String, String>();
 	HashMap<String, String> fabricSupportVersions = new HashMap<String, String>();
 	HashMap<String, String> paperSupportVersions = new HashMap<String, String>();
-	
+
 	HashMap<String, String> paperMappingVersions = new HashMap<String, String>();
-	
+
 	HashMap<String, String> stableSpigotMappings = new HashMap<String, String>();
 	HashMap<String, String> latestSpigotMappings = new HashMap<String, String>();
 	HashMap<String, String> testingSpigotMappings = new HashMap<String, String>();
-	
+
 	try {
 		StringBuilder conf = new StringBuilder();
 		URL u = new URL(useurl + infoPath);
 		Scanner sc = new Scanner(u.openStream());
 		while (sc.hasNext())
-		conf.append(sc.nextLine()+System.lineSeparator());
+			conf.append(sc.nextLine()+System.lineSeparator());
 		sc.close();
 
 		CyanUpdateInfo info = new CyanUpdateInfo(conf.toString())
@@ -1281,7 +1269,7 @@ processResources {
 		latestalpha = info.latestAlphaVersion
 		latestbeta = info.latestBetaVersion
 		latestpreview = info.latestPreviewVersion
-		
+
 		for (String key : info.allVersions.keySet()) {
 			def val = info.allVersions.get(key)
 			if (!cyanversion.toString().equals(key)) {
@@ -1295,22 +1283,22 @@ processResources {
 				allcyanchangelog += "    $key> '${val}'\n"
 			}
 		}
-		
+
 		for (String key : info.byGameVersions.keySet()) {
 			def val = info.byGameVersions.get(key).replaceAll("\n", "\n    ")
 			gameVersions.put(key, val)
 		}
-		
+
 		for (String key : info.forgeSupport.keySet()) {
 			def val = info.forgeSupport.get(key).replaceAll("\n", "\n    ")
 			forgeSupportVersions.put(key, val)
 		}
-		
+
 		for (String key : info.fabricSupport.keySet()) {
 			def val = info.fabricSupport.get(key).replaceAll("\n", "\n    ")
 			fabricSupportVersions.put(key, val)
 		}
-		
+
 		for (String key : info.paperSupport.keySet()) {
 			def val = info.paperSupport.get(key).replaceAll("\n", "\n    ")
 			paperSupportVersions.put(key, val)
@@ -1326,28 +1314,28 @@ processResources {
 
 		for (def unsupportedver : info.requiredUpgrade) {
 			if (unsupportedver.equals(cyanversion)) continue
-			unsupportedcyan.add(unsupportedver)
+				unsupportedcyan.add(unsupportedver)
 		}
-		
+
 		for (def ver : info.paperByMappings.keySet()) {
 			def val = info.paperByMappings.get(ver)
-			
+
 			if (project.hasProperty("removePaper") && project.getProperty("removePaper").equals(val))
 				continue;
-			
+
 			paperMappingVersions.put(ver, val)
 		}
-		
+
 		for (def ver : info.spigotStableMappings.keySet()) {
 			def val = info.spigotStableMappings.get(ver)
 			stableSpigotMappings.put(ver, val)
 		}
-		
+
 		for (def ver : info.spigotLatestMappings.keySet()) {
 			def val = info.spigotLatestMappings.get(ver)
 			latestSpigotMappings.put(ver, val)
 		}
-		
+
 		for (def ver : info.spigotTestingMappings.keySet()) {
 			def val = info.spigotTestingMappings.get(ver)
 			testingSpigotMappings.put(ver, val)
@@ -1356,7 +1344,7 @@ processResources {
 		logger.warn("WARNING: Failed to download update information file from: "+useurl + infoPath)
 		logger.warn("You will be missing CYAN version information entries!")
 	}
-	
+
 	def loaderversion = null;
 	if (!modloader.equals("")) {
 		if (modloader.startsWith("forge-")) {
@@ -1367,12 +1355,12 @@ processResources {
 			loaderversion = modloader.substring("paper-".length())
 		}
 	}
-	
+
 	if (project.hasProperty("removeLTSVersions")) {
 		for (String ltsver : project.getProperty("removeLTSVersions").split(" ")) {
 			def ltsid = "lts-" + ltsver
 			def ltsgameversions = new ArrayList<String>()
-			
+
 			for (String key : new ArrayList<String>(gameVersions.keySet())) {
 				String val = gameVersions.get(key)
 				if (val.equals(ltsver) && key.endsWith("-" + ltsid)) {
@@ -1380,7 +1368,7 @@ processResources {
 					ltsgameversions.add(key)
 				}
 			}
-			
+
 			for (String key : paperSupportVersions.keySet()) {
 				String val = paperSupportVersions.get(key)
 				if (val.equals(ltsver) && (key.endsWith("-" + ltsid) || key.startsWith(ltsid + "-"))) {
@@ -1411,7 +1399,7 @@ processResources {
 			}
 		}
 	}
-	
+
 	if (project.hasProperty("removeFromLatest")) {
 		for (String key : gameVersions.keySet()) {
 			String val = gameVersions.get(key)
@@ -1441,12 +1429,12 @@ processResources {
 				break
 			}
 		}
-				
+
 		if (latestSpigotMappings.containsKey(minecraft)) {
 			latestSpigotMappings.remove(minecraft)
 		}
 	}
-	
+
 	if (project.hasProperty("removeFromStable")) {
 		for (String key : gameVersions.keySet()) {
 			String val = gameVersions.get(key)
@@ -1476,12 +1464,12 @@ processResources {
 				break
 			}
 		}
-		
+
 		if (stableSpigotMappings.containsKey(minecraft)) {
 			stableSpigotMappings.remove(minecraft)
 		}
 	}
-	
+
 	if (project.hasProperty("removeFromTesting")) {
 		for (String key : gameVersions.keySet()) {
 			String val = gameVersions.get(key)
@@ -1511,7 +1499,7 @@ processResources {
 				break
 			}
 		}
-		
+
 		for (String ver : testingSpigotMappings.keySet()) {
 			String val = testingSpigotMappings.get(ver)
 			if (val.equals(minecraft)) {
@@ -1519,13 +1507,13 @@ processResources {
 				break
 			}
 		}
-		
+
 		if (testingSpigotMappings.containsKey(minecraft)) {
 			testingSpigotMappings.remove(minecraft)
 		}
 	} else {
 		gameVersions.put(minecraft + "-testing", cyanversion)
-		
+
 		if (!modloader.equals("")) {
 			if (modloader.startsWith("forge-")) {
 				forgeSupportVersions.put("testing-forge", minecraft + "-" + loaderversion)
@@ -1539,19 +1527,19 @@ processResources {
 				paperSupportVersions.put("testing-paper", minecraft + "-" + loaderversion)
 				paperSupportVersions.put("testing-paper-" + minecraft, loaderversion)
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-testing", cyanversion);
-				
+
 				testingSpigotMappings.put(minecraft, mappingsVersion)
 			}
 		}
 	}
-	
+
 	if (modloader.startsWith("paper-") && (!project.hasProperty("removePaper") || !project.getProperty("removePaper").equals(loaderversion))) {
 		paperMappingVersions.put(mappingsVersion, loaderversion)
 	}
-	
+
 	if (project.hasProperty("addToLatest")) {
 		gameVersions.put(minecraft + "-latest", cyanversion)
-		
+
 		if (!modloader.equals("")) {
 			if (modloader.startsWith("forge-")) {
 				forgeSupportVersions.put("latest-paper", minecraft + "-" + loaderversion)
@@ -1560,12 +1548,12 @@ processResources {
 			} else if (modloader.startsWith("fabric-loader-")) {
 				fabricSupportVersions.put("latest-fabric", minecraft + "-" + loaderversion)
 				fabricSupportVersions.put("latest-fabric-" + minecraft, loaderversion)
-				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);				
+				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 			}  else if (modloader.startsWith("paper-")) {
 				paperSupportVersions.put("latest-paper", minecraft + "-" + loaderversion)
 				paperSupportVersions.put("latest-paper-" + minecraft, loaderversion)
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
-				
+
 				testingSpigotMappings.put(minecraft, mappingsVersion)
 				latestSpigotMappings.put(minecraft, mappingsVersion)
 			}
@@ -1573,22 +1561,22 @@ processResources {
 	} else if (project.hasProperty("addToStable") || (project.hasProperty("LTS") && project.getProperty("LTS").equals("true"))) {
 		gameVersions.put(minecraft + "-stable", cyanversion)
 		gameVersions.put(minecraft + "-latest", cyanversion)
-		
+
 		if (!modloader.equals("")) {
 			if (modloader.startsWith("forge-")) {
 				forgeSupportVersions.put("stable-forge", minecraft + "-" + loaderversion)
 				forgeSupportVersions.put("latest-forge", minecraft + "-" + loaderversion)
 				forgeSupportVersions.put("stable-forge-" + minecraft, loaderversion)
 				forgeSupportVersions.put("latest-forge-" + minecraft, loaderversion)
-				
+
 				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-stable", cyanversion);
 			} else if (modloader.startsWith("fabric-loader-")) {
 				fabricSupportVersions.put("stable-fabric", minecraft + "-" + loaderversion)
-				fabricSupportVersions.put("latest-fabric", minecraft + "-" + loaderversion)				
+				fabricSupportVersions.put("latest-fabric", minecraft + "-" + loaderversion)
 				fabricSupportVersions.put("stable-fabric-" + minecraft, loaderversion)
 				fabricSupportVersions.put("latest-fabric-" + minecraft, loaderversion)
-				
+
 				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-stable", cyanversion);
 			}  else if (modloader.startsWith("paper-")) {
@@ -1596,19 +1584,19 @@ processResources {
 				paperSupportVersions.put("latest-paper", minecraft + "-" + loaderversion)
 				paperSupportVersions.put("stable-paper-" + minecraft, loaderversion)
 				paperSupportVersions.put("latest-paper-" + minecraft, loaderversion)
-				
+
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-stable", cyanversion);
-				
+
 				testingSpigotMappings.put(minecraft, mappingsVersion)
 				latestSpigotMappings.put(minecraft, mappingsVersion)
 				stableSpigotMappings.put(minecraft, mappingsVersion)
 			}
 		}
-		
+
 		if (project.hasProperty("LTS") && project.getProperty("LTS").equals("true")) {
 			gameVersions.put(minecraft + "-lts-" + cyanversion, cyanversion)
-			
+
 			if (modloader.startsWith("forge-")) {
 				forgeSupportVersions.put("lts-"+cyanversion+"-forge-" + minecraft, loaderversion);
 				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-lts-"+cyanversion, cyanversion);
@@ -1616,16 +1604,17 @@ processResources {
 				fabricSupportVersions.put("lts-"+cyanversion+"-fabric-" + minecraft, loaderversion);
 				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-lts-"+cyanversion, cyanversion);
 			}  else if (modloader.startsWith("paper-")) {
-				paperSupportVersions.put("lts-"+cyanversion+"-paper-" + minecraft, loaderversion);				
+				paperSupportVersions.put("lts-"+cyanversion+"-paper-" + minecraft, loaderversion);
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-lts-"+cyanversion, cyanversion);
-				
+
 				testingSpigotMappings.put(minecraft, mappingsVersion)
 				latestSpigotMappings.put(minecraft, mappingsVersion)
 				stableSpigotMappings.put(minecraft, mappingsVersion)
 			}
 		}
 	}
-	
+
+	def apiID = null
 	libraries.each { k, v ->
 		def name = null
 		def version = null
@@ -1640,17 +1629,19 @@ processResources {
 			libraryVersionMap.put(name, version)
 		}
 	}
-	
+
+	libraryVersionMap.put("CyanAPI-" + project(":CyanAPI").ext.specVersion, project(":CyanAPI").version);
+
 	for (String key : gameVersions.keySet()) {
 		def val = gameVersions.get(key).replaceAll("\n", "\n    ")
 		byGameVersions += "    $key> '${val}'\n"
 	}
-	
+
 	for (String key : forgeSupportVersions.keySet()) {
 		def val = forgeSupportVersions.get(key).replaceAll("\n", "\n    ")
 		cyanforgesupportversions += "    $key> '${val}'\n"
 	}
-	
+
 	for (String key : fabricSupportVersions.keySet()) {
 		def val = fabricSupportVersions.get(key).replaceAll("\n", "\n    ")
 		cyanfabricsupportversions += "    $key> '${val}'\n"
@@ -1660,27 +1651,27 @@ processResources {
 		def val = paperSupportVersions.get(key).replaceAll("\n", "\n    ")
 		cyanpapersupportversions += "    $key> '${val}'\n"
 	}
-	
+
 	for (String key : libraryVersionMap.keySet()) {
 		def val = libraryVersionMap.get(key).replaceAll("\n", "\n    ")
 		libraryVersions += "    $key> '${val}'\n"
 	}
-	
+
 	for (String key : testingSpigotMappings.keySet()) {
 		def val = testingSpigotMappings.get(key).replaceAll("\n", "\n    ")
 		spigotTestingMappings += "    $key> '${val}'\n"
 	}
-	
+
 	for (String key : latestSpigotMappings.keySet()) {
 		def val = latestSpigotMappings.get(key).replaceAll("\n", "\n    ")
 		spigotLatestMappings += "    $key> '${val}'\n"
 	}
-	
+
 	for (String key : stableSpigotMappings.keySet()) {
 		def val = stableSpigotMappings.get(key).replaceAll("\n", "\n    ")
 		spigotStableMappings += "    $key> '${val}'\n"
 	}
-	
+
 	for (String key : paperMappingVersions.keySet()) {
 		def val = paperMappingVersions.get(key).replaceAll("\n", "\n    ")
 		paperByMappings += "    $key> '${val}'\n"
@@ -1694,14 +1685,14 @@ processResources {
 		for (String unsupportedver : project.getProperty("addUnsupportedVersions").split(" ")) {
 			unsupportedcyan.add(unsupportedver)
 			if (ltscyanversions.contains(unsupportedver))
-			ltscyanversions.remove(unsupportedver)
+				ltscyanversions.remove(unsupportedver)
 		}
 	}
 
 	if (project.hasProperty("removeLTSVersions")) {
 		for (String ltsver : project.getProperty("removeLTSVersions").split(" ")) {
 			if (ltscyanversions.contains(ltsver))
-			ltscyanversions.remove(ltsver)
+				ltscyanversions.remove(ltsver)
 		}
 	}
 
@@ -1748,7 +1739,7 @@ processResources {
 	}
 
 	allcyan += "    ${cyanversion}> '${cyantype}'"
-	
+
 	inputs.property "paperByMappings", "${paperByMappings}"
 	inputs.property "spigotStableMappings", "${spigotStableMappings}"
 	inputs.property "spigotTestingMappings", "${spigotTestingMappings}"
@@ -1776,106 +1767,115 @@ processResources {
 	inputs.property "cyanfabricsupportversions", "${cyanfabricsupportversions}"
 	inputs.property "cyanpapersupportversions", "${cyanpapersupportversions}"
 
-	def projbins = ""
-	def resources = ""
-	def libs="["+System.lineSeparator()
-	libraries.each { k, v ->
-		if (libs.equals("["+System.lineSeparator()))
-		libs += template.replaceAll("\\%lib\\%", k).replaceAll("\\%url\\%", librarysources.get(k))
-		else
-		libs += ","+System.lineSeparator()+template.replaceAll("\\%lib\\%", k).replaceAll("\\%url\\%", librarysources.get(k))
-	}
-	libs+=System.lineSeparator()+"\t],"
+	project(":CyanAPI").afterEvaluate {
+		def projbins = ""
+		def resources = ""
+		def libs="["+System.lineSeparator()
 
-	def libsNoSelf = "["+System.lineSeparator()
-	libraries.each { k, v ->
-		def add = true
-		project(":").childProjects.each { proj ->
-			if (k.equals(proj.value.group+":"+proj.value.name+":"+proj.value.version) && proj.value.file('bin/main').exists() && proj.value.hasProperty("sourceSets")) {
-				add = false
-			}
+		if (!modloader.startsWith("paper-")) {
+			def apiJarTask = tasks.getByPath(":CyanAPI:platformRiftJarClient")
+			apiID = "org.asf.cyan:CyanAPI:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
+			libraries.put(apiID, apiJarTask.getArchiveFile().get().getAsFile());
+			librarysources.put(apiID, fallback_url)
 		}
 
-		if (add) {
-			if (libsNoSelf.equals("["+System.lineSeparator()))
-			libsNoSelf += template.replaceAll("\\%lib\\%", k).replaceAll("\\%url\\%", librarysources.get(k))
+		libraries.each { k, v ->
+			if (libs.equals("["+System.lineSeparator()))
+				libs += template.replaceAll("\\%lib\\%", k).replaceAll("\\%url\\%", librarysources.get(k))
 			else
-			libsNoSelf += ","+System.lineSeparator()+template.replaceAll("\\%lib\\%", k).replaceAll("\\%url\\%", librarysources.get(k))
+				libs += ","+System.lineSeparator()+template.replaceAll("\\%lib\\%", k).replaceAll("\\%url\\%", librarysources.get(k))
 		}
-	}
+		libs+=System.lineSeparator()+"\t],"
 
-	libraries.each { k, v ->
-		for (def proj : project(":").childProjects) {
-			if (k.equals(proj.value.group+":"+proj.value.name+":"+proj.value.version) && proj.value.file('bin/main').exists()) {
-				if (projbins.isEmpty()) projbins=proj.value.file('bin/main').getCanonicalPath();
-				else projbins += ":"+proj.value.file('bin/main').getCanonicalPath();
+		def libsNoSelf = "["+System.lineSeparator()
+		libraries.each { k, v ->
+			def add = true
+			project(":").childProjects.each { proj ->
+				if (k.equals(proj.value.group+":"+proj.value.name+":"+proj.value.version) && proj.value.file('bin/main').exists() && proj.value.hasProperty("sourceSets")) {
+					add = false
+				}
+			}
 
-				if (!proj.value.hasProperty("sourceSets")) continue;
-				if (resources.isEmpty()) resources = proj.value.sourceSets.main.output.resourcesDir.getCanonicalPath();
-				else resources += ":" + proj.value.sourceSets.main.output.resourcesDir.getCanonicalPath();
+			if (add) {
+				if (libsNoSelf.equals("["+System.lineSeparator()))
+					libsNoSelf += template.replaceAll("\\%lib\\%", k).replaceAll("\\%url\\%", librarysources.get(k))
+				else
+					libsNoSelf += ","+System.lineSeparator()+template.replaceAll("\\%lib\\%", k).replaceAll("\\%url\\%", librarysources.get(k))
 			}
 		}
-	}
 
-	libsNoSelf+=System.lineSeparator()+"\t],"
-	inputs.property "projbins", "${projbins}"
-	inputs.property "libsNoSelf", "${libsNoSelf}"
-	inputs.property "resources", "${resources}"
+		libraries.each { k, v ->
+			for (def proj : project(":").childProjects) {
+				if (k.equals(proj.value.group+":"+proj.value.name+":"+proj.value.version) && proj.value.file('bin/main').exists()) {
+					if (projbins.isEmpty()) projbins=proj.value.file('bin/main').getCanonicalPath();
+					else projbins += ":"+proj.value.file('bin/main').getCanonicalPath();
 
-	def props = [
-		"mcver": "${minecraft}",
-		"gameexact": "${exactgameversion}",
-		"modloader": "${modloader}",
-		"minmixin": "${minmixin}",
-		"cyanver": cyanversion,
-		"timeStartDev": "${timeStartDev}",
-		"timeRelease": "${timeRelease}",
-		"type": "${versionType}",
-		"logsha": "${logSha}",
-		"logsize": "${logSize}",
-		"logurl": "${url}",
-		"group": project.group,
-		"projname": project.name,
-		"projbins": "${projbins}",
-		"root": project.file(".").getCanonicalPath(),
-		"agentjar": project(':Fluid').tasks.jar.archivePath.getCanonicalPath(),
-		"resources": "${resources}",
-		"libraries": "${libs}",
-		"cyantype": "${cyantype}",
-		"lts": "${lts}",
-		"allcyan": "${allcyan}",
-		"lateststable": "${lateststable}",
-		"latestpreview": "${latestpreview}",
-		"latestbeta": "${latestbeta}",
-		"latestalpha": "${latestalpha}",
-		"unsupportedcyan": "${unsupported}",
-		"librariesRemSelf": "${libsNoSelf}",
-		"groupslashed": project.group.replaceAll("\\.", "/"),
-		"classwrapperclient": "${classWrapperClient}",
-		"allcyanchangelog": "${allcyanchangelog}",
-		"mappingsVersion": "${mappingsVersion}",
-		"cyangameversions": "${byGameVersions}",
-		"cyanforgesupportversions": "${cyanforgesupportversions}",
-		"cyanfabricsupportversions": "${cyanfabricsupportversions}",
-		"cyanpapersupportversions": "${cyanpapersupportversions}",
-		"libraryVersions": "${libraryVersions}",
-		"paperByMappings": "${paperByMappings}",
-		"spigotStableMappings": "${spigotStableMappings}",
-		"spigotLatestMappings": "${spigotLatestMappings}",
-		"spigotTestingMappings": "${spigotTestingMappings}"
-	]
+					if (!proj.value.hasProperty("sourceSets")) continue;
+					if (resources.isEmpty()) resources = proj.value.sourceSets.main.output.resourcesDir.getCanonicalPath();
+					else resources += ":" + proj.value.sourceSets.main.output.resourcesDir.getCanonicalPath();
+				}
+			}
+		}
 
-	for (def proj : project(":").childProjects) {
-		if (!proj.value.hasProperty("sourceSets")) continue;
-		props.put(proj.value.name, [
-			"resources": proj.value.sourceSets.main.output.resourcesDir.getCanonicalPath(),
-			"name": proj.value.name,
-			"version": proj.value.version
-		])
-	}
+		libsNoSelf+=System.lineSeparator()+"\t],"
+		def props = [
+			"mcver": "${minecraft}",
+			"gameexact": "${exactgameversion}",
+			"modloader": "${modloader}",
+			"minmixin": "${minmixin}",
+			"cyanver": cyanversion,
+			"timeStartDev": "${timeStartDev}",
+			"timeRelease": "${timeRelease}",
+			"type": "${versionType}",
+			"logsha": "${logSha}",
+			"logsize": "${logSize}",
+			"logurl": "${url}",
+			"group": project.group,
+			"projname": project.name,
+			"projbins": "${projbins}",
+			"root": project.file(".").getCanonicalPath(),
+			"agentjar": project(':Fluid').tasks.jar.archivePath.getCanonicalPath(),
+			"resources": "${resources}",
+			"libraries": "${libs}",
+			"cyantype": "${cyantype}",
+			"lts": "${lts}",
+			"allcyan": "${allcyan}",
+			"lateststable": "${lateststable}",
+			"latestpreview": "${latestpreview}",
+			"latestbeta": "${latestbeta}",
+			"latestalpha": "${latestalpha}",
+			"unsupportedcyan": "${unsupported}",
+			"librariesRemSelf": "${libsNoSelf}",
+			"groupslashed": project.group.replaceAll("\\.", "/"),
+			"classwrapperclient": "${classWrapperClient}",
+			"allcyanchangelog": "${allcyanchangelog}",
+			"mappingsVersion": "${mappingsVersion}",
+			"cyangameversions": "${byGameVersions}",
+			"cyanforgesupportversions": "${cyanforgesupportversions}",
+			"cyanfabricsupportversions": "${cyanfabricsupportversions}",
+			"cyanpapersupportversions": "${cyanpapersupportversions}",
+			"libraryVersions": "${libraryVersions}",
+			"paperByMappings": "${paperByMappings}",
+			"spigotStableMappings": "${spigotStableMappings}",
+			"spigotLatestMappings": "${spigotLatestMappings}",
+			"spigotTestingMappings": "${spigotTestingMappings}"
+		]
 
-	from(sourceSets.main.resources.srcDirs) {
-		expand(props)
+		for (def proj : project(":").childProjects) {
+			if (!proj.value.hasProperty("sourceSets")) continue;
+			props.put(proj.value.name, [
+				"resources": proj.value.sourceSets.main.output.resourcesDir.getCanonicalPath(),
+				"name": proj.value.name,
+				"version": proj.value.version
+			])
+		}
+
+		from(sourceSets.main.resources.srcDirs) {
+			expand(props)
+		}
+
+		if (apiID != null)
+			libraries.remove(apiID)
 	}
 }
 
@@ -1888,7 +1888,11 @@ def versionFilesDbg = [
 ]
 
 task gameData () {
+	def apiID = ""
 	doLast {
+		def apiJarTask = tasks.getByPath(":CyanAPI:platformRiftJarClient")
+		apiID = "org.asf.cyan:CyanAPI:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
+		libraries.put(apiID, apiJarTask.archivePath);
 		println "Generating client folders..."
 		def versions = new File("${buildDir}", project.version+"/.minecraft/versions/${exactgameversion}-cyan-"+cyanversion)
 		versions.mkdirs()
@@ -1934,7 +1938,7 @@ task gameData () {
 			} else {
 				if (new File(log, "cyanclient-" + cyanversion + ".xml").exists())
 					new File(log, "cyanclient-" + cyanversion + ".xml").delete();
-				
+
 				Files.copy(xml.toPath(), new File(log, "cyanclient-" + cyanversion + ".xml").toPath())
 			}
 		}
@@ -1961,6 +1965,7 @@ task gameData () {
 				rename v.getName(), k
 			}
 		}
+		libraries.remove(apiID)
 	}
 }
 gameData.dependsOn processResources
@@ -1974,22 +1979,22 @@ task mixinVersion {
 HashMap<String, File> scanFiles(File inp, String start, String... extensions) {
 	HashMap<String, File> collection = new HashMap<String, File>()
 	for (File f : inp.listFiles(new FileFilter() {
-		@Override
-		public boolean accept(File f2) {
-			for (String extension : extensions) {
-				if (f2.getName().endsWith("."+extension)) return true
-			}
-			return false
-		}
-	})) {
+				@Override
+				public boolean accept(File f2) {
+					for (String extension : extensions) {
+						if (f2.getName().endsWith("."+extension)) return true
+					}
+					return false
+				}
+			})) {
 		collection.put(start+f.getName(), f)
 	}
 	for (File f : inp.listFiles(new FileFilter() {
-		@Override
-		public boolean accept(File f2) {
-			return f2.isDirectory()
-		}
-	})) {
+				@Override
+				public boolean accept(File f2) {
+					return f2.isDirectory()
+				}
+			})) {
 		scanFiles(f, start+f.getName()+"/", extensions).forEach { p, f2 ->
 			collection.put(p, f2)
 		}
@@ -1998,88 +2003,98 @@ HashMap<String, File> scanFiles(File inp, String start, String... extensions) {
 }
 
 task serverJar (type: Jar, dependsOn: build) {
-	def dest = file('../build/Wrapper/Server jars/'+cyanversion+"-mc-"+exactgameversion)
+	def dest = null
+	def apiID = null
+	doFirst {
+		def apiJarTask = tasks.getByPath(":CyanAPI:platformRiftJarServer")
+		apiID = "org.asf.cyan:CyanAPI:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
+		libraries.put(apiID, apiJarTask.archivePath);
 
-	destinationDirectory = dest
-	classifier = 'server'
-	archiveVersion = exactgameversion+"-cyan-"+cyanversion
-	archiveBaseName = 'minecraft'
+		dest = file('../build/Wrapper/Server jars/'+cyanversion+"-mc-"+exactgameversion)
+		if (!dest.exists())
+			dest.mkdirs();
 
-	exclude "**/extra/**"
-	exclude "**/tests/**"
-	exclude "**/version-launcher.json"
-	exclude "**/version-dbg.json"
-	exclude "**/versions.ccfg"
-	exclude "**/log4j2.xml"
-	exclude "**/log4j2-game.xml"
-	exclude "**/log4j2-ide.xml"
-	rename "log4j2-server.xml", "log4j2.xml"
-	includeEmptyDirs = false
+		destinationDirectory = dest
+		archiveClassifier = 'server'
+		archiveVersion = exactgameversion+"-cyan-"+cyanversion
+		archiveBaseName = 'minecraft'
 
-	if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
-	cyanclasspath+="vanilla-server.jar"
-	if (!modloader.isEmpty() && modloader.startsWith("paper-")) {
-		def paperversion = modloader.substring("paper-".length())
+		exclude "**/extra/**"
+		exclude "**/tests/**"
+		exclude "**/version-launcher.json"
+		exclude "**/version-dbg.json"
+		exclude "**/versions.ccfg"
+		exclude "**/log4j2.xml"
+		exclude "**/log4j2-game.xml"
+		exclude "**/log4j2-ide.xml"
+		rename "log4j2-server.xml", "log4j2.xml"
+		includeEmptyDirs = false
+
 		if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
-		cyanclasspath+="paper-server-${paperversion}.jar"
-	}
+		cyanclasspath+="vanilla-server.jar"
+		if (!modloader.isEmpty() && modloader.startsWith("paper-")) {
+			def paperversion = modloader.substring("paper-".length())
+			if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
+			cyanclasspath+="paper-server-${paperversion}.jar"
+		}
 
-	from sourceSets.main.output
-	libnames.add(project.group+"."+project.name)
-	project(":").childProjects.each { proj ->
-		if (!proj.value.name.equals(project.name)) {
-			if (configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.stream().anyMatch({it.moduleName.equals(proj.value.name)})) {
-				from proj.value.sourceSets.main.output
-				libnames.add(proj.value.group+"."+proj.value.name)
+		from sourceSets.main.output
+		libnames.add(project.group+"."+project.name)
+		project(":").childProjects.each { proj ->
+			if (!proj.value.name.equals(project.name)) {
+				if (configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.stream().anyMatch({it.moduleName.equals(proj.value.name)})) {
+					from proj.value.sourceSets.main.output
+					libnames.add(proj.value.group+"."+proj.value.name)
+				}
 			}
 		}
-	}
 
-	libraries.forEach { k, v ->
-		String[] information = k.split(":")
-		String group = ""
-		String name = information[0]
-		String versionstr = ""
+		libraries.forEach { k, v ->
+			String[] information = k.split(":")
+			String group = ""
+			String name = information[0]
+			String versionstr = ""
 
-		if (information.length == 3) {
-			group = information[0]
-			name = information[1]
-			versionstr = information[2]
-		} else if (information.length >= 2) {
-			name = information[0]
-			versionstr = information[1]
+			if (information.length == 3) {
+				group = information[0]
+				name = information[1]
+				versionstr = information[2]
+			} else if (information.length >= 2) {
+				name = information[0]
+				versionstr = information[1]
+			}
+
+			if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) })) {
+				libnames.add(group+"."+name)
+
+				def lib = "libraries/"+group.replaceAll("\\.", "/")
+
+				lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
+				filepaths.put(lib, v.toPath())
+
+				cyanclasspath += " "+lib
+			}
 		}
+		libraries.remove(apiID)
 
-		if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) })) {
-			libnames.add(group+"."+name)
-
-			def lib = "libraries/"+group.replaceAll("\\.", "/")
-
-			if (lib.endsWith("/")) cp = lib.substring(0, lib.length() - 1)
-			lib += "/"+name+"/"+versionstr+"/"+name+"-"+versionstr+".jar"
-			filepaths.put(lib, v.toPath())
-
-			cyanclasspath += " "+lib
+		manifest {
+			attributes([
+				"Specification-Title": project.name,
+				"Specification-Vendor": "${authorname}",
+				"Specification-Version": project.version,
+				"Implementation-Title": project.name,
+				"Implementation-Version": project.version,
+				"Implementation-Vendor" :"${authorname}",
+				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+				"Launcher-Agent-Class": "org.asf.cyan.fluid.FluidAgent",
+				"Class-Path": cyanclasspath,
+				"Boot-Class-Path": bootclasspath,
+				"Main-Class": project.group+"."+classWrapperServer,
+				"Multi-Release": "true"
+			])
 		}
 	}
 
-	manifest {
-		attributes([
-			"Specification-Title": project.name,
-			"Specification-Vendor": "${authorname}",
-			"Specification-Version": project.version,
-			"Implementation-Title": project.name,
-			"Implementation-Version": project.version,
-			"Implementation-Vendor" :"${authorname}",
-			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-			"Launcher-Agent-Class": "org.asf.cyan.fluid.FluidAgent",
-			"Class-Path": cyanclasspath,
-			"Boot-Class-Path": bootclasspath,
-			"Main-Class": project.group+"."+classWrapperServer,
-			"Multi-Release": "true"
-		])
-	}
-	
 	doLast {
 		def libsDir = new File(dest, "libraries");
 		if (libsDir.exists()) delete libsDir
@@ -2168,22 +2183,22 @@ task serverJar (type: Jar, dependsOn: build) {
 			println " |"
 			def paperversion = modloader.substring("paper-".length())
 			println " | Downloading paper server..."
-			
+
 			server = new File(org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit.getMinecraftDirectory(), "tmp/download/paper")
 			if (!server.exists())
 				server.mkdirs()
-				
+
 			server = new File(server, "paper-current.jar")
 			if (server.exists())
 				server.delete()
-				
-			URL u = new URL("https://papermc.io/api/v2/projects/paper/versions/${minecraft}/builds/${paperversion}/downloads/paper-${minecraft}-${paperversion}.jar") 
+
+			URL u = new URL("https://papermc.io/api/v2/projects/paper/versions/${minecraft}/builds/${paperversion}/downloads/paper-${minecraft}-${paperversion}.jar")
 			InputStream strm = u.openStream()
 			FileOutputStream strmOut = new FileOutputStream(server)
 			strm.transferTo(strmOut)
 			strm.close()
 			strmOut.close()
-			
+
 			if (new File(dest, "paper-server-${paperversion}.jar").exists()) new File(dest, "paper-server-${paperversion}.jar").delete()
 			println " +-- Installing paper server..."
 			Files.copy(server.toPath(), new File(dest, "paper-server-${paperversion}.jar").toPath())

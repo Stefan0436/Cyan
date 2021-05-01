@@ -91,7 +91,6 @@ public abstract class EventBus extends CyanComponent {
 	 * 
 	 * @param completionHook Called on event completion
 	 * @param params         Event parameters.
-	 * @return Overall event completion status
 	 */
 	public abstract void dispatch(Consumer<ResultContainer> completionHook, Object[] params);
 

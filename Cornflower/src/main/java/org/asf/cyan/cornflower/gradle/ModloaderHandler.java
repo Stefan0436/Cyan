@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.function.Consumer;
 
 import org.asf.cyan.api.common.CyanComponent;
+import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IAPIDependency;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IGame;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IGameExecutionContext;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IModloader;
@@ -55,6 +56,7 @@ public class ModloaderHandler extends CyanComponent {
 		// Search for modloaders
 		proj.getExtensions().getExtraProperties().set("cornflowermodloaders", new ArrayList<IModloader>());
 		proj.getExtensions().getExtraProperties().set("cornflowergames", new ArrayList<IGame>());
+		proj.getExtensions().getExtraProperties().set("cornflowerapis", new ArrayList<IGame>());
 
 		findDeps(proj, "modloader", (dep) -> {
 			String modloaderName = dep.getName();
@@ -122,6 +124,38 @@ public class ModloaderHandler extends CyanComponent {
 					+ ", make sure you have the modloader that provides it, cornflower may not work properly.");
 		});
 
+		findDeps(proj, "api", (dep) -> {
+			Class<IAPIDependency>[] apis = findClasses(getMainImplementation(), IAPIDependency.class);
+			for (Class<IAPIDependency> cls : apis) {
+				if (cls.isInterface() || Modifier.isAbstract(cls.getModifiers()))
+					continue;
+
+				try {
+					IAPIDependency api = cls.getConstructor().newInstance();
+					for (IModloader modloader : (ArrayList<IModloader>) proj.getExtensions().getExtraProperties()
+							.get("cornflowermodloaders")) {
+						if (api.modloader().isAssignableFrom(modloader.getClass())) {
+							if (api.name().equalsIgnoreCase(dep.getName())) {
+								api = api.newInstance(proj, dep.getVersion(), modloader);
+								if (api == null)
+									continue;
+
+								((ArrayList<IAPIDependency>) proj.getExtensions().getExtraProperties()
+										.get("cornflowerapis")).add(api);
+								return;
+							}
+
+						}
+					}
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+						| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				}
+			}
+
+			CornflowerCore.LOGGER.error("Cannot to find game: " + dep.getName()
+					+ ", make sure you have the modloader that provides it, cornflower may not work properly.");
+		});
+
 		ArrayList<String> deps = new ArrayList<String>();
 		for (IModloader modloader : (ArrayList<IModloader>) proj.getExtensions().getExtraProperties()
 				.get("cornflowermodloaders")) {
@@ -129,6 +163,12 @@ public class ModloaderHandler extends CyanComponent {
 
 			for (String dep : modloader.addDependencies(proj.getConfigurations()))
 				deps.add(dep);
+		}
+
+		for (IAPIDependency api : (ArrayList<IAPIDependency>) proj.getExtensions().getExtraProperties()
+				.get("cornflowerapis")) {
+			api.addRepositories(proj.getRepositories());
+			api.addDependencies(proj.getConfigurations());
 		}
 
 		for (IGame game : (ArrayList<IGame>) proj.getExtensions().getExtraProperties().get("cornflowergames")) {

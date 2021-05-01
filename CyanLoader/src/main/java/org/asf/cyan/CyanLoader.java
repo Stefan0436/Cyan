@@ -1174,7 +1174,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 					Version last = Version.fromString("0.0.0");
 
 					String selectedPackage = "";
-					ArrayList<String> packages = new ArrayList<String>();
 					Class<?>[] classes = findAnnotatedClasses(getMainImplementation(), FluidTransformer.class);
 					for (Class<?> cls : classes) {
 						String pkg = cls.getPackageName();
@@ -1197,12 +1196,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 						selectedPackage = pkg;
 						last = Version.fromString(version);
 					}
-
-					packages.sort((str1, str2) -> {
-						String version1 = str1.substring(str1.lastIndexOf(".") + 1).substring(1).replace("_", ".");
-						String version2 = str2.substring(str2.lastIndexOf(".") + 1).substring(1).replace("_", ".");
-						return -Version.fromString(version1).compareTo(Version.fromString(version2));
-					});
 
 					try {
 						for (Class<?> transformer : classes) {
