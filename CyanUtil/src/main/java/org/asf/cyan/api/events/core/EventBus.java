@@ -3,6 +3,7 @@ package org.asf.cyan.api.events.core;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.function.Consumer;
 
 import org.asf.cyan.api.common.CyanComponent;
 
@@ -19,6 +20,11 @@ public abstract class EventBus extends CyanComponent {
 
 	protected EventBus() {
 	}
+
+	/**
+	 * Checks if the bus has no listeners
+	 */
+	public abstract boolean isEmpty();
 
 	/**
 	 * Get the child bus (if any)
@@ -76,29 +82,90 @@ public abstract class EventBus extends CyanComponent {
 	 * Called to execute the event.
 	 * 
 	 * @param params Event parameters.
+	 * @return Overall event completion status
 	 */
-	public abstract void dispatch(Object... params);
+	public abstract ResultContainer dispatch(Object... params);
+
+	/**
+	 * Called to execute the event.
+	 * 
+	 * @param completionHook Called on event completion
+	 * @param params         Event parameters.
+	 * @return Overall event completion status
+	 */
+	public abstract void dispatch(Consumer<ResultContainer> completionHook, Object[] params);
 
 	/**
 	 * Call a listener
 	 * 
-	 * @param listener The listener to call
+	 * @param listener       The listener to call
+	 * @param params         Event parameters
+	 * @param completionHook Hook to call on event completion
 	 */
-	protected void callListener(IEventListener listener, Object[] params) {
+	protected ResultContainer callListener(IEventListener listener, Object[] params,
+			Consumer<ResultContainer> completionHook) {
+		ResultContainer container = new ResultContainer(this);
 		debug("Dispatching event " + getChannel() + " to listener " + listener.getListenerName() + "...");
 		try {
+			container.completed = false;
 			if (listener instanceof ISynchronizedEventListener) {
 				listener.received(params);
+				container.completed = true;
+				completionHook.accept(container);
 			} else {
-				Thread listenerThread = new Thread(() -> listener.received(params),
-						listener.getListenerName() + " Event Listener");
+				Thread listenerThread = new Thread(() -> {
+					try {
+						listener.received(params);
+						container.completed = true;
+						completionHook.accept(container);
+					} catch (RuntimeException e) {
+						container.completed = true;
+						completionHook.accept(container);
+						throw e;
+					}
+				}, listener.getListenerName() + " Event Listener");
 				listenerThread.start();
 			}
 		} catch (Exception e) {
+			container.completed = true;
+			container.error = true;
+			completionHook.accept(container);
 			if (e instanceof RuntimeException)
 				throw e;
 			else
 				error("Exception caught in event listener " + listener.getListenerName(), e);
+		}
+		return container;
+	}
+
+	protected void setResult(ResultContainer container, boolean completed, boolean error) {
+		if (container.bus == this) {
+			container.completed = completed;
+			container.error = error;
+		}
+	}
+
+	/**
+	 * Class containing information about event execution, completed will always
+	 * become true when execution completes. The error field will show success or
+	 * error.
+	 */
+	public class ResultContainer {
+		protected EventBus bus;
+
+		public ResultContainer(EventBus owner) {
+			this.bus = owner;
+		}
+
+		protected boolean completed = false;
+		protected boolean error = false;
+
+		public boolean hasCompleted() {
+			return completed;
+		}
+
+		public boolean hasError() {
+			return error;
 		}
 	}
 }

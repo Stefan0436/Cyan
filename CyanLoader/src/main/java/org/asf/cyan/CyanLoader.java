@@ -1526,6 +1526,13 @@ public class CyanLoader extends Modloader implements IModProvider {
 					error("Failed to attach event listener " + listener.getListenerName() + " to event " + channel
 							+ ", event not recognized.");
 				}
+			}, eventType -> {
+				for (IExtendedEvent<?> ev : extEvents) {
+					if (eventType.isAssignableFrom(ev.getClass()))
+						return ev.channelName();
+				}
+
+				return null;
 			});
 			return true;
 		} else if (component instanceof IAcceptableComponent) {

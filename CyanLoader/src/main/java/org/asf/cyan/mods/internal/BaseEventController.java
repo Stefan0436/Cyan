@@ -4,12 +4,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.events.core.IEventListener;
 import org.asf.cyan.api.events.core.ISynchronizedEventListener;
+import org.asf.cyan.api.events.extended.EventObject;
+import org.asf.cyan.api.events.extended.IExtendedEvent;
+import org.asf.cyan.api.events.extended.IExtendedEventListener;
+import org.asf.cyan.api.events.extended.IExtendedSynchronizedEventListener;
 import org.asf.cyan.api.modloader.IModloaderComponent;
 import org.asf.cyan.api.modloader.TargetModloader;
+import org.asf.cyan.mods.events.SimpleEvent;
 import org.asf.cyan.mods.events.AttachEvent;
 import org.asf.cyan.mods.events.IEventListenerContainer;
 
@@ -20,6 +26,7 @@ public class BaseEventController implements IModloaderComponent {
 	}
 
 	private static BaseEventController controller;
+	private Function<Class<? extends IExtendedEvent<?>>, String> extendedEventSupplier;
 	private BiConsumer<String, IEventListener> attachMethod;
 	private boolean runtime = false;
 
@@ -29,8 +36,10 @@ public class BaseEventController implements IModloaderComponent {
 		attachMethod.accept(event, listener);
 	}
 
-	public void attachListenerRegistry(BiConsumer<String, IEventListener> attachMethod) {
+	public void attachListenerRegistry(BiConsumer<String, IEventListener> attachMethod,
+			Function<Class<? extends IExtendedEvent<?>>, String> extendedEventSupplier) {
 		this.attachMethod = attachMethod;
+		this.extendedEventSupplier = extendedEventSupplier;
 	}
 
 	public void assign() {
@@ -76,6 +85,42 @@ public class BaseEventController implements IModloaderComponent {
 							runEventListener(params, container, mth);
 						}
 					});
+				}
+			} else if (mth.isAnnotationPresent(SimpleEvent.class)) {
+				mth.setAccessible(true);
+				SimpleEvent ev = mth.getAnnotation(SimpleEvent.class);
+				if (mth.getParameterCount() == 1
+						&& EventObject.class.isAssignableFrom(mth.getParameters()[0].getType())) {
+					String name = extendedEventSupplier.apply(ev.value());
+					if (name != null) {
+						if (ev.synchronize()) {
+							attachEventListener(name, new IExtendedSynchronizedEventListener<EventObject>() {
+
+								@Override
+								public String getListenerName() {
+									return mth.getName();
+								}
+
+								@Override
+								public void received(EventObject params) {
+									runEventListener(new Object[] { params }, container, mth);
+								}
+							});
+						} else {
+							attachEventListener(name, new IExtendedEventListener<EventObject>() {
+
+								@Override
+								public String getListenerName() {
+									return mth.getName();
+								}
+
+								@Override
+								public void received(EventObject params) {
+									runEventListener(new Object[] { params }, container, mth);
+								}
+							});
+						}
+					}
 				}
 			}
 		}

@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 
 import org.asf.cyan.api.events.core.EventBus;
 import org.asf.cyan.api.events.core.IEventListener;
+import org.asf.cyan.api.events.extended.EventObject.EventResult;
 import org.asf.cyan.api.modloader.IModloaderComponent;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.TargetModloader;
@@ -43,8 +44,15 @@ public interface IExtendedEvent<T extends EventObject> extends IModloaderCompone
 	 * 
 	 * @param parameters EventObject instance
 	 */
-	public default void dispatch(T parameters) {
-		getBus().dispatch(parameters);
+	public default EventFunction dispatch(T parameters) {
+		EventFunction function = new EventFunction(getBus(), parameters);
+		if (getBus().isEmpty()) {
+			function.setResult(EventResult.CONTINUE);
+			function.start();
+			return function;
+		}
+		function.start();
+		return function;
 	}
 
 	/**

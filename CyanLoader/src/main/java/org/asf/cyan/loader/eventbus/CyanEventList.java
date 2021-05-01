@@ -2,15 +2,17 @@ package org.asf.cyan.loader.eventbus;
 
 import java.util.Iterator;
 
+import org.asf.cyan.api.events.core.EventBus.ResultContainer;
 import org.asf.cyan.api.events.core.IEventListener;
 
-class CyanEventList implements Iterable<IEventListener> {
-	private class CELEntry {
+public class CyanEventList implements Iterable<CyanEventList.CELEntry> {
+	public class CELEntry {
+		public ResultContainer result;
 		public IEventListener listener;
 		public CELEntry nextEntry;
 	}
 
-	private class CELIter implements Iterator<IEventListener> {
+	public class CELIter implements Iterator<CELEntry> {
 		public CELEntry nextEntry;
 
 		public CELIter(CELEntry entry) {
@@ -23,12 +25,12 @@ class CyanEventList implements Iterable<IEventListener> {
 		}
 
 		@Override
-		public IEventListener next() {
+		public CELEntry next() {
 			CELEntry next = nextEntry;
 			if (next != null)
 				nextEntry = nextEntry.nextEntry;
 
-			return next.listener;
+			return next;
 		}
 	}
 
@@ -84,7 +86,7 @@ class CyanEventList implements Iterable<IEventListener> {
 	}
 
 	@Override
-	public Iterator<IEventListener> iterator() {
+	public Iterator<CELEntry> iterator() {
 		return new CELIter(mainEntry);
 	}
 	
