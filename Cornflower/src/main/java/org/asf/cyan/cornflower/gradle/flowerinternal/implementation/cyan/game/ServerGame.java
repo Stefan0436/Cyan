@@ -157,6 +157,7 @@ public class ServerGame implements IGameExecutionContext, ILaunchProvider {
 	public File mainJar() {
 		prepare();
 		try {
+			MinecraftModdingToolkit.sourcesJar(gameVersion, GameSide.SERVER);
 			return MinecraftModdingToolkit.deobfuscateJar(gameVersion, GameSide.SERVER);
 		} catch (IOException e) {
 			return null;

@@ -103,7 +103,7 @@ public class ClientGame implements IGameExecutionContext, ILaunchProvider {
 			MinecraftInstallationToolkit.setIDE();
 			return MinecraftInstallationToolkit.generateJvmArguments(gameVersion, args,
 					MinecraftInstallationToolkit.getLibraries(cyanVersion),
-					MinecraftInstallationToolkit.getNativesDirectory(gameVersion), mainJar(),
+					MinecraftInstallationToolkit.getNativesDirectory(cyanVersion), mainJar(),
 					MinecraftInstallationToolkit.getAssetsRoot(), MinecraftInstallationToolkit.getAssetId(gameVersion),
 					null, false);
 		} catch (IOException e) {
@@ -175,6 +175,7 @@ public class ClientGame implements IGameExecutionContext, ILaunchProvider {
 	public File mainJar() {
 		prepare();
 		try {
+			MinecraftModdingToolkit.sourcesJar(gameVersion, GameSide.CLIENT);
 			return MinecraftModdingToolkit.deobfuscateJar(gameVersion, GameSide.CLIENT);
 		} catch (IOException e) {
 			return null;
