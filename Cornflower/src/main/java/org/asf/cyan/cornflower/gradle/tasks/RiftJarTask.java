@@ -226,7 +226,7 @@ public class RiftJarTask extends AbstractArchiveTask implements ITaskExtender {
 		private void scan(File input, ArrayList<String> classes) throws IOException {
 			for (File dir : input.listFiles((f) -> f.isDirectory()))
 				scan(dir, classes);
-			for (File classFile : input.listFiles((f) -> !f.isDirectory() && !f.getName().endsWith(".class"))) {
+			for (File classFile : input.listFiles((f) -> !f.isDirectory() && f.getName().endsWith(".class"))) {
 				FileInputStream strm = new FileInputStream(classFile);
 				ClassReader reader = new ClassReader(strm);
 				ClassNode node = new ClassNode();

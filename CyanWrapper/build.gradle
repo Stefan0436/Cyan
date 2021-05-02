@@ -7,7 +7,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A32'
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A33'
 	}
 }
 
@@ -660,7 +660,8 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "clients/cyan/"+minecraft)
 
-		classpath jar
+		jvm "-DmainJar=" + jar.getCanonicalPath()
+//		classpath jar
 		jvm "-DassetRoot="+MinecraftInstallationToolkit.getAssetsRoot().getCanonicalPath()
 		jvm "-DassetIndex="+MinecraftInstallationToolkit.getAssetId(version)
 		jvm "-DcyanAgentJar="+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()

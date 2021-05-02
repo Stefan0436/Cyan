@@ -320,6 +320,11 @@ public class CyanCore extends CyanComponent {
 						.getCodeSource().getLocation());
 			} catch (ClassNotFoundException e) {
 			}
+			try {
+				conf.addUrls(Class.forName("org.asf.cyan.fluid.implementation.CyanTransformer").getProtectionDomain()
+						.getCodeSource().getLocation());
+			} catch (ClassNotFoundException e) {
+			}
 			trace("SET setExpandSuperTypes to false, caller: " + CallTrace.traceCallName());
 			conf = conf.setExpandSuperTypes(false);
 		} else {
