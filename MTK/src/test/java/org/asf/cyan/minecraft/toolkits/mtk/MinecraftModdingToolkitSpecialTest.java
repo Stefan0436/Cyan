@@ -21,7 +21,7 @@ public class MinecraftModdingToolkitSpecialTest {
 	public void sourcesJar() throws IOException {
 		CyanCore.enableLog();
 		MinecraftInstallationToolkit.setMinecraftDirectory(new File("bin/test/mtk"));
-		
+
 		CyanCore.trackLevel(Level.WARN);
 
 		if (!CyanCore.isInitialized()) {
@@ -55,34 +55,34 @@ public class MinecraftModdingToolkitSpecialTest {
 
 		MinecraftMappingsToolkit.loadMappings(info, GameSide.CLIENT);
 		MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER);
-		
+
 		File file3 = MinecraftModdingToolkit.deobfuscateJar(info, GameSide.CLIENT);
 		File file4 = MinecraftModdingToolkit.deobfuscateJar(info, GameSide.SERVER);
 
 		assertTrue(file3.exists());
 		assertTrue(file4.exists());
-		
+
 		File jarsC = MinecraftModdingToolkit.sourcesJar(info, GameSide.CLIENT, true);
 		File jarsS = MinecraftModdingToolkit.sourcesJar(info, GameSide.SERVER, true);
 
 		assertTrue(jarsC.exists());
 
 		assertTrue(jarsS.exists());
-		
+
 		HashMap<String, Level> errors = CyanCore.stopTracking();
-		errors.forEach((k,v)->{
+		errors.forEach((k, v) -> {
 			System.err.println(k);
 		});
 		assertTrue(errors.size() == 0);
 	}
-	
+
 	@Test
 	public void deobfuscateJarTest() throws IOException {
 		CyanCore.setDebugLog(); // trace slows down too much and is unreadable for this test
 		MinecraftInstallationToolkit.setMinecraftDirectory(new File("bin/test/mtk"));
-		
+
 		CyanCore.trackLevel(Level.WARN);
-		
+
 		if (!CyanCore.isInitialized()) {
 			CyanCore.initializeComponents();
 			MinecraftToolkit.initializeMTK();
@@ -114,15 +114,15 @@ public class MinecraftModdingToolkitSpecialTest {
 
 		MinecraftMappingsToolkit.loadMappings(info, GameSide.CLIENT);
 		MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER);
-		
+
 		File file3 = MinecraftModdingToolkit.deobfuscateJar(info, GameSide.CLIENT, true);
 		File file4 = MinecraftModdingToolkit.deobfuscateJar(info, GameSide.SERVER, true);
 
 		assertTrue(file3.exists());
 		assertTrue(file4.exists());
-		
+
 		HashMap<String, Level> errors = CyanCore.stopTracking();
-		errors.forEach((k,v)->{
+		errors.forEach((k, v) -> {
 			System.err.println(k);
 		});
 		assertTrue(errors.size() == 0);

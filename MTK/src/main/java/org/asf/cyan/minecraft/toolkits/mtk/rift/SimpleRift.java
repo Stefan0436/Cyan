@@ -16,6 +16,7 @@ import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.bytecode.FluidClassPool;
 import org.asf.cyan.fluid.deobfuscation.DeobfuscationTargetMap;
 import org.asf.cyan.fluid.remapping.Mapping;
+import org.asf.cyan.fluid.remapping.SupertypeRemapper;
 import org.objectweb.asm.tree.ClassNode;
 
 /**
@@ -129,6 +130,11 @@ public class SimpleRift extends CyanComponent implements Closeable {
 			}
 
 			info("Remapping...");
+			SupertypeRemapper remapper = new SupertypeRemapper(mappings);
+			for (ClassNode node : getClasses()) {
+				remapper.remap(node);
+			}
+			remapper.close();
 			Fluid.remapClasses(Fluid.createMemberRemapper(mappings), Fluid.createClassRemapper(mappings), sourcesPool,
 					getClasses());
 
