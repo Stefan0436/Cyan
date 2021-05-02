@@ -44,7 +44,7 @@ public interface IExtendedEvent<T extends EventObject> extends IModloaderCompone
 	 * 
 	 * @param parameters EventObject instance
 	 */
-	public default EventFunction dispatch(T parameters) {
+	public default AsyncFunction<EventObject.EventResult> dispatch(T parameters) {
 		EventFunction function = new EventFunction(getBus(), parameters);
 		if (getBus().isEmpty()) {
 			function.setResult(EventResult.CONTINUE);

@@ -1693,4 +1693,11 @@ public class CyanLoader extends Modloader implements IModProvider {
 		});
 	}
 
+	public IMod[] getAllModInstances() {
+		ArrayList<IMod> mods = new ArrayList<IMod>();
+		mods.addAll(this.mods);
+		mods.addAll(this.coremods);
+		return mods.toArray(t -> new IMod[t]);
+	}
+
 }

@@ -11,13 +11,13 @@ import org.asf.cyan.fluid.api.transforming.TargetType;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.Pack.PackConstructor;
 import net.minecraft.server.packs.repository.Pack.Position;
-import net.minecraft.server.packs.repository.PackSource;
 
 @FluidTransformer
-@TargetClass(target = "net.minecraft.client.resources.ClientPackSource")
-public class ClientPackSourceModification {
+@TargetClass(target = "net.minecraft.server.packs.ServerPacksSource")
+public class ServerPacksSourceModification {
 
 	private CyanPackResources cyanMods = null;
 
@@ -27,8 +27,8 @@ public class ClientPackSourceModification {
 		if (cyanMods == null)
 			cyanMods = new CyanPackResources();
 
-		Pack cyanPack = Pack.create("cyan", true,
-				new CyanPackSupplier(cyanMods), constructor, Position.BOTTOM, PackSource.BUILT_IN);
+		Pack cyanPack = Pack.create("cyan", true, new CyanPackSupplier(cyanMods), constructor, Position.BOTTOM,
+				PackSource.BUILT_IN);
 		if (cyanPack != null)
 			consumer.accept(cyanPack);
 	}

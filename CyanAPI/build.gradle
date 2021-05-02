@@ -39,6 +39,7 @@ import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftMappingsToolkit
 import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender
+import java.nio.file.Files
 import java.time.OffsetDateTime
 Log4jToGradleAppender.logInfo()
 
@@ -53,7 +54,7 @@ MinecraftMappingsToolkit.loadMappings(info, GameSide.CLIENT)
 
 if (!MinecraftInstallationToolkit.isVersionManifestSaved(info))
 	MinecraftInstallationToolkit.saveVersionManifest(info)
-if (!MinecraftInstallationToolkit.checkVersion(info))
+if (!project.hasProperty("uncheckedClient") && !MinecraftInstallationToolkit.checkVersion(info))
 	MinecraftInstallationToolkit.downloadVersionAndLibraries(info)
 
 eclipseClasspath {
@@ -130,9 +131,20 @@ if (!modloader.startsWith("paper-")) {
 	    archiveClassifier = "RIFT-" + config.getPlatform().toString().toUpperCase() + "-" + config.getCommonMappingsVersion().replaceAll("[!?/:\\\\]", "-") + "-CLIENT"
 	    
 	    destinationDirectory = file('../build/CyanAPI/Jars')
+	
+		doLast {
+			if (project.hasProperty("destinationDirClient")) {
+			File dest = new File(project.getProperty("destinationDirClient"), getArchiveFile().get().getAsFile().getName())
+			if (dest.exists())
+				dest.delete()
+			Files.copy(getArchiveFile().get().getAsFile().toPath(), dest.toPath())
+			}
+		}
 	}
-	jar.finalizedBy platformRiftJarClient
-	build.dependsOn platformRiftJarClient
+	if (!project.hasProperty("noClient")) {
+		jar.finalizedBy platformRiftJarClient
+		build.dependsOn platformRiftJarClient
+	}
 }
 
 task platformRiftJarServer (type: RiftJar, dependsOn: jar) {
@@ -152,9 +164,20 @@ task platformRiftJarServer (type: RiftJar, dependsOn: jar) {
     archiveClassifier = "RIFT-" + config.getPlatform().toString().toUpperCase() + "-" + config.getCommonMappingsVersion().replaceAll("[!?/:\\\\]", "-") + "-SERVER"
     
     destinationDirectory = file('../build/CyanAPI/Jars')
+	
+	doLast {
+		if (project.hasProperty("destinationDirServer")) {
+			File dest = new File(project.getProperty("destinationDirServer"), getArchiveFile().get().getAsFile().getName())
+			if (dest.exists())
+				dest.delete()
+			Files.copy(getArchiveFile().get().getAsFile().toPath(), dest.toPath())
+		}
+	}
 }
-jar.finalizedBy platformRiftJarServer
-build.dependsOn platformRiftJarServer
+if (!project.hasProperty("noServer")) {
+	jar.finalizedBy platformRiftJarServer
+	build.dependsOn platformRiftJarServer
+}
 
 
 jar.dependsOn('processResources')
@@ -182,6 +205,7 @@ dependencies {
 	implementation project(":CyanUtil")
 	implementation project(":CCFG")
 	implementation project(":CyanCore")
+	implementation project(":CyanLoader")
 }
 
 jar {

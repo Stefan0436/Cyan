@@ -659,9 +659,8 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 		sourceLookup MinecraftModdingToolkit.sourcesJar(version, GameSide.CLIENT)
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "clients/cyan/"+minecraft)
-
-		jvm "-DmainJar=" + jar.getCanonicalPath()
-//		classpath jar
+		
+		classpath jar
 		jvm "-DassetRoot="+MinecraftInstallationToolkit.getAssetsRoot().getCanonicalPath()
 		jvm "-DassetIndex="+MinecraftInstallationToolkit.getAssetId(version)
 		jvm "-DcyanAgentJar="+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
