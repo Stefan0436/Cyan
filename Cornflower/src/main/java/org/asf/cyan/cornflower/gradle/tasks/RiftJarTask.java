@@ -13,7 +13,6 @@ import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.cornflower.gradle.utilities.modding.IPlatformConfiguration;
 import org.asf.cyan.cornflower.gradle.utilities.ITaskExtender;
 import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender;
-import org.asf.cyan.fluid.bytecode.FluidClassPool;
 import org.asf.cyan.fluid.bytecode.sources.FileClassSourceProvider;
 import org.asf.cyan.minecraft.toolkits.mtk.rift.SimpleRift;
 import org.asf.cyan.minecraft.toolkits.mtk.rift.SimpleRiftBuilder;
@@ -104,7 +103,6 @@ public class RiftJarTask extends AbstractArchiveTask implements ITaskExtender {
 				ArrayList<String> classes = new ArrayList<String>();
 				SimpleRiftBuilder rift = new SimpleRiftBuilder();
 
-				FluidClassPool pool = FluidClassPool.createEmpty();
 				for (File input : inputs.getFiles()) {
 					rift.appendSources(new FileClassSourceProvider(input));
 
@@ -121,33 +119,34 @@ public class RiftJarTask extends AbstractArchiveTask implements ITaskExtender {
 						}
 					} else {
 						try {
-							ZipInputStream strm = new ZipInputStream(new FileInputStream(input));
-							pool.importArchive(strm);
-							strm.close();
-						} catch (IOException e) {
+							FileInputStream inputStream = new FileInputStream(input);
 							try {
-								rift.close();
-							} catch (IOException e2) {
+								ZipInputStream strm = new ZipInputStream(inputStream);
+								ZipEntry entry = strm.getNextEntry();
+								while (entry != null) {
+									if (new File(entry.getName()).getName().endsWith(".class")) {
+										ClassReader reader = new ClassReader(strm);
+										ClassNode node = new ClassNode();
+										reader.accept(node, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+
+										classes.add(node.name.replace("/", "."));
+									}
+									entry = strm.getNextEntry();
+								}
+								strm.close();
+							} catch (IOException e) {
+								try {
+									rift.close();
+								} catch (IOException e2) {
+								}
+								Log4jToGradleAppender.noLogInfo();
+								return WorkResults.didWork(false);
 							}
-							Log4jToGradleAppender.noLogInfo();
-							return WorkResults.didWork(false);
+							inputStream.close();
+						} catch (IOException e) {
+
 						}
 					}
-				}
-
-				for (ClassNode cls : pool.getLoadedClasses()) {
-					classes.add(cls.name.replace("/", "."));
-				}
-
-				try {
-					pool.close();
-				} catch (IOException e) {
-					try {
-						rift.close();
-					} catch (IOException e2) {
-					}
-					Log4jToGradleAppender.noLogInfo();
-					return WorkResults.didWork(false);
 				}
 
 				for (IRiftToolchainProvider provider : providers) {
@@ -166,8 +165,6 @@ public class RiftJarTask extends AbstractArchiveTask implements ITaskExtender {
 				try {
 					SimpleRift riftInst = rift.build();
 					for (File input : inputs.getFiles()) {
-						rift.appendSources(new FileClassSourceProvider(input));
-
 						if (input.isDirectory()) {
 							try {
 								addFiles(input, "/", riftInst);
@@ -235,6 +232,7 @@ public class RiftJarTask extends AbstractArchiveTask implements ITaskExtender {
 				ClassNode node = new ClassNode();
 				reader.accept(node, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
 				strm.close();
+
 				classes.add(node.name.replace("/", "."));
 			}
 		}
