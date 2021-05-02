@@ -64,7 +64,8 @@ public class BaseEventController implements IModloaderComponent {
 
 						@Override
 						public String getListenerName() {
-							return mth.getName();
+							return container.getClass().getTypeName() + ":" + mth.getName() + "@"
+									+ System.currentTimeMillis() + "@" + System.nanoTime();
 						}
 
 						@Override
@@ -77,7 +78,8 @@ public class BaseEventController implements IModloaderComponent {
 
 						@Override
 						public String getListenerName() {
-							return mth.getName();
+							return container.getClass().getTypeName() + ":" + mth.getName() + "@"
+									+ System.currentTimeMillis() + "@" + System.nanoTime();
 						}
 
 						@Override
@@ -98,7 +100,8 @@ public class BaseEventController implements IModloaderComponent {
 
 								@Override
 								public String getListenerName() {
-									return mth.getName();
+									return container.getClass().getTypeName() + ":" + mth.getName() + "@"
+											+ System.currentTimeMillis() + "@" + System.nanoTime();
 								}
 
 								@Override
@@ -111,7 +114,8 @@ public class BaseEventController implements IModloaderComponent {
 
 								@Override
 								public String getListenerName() {
-									return mth.getName();
+									return container.getClass().getTypeName() + ":" + mth.getName() + "@"
+											+ System.currentTimeMillis() + "@" + System.nanoTime();
 								}
 
 								@Override

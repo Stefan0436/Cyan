@@ -1,6 +1,9 @@
 package org.asf.cyan.api.internal;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.common.CYAN_COMPONENT;
@@ -59,7 +62,7 @@ public class CyanAPIComponent extends CyanComponent {
 			}
 
 			try {
-				IModKitComponent inst = (IModKitComponent)cls.getConstructor().newInstance();
+				IModKitComponent inst = (IModKitComponent) cls.getConstructor().newInstance();
 				inst.initializeComponent();
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
@@ -127,11 +130,48 @@ public class CyanAPIComponent extends CyanComponent {
 					continue;
 				}
 
-				Fluid.registerTransformer(transformer.getTypeName(),
+				Fluid.registerTransformer(transformer.getTypeName(), "CyanAPI",
 						CyanAPIComponent.class.getProtectionDomain().getCodeSource().getLocation());
 			}
 		} catch (IllegalStateException | ClassNotFoundException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	public static URL getResource(String path) {
+		String base = CyanAPIComponent.class.getProtectionDomain().getCodeSource().getLocation().toString();
+		if (base.toString().startsWith("jar:"))
+			base = base.substring(0, base.lastIndexOf("!"));
+		else if (base.endsWith("/" + CyanAPIComponent.class.getTypeName().replace(".", "/") + ".class")) {
+			base = base.substring(0,
+					base.length() - ("/" + CyanAPIComponent.class.getTypeName().replace(".", "/") + ".class").length());
+		}
+
+		try {
+			if ((base.endsWith(".jar") || base.endsWith(".zip")) && !base.startsWith("jar:"))
+				base = "jar:" + base + "!";
+			new URL(base + "/" + path).openStream().close();
+			return new URL(base + "/" + path);
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+	public static InputStream getResourceAsStream(String path) {
+		String base = CyanAPIComponent.class.getProtectionDomain().getCodeSource().getLocation().toString();
+		if (base.toString().startsWith("jar:"))
+			base = base.substring(0, base.lastIndexOf("!"));
+		else if (base.endsWith("/" + CyanAPIComponent.class.getTypeName().replace(".", "/") + ".class")) {
+			base = base.substring(0,
+					base.length() - ("/" + CyanAPIComponent.class.getTypeName().replace(".", "/") + ".class").length());
+		}
+
+		try {
+			if ((base.endsWith(".jar") || base.endsWith(".zip")) && !base.startsWith("jar:"))
+				base = "jar:" + base + "!";
+			return new URL(base + "/" + path).openStream();
+		} catch (IOException e) {
+			return null;
 		}
 	}
 }

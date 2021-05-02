@@ -35,10 +35,28 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 	private String desc = null;
 	private String group = null;
 
+	private String descKey = null;
+	private String fallbackDesc;
+
 	private AbstractMod[] deps;
 	private String[] optdeps;
 
 	private Version version;
+
+	@Override
+	public String getDescriptionLanguageKey() {
+		return descKey;
+	}
+
+	@Override
+	public void setLanguageBasedDescription(String desc) {
+		this.desc = desc;
+	}
+
+	@Override
+	public void setDefaultDescription() {
+		this.desc = fallbackDesc;
+	}
 
 	@Override
 	public void setup(Modloader modloader, GameSide side, CyanModfileManifest manifest) {
@@ -49,6 +67,10 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 		dsp = manifest.displayName;
 		desc = manifest.fallbackDescription;
 		group = manifest.modGroup;
+		descKey = manifest.descriptionLanguageKey;
+		fallbackDesc = manifest.fallbackDescription;
+		if (descKey != null && descKey.isEmpty())
+			descKey = null;
 		version = Version.fromString(manifest.version);
 
 		ArrayList<AbstractMod> mods = new ArrayList<AbstractMod>();

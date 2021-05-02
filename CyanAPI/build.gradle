@@ -48,9 +48,9 @@ if (!MinecraftMappingsToolkit.areMappingsAvailable(info, GameSide.CLIENT))
 	MinecraftMappingsToolkit.downloadVanillaMappings(info, GameSide.CLIENT)
 MinecraftMappingsToolkit.loadMappings(info, GameSide.CLIENT)
 
-//if (!MinecraftMappingsToolkit.areMappingsAvailable(info, GameSide.SERVER))
-//	MinecraftMappingsToolkit.downloadVanillaMappings(info, GameSide.SERVER)
-//MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER)
+if (!MinecraftMappingsToolkit.areMappingsAvailable(info, GameSide.SERVER))
+	MinecraftMappingsToolkit.downloadVanillaMappings(info, GameSide.SERVER)
+MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER)
 
 if (!MinecraftInstallationToolkit.isVersionManifestSaved(info))
 	MinecraftInstallationToolkit.saveVersionManifest(info)
@@ -60,7 +60,7 @@ if (!project.hasProperty("uncheckedClient") && !MinecraftInstallationToolkit.che
 eclipseClasspath {
 	doFirst {		
 		MinecraftModdingToolkit.sourcesJar(info, GameSide.CLIENT)
-//		MinecraftModdingToolkit.deobfuscateJar(info, GameSide.SERVER)
+		MinecraftModdingToolkit.deobfuscateJar(info, GameSide.SERVER)
 //		MinecraftModdingToolkit.sourcesJar(info, GameSide.SERVER)
 	}
 }	
@@ -196,7 +196,7 @@ createEclipseLaunches {
 
 dependencies {
 	implementation name: 'client', version: minecraft + "-deobf"
-// 	implementation name: 'server', version: minecraft + "-deobf"
+ 	implementation name: 'server', version: minecraft + "-deobf"
 	
     testImplementation 'junit:junit:4.12'
     

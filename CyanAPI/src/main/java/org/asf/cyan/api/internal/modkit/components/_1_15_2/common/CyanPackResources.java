@@ -59,7 +59,7 @@ public class CyanPackResources extends VanillaPackResources {
 			for (String namespace : mods.keySet()) {
 				if (namespace.equals(location.getNamespace())) {
 					IMod mod = mods.get(location.getNamespace());
-					InputStream strm = getCyanResourceStream(type, mod.getClass(), location.getPath());
+					InputStream strm = getCyanResourceStream(type, mod, location.getPath());
 					if (strm != null)
 						return strm;
 					else {
@@ -69,7 +69,7 @@ public class CyanPackResources extends VanillaPackResources {
 				}
 			}
 		} else {
-			InputStream strm = getCyanResourceStream(type, CyanAPIComponent.class, location.getPath());
+			InputStream strm = getCyanResourceStream(type, location.getPath());
 			if (strm != null)
 				return strm;
 			else {
@@ -80,7 +80,7 @@ public class CyanPackResources extends VanillaPackResources {
 		return null;
 	}
 
-	private URL getCyanResource(PackType type, Class<?> source, String location) {
+	private URL getCyanResource(PackType type, IMod source, String location) {
 		String path = "";
 		if (type == PackType.SERVER_DATA) {
 			path = "server/" + location;
@@ -97,8 +97,36 @@ public class CyanPackResources extends VanillaPackResources {
 		return null;
 	}
 
-	private InputStream getCyanResourceStream(PackType type, Class<?> source, String location) {
+	private InputStream getCyanResourceStream(PackType type, IMod source, String location) {
 		URL u = getCyanResource(type, source, location);
+		if (u != null) {
+			try {
+				return u.openStream();
+			} catch (IOException e) {
+			}
+		}
+		return null;
+	}
+
+	private URL getCyanResource(PackType type, String location) {
+		String path = "";
+		if (type == PackType.SERVER_DATA) {
+			path = "server/" + location;
+			if (CyanAPIComponent.getResource(path) != null)
+				return CyanAPIComponent.getResource(path);
+		} else if (type == PackType.CLIENT_RESOURCES) {
+			path = "client/" + location;
+			if (CyanAPIComponent.getResource(path) != null)
+				return CyanAPIComponent.getResource(path);
+		}
+		path = "common/" + location;
+		if (CyanAPIComponent.getResource(path) != null)
+			return CyanAPIComponent.getResource(path);
+		return null;
+	}
+
+	private InputStream getCyanResourceStream(PackType type, String location) {
+		URL u = getCyanResource(type, location);
 		if (u != null) {
 			try {
 				return u.openStream();
@@ -114,7 +142,7 @@ public class CyanPackResources extends VanillaPackResources {
 			if (location.getPath().equals("pack.mcmeta"))
 				return true;
 			else {
-				if (getCyanResource(type, CyanAPIComponent.class, location.getPath()) != null)
+				if (getCyanResource(type, location.getPath()) != null)
 					return true;
 			}
 		}
@@ -125,7 +153,7 @@ public class CyanPackResources extends VanillaPackResources {
 
 			if (namespace.equals(location.getNamespace())) {
 				IMod mod = mods.get(location.getNamespace());
-				if (getCyanResource(type, mod.getClass(), location.getPath()) != null)
+				if (getCyanResource(type, mod, location.getPath()) != null)
 					return true;
 			}
 		}
@@ -139,7 +167,7 @@ public class CyanPackResources extends VanillaPackResources {
 			if (CyanAPIComponent.class.getResource(path) == null)
 				return new ByteArrayInputStream(getPackMeta().getBytes());
 		}
-		return CyanAPIComponent.class.getResourceAsStream("common/" + path);
+		return CyanAPIComponent.getResourceAsStream("common/" + path);
 	}
 
 	private String getPackMeta() {
