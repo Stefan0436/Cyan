@@ -8,12 +8,12 @@ import org.asf.cyan.mods.internal.BaseEventController;
 
 /**
  * 
- * Command Manager - Mod Command System
+ * Command Manager - Mod Command System (<b>NOT YET IMPLEMENTED, ModKit 1.2</b>)
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public class CommandManager implements IEventListenerContainer {
+public class CommandManager implements IEventListenerContainer { // TODO
 	private static CommandManager implementation;
 
 	private CommandManager() {

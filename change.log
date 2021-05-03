@@ -8,15 +8,22 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  
  - ModKit Threads API (CyanAPI ModKit 1.0, count of threads is displayed in crash logs) -- TODO
  
- - ModKit Resource Interface (CyanAPI ModKit 1.0)
+ - ModKit Resource API (CyanAPI ModKit 1.0)
  - ModKit Language Manager (with server support using custom implementation instead of vanilla language manager, CyanAPI ModKit 1.0) -- TODO
  - ModKit Config Manager (CyanAPI ModKit 1.0) -- TODO
+ 
+ - ModKit Entity Registry Events (CyanAPI ModKit 1.0)
+ - ModKit Entity Renderer Registry Events (CyanAPI ModKit 1.0)
+ - ModKit Resource Events (CyanAPI ModKit 1.0)
+ - ModKit Language Manager Events (CyanAPI ModKit 1.0)
+ - ModKit Texture Manager Events (CyanAPI ModKit 1.0)
+ - ModKit Game Reload Events (CyanAPI ModKit 1.0)
+ - ModKit Command Registry Events (CyanAPI ModKit 1.0)
  
  - ModKit Block Entity Registry Events (CyanAPI ModKit 1.0) -- TODO 
  - ModKit Block Registry Events (CyanAPI ModKit 1.0) -- TODO
  - ModKit Item Registry Events (CyanAPI ModKit 1.0) -- TODO
  - ModKit Dimension Registry Events (CyanAPI ModKit 1.0) -- TODO
- - ModKit GUI Registry? Events (CyanAPI ModKit 1.0) -- TODO
  
  
  // A14
