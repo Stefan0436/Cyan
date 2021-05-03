@@ -134,7 +134,6 @@ public class SimpleRift extends CyanComponent implements Closeable {
 			for (ClassNode node : getClasses()) {
 				remapper.remap(node);
 			}
-			remapper.close();
 			Fluid.remapClasses(Fluid.createMemberRemapper(mappings), Fluid.createClassRemapper(mappings), sourcesPool,
 					getClasses());
 

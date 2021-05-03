@@ -1,6 +1,5 @@
 package org.asf.cyan.fluid.remapping;
 
-import java.io.Closeable;
 import java.util.Arrays;
 
 import org.asf.cyan.fluid.Fluid;
@@ -20,7 +19,7 @@ import org.objectweb.asm.tree.MethodNode;
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public class SupertypeRemapper implements Closeable {
+public class SupertypeRemapper {
 	private DeobfuscationTargetMap mappings;
 
 	public SupertypeRemapper(DeobfuscationTargetMap initialMappings) {
@@ -116,10 +115,5 @@ public class SupertypeRemapper implements Closeable {
 				}
 			}
 		}
-	}
-
-	@Override
-	public void close() {
-		mappings.clear();
 	}
 }

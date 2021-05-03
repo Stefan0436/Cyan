@@ -2,9 +2,11 @@ package org.asf.cyan.api.internal.test;
 
 import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.cyan.api.common.CyanComponent;
+import org.asf.cyan.api.events.core.ReloadEvent;
 import org.asf.cyan.api.events.entities.EntityAttributesEvent;
 import org.asf.cyan.api.events.entities.EntityRegistryEvent;
 import org.asf.cyan.api.events.entities.EntityRendererRegistryEvent;
+import org.asf.cyan.api.events.objects.core.ReloadEventObject;
 import org.asf.cyan.api.events.objects.entities.EntityAttributesEventObject;
 import org.asf.cyan.api.events.objects.entities.EntityRegistryEventObject;
 import org.asf.cyan.api.events.objects.entities.EntityRegistryEventObject.EntityRegistryCallback;
@@ -24,8 +26,6 @@ public class TestEventListeners extends CyanComponent implements IEventListenerC
 
 	protected static void initComponent() {
 		BaseEventController.addEventContainer(new TestEventListeners());
-		String dat = Resources.getFor("testmod").getResource("test").readAsString();
-		dat = dat;
 	}
 
 	@SimpleEvent(EntityRendererRegistryEvent.class)
