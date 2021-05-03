@@ -1,4 +1,4 @@
-package org.asf.cyan.api.internal.modkit.transformers._1_15_2.common;
+package org.asf.cyan.api.internal.modkit.transformers._1_15_2.common.resources;
 
 import org.asf.cyan.api.events.ingame.commands.CommandManagerStartupEvent;
 import org.asf.cyan.api.events.ingame.crafting.RecipeManagerStartupEvent;

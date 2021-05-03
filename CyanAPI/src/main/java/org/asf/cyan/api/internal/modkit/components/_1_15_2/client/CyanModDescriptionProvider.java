@@ -1,4 +1,4 @@
-package org.asf.cyan.api.internal.modkit.components._1_15_2.common;
+package org.asf.cyan.api.internal.modkit.components._1_15_2.client;
 
 import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.events.core.ReloadEvent;

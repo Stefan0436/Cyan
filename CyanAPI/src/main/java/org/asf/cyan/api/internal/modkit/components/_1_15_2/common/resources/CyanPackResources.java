@@ -1,4 +1,4 @@
-package org.asf.cyan.api.internal.modkit.components._1_15_2.common;
+package org.asf.cyan.api.internal.modkit.components._1_15_2.common.resources;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

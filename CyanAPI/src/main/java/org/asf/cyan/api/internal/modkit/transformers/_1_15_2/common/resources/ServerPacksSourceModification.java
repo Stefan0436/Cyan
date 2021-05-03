@@ -1,9 +1,9 @@
-package org.asf.cyan.api.internal.modkit.transformers._1_15_2.common;
+package org.asf.cyan.api.internal.modkit.transformers._1_15_2.common.resources;
 
 import java.util.function.Consumer;
 
-import org.asf.cyan.api.internal.modkit.components._1_15_2.common.CyanPackResources;
-import org.asf.cyan.api.internal.modkit.components._1_15_2.common.CyanPackSupplier;
+import org.asf.cyan.api.internal.modkit.components._1_15_2.common.resources.CyanPackResources;
+import org.asf.cyan.api.internal.modkit.components._1_15_2.common.resources.CyanPackSupplier;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.TargetClass;

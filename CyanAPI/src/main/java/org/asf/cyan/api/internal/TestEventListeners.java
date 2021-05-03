@@ -5,10 +5,14 @@ import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.events.core.ReloadEvent;
 import org.asf.cyan.api.events.core.ReloadPrepareEvent;
+import org.asf.cyan.api.events.entities.EntityRegistryEvent;
+import org.asf.cyan.api.events.entities.EntityRendererRegistryEvent;
 import org.asf.cyan.api.events.ingame.commands.CommandManagerStartupEvent;
 import org.asf.cyan.api.events.ingame.crafting.RecipeManagerStartupEvent;
 import org.asf.cyan.api.events.ingame.tags.TagManagerStartupEvent;
 import org.asf.cyan.api.events.objects.core.ReloadEventObject;
+import org.asf.cyan.api.events.objects.entities.EntityRegistryEventObject;
+import org.asf.cyan.api.events.objects.entities.EntityRendererRegistryEventObject;
 import org.asf.cyan.api.events.objects.ingame.commands.CommandManagerEventObject;
 import org.asf.cyan.api.events.objects.ingame.crafting.RecipeManagerEventObject;
 import org.asf.cyan.api.events.objects.ingame.tags.TagManagerEventObject;
@@ -40,30 +44,27 @@ public class TestEventListeners extends CyanComponent implements IEventListenerC
 
 	@SimpleEvent(ReloadEvent.class)
 	public void reload(ReloadEventObject event) {
-		if (Modloader.getModloaderGameSide() == GameSide.CLIENT) {
-			String msg = Language.getInstance().getOrDefault("examplemod.lang.test");
-			msg = msg;
-		}
+		event = event; // DONE
 	}
 
 	@SimpleEvent(ReloadPrepareEvent.class)
 	public void reloadPrepare(ReloadEventObject event) {
-		event = event;
+		event = event; // DONE
 	}
 
 	@SimpleEvent(CommandManagerStartupEvent.class)
 	public void test(CommandManagerEventObject event) {
-		event = event;
+		event = event; // DONE
 	}
 
 	@SimpleEvent(RecipeManagerStartupEvent.class)
 	public void test(RecipeManagerEventObject event) {
-		event = event;
+		event = event; // DONE
 	}
 
 	@SimpleEvent(TagManagerStartupEvent.class)
 	public void test(TagManagerEventObject event) {
-		event = event;
+		event = event; // DONE
 	}
 
 	@SimpleEvent(TextureManagerStartupEvent.class)
@@ -73,7 +74,7 @@ public class TestEventListeners extends CyanComponent implements IEventListenerC
 
 	@SimpleEvent(ResourceManagerStartupEvent.class)
 	public void test(ResourceManagerEventObject event) {
-		event = event;
+		event = event; // DONE
 	}
 
 	@SimpleEvent(LanguageManagerStartupEvent.class)
@@ -84,5 +85,15 @@ public class TestEventListeners extends CyanComponent implements IEventListenerC
 	@SimpleEvent(ModResourcePackLoadEvent.class)
 	public void test(ResourcePackEventObject event) {
 		event = event;
+	}
+
+	@SimpleEvent(EntityRendererRegistryEvent.class)
+	public void test(EntityRendererRegistryEventObject event) {
+		event = event;
+	}
+
+	@SimpleEvent(EntityRegistryEvent.class)
+	public void test(EntityRegistryEventObject event) {
+		event = event; // DONE
 	}
 }

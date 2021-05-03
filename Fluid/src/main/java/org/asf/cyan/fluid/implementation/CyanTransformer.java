@@ -40,6 +40,7 @@ import org.asf.cyan.fluid.Transformer;
 import org.asf.cyan.fluid.api.transforming.ASM;
 import org.asf.cyan.fluid.api.transforming.Constructor;
 import org.asf.cyan.fluid.api.transforming.Erase;
+import org.asf.cyan.fluid.api.transforming.Exclude;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.LocalVariable;
 import org.asf.cyan.fluid.api.transforming.Modifiers;
@@ -145,6 +146,9 @@ public class CyanTransformer extends Transformer {
 						.getAnnotation(Modifiers.class, transformerNode).<Integer>get("modifiers").intValue();
 			}
 			for (MethodNode method : transformerNode.methods) {
+				if (AnnotationInfo.isAnnotationPresent(Exclude.class, method))
+					continue;
+
 				boolean found = false;
 				ArrayList<String> types = new ArrayList<String>();
 
@@ -236,6 +240,9 @@ public class CyanTransformer extends Transformer {
 			cls.interfaces.add(transformerNode.name);
 		} else {
 			for (MethodNode meth : transformerNode.methods) {
+				if (AnnotationInfo.isAnnotationPresent(Exclude.class, meth))
+					continue;
+
 				if (AnnotationInfo.isAnnotationPresent(ASM.class, meth)) {
 					asmMethods = true;
 					continue;

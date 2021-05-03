@@ -33,7 +33,7 @@ public class CommandManager implements IEventListenerContainer {
 
 	@SimpleEvent(CommandManagerStartupEvent.class)
 	private void commandSetup(CommandManagerEventObject event) {
-		event = event;
+		
 	}
 
 	/**
