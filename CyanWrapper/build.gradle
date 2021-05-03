@@ -2005,50 +2005,50 @@ HashMap<String, File> scanFiles(File inp, String start, String... extensions) {
 task serverJar (type: Jar, dependsOn: build) {
 	def dest = null
 	def apiID = null
+	
+	dest = file('../build/Wrapper/Server jars/'+cyanversion+"-mc-"+exactgameversion)
+	if (!dest.exists())
+		dest.mkdirs();
+
+	destinationDirectory = dest
+	archiveClassifier = 'server'
+	archiveVersion = exactgameversion+"-cyan-"+cyanversion
+	archiveBaseName = 'minecraft'
+
+	exclude "**/extra/**"
+	exclude "**/tests/**"
+	exclude "**/version-launcher.json"
+	exclude "**/version-dbg.json"
+	exclude "**/versions.ccfg"
+	exclude "**/log4j2.xml"
+	exclude "**/log4j2-game.xml"
+	exclude "**/log4j2-ide.xml"
+	rename "log4j2-server.xml", "log4j2.xml"
+	includeEmptyDirs = false
+
+	if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
+	cyanclasspath+="vanilla-server.jar"
+	if (!modloader.isEmpty() && modloader.startsWith("paper-")) {
+		def paperversion = modloader.substring("paper-".length())
+		if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
+		cyanclasspath+="paper-server-${paperversion}.jar"
+	}
+
+	from sourceSets.main.output
+	libnames.add(project.group+"."+project.name)
+	project(":").childProjects.each { proj ->
+		if (!proj.value.name.equals(project.name)) {
+			if (configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.stream().anyMatch({it.moduleName.equals(proj.value.name)})) {
+				from proj.value.sourceSets.main.output
+				libnames.add(proj.value.group+"."+proj.value.name)
+			}
+		}
+	}
+	
 	doFirst {
 		def apiJarTask = tasks.getByPath(":CyanAPI:platformRiftJarServer")
 		apiID = "org.asf.cyan:CyanAPI:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
 		libraries.put(apiID, apiJarTask.archivePath);
-
-		dest = file('../build/Wrapper/Server jars/'+cyanversion+"-mc-"+exactgameversion)
-		if (!dest.exists())
-			dest.mkdirs();
-
-		destinationDirectory = dest
-		archiveClassifier = 'server'
-		archiveVersion = exactgameversion+"-cyan-"+cyanversion
-		archiveBaseName = 'minecraft'
-
-		exclude "**/extra/**"
-		exclude "**/tests/**"
-		exclude "**/version-launcher.json"
-		exclude "**/version-dbg.json"
-		exclude "**/versions.ccfg"
-		exclude "**/log4j2.xml"
-		exclude "**/log4j2-game.xml"
-		exclude "**/log4j2-ide.xml"
-		rename "log4j2-server.xml", "log4j2.xml"
-		includeEmptyDirs = false
-
-		if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
-		cyanclasspath+="vanilla-server.jar"
-		if (!modloader.isEmpty() && modloader.startsWith("paper-")) {
-			def paperversion = modloader.substring("paper-".length())
-			if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
-			cyanclasspath+="paper-server-${paperversion}.jar"
-		}
-
-		from sourceSets.main.output
-		libnames.add(project.group+"."+project.name)
-		project(":").childProjects.each { proj ->
-			if (!proj.value.name.equals(project.name)) {
-				if (configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.stream().anyMatch({it.moduleName.equals(proj.value.name)})) {
-					from proj.value.sourceSets.main.output
-					libnames.add(proj.value.group+"."+proj.value.name)
-				}
-			}
-		}
-
 		libraries.forEach { k, v ->
 			String[] information = k.split(":")
 			String group = ""
