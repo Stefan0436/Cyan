@@ -17,6 +17,7 @@ public class EntityTypeModification {
 	public static void clinit() {
 		EntityRegistryEventObject cyanEntities = new EntityRegistryEventObject();
 		EntityRegistryEvent.getInstance().dispatch(cyanEntities).getResult();
+		EntityRegistryEvent.getInstance().registerEntities(cyanEntities);
 	}
 
 }

@@ -26,6 +26,43 @@ import org.asf.cyan.mods.internal.CyanModManifest;
  */
 public abstract class AbstractMod extends CyanComponent implements IMod, IEventListenerContainer {
 
+	/**
+	 * Retrieves the instance of this mod
+	 */
+	@SuppressWarnings("unchecked")
+	public static AbstractMod getInstance() {
+		Class<?> caller = CallTrace.traceCall(0);
+		if (AbstractMod.class.isAssignableFrom(caller) && !caller.getTypeName().equals(AbstractMod.class.getTypeName()))
+			return getInstance((Class<AbstractMod>) caller);
+		else
+			return null;
+	}
+
+	/**
+	 * Retrieves the instance of the given mod
+	 * 
+	 * @param <T>      Mod type
+	 * @param modClass Mod class
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends AbstractMod> T getInstance(Class<T> modClass) {
+		if (modClass.getTypeName().equals(AbstractMod.class.getTypeName()))
+			return null;
+
+		for (Modloader loader : Modloader.getAllModloaders()) {
+			for (IModManifest manifest : loader.getLoadedMods()) {
+				if (manifest instanceof CyanModManifest) {
+					AbstractMod md = ((CyanModManifest) manifest).getInstance();
+					if (modClass.isAssignableFrom(md.getClass())) {
+						return (T) md;
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
 	private CyanModManifest manifest;
 	private Modloader owner;
 	private GameSide side;

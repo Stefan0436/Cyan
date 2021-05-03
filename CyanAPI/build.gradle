@@ -197,7 +197,8 @@ createEclipseLaunches {
 dependencies {
 	implementation name: 'client', version: minecraft + "-deobf"
  	implementation name: 'server', version: minecraft + "-deobf"
-	
+	 
+	implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
     testImplementation 'junit:junit:4.12'
     
 	implementation project(":CyanComponents")

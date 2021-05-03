@@ -1,12 +1,14 @@
 Cyan Update Changelog: 1.0.0 (Alpha 13):
- - Rift Supertype Remapping (using @Override) -- TODO
+ - Rift Supertype Remapping (using @Override)
  - Extended Event Provider (less overhead, CyanUtil 1.0.0.A11)
- - The FLUID transformer system is now an API. (FLUID A24) -- TODO
+ - The FLUID transformer system is now an API. (FLUID A25) -- TODO
+ - Fluid Supertype Remapping now creates deobfuscation targets (FLUID A24)
  - MTK RIFT Supertype Implementation Remapping (MTK A19)
  - MTK MSA Account Support (MTK A21) -- TODO
  - ModKit Config Manager (CyanAPI ModKit 1.0) -- TODO
  - Mod Threads API (CyanAPI ModKit 1.0, count of threads is displayed in crash logs) -- TODO
  - ModKit Command Manager (CyanAPI ModKit 1.0) -- TODO
+ - ModKit Language Manager (with server support using custom implementation instead of vanilla language manager, CyanAPI ModKit 1.0) -- TODO
  
  // A14
  - ResourceManager modification to allow mods to set textures (Cyan 1.0.0.A14) -- TODO

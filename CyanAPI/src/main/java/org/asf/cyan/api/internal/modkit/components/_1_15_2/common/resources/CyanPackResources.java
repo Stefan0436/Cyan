@@ -23,11 +23,17 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.VanillaPackResources;
 
 public class CyanPackResources extends VanillaPackResources {
+	private static CyanPackResources current;
 	private HashMap<String, IMod> mods = new HashMap<String, IMod>();
 	private Set<String> modNamespaces;
 
 	public CyanPackResources() {
 		modNamespaces = new HashSet<String>(init());
+		current = this;
+	}
+
+	public static CyanPackResources getInstance() {
+		return current;
 	}
 
 	@Override
@@ -54,7 +60,7 @@ public class CyanPackResources extends VanillaPackResources {
 	}
 
 	@Override
-	protected InputStream getResourceAsStream(PackType type, ResourceLocation location) {
+	public InputStream getResourceAsStream(PackType type, ResourceLocation location) {
 		if (!location.getNamespace().equals("cyan")) {
 			for (String namespace : mods.keySet()) {
 				if (namespace.equals(location.getNamespace())) {

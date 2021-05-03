@@ -1,7 +1,6 @@
 package org.asf.cyan.fluid.remapping;
 
 import java.io.Closeable;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.asf.cyan.fluid.Fluid;
@@ -22,36 +21,10 @@ import org.objectweb.asm.tree.MethodNode;
  *
  */
 public class SupertypeRemapper implements Closeable {
-	private ArrayList<DeobfuscationTargetMap> mappings = new ArrayList<DeobfuscationTargetMap>();
+	private DeobfuscationTargetMap mappings;
 
-	public SupertypeRemapper() {
-
-	}
-
-	public SupertypeRemapper addMappings(DeobfuscationTargetMap... mappings) {
-		for (DeobfuscationTargetMap map : mappings) {
-			this.mappings.add(map);
-		}
-		return this;
-	}
-
-	public SupertypeRemapper addMappings(Iterable<DeobfuscationTargetMap> mappings) {
-		for (DeobfuscationTargetMap map : mappings) {
-			this.mappings.add(map);
-		}
-		return this;
-	}
-
-	public SupertypeRemapper(Iterable<DeobfuscationTargetMap> initialMappings) {
-		for (DeobfuscationTargetMap mappings : initialMappings) {
-			this.mappings.add(mappings);
-		}
-	}
-
-	public SupertypeRemapper(DeobfuscationTargetMap... initialMappings) {
-		for (DeobfuscationTargetMap mappings : initialMappings) {
-			this.mappings.add(mappings);
-		}
+	public SupertypeRemapper(DeobfuscationTargetMap initialMappings) {
+		mappings = initialMappings;
 	}
 
 	/**
@@ -62,27 +35,53 @@ public class SupertypeRemapper implements Closeable {
 	 * @return Remapped class
 	 */
 	public ClassNode remap(ClassNode input) {
+		DeobfuscationTarget clsTarget = new DeobfuscationTarget();
+		clsTarget.outputName = input.name.replace("/", ".");
+		clsTarget.jvmName = input.name;
+
 		if (input.superName != null && !input.superName.equals("java/lang/Object")) {
-			mappings.forEach((mappings) -> {
-				mappings.forEach((type, target) -> {
-					if (type.equals(input.superName)) {
-						remap(input, type, target);
+			mappings.forEach((type, target) -> {
+				if (type.equals(input.superName)) {
+					for (String fieldKey : target.fields.keySet()) {
+						clsTarget.fields.putIfAbsent(fieldKey, target.fields.get(fieldKey));
 					}
-				});
+					for (String mthKey : target.methods.keySet()) {
+						clsTarget.methods.putIfAbsent(mthKey, target.methods.get(mthKey));
+					}
+					remap(input, type, target);
+				}
 			});
 		}
 		if (input.interfaces != null) {
 			for (String interfaceName : input.interfaces) {
-				mappings.forEach((mappings) -> {
-					mappings.forEach((type, target) -> {
-						if (type.equals(interfaceName)) {
-							remap(input, type, target);
+				mappings.forEach((type, target) -> {
+					if (type.equals(interfaceName)) {
+						for (String fieldKey : target.fields.keySet()) {
+							clsTarget.fields.putIfAbsent(fieldKey, target.fields.get(fieldKey));
 						}
-					});
+						for (String mthKey : target.methods.keySet()) {
+							clsTarget.methods.putIfAbsent(mthKey, target.methods.get(mthKey));
+						}
+						remap(input, type, target);
+					}
 				});
 			}
 		}
+//		if (input.name.contains("$")) { // Not sure this is right
+//			String host = input.name.substring(0, input.name.lastIndexOf("$"));
+//			mappings.forEach((type, target) -> {
+//				if (type.equals(host)) {
+//					for (String fieldKey : target.fields.keySet()) {
+//						clsTarget.fields.putIfAbsent(fieldKey, target.fields.get(fieldKey));
+//					}
+//					for (String mthKey : target.methods.keySet()) {
+//						clsTarget.methods.putIfAbsent(mthKey, target.methods.get(mthKey));
+//					}
+//				}
+//			});
+//		}
 
+		mappings.putIfAbsent(input.name, clsTarget);
 		return input;
 	}
 
