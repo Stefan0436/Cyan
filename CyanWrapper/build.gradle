@@ -1340,6 +1340,12 @@ processResources {
 			def val = info.spigotTestingMappings.get(ver)
 			testingSpigotMappings.put(ver, val)
 		}
+		
+		for (def ver : info.libraryVersions) {
+			if (ver.startsWith("ModKit-")) {
+				libraryVersionMap.put(ver, info.libraryVersions.get(ver))
+			}
+		}
 	} catch (IOException e) {
 		logger.warn("WARNING: Failed to download update information file from: "+useurl + infoPath)
 		logger.warn("You will be missing CYAN version information entries!")
@@ -1630,7 +1636,7 @@ processResources {
 		}
 	}
 
-	libraryVersionMap.put("CyanAPI-" + project(":CyanAPI").ext.specVersion, project(":CyanAPI").version);
+	libraryVersionMap.put("ModKit-" + project(":CyanAPI").ext.specVersion, project(":CyanAPI").version);
 
 	for (String key : gameVersions.keySet()) {
 		def val = gameVersions.get(key).replaceAll("\n", "\n    ")
