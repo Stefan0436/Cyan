@@ -44,7 +44,7 @@ public class CyanAPI implements IAPIDependency {
 	@Override
 	public void addDependencies(ConfigurationContainer configurations) {
 		proj.getDependencies().add("implementation",
-				"org.asf.cyan:CyanAPI:" + modloader.libraries.get("CyanAPI-" + version));
+				"org.asf.cyan:CyanAPI:" + modloader.libraries.get("ModKit-" + version));
 	}
 
 	@Override
