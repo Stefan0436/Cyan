@@ -74,16 +74,18 @@ public class ResourcesImplementation extends Resources implements IModKitCompone
 
 	@Override
 	public InputStream getResourceAsStream(Resource resource) {
-		if (CyanInfo.getSide() == GameSide.CLIENT) {
-			InputStream strm = CyanPackResources.getInstance().getResourceAsStream(PackType.CLIENT_RESOURCES,
+		if (CyanPackResources.getInstance() != null) {
+			if (CyanInfo.getSide() == GameSide.CLIENT) {
+				InputStream strm = CyanPackResources.getInstance().getResourceAsStream(PackType.CLIENT_RESOURCES,
+						resource.toGameType());
+				if (strm != null)
+					return strm;
+			}
+			InputStream strm = CyanPackResources.getInstance().getResourceAsStream(PackType.SERVER_DATA,
 					resource.toGameType());
 			if (strm != null)
 				return strm;
 		}
-		InputStream strm = CyanPackResources.getInstance().getResourceAsStream(PackType.SERVER_DATA,
-				resource.toGameType());
-		if (strm != null)
-			return strm;
 
 		try {
 			return manager.getResource(resource.toGameType()).getInputStream();

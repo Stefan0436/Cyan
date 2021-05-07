@@ -2,14 +2,18 @@ package org.asf.cyan.api.internal.test;
 
 import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.cyan.api.common.CyanComponent;
+import org.asf.cyan.api.events.core.ReloadEvent;
 import org.asf.cyan.api.events.entities.EntityAttributesEvent;
 import org.asf.cyan.api.events.entities.EntityRegistryEvent;
 import org.asf.cyan.api.events.entities.EntityRendererRegistryEvent;
+import org.asf.cyan.api.events.objects.core.ReloadEventObject;
 import org.asf.cyan.api.events.objects.entities.EntityAttributesEventObject;
 import org.asf.cyan.api.events.objects.entities.EntityRegistryEventObject;
 import org.asf.cyan.api.events.objects.entities.EntityRegistryEventObject.EntityRegistryCallback;
 import org.asf.cyan.api.events.objects.resources.ResourceManagerEventObject;
+import org.asf.cyan.api.events.objects.resources.ResourcePackEventObject;
 import org.asf.cyan.api.events.resources.manager.ResourceManagerStartupEvent;
+import org.asf.cyan.api.events.resources.modresources.ModResourcePackLoadEvent;
 import org.asf.cyan.api.resources.Resources;
 import org.asf.cyan.api.events.objects.entities.EntityRendererRegistryEventObject;
 import org.asf.cyan.mods.events.IEventListenerContainer;
@@ -27,9 +31,9 @@ public class TestEventListeners extends CyanComponent implements IEventListenerC
 		BaseEventController.addEventContainer(new TestEventListeners());
 	}
 	
-	@SimpleEvent(ResourceManagerStartupEvent.class)
-	private void startResourceManager(ResourceManagerEventObject event) {
-		String test = Resources.getFor("minecraft").getResource("lang/en-us.json").readAsString();
+	@SimpleEvent(ReloadEvent.class)
+	private void startResourceManager(ReloadEventObject event) {
+		String test = Resources.getFor("minecraft").getResource("lang/en_us.json").readAsString();
 		test = test;
 	}
 
