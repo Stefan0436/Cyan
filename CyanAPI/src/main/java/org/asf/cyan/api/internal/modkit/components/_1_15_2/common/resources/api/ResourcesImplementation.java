@@ -3,6 +3,8 @@ package org.asf.cyan.api.internal.modkit.components._1_15_2.common.resources.api
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.asf.cyan.api.events.objects.resources.ResourceManagerEventObject;
+import org.asf.cyan.api.events.resources.manager.ResourceManagerStartupEvent;
 import org.asf.cyan.api.internal.IModKitComponent;
 import org.asf.cyan.api.internal.modkit.components._1_15_2.common.resources.CyanPackResources;
 import org.asf.cyan.api.modloader.information.game.GameSide;
@@ -10,13 +12,18 @@ import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.api.resources.Resource;
 import org.asf.cyan.api.resources.Resources;
 import org.asf.cyan.core.CyanInfo;
+import org.asf.cyan.mods.events.IEventListenerContainer;
+import org.asf.cyan.mods.events.SimpleEvent;
+import org.asf.cyan.mods.internal.BaseEventController;
 
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
 
-public class ResourcesImplementation extends Resources implements IModKitComponent {
+public class ResourcesImplementation extends Resources implements IModKitComponent, IEventListenerContainer {
 
 	private IModManifest ownerMod = null;
 	private String owner = "";
+	private static ResourceManager manager;
 
 	@Override
 	protected void setDefaultOwner(IModManifest mod) {
@@ -32,6 +39,12 @@ public class ResourcesImplementation extends Resources implements IModKitCompone
 	@Override
 	public void initializeComponent() {
 		implementation = this;
+		BaseEventController.addEventContainer(this);
+	}
+
+	@SimpleEvent(ResourceManagerStartupEvent.class)
+	private void startResourceManager(ResourceManagerEventObject event) {
+		manager = event.getResourceManager();
 	}
 
 	@Override
@@ -67,8 +80,16 @@ public class ResourcesImplementation extends Resources implements IModKitCompone
 			if (strm != null)
 				return strm;
 		}
-		return CyanPackResources.getInstance().getResourceAsStream(PackType.SERVER_DATA, resource.toGameType());
+		InputStream strm = CyanPackResources.getInstance().getResourceAsStream(PackType.SERVER_DATA,
+				resource.toGameType());
+		if (strm != null)
+			return strm;
 
+		try {
+			return manager.getResource(resource.toGameType()).getInputStream();
+		} catch (IOException e) {
+			return null;
+		}
 	}
 
 	@Override

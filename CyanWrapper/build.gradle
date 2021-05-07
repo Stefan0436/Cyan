@@ -1341,7 +1341,7 @@ processResources {
 			testingSpigotMappings.put(ver, val)
 		}
 		
-		for (def ver : info.libraryVersions) {
+		for (def ver : info.libraryVersions.keySet()) {
 			if (ver.startsWith("ModKit-")) {
 				libraryVersionMap.put(ver, info.libraryVersions.get(ver))
 			}

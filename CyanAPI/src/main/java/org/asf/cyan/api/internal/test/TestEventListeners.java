@@ -8,6 +8,9 @@ import org.asf.cyan.api.events.entities.EntityRendererRegistryEvent;
 import org.asf.cyan.api.events.objects.entities.EntityAttributesEventObject;
 import org.asf.cyan.api.events.objects.entities.EntityRegistryEventObject;
 import org.asf.cyan.api.events.objects.entities.EntityRegistryEventObject.EntityRegistryCallback;
+import org.asf.cyan.api.events.objects.resources.ResourceManagerEventObject;
+import org.asf.cyan.api.events.resources.manager.ResourceManagerStartupEvent;
+import org.asf.cyan.api.resources.Resources;
 import org.asf.cyan.api.events.objects.entities.EntityRendererRegistryEventObject;
 import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.events.SimpleEvent;
@@ -22,6 +25,12 @@ public class TestEventListeners extends CyanComponent implements IEventListenerC
 
 	protected static void initComponent() {
 		BaseEventController.addEventContainer(new TestEventListeners());
+	}
+	
+	@SimpleEvent(ResourceManagerStartupEvent.class)
+	private void startResourceManager(ResourceManagerEventObject event) {
+		String test = Resources.getFor("minecraft").getResource("lang/en-us.json").readAsString();
+		test = test;
 	}
 
 	@SimpleEvent(EntityRendererRegistryEvent.class)
