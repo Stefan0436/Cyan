@@ -20,6 +20,9 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - ModKit Game Reload Events (CyanAPI ModKit 1.0)
  - ModKit Command Registry Events (CyanAPI ModKit 1.0)
  
+ - ModKit Client Required Packet Handlers (such as entities, CyanAPI ModKit 1.0) -- TODO
+ - ModKit Packet Setup Events (CyanAPI ModKit 1.0) -- TODO
+ - ModKit Login Logic Events (CyanAPI ModKit 1.0) -- TODO
  - ModKit Block Entity Registry Events (CyanAPI ModKit 1.0) -- TODO 
  - ModKit Block Registry Events (CyanAPI ModKit 1.0) -- TODO
  - ModKit Item Registry Events (CyanAPI ModKit 1.0) -- TODO
