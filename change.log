@@ -20,8 +20,8 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - ModKit Game Reload Events (CyanAPI ModKit 1.0)
  - ModKit Command Registry Events (CyanAPI ModKit 1.0)
  
- - ModKit Client Required Packet Handlers (such as entities, CyanAPI ModKit 1.0) -- TODO
- - ModKit Packet Setup Events (CyanAPI ModKit 1.0) -- TODO
+ - ModKit Packet Receive Events (CyanAPI ModKit 1.0) -- TODO
+ - ModKit Client Add Entity Packet Handlers (CyanAPI ModKit 1.0) -- TODO
  - ModKit Login Logic Events (CyanAPI ModKit 1.0) -- TODO
  - ModKit Block Entity Registry Events (CyanAPI ModKit 1.0) -- TODO 
  - ModKit Block Registry Events (CyanAPI ModKit 1.0) -- TODO
@@ -30,8 +30,8 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  
  
  // A14
+ - Client Language Key Packet (for the server, so it knows what language keys the client has, CyanAPI ModKit 1.1) -- TODO
  - Network Packet Channel API (CyanAPI ModKit 1.1) -- TODO
- - Network Events (CyanAPI ModKit 1.1) -- TODO
  - Server/client mod version checking (CyanAPI ModKit 1.1 mods have annotated methods check their versions, if implemented) -- TODO
  - MTK MSA Account Support (MTK A22) -- TODO
  

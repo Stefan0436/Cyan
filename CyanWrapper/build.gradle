@@ -1,6 +1,5 @@
 buildscript {
 	repositories {
-		jcenter()
 		mavenCentral()
 		maven {
 			name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven"
@@ -311,7 +310,6 @@ jar.dependsOn('processResources')
 
 repositories {
 	mavenCentral()
-	jcenter()
 	maven {
 		url = 'https://repo.spongepowered.org/maven'
 	}

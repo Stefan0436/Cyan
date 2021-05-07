@@ -40,7 +40,6 @@ jar.dependsOn('processResources')
 
 repositories {
     mavenCentral()
-    jcenter()
 	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
 }
 

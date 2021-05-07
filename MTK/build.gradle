@@ -35,7 +35,6 @@ jar.dependsOn('processResources')
 
 repositories {
     mavenCentral()
-    jcenter()
 	maven { url = 'https://repo.spongepowered.org/maven' }
 	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
 }
@@ -117,6 +116,7 @@ task specialTest (type: Test, dependsOn: test) {
 }
 
 processResources  {
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 	inputs.property "version", project.version
 	
 	from(sourceSets.main.resources.srcDirs) {

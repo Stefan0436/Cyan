@@ -1,6 +1,5 @@
 buildscript {
 	repositories {
-		jcenter()
 		mavenCentral()
 		maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
 	}

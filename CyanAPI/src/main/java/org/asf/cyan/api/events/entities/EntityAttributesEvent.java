@@ -5,8 +5,8 @@ import org.asf.cyan.api.events.objects.entities.EntityAttributesEventObject;
 
 /**
  * 
- * Entity Attributes Event Object -- Register your entity attribute suppliers
- * with this event
+ * Entity Attributes Event -- Register your entity attribute suppliers with this
+ * event
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
  *

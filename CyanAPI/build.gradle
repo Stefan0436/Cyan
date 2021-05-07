@@ -1,6 +1,5 @@
 buildscript {
 	repositories {
-		jcenter()
 		mavenCentral()
 		maven {
 			name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven"
@@ -183,7 +182,6 @@ if (!project.hasProperty("noServer")) {
 jar.dependsOn('processResources')
 repositories {
     mavenCentral()
-    jcenter()
 	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
 	flatDir {
 		dirs jarFile.getParentFile()

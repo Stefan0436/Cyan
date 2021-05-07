@@ -8,7 +8,7 @@ package org.asf.cyan.api.threading;
  *
  */
 public abstract class ModThread {
-	private Thread modThread;
+//	private Thread modThread;
 	
 	protected abstract void startThread();
 }

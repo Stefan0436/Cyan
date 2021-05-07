@@ -30,7 +30,9 @@ configurePublish {
 version="1.0.0.A24"
 jar.dependsOn('processResources')
 
-processResources  {
+processResources {
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+	
 	inputs.property "version", project.version
 	
 	from(sourceSets.main.resources.srcDirs) {
@@ -40,7 +42,6 @@ processResources  {
 
 repositories {
     mavenCentral()
-    jcenter()
 	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
 }
 

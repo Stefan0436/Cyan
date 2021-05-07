@@ -80,7 +80,7 @@ public abstract class ReportBuilder extends CyanComponent {
 		for (int value : values) {
 			nodes.add(newEntry(node, null, value));
 		}
-
+		
 		return (ReportEntry<Integer>[]) nodes.toArray(t -> new ReportEntry<?>[t]);
 	}
 
