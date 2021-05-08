@@ -44,12 +44,40 @@ public class MinecraftModification {
 
 	@Constructor
 	@InjectAt(location = InjectLocation.TAIL)
-	public static void ctor(@TargetType(target = "net.minecraft.client.main.GameConfig") Object conf) {
+	public static void ctor1(@TargetType(target = "net.minecraft.client.main.GameConfig") Object conf) {
 		if (firstLoad) {
 			CyanCore.setPhase(LoadPhase.RUNTIME);
 			Modloader.getModloader().dispatchEvent("mods.runtimestart");
 
 			firstLoad = false;
+		}
+	}
+
+	@Constructor
+	@InjectAt(location = InjectLocation.HEAD, targetCall = "setupDefaultState(int,int,int,int)", targetOwner = "com.mojang.blaze3d.systems.RenderSystem")
+	public static void ctor2(@TargetType(target = "net.minecraft.client.main.GameConfig") Object conf) {
+		if (firstLoad) {
+			CyanCore.setPhase(LoadPhase.INIT);
+			Modloader.getModloader().dispatchEvent("mods.init");
+		}
+	}
+
+	@Constructor
+	@InjectAt(location = InjectLocation.HEAD, targetCall = "createDefault()", targetOwner = "net.minecraft.client.color.block.BlockColors")
+	public static void ctor3(@TargetType(target = "net.minecraft.client.main.GameConfig") Object conf) {
+		if (firstLoad) {
+			CyanCore.setPhase(LoadPhase.POSTINIT);
+			Modloader.getModloader().dispatchEvent("mods.postinit");
+		}
+	}
+
+	@Constructor
+	@InjectAt(location = InjectLocation.HEAD)
+	public static void ctor4(@TargetType(target = "net.minecraft.client.main.GameConfig") Object conf) {
+		if (firstLoad) {
+			CyanCore.setPhase(LoadPhase.PRELOAD);
+			CyanLoader.getModloader(CyanLoader.class).loadMods();
+			Modloader.getModloader().dispatchEvent("mods.preinit");
 		}
 	}
 

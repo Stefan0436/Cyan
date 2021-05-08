@@ -6,8 +6,6 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - MTK RIFT Supertype Implementation Remapping (MTK A19)
  - The FLUID transformer system is now an API. (FLUID A25) -- TODO
  
- - ModKit Threads API (CyanAPI ModKit 1.0, count of threads is displayed in crash logs) -- TODO
- 
  - ModKit Resource API (CyanAPI ModKit 1.0)
  - ModKit Language Manager (with server support using custom implementation instead of vanilla language manager, CyanAPI ModKit 1.0) -- TODO
  - ModKit Config Manager (CyanAPI ModKit 1.0) -- TODO
@@ -20,9 +18,10 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - ModKit Game Reload Events (CyanAPI ModKit 1.0)
  - ModKit Command Registry Events (CyanAPI ModKit 1.0)
  
- - ModKit Packet Receive Events (CyanAPI ModKit 1.0) -- TODO
- - ModKit Client Add Entity Packet Handlers (CyanAPI ModKit 1.0) -- TODO
- - ModKit Login Logic Events (CyanAPI ModKit 1.0) -- TODO
+ - ModKit Network Channel API (CyanAPI ModKit 1.0)
+ - Server/client mod version checking (CyanAPI ModKit 1.0)
+ - ModKit Serverbound Language Packet (CyanAPI ModKit 1.0) -- TODO
+ - ModKit Client Add Entity Packet Handlers (CyanAPI ModKit 1.0)
  - ModKit Block Entity Registry Events (CyanAPI ModKit 1.0) -- TODO 
  - ModKit Block Registry Events (CyanAPI ModKit 1.0) -- TODO
  - ModKit Item Registry Events (CyanAPI ModKit 1.0) -- TODO
@@ -30,15 +29,11 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  
  
  // A14
- - Client Language Key Packet (for the server, so it knows what language keys the client has, CyanAPI ModKit 1.1) -- TODO
- - Network Packet Channel API (CyanAPI ModKit 1.1) -- TODO
- - Server/client mod version checking (CyanAPI ModKit 1.1 mods have annotated methods check their versions, if implemented) -- TODO
+ - ModKit Threads API (CyanAPI ModKit 1.1, count of threads is displayed in crash logs) -- TODO
  - MTK MSA Account Support (MTK A22) -- TODO
- 
- 
+  
  // A15
- - Utility Event Hooks (CyanAPI) -- TODO
- - Mod loading(Cyan 1.0.0.A12) -- TODO
+ - Mod loading (Cyan 1.0.0.A12) -- TODO
  - ModKit Download (Cyan 1.0.0.A12) -- TODO
  
  - ModKit Entity API (CyanAPI ModKit 1.2) -- TODO

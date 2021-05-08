@@ -42,8 +42,7 @@ public class PacketBuilder {
 	 * @param entry String entry
 	 */
 	public PacketBuilder add(String entry) {
-		entries.add(new StringEntry(entry));
-		return this;
+		return add(new StringEntry(entry));
 	}
 
 	/**
@@ -52,8 +51,7 @@ public class PacketBuilder {
 	 * @param entry Integer entry
 	 */
 	public PacketBuilder add(int entry) {
-		entries.add(new IntEntry(entry));
-		return this;
+		return add(new IntEntry(entry));
 	}
 
 	/**
@@ -62,8 +60,7 @@ public class PacketBuilder {
 	 * @param entry Float entry
 	 */
 	public PacketBuilder add(float entry) {
-		entries.add(new FloatEntry(entry));
-		return this;
+		return add(new FloatEntry(entry));
 	}
 
 	/**
@@ -72,8 +69,7 @@ public class PacketBuilder {
 	 * @param entry Float entry
 	 */
 	public PacketBuilder add(long entry) {
-		entries.add(new LongEntry(entry));
-		return this;
+		return add(new LongEntry(entry));
 	}
 
 	/**
@@ -82,8 +78,7 @@ public class PacketBuilder {
 	 * @param entry Double entry
 	 */
 	public PacketBuilder add(double entry) {
-		entries.add(new DoubleEntry(entry));
-		return this;
+		return add(new DoubleEntry(entry));
 	}
 
 	/**
@@ -92,8 +87,7 @@ public class PacketBuilder {
 	 * @param entry Byte entry
 	 */
 	public PacketBuilder add(byte entry) {
-		entries.add(new ByteEntry(entry));
-		return this;
+		return add(new ByteEntry(entry));
 	}
 
 	/**
@@ -102,8 +96,7 @@ public class PacketBuilder {
 	 * @param entry Char entry
 	 */
 	public PacketBuilder add(char entry) {
-		entries.add(new CharEntry(entry));
-		return this;
+		return add(new CharEntry(entry));
 	}
 
 	/**
@@ -112,8 +105,7 @@ public class PacketBuilder {
 	 * @param entry Byte array entry
 	 */
 	public PacketBuilder add(byte[] entry) {
-		entries.add(new ByteArrayEntry(entry));
-		return this;
+		return add(new ByteArrayEntry(entry));
 	}
 
 	/**
@@ -123,8 +115,7 @@ public class PacketBuilder {
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public PacketBuilder add(Object entry) {
-		entries.add(new SerializingEntry(entry));
-		return this;
+		return add(new SerializingEntry(entry));
 	}
 
 	/**

@@ -83,6 +83,10 @@ public class CyanLoader extends Modloader implements IModProvider {
 		mavenRepositories.put("Maven Central", "https://repo1.maven.org/maven2");
 	}
 
+	protected static String getMarker() {
+		return "MODLOADER";
+	}
+
 	// TODO: Mod thread manager
 
 	public static void appendCyanInfo(BiConsumer<String, Object> setDetail1, BiConsumer<String, Object> setDetail2) {
@@ -241,6 +245,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 		}
 
 		mappings = MinecraftMappingsToolkit.loadMappings(mcVersion, CyanCore.getSide());
+		Modloader.getModloader(CyanLoader.class).startCore();
 	}
 
 	private static boolean setup = false;
@@ -423,8 +428,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 					: manifest.version);
 
 			Version ver = Version.fromString(cVersion);
-			checkDependencyVersion(version, cVersion, ver,
-					"Missing mod dependency for " + manifest.displayName + ": " + id);
+			checkDependencyVersion(version, ver, "Missing mod dependency for " + manifest.displayName + ": " + id);
 
 			if (!optManifest.isEmpty() && !Stream.of(mods)
 					.anyMatch(t -> t.getManifest().id().equals(manifest.modGroup + ":" + manifest.modId))) {
@@ -445,8 +449,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 						: manifest.version);
 
 				Version ver = Version.fromString(cVersion);
-				checkDependencyVersion(version, cVersion, ver,
-						"Missing mod dependency for " + manifest.displayName + ": " + id);
+				checkDependencyVersion(version, ver, "Missing mod dependency for " + manifest.displayName + ": " + id);
 
 				loadMod(coremod, optManifest.get(), loadingMods);
 			}
@@ -468,67 +471,97 @@ public class CyanLoader extends Modloader implements IModProvider {
 		}
 	}
 
-	private void checkDependencyVersion(String check, String cVersion, Version ver, String message) {
-		String error = null;
+	public static boolean validateCheckString(String checkString, Version version) {
+		return validateCheckString(checkString, version, "", true) == null;
+	}
+
+	public static String validateCheckString(String check, Version version, String message, boolean brief) {
+		String error = "";
 		for (String checkVersion : check.split(" | ")) {
 			error = null;
-			for (String version : checkVersion.split(" & ")) {
-				version = version.trim();
-				if (version.startsWith("~=")) {
-					String regex = version.substring(2);
+			for (String checkStr : checkVersion.split(" & ")) {
+				checkStr = checkStr.trim();
+				if (checkStr.startsWith("~=")) {
+					String regex = checkStr.substring(2);
 					if (regex.startsWith(" "))
 						regex = regex.substring(1);
-					if (!cVersion.matches(regex)) {
-						error = message + " (incompatible version installed)";
+					if (!version.toString().matches(regex)) {
+						if (!brief)
+							error = message + " (incompatible version installed)";
+						else
+							error = message + " (incompatible)";
 						break;
 					}
-				} else if (version.startsWith(">=")) {
-					String str = version.substring(2);
+				} else if (checkStr.startsWith(">=")) {
+					String str = checkStr.substring(2);
 					if (str.startsWith(" "))
 						str = str.substring(1);
 
 					Version min = Version.fromString(str);
 
-					if (!ver.isGreaterOrEqualTo(min)) {
-						error = message + " (outdated version installed)";
+					if (!version.isGreaterOrEqualTo(min)) {
+						if (!brief)
+							error = message + " (outdated version installed)";
+						else
+							error = message + " (>= " + str + ")";
 						break;
 					}
-				} else if (version.startsWith("<=")) {
-					String str = version.substring(2);
+				} else if (checkStr.startsWith("<=")) {
+					String str = checkStr.substring(2);
 					if (str.startsWith(" "))
 						str = str.substring(1);
 
 					Version min = Version.fromString(str);
 
-					if (!ver.isLessOrEqualTo(min)) {
-						error = message + " (incompatible newer version installed)";
+					if (!version.isLessOrEqualTo(min)) {
+						if (!brief)
+							error = message + " (incompatible newer version installed)";
+						else
+							error = message + " (<= " + str + ")";
 						break;
 					}
-				} else if (version.startsWith(">")) {
-					String str = version.substring(1);
+				} else if (checkStr.startsWith(">")) {
+					String str = checkStr.substring(1);
 					if (str.startsWith(" "))
 						str = str.substring(1);
 
 					Version min = Version.fromString(str);
 
-					if (!ver.isGreaterThan(min)) {
-						error = message + " (outdated version installed)";
+					if (!version.isGreaterThan(min)) {
+						if (!brief)
+							error = message + " (outdated version installed)";
+						else
+							error = message + " (" + str + "+)";
 						break;
 					}
-				} else if (version.startsWith("<")) {
-					String str = version.substring(1);
+				} else if (checkStr.startsWith("<")) {
+					String str = checkStr.substring(1);
 					if (str.startsWith(" "))
 						str = str.substring(1);
 
 					Version min = Version.fromString(str);
 
-					if (!ver.isLessThan(min)) {
-						error = message + " (incompatible newer version installed)";
+					if (!version.isLessThan(min)) {
+						if (!brief)
+							error = message + " (incompatible newer version installed)";
+						else
+							error = message + " (Pre-" + str + ")";
+						break;
+					}
+				} else if (checkStr.startsWith("!=")) {
+					if (version.isEqualTo(Version.fromString(checkStr.substring(2).trim()))) {
+						if (!brief)
+							error = message + " (incompatible version installed)";
+						else
+							error = message + " (" + checkStr.substring(2).trim() + ")";
 						break;
 					}
 				} else {
-					if (!ver.isEqualTo(Version.fromString(version.trim()))) {
-						error = message + " (incompatible version installed)";
+					if (!version.isEqualTo(Version.fromString(checkStr.trim()))) {
+						if (!brief)
+							error = message + " (incompatible version installed)";
+						else
+							error = message + " (" + checkStr.trim() + ")";
 						break;
 					}
 				}
@@ -536,6 +569,11 @@ public class CyanLoader extends Modloader implements IModProvider {
 			if (error == null)
 				break;
 		}
+		return error;
+	}
+
+	private void checkDependencyVersion(String check, Version version, String message) {
+		String error = validateCheckString(check, version, message, false);
 		if (error != null) {
 			fatal(error);
 			System.exit(-1);
@@ -679,9 +717,8 @@ public class CyanLoader extends Modloader implements IModProvider {
 			if (cVersion == null)
 				cVersion = CyanInfo.getModloaderVersion();
 
-			this.checkDependencyVersion(platformVersion, cVersion, Version.fromString(cVersion),
-					"Incompatible platform '" + CyanInfo.getPlatform() + "' for coremod '" + manifest.displayName
-							+ "'");
+			this.checkDependencyVersion(platformVersion, Version.fromString(cVersion), "Incompatible platform '"
+					+ CyanInfo.getPlatform() + "' for coremod '" + manifest.displayName + "'");
 		}
 
 		ZipInputStream strm = new ZipInputStream(new FileInputStream(ccmf));
@@ -1088,235 +1125,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 		try {
 			if (!loaded)
 				prepare(side);
-
-			CyanCore.registerPreLoadHook(new Runnable() {
-
-				@Override
-				public void run() {
-
-					info("Loading FLUID mappings...");
-
-					if (vanillaMappings)
-						Fluid.loadMappings(mappings);
-
-					for (Mapping<?> cmap : compatibilityMappings)
-						Fluid.loadMappings(cmap);
-				}
-
-			});
-			CyanCore.registerPreLoadHook(new Runnable() {
-
-				@Override
-				public void run() {
-					info("Loading FLUID class load hooks...");
-					for (ClassLoadHook hook : classHooks) {
-						Class<?> cls = hook.getClass();
-						if (cls.isAnnotationPresent(SideOnly.class)
-								&& cls.getAnnotation(SideOnly.class).value() != getModloaderGameSide()) {
-							continue;
-						} else if (cls.isAnnotationPresent(PlatformOnly.class)
-								&& cls.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
-							continue;
-						} else if (cls.isAnnotationPresent(PlatformExclude.class)
-								&& cls.getAnnotation(PlatformOnly.class).value() == getModloaderLaunchPlatform()) {
-							continue;
-						} else if (cls.isAnnotationPresent(VersionRegex.class)
-								&& !cls.getAnnotation(VersionRegex.class).modloaderVersion()
-								&& !getModloaderGameVersion().matches(cls.getAnnotation(VersionRegex.class).value())) {
-							continue;
-						} else if (cls.isAnnotationPresent(VersionRegex.class)
-								&& cls.getAnnotation(VersionRegex.class).modloaderVersion() && !getModloaderVersion()
-										.toString().matches(cls.getAnnotation(VersionRegex.class).value())) {
-							continue;
-						}
-
-						Fluid.registerHook(hook);
-					}
-					for (Class<?> hook : findClasses(getMainImplementation(), ClassLoadHook.class)) {
-						if (hook.isAnnotationPresent(SideOnly.class)
-								&& hook.getAnnotation(SideOnly.class).value() != getModloaderGameSide()) {
-							continue;
-						} else if (hook.isAnnotationPresent(PlatformOnly.class)
-								&& hook.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
-							continue;
-						} else if (hook.isAnnotationPresent(PlatformExclude.class)
-								&& hook.getAnnotation(PlatformExclude.class).value() == getModloaderLaunchPlatform()) {
-							continue;
-						} else if (hook.isAnnotationPresent(VersionRegex.class)
-								&& !hook.getAnnotation(VersionRegex.class).modloaderVersion()
-								&& !getModloaderGameVersion().matches(hook.getAnnotation(VersionRegex.class).value())) {
-							continue;
-						} else if (hook.isAnnotationPresent(VersionRegex.class)
-								&& hook.getAnnotation(VersionRegex.class).modloaderVersion() && !getModloaderVersion()
-										.toString().matches(hook.getAnnotation(VersionRegex.class).value())) {
-							continue;
-						}
-
-						classHookPackages.forEach((pkg) -> {
-							if (hook.getPackageName().equals(pkg) || hook.getPackageName().startsWith(pkg + ".")) {
-								try {
-									Fluid.registerHook((ClassLoadHook) hook.getConstructor().newInstance());
-								} catch (IllegalStateException | InstantiationException | IllegalAccessException
-										| IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-										| SecurityException e) {
-								}
-							}
-						});
-					}
-				}
-
-			});
-			CyanCore.registerPreLoadHook(new Runnable() {
-				@Override
-				public void run() {
-					info("Loading FLUID transformers...");
-					Version minecraft = Version.fromString(CyanInfo.getMinecraftVersion());
-					Version last = Version.fromString("0.0.0");
-
-					String selectedPackage = "";
-					Class<?>[] classes = findAnnotatedClasses(getMainImplementation(), FluidTransformer.class);
-					for (Class<?> cls : classes) {
-						String pkg = cls.getPackageName();
-						if (!pkg.startsWith("org.asf.cyan.modifications."))
-							continue;
-
-						if (pkg.contains(".common")) {
-							pkg = pkg.substring(0, pkg.lastIndexOf(".common"));
-						} else if (pkg.contains(".client")) {
-							pkg = pkg.substring(0, pkg.lastIndexOf(".client"));
-						} else if (pkg.contains(".server")) {
-							pkg = pkg.substring(0, pkg.lastIndexOf(".server"));
-						}
-
-						String version = pkg.substring(pkg.lastIndexOf(".") + 1).substring(1).replace("_", ".");
-						if (Version.fromString(version).isGreaterThan(minecraft)
-								|| Version.fromString(version).isLessThan(last))
-							continue;
-
-						selectedPackage = pkg;
-						last = Version.fromString(version);
-					}
-
-					try {
-						for (Class<?> transformer : classes) {
-							String pkg = transformer.getPackageName();
-							if (!pkg.startsWith("org.asf.cyan.modifications.")
-									|| (!pkg.equals(selectedPackage) && !pkg.startsWith(selectedPackage + ".")))
-								continue;
-
-							if (pkg.contains(".client") && CyanInfo.getSide() != GameSide.CLIENT) {
-								continue;
-							} else if (pkg.contains(".server") && CyanInfo.getSide() != GameSide.SERVER) {
-								continue;
-							}
-
-							if (transformer.isAnnotationPresent(SideOnly.class)
-									&& transformer.getAnnotation(SideOnly.class).value() != getModloaderGameSide()) {
-								continue;
-							} else if (transformer.isAnnotationPresent(PlatformOnly.class) && transformer
-									.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
-								continue;
-							} else if (transformer.isAnnotationPresent(PlatformExclude.class) && transformer
-									.getAnnotation(PlatformExclude.class).value() == getModloaderLaunchPlatform()) {
-								continue;
-							} else if (transformer.isAnnotationPresent(VersionRegex.class)
-									&& !transformer.getAnnotation(VersionRegex.class).modloaderVersion()
-									&& !getModloaderGameVersion()
-											.matches(transformer.getAnnotation(VersionRegex.class).value())) {
-								continue;
-							} else if (transformer.isAnnotationPresent(VersionRegex.class)
-									&& transformer.getAnnotation(VersionRegex.class).modloaderVersion()
-									&& !getModloaderVersion().toString()
-											.matches(transformer.getAnnotation(VersionRegex.class).value())) {
-								continue;
-							}
-
-							Fluid.registerTransformer(transformer.getTypeName(),
-									CyanLoader.class.getProtectionDomain().getCodeSource().getLocation());
-						}
-					} catch (IllegalStateException | ClassNotFoundException e) {
-						throw new RuntimeException(e);
-					}
-				}
-
-			});
-			CyanCore.registerPreLoadHook(new Runnable() {
-
-				@Override
-				public void run() {
-					info("Loading Coremod Transformers...");
-					for (String[] transformerInfo : transformers.keySet()) {
-						String transformer = transformerInfo[0];
-						String owner = transformerInfo[1];
-						URL source = transformers.get(transformerInfo);
-						try {
-							Class<?> cls = Class.forName(transformer, false, CyanCore.getCoreClassLoader());
-							if (cls.isAnnotationPresent(SideOnly.class)
-									&& cls.getAnnotation(SideOnly.class).value() != getModloaderGameSide()) {
-								continue;
-							} else if (cls.isAnnotationPresent(PlatformOnly.class)
-									&& cls.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
-								continue;
-							} else if (cls.isAnnotationPresent(PlatformExclude.class) && cls
-									.getAnnotation(PlatformExclude.class).value() == getModloaderLaunchPlatform()) {
-								continue;
-							} else if (cls.isAnnotationPresent(VersionRegex.class)
-									&& !cls.getAnnotation(VersionRegex.class).modloaderVersion()
-									&& !getModloaderGameVersion()
-											.matches(cls.getAnnotation(VersionRegex.class).value())) {
-								continue;
-							} else if (cls.isAnnotationPresent(VersionRegex.class)
-									&& cls.getAnnotation(VersionRegex.class).modloaderVersion()
-									&& !getModloaderVersion().toString()
-											.matches(cls.getAnnotation(VersionRegex.class).value())) {
-								continue;
-							}
-
-							Fluid.registerTransformer(transformer, owner, source);
-						} catch (IllegalStateException | ClassNotFoundException e) {
-						}
-					}
-
-					for (Class<?> transformer : findAnnotatedClasses(getMainImplementation(), FluidTransformer.class)) {
-						if (transformer.isAnnotationPresent(SideOnly.class)
-								&& transformer.getAnnotation(SideOnly.class).value() != getModloaderGameSide()) {
-							continue;
-						} else if (transformer.isAnnotationPresent(PlatformOnly.class) && transformer
-								.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
-							continue;
-						} else if (transformer.isAnnotationPresent(PlatformExclude.class) && transformer
-								.getAnnotation(PlatformExclude.class).value() == getModloaderLaunchPlatform()) {
-							continue;
-						} else if (transformer.isAnnotationPresent(VersionRegex.class)
-								&& !transformer.getAnnotation(VersionRegex.class).modloaderVersion()
-								&& !getModloaderGameVersion()
-										.matches(transformer.getAnnotation(VersionRegex.class).value())) {
-							continue;
-						} else if (transformer.isAnnotationPresent(VersionRegex.class)
-								&& transformer.getAnnotation(VersionRegex.class).modloaderVersion()
-								&& !getModloaderVersion().toString()
-										.matches(transformer.getAnnotation(VersionRegex.class).value())) {
-							continue;
-						}
-
-						transformerPackages.forEach((pkgInfo, source) -> {
-							String pkg = pkgInfo[0];
-							String owner = pkgInfo[1];
-							if (transformer.getPackageName().equals(pkg)
-									|| transformer.getPackageName().startsWith(pkg + ".")) {
-								try {
-									transformers.put(new String[] { transformer.getTypeName(), owner }, source);
-									Fluid.registerTransformer(transformer.getTypeName(), owner, source);
-								} catch (IllegalStateException | ClassNotFoundException e) {
-								}
-							}
-						});
-					}
-				}
-			});
-
-			info("Starting CyanCore...");
-			CyanCore.initializeComponents();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -1623,7 +1431,262 @@ public class CyanLoader extends Modloader implements IModProvider {
 	}
 
 	@Override
+	protected boolean postLoadOnlyComponent(Class<IModloaderComponent> component) {
+		if (IExtendedEvent.class.isAssignableFrom(component)) {
+			return true;
+		}
+		return false;
+	}
+
+	private void startCore() {
+		CyanCore.registerPreLoadHook(new Runnable() {
+
+			@Override
+			public void run() {
+
+				info("Loading FLUID mappings...");
+
+				if (vanillaMappings)
+					Fluid.loadMappings(mappings);
+
+				for (Mapping<?> cmap : compatibilityMappings)
+					Fluid.loadMappings(cmap);
+			}
+
+		});
+		CyanCore.registerPreLoadHook(new Runnable() {
+
+			@Override
+			public void run() {
+				info("Loading FLUID class load hooks...");
+				for (ClassLoadHook hook : classHooks) {
+					Class<?> cls = hook.getClass();
+					if (cls.isAnnotationPresent(SideOnly.class)
+							&& cls.getAnnotation(SideOnly.class).value() != getModloaderGameSide()) {
+						continue;
+					} else if (cls.isAnnotationPresent(PlatformOnly.class)
+							&& cls.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
+						continue;
+					} else if (cls.isAnnotationPresent(PlatformExclude.class)
+							&& cls.getAnnotation(PlatformOnly.class).value() == getModloaderLaunchPlatform()) {
+						continue;
+					} else if (cls.isAnnotationPresent(VersionRegex.class)
+							&& !cls.getAnnotation(VersionRegex.class).modloaderVersion()
+							&& !getModloaderGameVersion().matches(cls.getAnnotation(VersionRegex.class).value())) {
+						continue;
+					} else if (cls.isAnnotationPresent(VersionRegex.class)
+							&& cls.getAnnotation(VersionRegex.class).modloaderVersion() && !getModloaderVersion()
+									.toString().matches(cls.getAnnotation(VersionRegex.class).value())) {
+						continue;
+					}
+
+					Fluid.registerHook(hook);
+				}
+				for (Class<?> hook : findClasses(getMainImplementation(), ClassLoadHook.class)) {
+					if (hook.isAnnotationPresent(SideOnly.class)
+							&& hook.getAnnotation(SideOnly.class).value() != getModloaderGameSide()) {
+						continue;
+					} else if (hook.isAnnotationPresent(PlatformOnly.class)
+							&& hook.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
+						continue;
+					} else if (hook.isAnnotationPresent(PlatformExclude.class)
+							&& hook.getAnnotation(PlatformExclude.class).value() == getModloaderLaunchPlatform()) {
+						continue;
+					} else if (hook.isAnnotationPresent(VersionRegex.class)
+							&& !hook.getAnnotation(VersionRegex.class).modloaderVersion()
+							&& !getModloaderGameVersion().matches(hook.getAnnotation(VersionRegex.class).value())) {
+						continue;
+					} else if (hook.isAnnotationPresent(VersionRegex.class)
+							&& hook.getAnnotation(VersionRegex.class).modloaderVersion() && !getModloaderVersion()
+									.toString().matches(hook.getAnnotation(VersionRegex.class).value())) {
+						continue;
+					}
+
+					classHookPackages.forEach((pkg) -> {
+						if (hook.getPackageName().equals(pkg) || hook.getPackageName().startsWith(pkg + ".")) {
+							try {
+								Fluid.registerHook((ClassLoadHook) hook.getConstructor().newInstance());
+							} catch (IllegalStateException | InstantiationException | IllegalAccessException
+									| IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+									| SecurityException e) {
+							}
+						}
+					});
+				}
+			}
+
+		});
+		CyanCore.registerPreLoadHook(new Runnable() {
+			@Override
+			public void run() {
+				info("Loading FLUID transformers...");
+				Version minecraft = Version.fromString(CyanInfo.getMinecraftVersion());
+				Version last = Version.fromString("0.0.0");
+
+				String selectedPackage = "";
+				Class<?>[] classes = findAnnotatedClasses(getMainImplementation(), FluidTransformer.class);
+				for (Class<?> cls : classes) {
+					String pkg = cls.getPackageName();
+					if (!pkg.startsWith("org.asf.cyan.modifications."))
+						continue;
+
+					if (pkg.contains(".common")) {
+						pkg = pkg.substring(0, pkg.lastIndexOf(".common"));
+					} else if (pkg.contains(".client")) {
+						pkg = pkg.substring(0, pkg.lastIndexOf(".client"));
+					} else if (pkg.contains(".server")) {
+						pkg = pkg.substring(0, pkg.lastIndexOf(".server"));
+					}
+
+					String version = pkg.substring(pkg.lastIndexOf(".") + 1).substring(1).replace("_", ".");
+					if (Version.fromString(version).isGreaterThan(minecraft)
+							|| Version.fromString(version).isLessThan(last))
+						continue;
+
+					selectedPackage = pkg;
+					last = Version.fromString(version);
+				}
+
+				try {
+					for (Class<?> transformer : classes) {
+						String pkg = transformer.getPackageName();
+						if (!pkg.startsWith("org.asf.cyan.modifications.")
+								|| (!pkg.equals(selectedPackage) && !pkg.startsWith(selectedPackage + ".")))
+							continue;
+
+						if (pkg.contains(".client") && CyanInfo.getSide() != GameSide.CLIENT) {
+							continue;
+						} else if (pkg.contains(".server") && CyanInfo.getSide() != GameSide.SERVER) {
+							continue;
+						}
+
+						if (transformer.isAnnotationPresent(SideOnly.class)
+								&& transformer.getAnnotation(SideOnly.class).value() != getModloaderGameSide()) {
+							continue;
+						} else if (transformer.isAnnotationPresent(PlatformOnly.class) && transformer
+								.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
+							continue;
+						} else if (transformer.isAnnotationPresent(PlatformExclude.class) && transformer
+								.getAnnotation(PlatformExclude.class).value() == getModloaderLaunchPlatform()) {
+							continue;
+						} else if (transformer.isAnnotationPresent(VersionRegex.class)
+								&& !transformer.getAnnotation(VersionRegex.class).modloaderVersion()
+								&& !getModloaderGameVersion()
+										.matches(transformer.getAnnotation(VersionRegex.class).value())) {
+							continue;
+						} else if (transformer.isAnnotationPresent(VersionRegex.class)
+								&& transformer.getAnnotation(VersionRegex.class).modloaderVersion()
+								&& !getModloaderVersion().toString()
+										.matches(transformer.getAnnotation(VersionRegex.class).value())) {
+							continue;
+						}
+
+						Fluid.registerTransformer(transformer.getTypeName(),
+								CyanLoader.class.getProtectionDomain().getCodeSource().getLocation());
+					}
+				} catch (IllegalStateException | ClassNotFoundException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+		});
+		CyanCore.registerPreLoadHook(new Runnable() {
+
+			@Override
+			public void run() {
+				info("Loading Coremod Transformers...");
+				for (String[] transformerInfo : transformers.keySet()) {
+					String transformer = transformerInfo[0];
+					String owner = transformerInfo[1];
+					URL source = transformers.get(transformerInfo);
+					try {
+						Class<?> cls = Class.forName(transformer, false, CyanCore.getCoreClassLoader());
+						if (cls.isAnnotationPresent(SideOnly.class)
+								&& cls.getAnnotation(SideOnly.class).value() != getModloaderGameSide()) {
+							continue;
+						} else if (cls.isAnnotationPresent(PlatformOnly.class)
+								&& cls.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
+							continue;
+						} else if (cls.isAnnotationPresent(PlatformExclude.class)
+								&& cls.getAnnotation(PlatformExclude.class).value() == getModloaderLaunchPlatform()) {
+							continue;
+						} else if (cls.isAnnotationPresent(VersionRegex.class)
+								&& !cls.getAnnotation(VersionRegex.class).modloaderVersion()
+								&& !getModloaderGameVersion().matches(cls.getAnnotation(VersionRegex.class).value())) {
+							continue;
+						} else if (cls.isAnnotationPresent(VersionRegex.class)
+								&& cls.getAnnotation(VersionRegex.class).modloaderVersion() && !getModloaderVersion()
+										.toString().matches(cls.getAnnotation(VersionRegex.class).value())) {
+							continue;
+						}
+
+						Fluid.registerTransformer(transformer, owner, source);
+					} catch (IllegalStateException | ClassNotFoundException e) {
+					}
+				}
+
+				for (Class<?> transformer : findAnnotatedClasses(getMainImplementation(), FluidTransformer.class)) {
+					if (transformer.isAnnotationPresent(SideOnly.class)
+							&& transformer.getAnnotation(SideOnly.class).value() != getModloaderGameSide()) {
+						continue;
+					} else if (transformer.isAnnotationPresent(PlatformOnly.class)
+							&& transformer.getAnnotation(PlatformOnly.class).value() != getModloaderLaunchPlatform()) {
+						continue;
+					} else if (transformer.isAnnotationPresent(PlatformExclude.class) && transformer
+							.getAnnotation(PlatformExclude.class).value() == getModloaderLaunchPlatform()) {
+						continue;
+					} else if (transformer.isAnnotationPresent(VersionRegex.class)
+							&& !transformer.getAnnotation(VersionRegex.class).modloaderVersion()
+							&& !getModloaderGameVersion()
+									.matches(transformer.getAnnotation(VersionRegex.class).value())) {
+						continue;
+					} else if (transformer.isAnnotationPresent(VersionRegex.class)
+							&& transformer.getAnnotation(VersionRegex.class).modloaderVersion()
+							&& !getModloaderVersion().toString()
+									.matches(transformer.getAnnotation(VersionRegex.class).value())) {
+						continue;
+					}
+
+					transformerPackages.forEach((pkgInfo, source) -> {
+						String pkg = pkgInfo[0];
+						String owner = pkgInfo[1];
+						if (transformer.getPackageName().equals(pkg)
+								|| transformer.getPackageName().startsWith(pkg + ".")) {
+							try {
+								transformers.put(new String[] { transformer.getTypeName(), owner }, source);
+								Fluid.registerTransformer(transformer.getTypeName(), owner, source);
+							} catch (IllegalStateException | ClassNotFoundException e) {
+							}
+						}
+					});
+				}
+			}
+		});
+
+		info("Starting CyanCore...");
+		CyanCore.addAllowedTransformerAutoDetectClass("org.asf.cyan.api.internal.CyanAPIComponent");
+		CyanCore.initializeComponents();
+
+		info("Finishing bootstrap... Loading postponed components...");
+		loadPostponedComponents();
+
+		info("Loading final events...");
+		loadEvents();
+		createEventChannel("mod.loaded");
+
+		info("Loading coremods...");
+		downloadMavenDependencies(coremodMavenDependencies);
+		loadCoreMods();
+
+		BaseEventController.work();
+	}
+
+	@Override
 	protected void postRegister() {
+		loadEvents();
+	}
+
+	private void loadEvents() {
 		for (String event : events) {
 			try {
 				Optional<IExtendedEvent<?>> optEvent = extEvents.stream().filter(t -> t.channelName().equals(event))
@@ -1639,12 +1702,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 			} catch (IllegalStateException e) {
 			}
 		}
-		createEventChannel("mod.loaded");
-
-		downloadMavenDependencies(coremodMavenDependencies);
-		loadCoreMods();
-
-		BaseEventController.work();
+		events.clear();
 	}
 
 	private void downloadMavenDependencies(HashMap<String, Version> mavenDependencies) {
@@ -1698,6 +1756,10 @@ public class CyanLoader extends Modloader implements IModProvider {
 		mods.addAll(this.mods);
 		mods.addAll(this.coremods);
 		return mods.toArray(t -> new IMod[t]);
+	}
+
+	public void loadMods() {
+		// TODO
 	}
 
 }

@@ -1,12 +1,14 @@
 package org.asf.cyan.api.events.objects.entities;
 
 import java.util.Iterator;
+import java.util.function.BiFunction;
 
 import org.asf.cyan.api.events.extended.EventObject;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityType.Builder;
+import net.minecraft.world.level.Level;
 
 /**
  * 
@@ -46,40 +48,47 @@ public class EntityRegistryEventObject extends EventObject {
 		public Builder<?> builder;
 		public EntityRegistryCallback<T> callback;
 		public EntityInfo<?> next;
+		public BiFunction<EntityType<T>, Level, T> constructor;
 
-		public EntityInfo(String id, String namespace, Builder<?> builder, EntityRegistryCallback<T> callback) {
+		public EntityInfo(String id, String namespace, BiFunction<EntityType<T>, Level, T> constructor,
+				Builder<?> builder, EntityRegistryCallback<T> callback) {
 			this.namespace = namespace;
 			this.id = id;
 			this.builder = builder;
 			this.callback = callback;
+			this.constructor = constructor;
 		}
 	}
 
 	/**
 	 * Adds custom entities to the game
 	 * 
-	 * @param <T>     Entity Class Type
-	 * @param id      Entity id
-	 * @param builder Entity builder
-	 * @param result  Result function (receives the EntityType instance)
+	 * @param <T>         Entity Class Type
+	 * @param id          Entity id
+	 * @param constructor Entity constructor
+	 * @param builder     Entity builder
+	 * @param result      Result function (receives the EntityType instance)
 	 */
-	public <T extends Entity> void addEntity(String id, EntityType.Builder<T> builder,
-			EntityRegistryCallback<T> result) {
-		addEntity(id, "cyan", builder, result);
+	public <T extends Entity> void addEntity(String id, BiFunction<EntityType<T>, Level, T> constructor,
+			EntityType.Builder<T> builder, EntityRegistryCallback<T> result) {
+		addEntity(id, "cyan", constructor, builder, result);
 	}
 
 	/**
 	 * Adds custom entities to the game
 	 * 
-	 * @param <T>       Entity Class Type
-	 * @param namespace Entity namespace
-	 * @param id        Entity id
-	 * @param builder   Entity builder
-	 * @param result    Result function (receives the EntityType instance)
+	 * @param <T>         Entity Class Type
+	 * @param namespace   Entity namespace
+	 * @param id          Entity id
+	 * @param constructor Entity constructor
+	 * @param builder     Entity builder
+	 * @param result      Result function (receives the EntityType instance)
 	 */
-	public <T extends Entity> void addEntity(String namespace, String id, EntityType.Builder<T> builder,
+	public <T extends Entity> void addEntity(String namespace, String id,
+			BiFunction<EntityType<T>, Level, T> constructor, EntityType.Builder<T> builder,
 			EntityRegistryCallback<T> result) {
-		EntityInfo<T> entry = new EntityInfo<T>(id, namespace, builder, result);
+
+		EntityInfo<T> entry = new EntityInfo<T>(id, namespace, constructor, builder, result);
 		if (first == null) {
 			first = entry;
 			return;
@@ -95,24 +104,28 @@ public class EntityRegistryEventObject extends EventObject {
 	/**
 	 * Adds custom entities to the game
 	 * 
-	 * @param <T>     Entity Class Type
-	 * @param id      Entity id
-	 * @param builder Entity builder
+	 * @param <T>         Entity Class Type
+	 * @param id          Entity id
+	 * @param constructor Entity constructor
+	 * @param builder     Entity builder
 	 */
-	public <T extends Entity> void addEntity(String id, EntityType.Builder<T> builder) {
-		addEntity(id, "cyan", builder, null);
+	public <T extends Entity> void addEntity(String id, BiFunction<EntityType<T>, Level, T> constructor,
+			EntityType.Builder<T> builder) {
+		addEntity(id, "cyan", constructor, builder, null);
 	}
 
 	/**
 	 * Adds custom entities to the game
 	 * 
-	 * @param <T>       Entity Class Type
-	 * @param namespace Entity namespace
-	 * @param id        Entity id
-	 * @param builder   Entity builder
+	 * @param <T>         Entity Class Type
+	 * @param namespace   Entity namespace
+	 * @param id          Entity id
+	 * @param constructor Entity constructor
+	 * @param builder     Entity builder
 	 */
-	public <T extends Entity> void addEntity(String namespace, String id, EntityType.Builder<T> builder) {
-		addEntity(id, namespace, builder, null);
+	public <T extends Entity> void addEntity(String namespace, String id,
+			BiFunction<EntityType<T>, Level, T> constructor, EntityType.Builder<T> builder) {
+		addEntity(id, namespace, constructor, builder, null);
 	}
 
 	/**

@@ -8,13 +8,8 @@ import net.minecraft.world.level.Level;
 
 public class TestEntity extends Mob {
 
-	private EntityType<?> entityType;
-	private Level level;
-
 	public TestEntity(EntityType<? extends TestEntity> type, Level level) {
 		super(type, level);
-		this.entityType = type;
-		this.level = level;
 	}
 
 	public static Builder createAttributes() {

@@ -70,7 +70,7 @@ public class CyanTransformer extends Transformer {
 	// Basic getters and init handler
 	//
 
-	protected static void initComponent() {
+	public static void initComponent() {
 		Transformer.setImplementation(new CyanTransformer());
 	}
 

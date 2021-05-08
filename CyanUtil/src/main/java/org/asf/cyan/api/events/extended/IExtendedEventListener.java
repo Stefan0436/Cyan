@@ -4,6 +4,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import org.asf.cyan.api.events.core.IEventListener;
+import org.asf.cyan.api.events.extended.EventObject.EventResult;
 
 /**
  * 
@@ -29,7 +30,8 @@ public interface IExtendedEventListener<T extends EventObject> extends IEventLis
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
-		if (params.length == 1 && type.isAssignableFrom(params[0].getClass())) {
+		if (params.length == 1 && type.isAssignableFrom(params[0].getClass())
+				&& ((T) params[0]).getResult() != EventResult.CANCEL) {
 			received((T) params[0]);
 		}
 	}

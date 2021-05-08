@@ -2,7 +2,7 @@ package org.asf.cyan.api.threading;
 
 /**
  * 
- * Mod Thread Manager -- 
+ * Mod Thread Manager -- Not yet implemented, ModKit 1.1
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
  *

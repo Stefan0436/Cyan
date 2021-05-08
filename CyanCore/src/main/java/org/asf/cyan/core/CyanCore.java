@@ -22,6 +22,8 @@ import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.modloader.LoadPhase;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.FluidAgent;
+import org.asf.cyan.fluid.implementation.CyanTransformer;
+import org.asf.cyan.fluid.implementation.CyanTransformerMetadata;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
 
@@ -40,9 +42,18 @@ public class CyanCore extends CyanComponent {
 	static ArrayList<Runnable> preLoadHooks = new ArrayList<Runnable>();
 	static ArrayList<String> allowedPackages = new ArrayList<String>();
 	private static ArrayList<Class<?>> additionalClasses = new ArrayList<Class<?>>();
+	private static ArrayList<String> allowedAutodetectClasses = new ArrayList<String>();
 	static boolean disableAgent = false;
 	static boolean cornflowerSupport = false;
 	private static String entryMethod = "Generic Launcher";
+
+	/**
+	 * Adds types to the list of allowed transformer providers, cannot be done after
+	 * initializeComponents
+	 */
+	public static void addAllowedTransformerAutoDetectClass(String typeName) {
+		allowedAutodetectClasses.add(typeName);
+	}
 
 	/**
 	 * Register a package for loading CyanComponents. (can only be done during or
@@ -263,12 +274,37 @@ public class CyanCore extends CyanComponent {
 		for (Runnable hook : preLoadHooks) {
 			hook.run();
 		}
+
+		info("Looking for more transformers...");
+		for (Class<?> cls : this.findAnnotatedClassesInternal(FLUID_AUTODETECT.class)) {
+			if (allowedAutodetectClasses.contains(cls.getTypeName())) {
+				try {
+					info("Loading " + cls.getTypeName() + "...");
+					Method m = cls.getDeclaredMethod("addTransformers");
+					m.setAccessible(true);
+					m.invoke(null);
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+						| SecurityException | NoSuchMethodException e) {
+					error("Failed to add transformers, class name: " + cls.getSimpleName(), e);
+				}
+			}
+		}
+		allowedAutodetectClasses.clear();
+		
+		trace("CLOSE FluidAPI Transformer and Mappings loader, caller: " + CallTrace.traceCallName());
+		Fluid.closeFluidLoader();
+
+		info("Starting the FLUID agent...");
+		CyanTransformer.initComponent();
+		CyanTransformerMetadata.initComponent();
+		if (!disableAgent)
+			Fluid.loadAgent();
+		else
+			FluidAgent.initialize();
 	}
 
 	@Override
 	protected void finalizeComponents() {
-		trace("CLOSE FluidAPI Transformer and Mappings loader, caller: " + CallTrace.traceCallName());
-		Fluid.closeFluidLoader();
 		trace("SECURE Core Class Loader, caller: " + CallTrace.traceCallName());
 		loader.secure();
 		debug("Class loader secured, preparing to start...");
@@ -487,19 +523,11 @@ public class CyanCore extends CyanComponent {
 			IllegalArgumentException, InvocationTargetException, IOException {
 		if (!isInitialized())
 			throw new UnsupportedOperationException("Cyan is not initialized!");
-		if (!disableAgent)
-			Fluid.loadAgent();
-		else
-			FluidAgent.initialize();
-
-		// TODO: move to game modification
-		Modloader.getModloader().dispatchEvent("mods.preinit");
 
 		Thread.currentThread().setContextClassLoader(loader);
 		info("Loading CYAN information container...");
 		CyanInfo.getDevStartDate();
 
-		// TODO: Load mods
 		info("Cyan launch method: " + entryMethod);
 		info("Cyan launch platform: " + Modloader.getModloaderLaunchPlatform().toString());
 		info("");
@@ -519,18 +547,11 @@ public class CyanCore extends CyanComponent {
 				+ (loaderStr.isEmpty() ? "" : "-" + loaderStr.toLowerCase()) + "-cyan-" + CyanInfo.getCyanVersion());
 		info("");
 
-		// TODO: move to game modification
-		Modloader.getModloader().dispatchEvent("mods.init");
-
 		debug("Securing mod classloader...");
 		openloader.secure();
 
 		info("Loading class " + game + "...");
 		Class<?> clas = loader.loadClass(game);
-
-		// TODO: move to game modification
-		setPhase(LoadPhase.POSTINIT);
-		Modloader.getModloader().dispatchEvent("mods.postinit");
 
 		Method meth = clas.getMethod("main", String[].class);
 		Modloader.getModloader().dispatchEvent("game.beforestart", new Object[] { game, args });

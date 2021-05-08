@@ -12,6 +12,7 @@ import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.mods.config.CyanModfileManifest;
+import org.asf.cyan.mods.dependencies.HandshakeRule;
 import org.asf.cyan.mods.dependencies.ModSupportHandler;
 import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.internal.BaseEventController;
@@ -79,6 +80,130 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 	private String[] optdeps;
 
 	private Version version;
+
+	/**
+	 * Registers a mod server/client handshake rule
+	 * 
+	 * @param key   Rule key
+	 * @param value Rule check string
+	 */
+	protected void addHandshakeRule(String key, String value) {
+		addHandshakeRule(GameSide.SERVER, key, value);
+		addHandshakeRule(GameSide.CLIENT, key, value);
+	}
+
+	/**
+	 * Registers a mod server/client handshake rule
+	 * 
+	 * @param side  Rule side
+	 * @param key   Rule key
+	 * @param value Rule check string
+	 */
+	protected void addHandshakeRule(GameSide side, String key, String value) {
+		HandshakeRule.registerRule(new HandshakeRule(side, key, value));
+	}
+
+	/**
+	 * Registers a mod server/client handshake rule
+	 * 
+	 * @param side  Rule side
+	 * @param key   Rule key
+	 * @param value Rule version
+	 */
+	protected void addHandshakeRule(GameSide side, String key, Version value) {
+		addHandshakeRule(side, key, value.toString());
+	}
+
+	/**
+	 * Registers a mod server/client handshake rule
+	 * 
+	 * @param side  Rule side
+	 * @param mod   Mod to use as key
+	 * @param value Rule version
+	 */
+	protected void addHandshakeRule(GameSide side, IModManifest mod, Version value) {
+		addHandshakeRule(side, mod.id(), value.toString());
+	}
+
+	/**
+	 * Registers a mod server/client handshake rule
+	 * 
+	 * @param mod   Mod to use as key
+	 * @param value Rule version
+	 */
+	protected void addHandshakeRule(IModManifest mod, Version value) {
+		addHandshakeRule(mod.id(), value.toString());
+	}
+
+	/**
+	 * Registers a mod server/client handshake rule
+	 * 
+	 * @param side Rule side
+	 * @param mod  Mod to use as key and value
+	 */
+	protected void addHandshakeRule(GameSide side, IModManifest mod) {
+		addHandshakeRule(side, mod.id(), mod.version());
+	}
+
+	/**
+	 * Registers a mod server/client handshake rule
+	 * 
+	 * @param mod Mod to use as key and value
+	 */
+	protected void addHandshakeRule(IModManifest mod) {
+		addHandshakeRule(mod.id(), mod.version());
+	}
+
+	/**
+	 * Registers a mod server/client handshake rule
+	 * 
+	 * @param side  Rule side
+	 * @param mod   Mod to use as key
+	 * @param value Rule version
+	 */
+	protected void addHandshakeRule(GameSide side, AbstractMod mod, Version value) {
+		addHandshakeRule(side, mod.getManifest().id(), value.toString());
+	}
+
+	/**
+	 * Registers a mod server/client handshake rule
+	 * 
+	 * @param mod   Mod to use as key
+	 * @param value Rule version
+	 */
+	protected void addHandshakeRule(AbstractMod mod, Version value) {
+		addHandshakeRule(mod.getManifest().id(), value.toString());
+	}
+
+	/**
+	 * Registers a mod server/client handshake rule
+	 * 
+	 * @param side Rule side
+	 * @param mod  Mod to use as key and value
+	 */
+	protected void addHandshakeRule(GameSide side, AbstractMod mod) {
+		addHandshakeRule(side, mod.getManifest().id(), mod.getManifest().version());
+	}
+
+	/**
+	 * Registers a mod server/client handshake rule
+	 * 
+	 * @param mod Mod to use as key and value
+	 */
+	protected void addHandshakeRule(AbstractMod mod) {
+		addHandshakeRule(mod.getManifest().id(), mod.getManifest().version());
+	}
+
+	/**
+	 * Registers a mod server/client handshake rule
+	 * 
+	 * @param side  Rule side
+	 * @param key   Rule key
+	 * @param value Rule version
+	 */
+	protected void addHandshakeRule(String key, Version value) {
+		addHandshakeRule(key, value.toString());
+	}
 
 	@Override
 	public String getDescriptionLanguageKey() {

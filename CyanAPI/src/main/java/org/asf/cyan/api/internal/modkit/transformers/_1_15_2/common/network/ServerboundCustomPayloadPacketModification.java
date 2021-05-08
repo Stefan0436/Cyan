@@ -13,6 +13,7 @@ public class ServerboundCustomPayloadPacketModification implements ServerboundCu
 	private FriendlyByteBuf data;
 	private ResourceLocation identifier;
 
+	@Override
 	public FriendlyByteBuf readDataCyan() {
 		return data;
 	}

@@ -68,6 +68,30 @@ public abstract class Modloader extends CyanComponent {
 	private boolean noGameProvider = false;
 	private boolean noPhaseProvider = false;
 
+	private ArrayList<Class<IModloaderComponent>> postLoadComponents = new ArrayList<Class<IModloaderComponent>>();
+
+	protected void loadPostponedComponents() {
+		for (Class<IModloaderComponent> componentCls : postLoadComponents) {
+			Constructor<IModloaderComponent> ctor;
+			IModloaderComponent component;
+			try {
+				ctor = componentCls.getDeclaredConstructor();
+				ctor.setAccessible(true);
+				component = ctor.newInstance();
+			} catch (IllegalAccessException | NoSuchMethodException | SecurityException | InstantiationException
+					| IllegalArgumentException | InvocationTargetException ex) {
+				error("Could not execute component " + componentCls.getTypeName()
+						+ " though it was accepted by the modloader", ex);
+				continue;
+			}
+			if (execComponent(component))
+				debug(getName() + " accepted the " + componentCls.getTypeName() + " component.");
+			else
+				debug(getName() + " rejected the " + componentCls.getTypeName() + " component.");
+		}
+		postLoadComponents.clear();
+	}
+
 	/**
 	 * Present a component to the modloader, intended to be overridden.
 	 * 
@@ -75,6 +99,16 @@ public abstract class Modloader extends CyanComponent {
 	 * @return True if the component is supported, false otherwise
 	 */
 	protected boolean presentComponent(Class<IModloaderComponent> component) {
+		return false;
+	}
+
+	/**
+	 * Checks if a modloader component needs to be loaded later
+	 * 
+	 * @param component Component to check.
+	 * @return True if the component needs to be loaded later, false otherwise
+	 */
+	protected boolean postLoadOnlyComponent(Class<IModloaderComponent> component) {
 		return false;
 	}
 
@@ -206,6 +240,24 @@ public abstract class Modloader extends CyanComponent {
 	}
 
 	/**
+	 * Retrieve a specific modloader.
+	 * 
+	 * @param <T>            Modloader type
+	 * @param modloaderClass Modloader class
+	 * @return The modloader instance, null if it was not found.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Modloader> T getModloader(Class<T> modloaderClass) {
+		Modloader impl = selectedImplementation;
+		while (impl != null) {
+			if (modloaderClass.isAssignableFrom(impl.getClass()))
+				return (T) impl;
+			impl = impl.getNextImplementation();
+		}
+		return null;
+	}
+
+	/**
 	 * Retrieves the child modloaders of the main running modloader.
 	 */
 	public static Modloader[] getAllModloaders() {
@@ -268,22 +320,26 @@ public abstract class Modloader extends CyanComponent {
 				continue;
 			}
 			if (modloader.presentComponent(componentCls)) {
-				Constructor<IModloaderComponent> ctor;
-				IModloaderComponent component;
-				try {
-					ctor = componentCls.getDeclaredConstructor();
-					ctor.setAccessible(true);
-					component = ctor.newInstance();
-				} catch (IllegalAccessException | NoSuchMethodException | SecurityException | InstantiationException
-						| IllegalArgumentException | InvocationTargetException ex) {
-					error("Could not execute component " + componentCls.getTypeName()
-							+ " though it was accepted by the modloader", ex);
-					continue;
+				if (!modloader.postLoadOnlyComponent(componentCls)) {
+					Constructor<IModloaderComponent> ctor;
+					IModloaderComponent component;
+					try {
+						ctor = componentCls.getDeclaredConstructor();
+						ctor.setAccessible(true);
+						component = ctor.newInstance();
+					} catch (IllegalAccessException | NoSuchMethodException | SecurityException | InstantiationException
+							| IllegalArgumentException | InvocationTargetException ex) {
+						error("Could not execute component " + componentCls.getTypeName()
+								+ " though it was accepted by the modloader", ex);
+						continue;
+					}
+					if (modloader.execComponent(component))
+						debug(modloader.getName() + " accepted the " + componentCls.getTypeName() + " component.");
+					else
+						debug(modloader.getName() + " rejected the " + componentCls.getTypeName() + " component.");
+				} else {
+					modloader.postLoadComponents.add(componentCls);
 				}
-				if (modloader.execComponent(component))
-					debug(modloader.getName() + " accepted the " + componentCls.getTypeName() + " component.");
-				else
-					debug(modloader.getName() + " rejected the " + componentCls.getTypeName() + " component.");
 			} else {
 				debug(modloader.getName() + " rejected the " + componentCls.getTypeName() + " component.");
 			}

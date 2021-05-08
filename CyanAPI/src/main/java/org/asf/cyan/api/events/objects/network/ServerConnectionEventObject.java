@@ -66,7 +66,19 @@ public class ServerConnectionEventObject extends EventObject {
 	 * @return ClientboundCustomPayloadPacket instance
 	 */
 	public ClientboundCustomPayloadPacket newClientboundCyanPacket(String id, FriendlyByteBuf buffer) {
-		return new ClientboundCustomPayloadPacket(new ResourceLocation("cyan." + id.toLowerCase()), buffer);
+		return new ClientboundCustomPayloadPacket(new ResourceLocation("cyan", id.toLowerCase()), buffer);
+	}
+
+	/**
+	 * Instantiates a new client-bound custom payload packet for Cyan mods
+	 * 
+	 * @param id      Packet id
+	 * @param channel Packet channel (cyan by default)
+	 * @param buffer  Packet buffer
+	 * @return ClientboundCustomPayloadPacket instance
+	 */
+	public ClientboundCustomPayloadPacket newClientboundCyanPacket(String id, String channel, FriendlyByteBuf buffer) {
+		return new ClientboundCustomPayloadPacket(new ResourceLocation(channel, id.toLowerCase()), buffer);
 	}
 
 	public Connection getConnection() {
@@ -81,5 +93,16 @@ public class ServerConnectionEventObject extends EventObject {
 	 */
 	public void sendNewClientPacket(String id, FriendlyByteBuf buffer) {
 		connection.send(newClientboundCyanPacket(id, buffer));
+	}
+
+	/**
+	 * Instantiates and sends ClientboundCustomPayloadPackets
+	 * 
+	 * @param id      Packet id
+	 * @param channel Packet channel (cyan by default)
+	 * @param buffer  Packet buffer
+	 */
+	public void sendNewClientPacket(String id, String channel, FriendlyByteBuf buffer) {
+		connection.send(newClientboundCyanPacket(id, channel, buffer));
 	}
 }

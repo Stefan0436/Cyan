@@ -30,7 +30,7 @@ public class CyanTransformerMetadata extends TransformerMetadata {
 	private String targetMapped = "";
 	private String target = "";
 
-	protected static void initComponent() {
+	public static void initComponent() {
 		setImplementation(new CyanTransformerMetadata());
 	}
 
