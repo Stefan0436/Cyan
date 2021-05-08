@@ -6,6 +6,9 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - MTK RIFT Supertype Implementation Remapping (MTK A19)
  - The FLUID transformer system is now an API. (FLUID A25) -- TODO
  
+ - Cyan Info Command (Cyan 1.0.0.A13) -- TODO
+ - Cyan Dump Command (Cyan 1.0.0.A13) -- TODO
+ 
  - ModKit Resource API (CyanAPI ModKit 1.0)
  - ModKit Language Manager (with server support using custom implementation instead of vanilla language manager, CyanAPI ModKit 1.0) -- TODO
  - ModKit Config Manager (CyanAPI ModKit 1.0) -- TODO
@@ -19,7 +22,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - ModKit Command Registry Events (CyanAPI ModKit 1.0)
  
  - ModKit Network Channel API (CyanAPI ModKit 1.0)
- - Server/client mod version checking (CyanAPI ModKit 1.0)
+ - ModKit Server/client mod version checking (CyanAPI ModKit 1.0)
  - ModKit Serverbound Language Packet (CyanAPI ModKit 1.0) -- TODO
  - ModKit Client Add Entity Packet Handlers (CyanAPI ModKit 1.0)
  - ModKit Block Entity Registry Events (CyanAPI ModKit 1.0) -- TODO 
