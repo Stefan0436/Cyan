@@ -125,7 +125,6 @@ public abstract class PacketReader {
 	 * Reads all available bytes (stops if size reaches integer max or if the end of
 	 * the byte flow is reached)
 	 * 
-	 * @param count Byte count
 	 * @return Byte array
 	 */
 	public byte[] readAllBytes() {

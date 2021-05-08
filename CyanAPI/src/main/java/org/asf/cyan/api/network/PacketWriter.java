@@ -234,7 +234,6 @@ public abstract class PacketWriter implements Closeable {
 	 * Writes the next object value
 	 * 
 	 * @param <T>  Value type
-	 * @param type Value class
 	 * @param data Packet entry data
 	 */
 	public <T> PacketWriter writeObject(T data) {
