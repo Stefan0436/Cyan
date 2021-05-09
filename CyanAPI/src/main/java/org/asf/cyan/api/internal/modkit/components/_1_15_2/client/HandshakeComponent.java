@@ -1,4 +1,4 @@
-package org.asf.cyan.api.internal.modkit.components._1_15_2.common.network;
+package org.asf.cyan.api.internal.modkit.components._1_15_2.client;
 
 import org.asf.cyan.api.events.network.EarlyCyanClientHandshakeEvent;
 import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;

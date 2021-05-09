@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN" packages="com.mojang.util">
+<Configuration status="WARN" packages="com.mojang.util,org.asf.cyan.core.logger">
 	<Appenders>
-		<Console name="Console" target="SYSTEM_OUT">
+		<ProcessingOutputAppender name="Console" target="SYSTEM_OUT">
 			<PatternLayout
 				pattern="[%d{HH:mm:ss} %5level] - %highlight{%msg%n%throwable}" />
-		</Console>
+		</ProcessingOutputAppender>
 		<Queue name="ServerGuiConsole">
 			<!-- Server GUI logger -->
 			<PatternLayout

@@ -1,10 +1,12 @@
 package org.asf.cyan.api.internal.modkit.components._1_15_2.common.network.packets.channels;
 
+import java.util.function.Supplier;
+
 import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;
 import org.asf.cyan.api.events.objects.network.ServerConnectionEventObject;
 import org.asf.cyan.api.internal.IModKitComponent;
+import org.asf.cyan.api.internal.ServerGamePacketListenerExtension;
 import org.asf.cyan.api.internal.modkit.components._1_15_2.common.network.packets.buffer.FriendlyByteBufOutputFlow;
-import org.asf.cyan.api.internal.modkit.transformers._1_15_2.common.network.ServerGamePacketListenerExtension;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.network.PacketWriter;
 import org.asf.cyan.api.network.channels.AbstractPacketProcessor;
@@ -56,7 +58,7 @@ public class PacketChannelContextServerImplementation extends PacketChannelConte
 	}
 
 	@Override
-	protected PacketChannelContext setupNew(Minecraft client) {
+	protected PacketChannelContext setupNew(Supplier<Minecraft> clientSupplier) {
 		return null;
 	}
 

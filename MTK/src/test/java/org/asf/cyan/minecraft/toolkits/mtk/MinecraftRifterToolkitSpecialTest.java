@@ -72,7 +72,7 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 		CyanCore.enableLog(); // trace slows down too much and debug is unreadable for this test
 		if (!CyanCore.isInitialized()) {
 			MinecraftInstallationToolkit.setMinecraftDirectory(new File("bin/test/mtk"));
-			CyanCore.initializeComponents();
+			// CyanCore.initializeComponents();
 			MinecraftToolkit.initializeMTK();
 		}
 
@@ -111,7 +111,7 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 
 		if (!CyanCore.isInitialized()) {
 			MinecraftInstallationToolkit.setMinecraftDirectory(new File("bin/test/mtk"));
-			CyanCore.initializeComponents();
+			// CyanCore.initializeComponents();
 			MinecraftToolkit.initializeMTK();
 		}
 
@@ -164,7 +164,7 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 
 		if (!CyanCore.isInitialized()) {
 			MinecraftInstallationToolkit.setMinecraftDirectory(new File("bin/test/mtk"));
-			CyanCore.initializeComponents();
+			// CyanCore.initializeComponents();
 			MinecraftToolkit.initializeMTK();
 		}
 
@@ -218,7 +218,7 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 
 		if (!CyanCore.isInitialized()) {
 			MinecraftInstallationToolkit.setMinecraftDirectory(new File("bin/test/mtk"));
-			CyanCore.initializeComponents();
+			// CyanCore.initializeComponents();
 			MinecraftToolkit.initializeMTK();
 		}
 
@@ -301,7 +301,8 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 
 		info("Testing server mappings...");
 		for (Mapping<?> clsMapping : server.mappings) {
-			if (clsMapping.name.contains("package-info"))
+			if (clsMapping.name.contains("package-info") || clsMapping.name.contains(".data.Main")
+					|| clsMapping.name.contains(".server.Main"))
 				continue;
 
 			Mapping<?> riftClass = riftServer.getClassMapping(clsMapping.obfuscated);

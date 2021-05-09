@@ -384,7 +384,9 @@ dependencies {
 	wrapper group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.1'
 	wrapper group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: '2.14.1'
-
+	implementation group: 'org.fusesource.jansi', name: 'jansi', version: '2.3.2'
+	
+	wrapper group: 'org.fusesource.jansi', name: 'jansi', version: '2.3.2'
 	wrapper group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
 	wrapper group: 'org.jboss.windup.decompiler.fernflower', name: 'windup-fernflower', version: '1.0.0.20171018'
 	wrapper group: 'org.jboss.windup.decompiler', name: 'decompiler-api', version: '5.1.2.Final'
@@ -640,6 +642,9 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 
 		mainClass project.group+".CyanIDEWrapper"
 
+		File jar = MinecraftModdingToolkit.deobfuscateJar(version, GameSide.CLIENT)
+		classpath jar
+		
 		libsMC.forEach { k, v ->
 			if (v != null) {
 				classpath k, v
@@ -647,18 +652,16 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 				classpath k
 			}
 		}
-
+		
 		project(":").childProjects.each { proj ->
 			classpath proj.value
 		}
 
-		File jar = MinecraftModdingToolkit.deobfuscateJar(version, GameSide.CLIENT)
 		classpath MinecraftInstallationToolkit.getLibraries(version)
 		sourceLookup MinecraftModdingToolkit.sourcesJar(version, GameSide.CLIENT)
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "clients/cyan/"+minecraft)
 		
-		classpath jar
 		jvm "-DassetRoot="+MinecraftInstallationToolkit.getAssetsRoot().getCanonicalPath()
 		jvm "-DassetIndex="+MinecraftInstallationToolkit.getAssetId(version)
 		jvm "-DcyanAgentJar="+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
@@ -688,6 +691,9 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 
 		mainClass project.group+".CyanIDEWrapper"
 
+		File jar = MinecraftInstallationToolkit.getVersionJar(version, GameSide.CLIENT)
+		classpath jar
+		
 		libsMC.forEach { k, v ->
 			if (v != null) {
 				classpath k, v
@@ -695,17 +701,15 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 				classpath k
 			}
 		}
-
+		
 		project(":").childProjects.each { proj ->
 			classpath proj.value
 		}
 
-		File jar = MinecraftInstallationToolkit.getVersionJar(version, GameSide.CLIENT)
 		classpath MinecraftInstallationToolkit.getLibraries(version)
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "clients/cyan/"+minecraft)
 
-		classpath jar
 		jvm "-DassetRoot="+MinecraftInstallationToolkit.getAssetsRoot().getCanonicalPath()
 		jvm "-DassetIndex="+MinecraftInstallationToolkit.getAssetId(version)
 		jvm "-DcyanAgentJar="+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
@@ -738,6 +742,9 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 
 		mainClass project.group+".CyanIDEWrapper"
 
+		File jar = MinecraftModdingToolkit.deobfuscateJar(version, GameSide.SERVER)
+		classpath jar
+		
 		libsMC.forEach { k, v ->
 			if (v != null) {
 				classpath k, v
@@ -745,12 +752,11 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 				classpath k
 			}
 		}
-
+		
 		project(":").childProjects.each { proj ->
 			classpath proj.value
 		}
 
-		File jar = MinecraftModdingToolkit.deobfuscateJar(version, GameSide.SERVER)
 		sourceLookup MinecraftModdingToolkit.sourcesJar(version, GameSide.SERVER)
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft)
@@ -760,7 +766,6 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 		if (!new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").exists())
 			Files.writeString(new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").toPath(), "eula=true")
 
-		classpath jar
 		jvm "-javaagent:"+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
 
@@ -782,6 +787,9 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 
 		mainClass project.group+".CyanIDEWrapper"
 
+		File jar = MinecraftInstallationToolkit.getVersionJar(version, GameSide.SERVER)
+		classpath jar
+		
 		libsMC.forEach { k, v ->
 			if (v != null) {
 				classpath k, v
@@ -789,13 +797,11 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 				classpath k
 			}
 		}
-
+		
 		project(":").childProjects.each { proj ->
 			classpath proj.value
 		}
-
-		File jar = MinecraftInstallationToolkit.getVersionJar(version, GameSide.SERVER)
-
+	
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft)
 		if (!new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft).exists())
 			new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft).mkdirs()
@@ -803,7 +809,6 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 		if (!new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").exists())
 			Files.writeString(new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").toPath(), "eula=true")
 
-		classpath jar
 		jvm "-javaagent:"+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
 
@@ -2030,6 +2035,8 @@ task serverJar (type: Jar, dependsOn: build) {
 	rename "log4j2-server.xml", "log4j2.xml"
 	includeEmptyDirs = false
 
+	outputs.upToDateWhen { return false; }
+	
 	if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
 	cyanclasspath+="vanilla-server.jar"
 	if (!modloader.isEmpty() && modloader.startsWith("paper-")) {

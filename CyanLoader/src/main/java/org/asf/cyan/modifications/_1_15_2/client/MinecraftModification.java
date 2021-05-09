@@ -45,8 +45,8 @@ public class MinecraftModification {
 	@Constructor
 	@InjectAt(location = InjectLocation.TAIL)
 	public static void ctor1(@TargetType(target = "net.minecraft.client.main.GameConfig") Object conf) {
+		CyanCore.setPhase(LoadPhase.RUNTIME);
 		if (firstLoad) {
-			CyanCore.setPhase(LoadPhase.RUNTIME);
 			Modloader.getModloader().dispatchEvent("mods.runtimestart");
 
 			firstLoad = false;
@@ -65,8 +65,8 @@ public class MinecraftModification {
 	@Constructor
 	@InjectAt(location = InjectLocation.HEAD, targetCall = "createDefault()", targetOwner = "net.minecraft.client.color.block.BlockColors")
 	public static void ctor3(@TargetType(target = "net.minecraft.client.main.GameConfig") Object conf) {
+		CyanCore.setPhase(LoadPhase.POSTINIT);
 		if (firstLoad) {
-			CyanCore.setPhase(LoadPhase.POSTINIT);
 			Modloader.getModloader().dispatchEvent("mods.postinit");
 		}
 	}
@@ -74,8 +74,8 @@ public class MinecraftModification {
 	@Constructor
 	@InjectAt(location = InjectLocation.HEAD)
 	public static void ctor4(@TargetType(target = "net.minecraft.client.main.GameConfig") Object conf) {
+		CyanCore.setPhase(LoadPhase.PRELOAD);
 		if (firstLoad) {
-			CyanCore.setPhase(LoadPhase.PRELOAD);
 			CyanLoader.getModloader(CyanLoader.class).loadMods();
 			Modloader.getModloader().dispatchEvent("mods.preinit");
 		}

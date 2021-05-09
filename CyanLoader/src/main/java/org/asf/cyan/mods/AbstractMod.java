@@ -197,7 +197,6 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 	/**
 	 * Registers a mod server/client handshake rule
 	 * 
-	 * @param side  Rule side
 	 * @param key   Rule key
 	 * @param value Rule version
 	 */

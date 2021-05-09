@@ -1,24 +1,15 @@
 package org.asf.cyan.api.network.channels;
 
-import java.util.ArrayList;
-
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.api.util.server.language.ClientLanguage;
 
 import net.minecraft.network.Connection;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 
 public abstract class ServerPacketProcessor extends AbstractPacketProcessor {
-
-	private static ArrayList<String> presentedLanguageKeys = new ArrayList<String>();
-
-	public static void registerLanguageKey(String key) {
-		if (!presentedLanguageKeys.contains(key))
-			presentedLanguageKeys.add(key);
-	}
 
 	/**
 	 * Retrieves the server instance
@@ -58,18 +49,25 @@ public abstract class ServerPacketProcessor extends AbstractPacketProcessor {
 	/**
 	 * Disconnects the sender
 	 * 
-	 * @param languageKey Language key to use, uses fallback if not possible
-	 * @param fallback    Fallback message to use if language is unavailable
+	 * @param languageKey Language key to use, uses fallback if not present on
+	 *                    client
 	 */
-	protected void disconnect(String languageKey, String fallback) {
+	protected void disconnect(String languageKey) {
 		if (getChannel().getPlayer() == null)
 			return;
-		if (getChannel().getRemoteBrand() == null || !getChannel().getRemoteBrand().startsWith("Cyan")
-				|| !presentedLanguageKeys.contains(languageKey)) {
-			getChannel().getConnection().disconnect(new TextComponent(fallback));
-		} else {
-			getChannel().getConnection().disconnect(new TranslatableComponent(languageKey));
-		}
+		getChannel().getConnection().disconnect(createComponent(languageKey));
+	}
+
+	/**
+	 * Creates a language or text component depending on the client presented keys
+	 * 
+	 * @param languageKey Language key to use, uses fallback if not present on
+	 *                    client
+	 */
+	protected BaseComponent createComponent(String languageKey) {
+		if (getChannel().getPlayer() == null)
+			return null;
+		return ClientLanguage.createComponent(getPlayer(), languageKey);
 	}
 
 	@Override

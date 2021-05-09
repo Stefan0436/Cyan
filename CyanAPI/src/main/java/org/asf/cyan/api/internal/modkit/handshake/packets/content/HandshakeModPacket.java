@@ -14,6 +14,7 @@ public class HandshakeModPacket extends AbstractPacket<HandshakeModPacket> {
 
 	public HashMap<String, Version> entries = new HashMap<String, Version>();
 	public ArrayList<HandshakeRule> remoteRules = new ArrayList<HandshakeRule>();
+	public double clientProtocol = 0d;
 
 	@Override
 	protected String id() {
@@ -31,6 +32,7 @@ public class HandshakeModPacket extends AbstractPacket<HandshakeModPacket> {
 			remoteRules.add(new HandshakeRule((reader.readInt() == 0 ? GameSide.SERVER : GameSide.CLIENT),
 					reader.readString(), reader.readString()));
 		}
+		clientProtocol = reader.readDouble();
 	}
 
 	@Override
@@ -46,6 +48,7 @@ public class HandshakeModPacket extends AbstractPacket<HandshakeModPacket> {
 			writer.writeString(rule.getKey());
 			writer.writeString(rule.getCheckString());
 		});
+		writer.writeDouble(clientProtocol);
 	}
 
 }

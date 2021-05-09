@@ -60,10 +60,11 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	}
 
 	public static void setIDE() {
+		CyanCore.setIDE();
 		ide = true;
 	}
 
-	private static HashMap<String, String> variableStorage = null;
+	private static HashMap<String, String> variableStorage = new HashMap<String, String>();
 	private final static String resourcesURL = "http://resources.download.minecraft.net/%1/%2";
 
 	/**

@@ -308,7 +308,6 @@ public class CyanCore extends CyanComponent {
 		trace("SECURE Core Class Loader, caller: " + CallTrace.traceCallName());
 		loader.secure();
 		debug("Class loader secured, preparing to start...");
-		setPhase(LoadPhase.PRELOAD);
 	}
 
 	@Override
@@ -564,16 +563,11 @@ public class CyanCore extends CyanComponent {
 	private static LoadPhase loadPhase = LoadPhase.NOT_READY;
 
 	/**
-	 * Sets the current loading phase (internal use only, avoid usage, ignores if
-	 * past runtime)
+	 * Sets the current loading phase (internal use only, avoid usage)
 	 * 
 	 * @param phase Current phase
 	 */
 	public static void setPhase(LoadPhase phase) {
-		if (loadPhase == LoadPhase.RUNTIME) {
-			return;
-		}
-
 		loadPhase = phase;
 		if (Modloader.getModloader() != null)
 			Modloader.getModloader().dispatchEvent("phase.changed", phase);
@@ -656,5 +650,14 @@ public class CyanCore extends CyanComponent {
 
 		core = new CyanCore();
 		core.assignImplementation();
+	}
+
+	private static boolean ide = false;
+	public static void setIDE() {
+		ide = true;
+	}
+	
+	public static boolean isIdeMode() {
+		return ide;
 	}
 }

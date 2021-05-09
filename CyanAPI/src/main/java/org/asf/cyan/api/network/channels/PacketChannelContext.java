@@ -1,5 +1,7 @@
 package org.asf.cyan.api.network.channels;
 
+import java.util.function.Supplier;
+
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;
 import org.asf.cyan.api.events.objects.network.ServerConnectionEventObject;
@@ -25,8 +27,8 @@ public abstract class PacketChannelContext extends CyanComponent {
 	protected static PacketChannelContext serverImplementation;
 	protected static PacketChannelContext coreImplementation;
 
-	protected static PacketChannelContext getForClient(Minecraft client) {
-		return clientImplementation.setupNew(client);
+	protected static PacketChannelContext getForClient(Supplier<Minecraft> clientSupplier) {
+		return clientImplementation.setupNew(clientSupplier);
 	}
 
 	protected static PacketChannelContext getForServer(ServerPlayer player) {
@@ -45,7 +47,7 @@ public abstract class PacketChannelContext extends CyanComponent {
 
 	protected abstract PacketChannelContext setupNew(ClientConnectionEventObject clientConnection);
 
-	protected abstract PacketChannelContext setupNew(Minecraft client);
+	protected abstract PacketChannelContext setupNew(Supplier<Minecraft> clientSupplier);
 
 	protected abstract PacketChannelContext setupNew(ServerPlayer server);
 

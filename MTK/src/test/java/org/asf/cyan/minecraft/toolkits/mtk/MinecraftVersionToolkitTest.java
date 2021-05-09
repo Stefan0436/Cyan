@@ -22,7 +22,7 @@ public class MinecraftVersionToolkitTest {
 		if (!CyanCore.isInitialized()) {
 			CyanCore.simpleInit();
 			MinecraftToolkit.initializeMTK();
-			CyanCore.initializeComponents();
+//			CyanCore.initializeComponents();
 		}
 	}
 

@@ -3,6 +3,7 @@ package org.asf.cyan.api.internal.modkit.components._1_15_2.common.network;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.util.function.Supplier;
 
 import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;
 import org.asf.cyan.api.events.objects.network.ServerConnectionEventObject;
@@ -83,7 +84,7 @@ public class ChannelContextCore extends PacketChannelContext implements IModKitC
 	}
 
 	@Override
-	protected PacketChannelContext setupNew(Minecraft client) {
+	protected PacketChannelContext setupNew(Supplier<Minecraft> clientSupplier) {
 		return null;
 	}
 

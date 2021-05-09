@@ -47,7 +47,7 @@ public class CyanIDEWrapper {
 		CyanLoader.enableDeveloperMode();
 
 		boolean deobf = Boolean.valueOf(System.getProperty("cyan.deobfuscated"));
-		String side = System.getProperty("cyan.side");
+		String side = System.getProperty("cyan.side");		
 		String clientMAIN = System.getProperty("cyan.launcher.client.wrapper", "net.minecraft.client.main.Main");
 		String serverMAIN = System.getProperty("cyan.launcher.server.wrapper", "%def");
 

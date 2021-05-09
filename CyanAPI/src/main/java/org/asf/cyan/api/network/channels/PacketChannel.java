@@ -1,7 +1,10 @@
 package org.asf.cyan.api.network.channels;
 
+import java.util.function.Supplier;
+
 import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;
 import org.asf.cyan.api.events.objects.network.ServerConnectionEventObject;
+import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.network.ByteFlow;
 import org.asf.cyan.api.network.PacketWriter;
@@ -71,11 +74,11 @@ public abstract class PacketChannel {
 	/**
 	 * Retrieves a packet channel
 	 * 
-	 * @param id     Channel id
-	 * @param client Game client
+	 * @param id             Channel id
+	 * @param clientSupplier Game client supplier
 	 */
-	public static PacketChannel getChannel(String id, Minecraft client) {
-		return getChannel(id, PacketChannelContext.getForClient(client));
+	public static PacketChannel getChannel(String id, Supplier<Minecraft> clientSupplier) {
+		return getChannel(id, PacketChannelContext.getForClient(clientSupplier));
 	}
 
 	/**
@@ -126,12 +129,12 @@ public abstract class PacketChannel {
 	/**
 	 * Retrieves a packet channel
 	 * 
-	 * @param <T>    Channel type
-	 * @param type   Channel class
-	 * @param client Game client
+	 * @param <T>            Channel type
+	 * @param type           Channel class
+	 * @param clientSupplier Game client supplier
 	 */
-	public static <T extends PacketChannel> T getChannel(Class<T> type, Minecraft client) {
-		return getChannel(type, PacketChannelContext.getForClient(client));
+	public static <T extends PacketChannel> T getChannel(Class<T> type, Supplier<Minecraft> clientSupplier) {
+		return getChannel(type, PacketChannelContext.getForClient(clientSupplier));
 	}
 
 	/**
@@ -257,7 +260,9 @@ public abstract class PacketChannel {
 	 * @param processor Processor class
 	 */
 	protected <T extends AbstractPacketProcessor> void register(Class<T> processor) {
-		context.registerProcessor(processor);
+		if (!(ClientPacketProcessor.class.isAssignableFrom(processor)
+				&& Modloader.getModloaderGameSide() == GameSide.SERVER))
+			context.registerProcessor(processor);
 	}
 
 	/**

@@ -134,7 +134,7 @@ public class ObjectSerializer {
 			input = input.replaceAll("([^\\\\])\\\\r", "$1\r");
 			input = input.replaceAll("\\\\r", "\\r");
 			input = input.replaceAll("([^\\\\])\\\\t", "$1\t");
-			input = input.replaceAll("\\\\t", "\\t");
+			input = input.replaceAll("\\\\t", "\t");
 			return (T) input;
 		case "java.net.URL":
 			return (T) new URL(input);

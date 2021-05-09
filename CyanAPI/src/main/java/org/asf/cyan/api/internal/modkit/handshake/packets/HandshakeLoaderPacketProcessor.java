@@ -31,7 +31,7 @@ public class HandshakeLoaderPacketProcessor extends ClientPacketProcessor {
 	protected void process(PacketReader reader) {
 		if (getClient().screen == null || !(getClient().screen instanceof ReceivingLevelScreen))
 			getClient().setScreen(new ReceivingLevelScreen());
-		
+
 		HandshakeLoaderPacket packet = new HandshakeLoaderPacket().read(reader);
 		Version version = Modloader.getModloader(CyanLoader.class).getVersion();
 
@@ -57,10 +57,14 @@ public class HandshakeLoaderPacketProcessor extends ClientPacketProcessor {
 					packet.version.toString(), response.displayVersion, response.version));
 		} else {
 			HandshakeModPacket response = new HandshakeModPacket();
-			response.entries.put("minecraft", Version.fromString(Modloader.getModloaderGameVersion()));
+			response.clientProtocol = PROTOCOL;
+			
+			response.entries.put("game", Version.fromString(Modloader.getModloaderGameVersion()));
+			response.entries.put("modloader", Modloader.getModloader(CyanLoader.class).getVersion());
 			for (IModManifest mod : Modloader.getAllMods()) {
-				response.entries.put(mod.id(), mod.version());
+				response.entries.putIfAbsent(mod.id(), mod.version());
 			}
+			
 			response.write(getChannel());
 			getChannel().getConnection().tick();
 		}

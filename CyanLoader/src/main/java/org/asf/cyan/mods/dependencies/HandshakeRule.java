@@ -86,7 +86,7 @@ public class HandshakeRule {
 	/**
 	 * Registers handshake rules for client/server mod checking
 	 * 
-	 * @param registerRule Rule to register
+	 * @param rule Rule to register
 	 */
 	public static void registerRule(HandshakeRule rule) {
 		if (!rules.stream().anyMatch(t -> t.checkString.equals(rule.getCheckString())

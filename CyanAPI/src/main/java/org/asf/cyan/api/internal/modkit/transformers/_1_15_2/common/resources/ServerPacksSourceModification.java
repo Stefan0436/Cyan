@@ -16,7 +16,7 @@ import net.minecraft.server.packs.repository.Pack.PackConstructor;
 import net.minecraft.server.packs.repository.Pack.Position;
 
 @FluidTransformer
-@TargetClass(target = "net.minecraft.server.packs.ServerPacksSource")
+@TargetClass(target = "net.minecraft.server.packs.repository.ServerPacksSource")
 public class ServerPacksSourceModification {
 
 	private CyanPackResources cyanMods = null;

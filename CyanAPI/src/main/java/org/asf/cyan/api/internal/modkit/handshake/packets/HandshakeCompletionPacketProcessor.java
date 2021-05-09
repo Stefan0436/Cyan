@@ -4,6 +4,7 @@ import org.asf.cyan.api.events.network.CyanClientHandshakeEvent;
 import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;
 import org.asf.cyan.api.network.PacketReader;
 import org.asf.cyan.api.network.channels.ClientPacketProcessor;
+import org.asf.cyan.api.util.server.language.ClientLanguage;
 
 import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -20,6 +21,7 @@ public class HandshakeCompletionPacketProcessor extends ClientPacketProcessor {
 	protected void process(PacketReader reader) {
 		if (getClient().screen != null && getClient().screen instanceof ReceivingLevelScreen)
 			getClient().setScreen((Screen) null);
+		ClientLanguage.writeKnownKeys(getChannel());
 		CyanClientHandshakeEvent.getInstance()
 				.dispatch(new ClientConnectionEventObject(getConnection(), getClient(), getServerBrand()));
 	}

@@ -3,6 +3,7 @@ package org.asf.cyan.modifications._1_15_2.server;
 import java.io.File;
 import java.net.Proxy;
 
+import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.fluid.annotations.PlatformExclude;
 import org.asf.cyan.api.fluid.annotations.VersionRegex;
 import org.asf.cyan.api.modloader.Modloader;
@@ -33,7 +34,7 @@ public class MinecraftServerModification_1_15_2 {
 
 	@Constructor
 	@InjectAt(location = InjectLocation.TAIL)
-	public static void ctor(File var1, Proxy var2, @TargetType(target = "com.mojang.datafixers.DataFixer") Object var3,
+	public static void ctor1(File var1, Proxy var2, @TargetType(target = "com.mojang.datafixers.DataFixer") Object var3,
 			@TargetType(target = "net.minecraft.commands.Commands") Object var4,
 			@TargetType(target = "com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService") Object var5,
 			@TargetType(target = "com.mojang.authlib.minecraft.MinecraftSessionService") Object var6,
@@ -46,6 +47,54 @@ public class MinecraftServerModification_1_15_2 {
 			Modloader.getModloader().dispatchEvent("mods.runtimestart");
 
 			firstLoad = false;
+		}
+	}
+
+	@Constructor
+	@InjectAt(location = InjectLocation.HEAD)
+	public static void ctor2(File var1, Proxy var2, @TargetType(target = "com.mojang.datafixers.DataFixer") Object var3,
+			@TargetType(target = "net.minecraft.commands.Commands") Object var4,
+			@TargetType(target = "com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService") Object var5,
+			@TargetType(target = "com.mojang.authlib.minecraft.MinecraftSessionService") Object var6,
+			@TargetType(target = "com.mojang.authlib.GameProfileRepository") Object var7,
+			@TargetType(target = "net.minecraft.server.players.GameProfileCache") Object var8,
+			@TargetType(target = "net.minecraft.server.level.progress.ChunkProgressListenerFactory") Object var9,
+			String var10) {
+		if (firstLoad) {
+			CyanLoader.getModloader(CyanLoader.class).loadMods();
+			Modloader.getModloader().dispatchEvent("mods.preinit");
+		}
+	}
+
+	@Constructor
+	@InjectAt(location = InjectLocation.HEAD, targetCall = "getMillis()", targetOwner = "net.minecraft.Util")
+	public static void ctor3(File var1, Proxy var2, @TargetType(target = "com.mojang.datafixers.DataFixer") Object var3,
+			@TargetType(target = "net.minecraft.commands.Commands") Object var4,
+			@TargetType(target = "com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService") Object var5,
+			@TargetType(target = "com.mojang.authlib.minecraft.MinecraftSessionService") Object var6,
+			@TargetType(target = "com.mojang.authlib.GameProfileRepository") Object var7,
+			@TargetType(target = "net.minecraft.server.players.GameProfileCache") Object var8,
+			@TargetType(target = "net.minecraft.server.level.progress.ChunkProgressListenerFactory") Object var9,
+			String var10) {
+		if (firstLoad) {
+			CyanCore.setPhase(LoadPhase.INIT);
+			Modloader.getModloader().dispatchEvent("mods.init");
+		}
+	}
+
+	@Constructor
+	@InjectAt(location = InjectLocation.HEAD, targetCall = "<init>(net.minecraft.server.MinecraftServer)", targetOwner = "net.minecraft.server.network.ServerConnectionListener")
+	public static void ctor4(File var1, Proxy var2, @TargetType(target = "com.mojang.datafixers.DataFixer") Object var3,
+			@TargetType(target = "net.minecraft.commands.Commands") Object var4,
+			@TargetType(target = "com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService") Object var5,
+			@TargetType(target = "com.mojang.authlib.minecraft.MinecraftSessionService") Object var6,
+			@TargetType(target = "com.mojang.authlib.GameProfileRepository") Object var7,
+			@TargetType(target = "net.minecraft.server.players.GameProfileCache") Object var8,
+			@TargetType(target = "net.minecraft.server.level.progress.ChunkProgressListenerFactory") Object var9,
+			String var10) {
+		if (firstLoad) {
+			CyanCore.setPhase(LoadPhase.POSTINIT);
+			Modloader.getModloader().dispatchEvent("mods.postinit");
 		}
 	}
 

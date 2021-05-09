@@ -289,6 +289,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 						+ "/log4j2-server.xml");
 
 			System.setProperty("log4j2.configurationFile", url.toString());
+			System.setProperty("log4j.configurationFile", url.toString());
 			CyanCore.disableAgent();
 		}
 

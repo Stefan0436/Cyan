@@ -148,6 +148,8 @@ public class MinecraftToolkit extends CyanComponent {
 			URL u = new URL(version_manifest_url);
 			trace("OPEN connection to network test URL, caller: " + CallTrace.traceCallName());
 			URLConnection uc = u.openConnection();
+			uc.setConnectTimeout(5000);
+			uc.setReadTimeout(5000);
 			trace("CONNECT to server test URL, caller: " + CallTrace.traceCallName());
 			uc.connect();
 			trace("RETURN true, all passed, caller: " + CallTrace.traceCallName());

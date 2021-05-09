@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.asf.cyan.api.common.CyanComponent;
@@ -308,6 +309,12 @@ public abstract class TransformerMetadata extends CyanComponent {
 				selectedImplementation.getClassPool());
 	}
 
+	public static void dumpBacktraceOnly(File output, Consumer<String> logDebug, Consumer<String> logInfo,
+			Consumer<String> logWarn, BiConsumer<String, Throwable> logError) throws IOException {
+		selectedImplementation.dumpBacktraceNoStacktrace(output, selectedImplementation.getClassPool(), false, logDebug,
+				logInfo, logWarn, logError);
+	}
+
 	protected synchronized void dumpErrorBacktraceInternal(String message, StackTraceElement[] elements, File output,
 			FluidClassPool pool) throws IOException {
 		if (!output.exists()) {
@@ -343,8 +350,23 @@ public abstract class TransformerMetadata extends CyanComponent {
 		if (!errorReportFile.exists())
 			Files.writeString(errorReportFile.toPath(), errorReport.toString());
 
+		dumpBacktraceNoStacktrace(output, pool, classesNew, TransformerMetadata::debug, TransformerMetadata::warn,
+				TransformerMetadata::warn, TransformerMetadata::error);
+	}
+
+	public void dumpBacktraceNoStacktrace(File output, FluidClassPool pool, boolean classesNew,
+			Consumer<String> logDebug, Consumer<String> logInfo, Consumer<String> logWarn,
+			BiConsumer<String, Throwable> logError) throws IOException {
+		if (!output.exists()) {
+			classesNew = true;
+			output.mkdirs();
+		}
+
+		File classesDump = new File(output, "classes");
+		File metadataDump = new File(output, "metadata");
 		File loadedTransformers = new File(output, "loaded-transformers.txt");
 		if (!loadedTransformers.exists()) {
+			logInfo.accept("Dumping transformer list...");
 			StringBuilder transformerData = new StringBuilder();
 			transformerData.append("All loaded transformers:").append("\n");
 			ArrayList<String> entries = new ArrayList<String>();
@@ -395,13 +417,13 @@ public abstract class TransformerMetadata extends CyanComponent {
 
 		for (TransformerMetadata md : getLoadedTransformers()) {
 			try {
-				dumpMetadata(md, metadataDump);
+				dumpMetadata(md, metadataDump, logDebug);
 			} catch (ClassNotFoundException | IOException e) {
-				error("Transformer metadata dump failed, transformer: " + md.getTransfomerClass(), e);
+				logError.accept("Transformer metadata dump failed, transformer: " + md.getTransfomerClass(), e);
 			}
 		}
 
-		dumpMappings(Fluid.getMappings(), output);
+		dumpMappings(Fluid.getMappings(), output, logInfo);
 		File readme = new File(classesDump, "README, VERY IMPORTANT.txt");
 
 		StringBuilder readmeTxt = new StringBuilder();
@@ -423,9 +445,12 @@ public abstract class TransformerMetadata extends CyanComponent {
 		readmeTxt.append("other than debugging purposes and must be destroyed afterwards.")
 				.append(System.lineSeparator());
 
+		if (!readme.exists()) {
+			logDebug.accept("Creating readme file for backtrace...");
+		}
 		Files.writeString(readme.toPath(), readmeTxt.toString());
 		if (classesNew) {
-			info("Dumping transformer classes...");
+			logInfo.accept("Dumping transformer classes...");
 			for (TransformerMetadata md : getLoadedTransformers()) {
 				try {
 					File trPseudoCode = new File(classesDumpTransformersPC,
@@ -436,7 +461,7 @@ public abstract class TransformerMetadata extends CyanComponent {
 					if (!trPseudoCode.exists()) {
 						trPseudoCode.getParentFile().mkdirs();
 						trClassFile.getParentFile().mkdirs();
-						debug("Dumping transformer " + md.getTransfomerClass() + " PseudoCode...");
+						logDebug.accept("Dumping transformer " + md.getTransfomerClass() + " PseudoCode...");
 
 						ClassNode targetClass = null;
 						try {
@@ -446,7 +471,7 @@ public abstract class TransformerMetadata extends CyanComponent {
 						}
 						Files.write(trPseudoCode.toPath(), BytecodeExporter.classToString(targetClass).getBytes());
 
-						debug("Dumping transformer " + md.getTransfomerClass() + " bytecode class file...");
+						logDebug.accept("Dumping transformer " + md.getTransfomerClass() + " bytecode class file...");
 						Files.write(trClassFile.toPath(), pool.getByteCode(md.getTransfomerClass()));
 					}
 				} catch (ClassNotFoundException | IOException e) {
@@ -454,7 +479,7 @@ public abstract class TransformerMetadata extends CyanComponent {
 				}
 			}
 
-			info("Dumping program class files...");
+			logInfo.accept("Dumping program class files...");
 			for (TransformerMetadata md : getLoadedTransformers()) {
 				try {
 					File clPseudoCode = new File(classesDumpProgramPC,
@@ -465,7 +490,7 @@ public abstract class TransformerMetadata extends CyanComponent {
 					if (!clPseudoCode.exists()) {
 						clPseudoCode.getParentFile().mkdirs();
 						clClassFile.getParentFile().mkdirs();
-						debug("Dumping class " + md.getTargetClass() + " PseudoCode...");
+						logDebug.accept("Dumping class " + md.getTargetClass() + " PseudoCode...");
 						ClassNode targetClass = null;
 						try {
 							targetClass = pool.getClassNode(md.getMappedTargetClass());
@@ -474,23 +499,24 @@ public abstract class TransformerMetadata extends CyanComponent {
 						}
 						Files.write(clPseudoCode.toPath(), BytecodeExporter.classToString(targetClass).getBytes());
 
-						debug("Dumping class " + md.getTargetClass() + " bytecode class file...");
+						logDebug.accept("Dumping class " + md.getTargetClass() + " bytecode class file...");
 						Files.write(clClassFile.toPath(), pool.getByteCode(targetClass.name));
 					}
 				} catch (ClassNotFoundException | IOException e) {
-					error("Transformer class dump failed, transformer: " + md.getTargetClass(), e);
+					logError.accept("Transformer class dump failed, transformer: " + md.getTargetClass(), e);
 				}
 			}
 		}
 	}
 
-	protected synchronized void dumpMappings(Mapping<?>[] mappings, File outputDir) throws IOException {
+	protected synchronized void dumpMappings(Mapping<?>[] mappings, File outputDir, Consumer<String> logInfo)
+			throws IOException {
 		int index = 0;
 		for (Mapping<?> root : mappings) {
 			File output = new File(outputDir,
 					"mappings.output" + (mappings.length == 1 ? "" : "." + (index + 1)) + ".txt");
 			if (!output.exists()) {
-				warn("Dumping mappings class '" + root.getClass().getTypeName()
+				logInfo.accept("Dumping mappings class '" + root.getClass().getTypeName()
 						+ "' in transformer backtrace... This can take a while...");
 				StringBuilder strBuilder = new StringBuilder();
 				StringBuilder head = new StringBuilder();
@@ -593,13 +619,14 @@ public abstract class TransformerMetadata extends CyanComponent {
 					strBuilder.append(root.getConfigFooter());
 				}
 				Files.writeString(output.toPath(), strBuilder.toString());
-				warn("Dumped mappings class '" + root.getClass().getTypeName() + "' in transformer backtrace.");
+				logInfo.accept(
+						"Dumped mappings class '" + root.getClass().getTypeName() + "' in transformer backtrace.");
 			}
 			index++;
 		}
 	}
 
-	protected synchronized void dumpMetadata(TransformerMetadata metadata, File output)
+	protected synchronized void dumpMetadata(TransformerMetadata metadata, File output, Consumer<String> logDebug)
 			throws IOException, ClassNotFoundException {
 		File transformerDir = new File(output,
 				metadata.getTransfomerOwner().replace(":", ".") + "/" + metadata.getTransfomerClass());
@@ -608,9 +635,10 @@ public abstract class TransformerMetadata extends CyanComponent {
 
 		File summaryFile = new File(output, metadata.getTransfomerClass() + ".tmd.txt");
 		if (!summaryFile.exists()) {
-			debug("Dumping transformer summary metadata file... Transformer: " + metadata.getTransfomerClass());
+			logDebug.accept(
+					"Dumping transformer summary metadata file... Transformer: " + metadata.getTransfomerClass());
 			Files.writeString(summaryFile.toPath(), selectedImplementation.buildSummary(metadata));
-			debug("Dumped transformer summary.");
+			logDebug.accept("Dumped transformer summary.");
 		}
 
 		ClassNode transformer = metadata.getClassPool().getClassNode(metadata.getTransfomerClass());
@@ -626,9 +654,10 @@ public abstract class TransformerMetadata extends CyanComponent {
 
 		File summaryFile2 = new File(transformerDir, metadata.getTransfomerClass() + ".tmd.txt");
 		if (!summaryFile2.exists()) {
-			debug("Dumping transformer summary metadata file... Transformer: " + metadata.getTransfomerClass());
+			logDebug.accept(
+					"Dumping transformer summary metadata file... Transformer: " + metadata.getTransfomerClass());
 			Files.writeString(summaryFile2.toPath(), selectedImplementation.buildSummary(metadata));
-			debug("Dumped transformer summary.");
+			logDebug.accept("Dumped transformer summary.");
 		}
 	}
 
