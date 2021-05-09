@@ -23,7 +23,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  
  - ModKit Permission Manager (CyanAPI ModKit 1.0)
  - ModKit World Load Event (CyanAPI ModKit 1.0)
- - ModKit Color Code Interface (CyanAPI ModKit 1.0) -- TODO
+ - ModKit Color Code Interface (CyanAPI ModKit 1.0)
  - ModKit Network Channel API (CyanAPI ModKit 1.0)
  - ModKit Server/client mod version checking (CyanAPI ModKit 1.0)
  - ModKit Serverbound Language Packet (CyanAPI ModKit 1.0)
