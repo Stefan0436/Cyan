@@ -4,7 +4,9 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 
+import org.asf.cyan.api.fluid.annotations.PlatformExclude;
 import org.asf.cyan.api.modloader.Modloader;
+import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
@@ -18,6 +20,7 @@ import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
  *
  */
 @FluidTransformer
+@PlatformExclude(LaunchPlatform.SPIGOT)
 @TargetClass(target = "net.minecraft.server.gui.MinecraftServerGui$1")
 public class MinecraftServerGuiModification$1 {
 

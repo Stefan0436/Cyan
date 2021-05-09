@@ -46,22 +46,22 @@ public class ServerEvents implements IEventListenerContainer {
 
 	@SimpleEvent(value = ReloadEvent.class)
 	public void reload(ReloadEventObject event) {
-		event = event;
+		event = event; // OK
 	}
 
 	@SimpleEvent(value = CommandManagerStartupEvent.class)
 	public void startCommandManager(CommandManagerEventObject event) {
-		event = event;
+		event = event; // OK
 	}
 
 	@SimpleEvent(value = ResourceManagerStartupEvent.class)
 	public void startResourceManager(ResourceManagerEventObject event) {
-		event = event;
+		event = event; // OK
 	}
 
 	@SimpleEvent(value = TagManagerStartupEvent.class)
 	public void startTagManager(TagManagerEventObject event) {
-		event = event;
+		event = event; // OK
 	}
 
 	@SimpleEvent(CyanServerHandshakeEvent.class)
