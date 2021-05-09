@@ -25,6 +25,7 @@ public class MinecraftModdingToolkitSpecialTest {
 		CyanCore.trackLevel(Level.WARN);
 
 		if (!CyanCore.isInitialized()) {
+			MinecraftToolkit.resetServerConnectionState();
 			MinecraftToolkit.initializeMTK();
 		}
 		MinecraftVersionInfo info = null;
@@ -83,6 +84,7 @@ public class MinecraftModdingToolkitSpecialTest {
 		CyanCore.trackLevel(Level.WARN);
 
 		if (!CyanCore.isInitialized()) {
+			MinecraftToolkit.resetServerConnectionState();
 			MinecraftToolkit.initializeMTK();
 		}
 		MinecraftVersionInfo info = null;

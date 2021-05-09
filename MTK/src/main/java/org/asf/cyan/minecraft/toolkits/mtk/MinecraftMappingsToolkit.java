@@ -377,7 +377,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 	public static SpigotMappings downloadSpigotMappings(Mapping<?> fallback, MinecraftVersionInfo version,
 			String mappingsVersion) throws IOException {
 		info("Resolving SPIGOT mappings of minecraft version " + version + "...");
-		
+
 		if (!MinecraftToolkit.hasMinecraftDownloadConnection())
 			throw new IOException("No network connection");
 

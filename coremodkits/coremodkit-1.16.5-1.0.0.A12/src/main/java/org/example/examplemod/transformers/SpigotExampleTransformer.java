@@ -32,15 +32,12 @@ public abstract class SpigotExampleTransformer {
 
 	private static Logger LOGGER = null;
 
-	// Spigot provides the world in the method parameters.
+	// Paper provides the world in the method parameters.
 	// We don't need the overworld method in spigot.
 	@InjectAt(location = InjectLocation.TAIL)
-	private void prepareLevels(
+	private void loadSpawn(
 			
-		@TargetType(target = "net.minecraft.server.level.progress.ChunkProgressListener") 
 		ChunkProgressListener listener,
-		
-		@TargetType(target = "net.minecraft.server.level.ServerLevel")
 		ServerLevel world
 		
 	) {

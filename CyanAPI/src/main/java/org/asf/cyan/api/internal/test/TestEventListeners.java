@@ -26,22 +26,22 @@ public class TestEventListeners extends CyanComponent implements IEventListenerC
 
 	@AttachEvent("mods.preinit")
 	private void preInit() {
-		this.equals(this); // OK 2
+		this.equals(this);
 	}
 
 	@AttachEvent("mods.init")
 	private void init() {
-		this.equals(this); // OK 2
+		this.equals(this);
 	}
 
 	@AttachEvent("mods.postinit")
 	private void postInit() {
-		this.equals(this); // OK 2
+		this.equals(this);
 	}
 
 	@AttachEvent("mods.runtimestart")
 	private void runtime() {
-		this.equals(this); // OK 2
+		this.equals(this);
 	}
 
 }

@@ -21,14 +21,17 @@ public class MinecraftVersionToolkitTest {
 	public MinecraftVersionToolkitTest() {		
 		if (!CyanCore.isInitialized()) {
 			CyanCore.simpleInit();
+			MinecraftToolkit.resetServerConnectionState();
 			MinecraftToolkit.initializeMTK();
-//			CyanCore.initializeComponents();
 		}
 	}
 
 	@Test
 	public void getLatestReleaseVersion() throws IOException {
+		if (!MinecraftToolkit.hasMinecraftDownloadConnection())
+			return;
 		// Download all version information objects
+		MinecraftToolkit.resetServerConnectionState();
 		MinecraftToolkit.resolveVersions();
 		
 		// Parse it manually
@@ -49,7 +52,10 @@ public class MinecraftVersionToolkitTest {
 
 	@Test
 	public void getLatestSnapshotVersion() throws IOException {
+		if (!MinecraftToolkit.hasMinecraftDownloadConnection())
+			return;
 		// Download all version information objects
+		MinecraftToolkit.resetServerConnectionState();
 		MinecraftToolkit.resolveVersions();
 		
 		// Parse it manually

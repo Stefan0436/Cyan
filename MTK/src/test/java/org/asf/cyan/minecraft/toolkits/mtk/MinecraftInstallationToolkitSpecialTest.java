@@ -16,6 +16,7 @@ public class MinecraftInstallationToolkitSpecialTest {
 		CyanCore.setTraceLog();
 		MinecraftInstallationToolkit.setMinecraftDirectory(new File("bin/test/mtk"));
 		if (!CyanCore.isInitialized()) {
+			MinecraftToolkit.resetServerConnectionState();
 			MinecraftToolkit.initializeMTK();
 		}
 		
@@ -31,6 +32,7 @@ public class MinecraftInstallationToolkitSpecialTest {
 		CyanCore.setTraceLog();
 		MinecraftInstallationToolkit.setMinecraftDirectory(new File("bin/test/mtk"));
 		if (!CyanCore.isInitialized()) {
+			MinecraftToolkit.resetServerConnectionState();
 			MinecraftToolkit.initializeMTK();
 		}
 		
@@ -44,6 +46,7 @@ public class MinecraftInstallationToolkitSpecialTest {
 		CyanCore.setTraceLog();
 		MinecraftInstallationToolkit.setMinecraftDirectory(new File("bin/test/mtk"));
 		if (!CyanCore.isInitialized()) {
+			MinecraftToolkit.resetServerConnectionState();
 			MinecraftToolkit.initializeMTK();
 		}
 		
@@ -60,6 +63,7 @@ public class MinecraftInstallationToolkitSpecialTest {
 		CyanCore.setTraceLog();
 		MinecraftInstallationToolkit.setMinecraftDirectory(new File("bin/test/mtk"));
 		if (!CyanCore.isInitialized()) {
+			MinecraftToolkit.resetServerConnectionState();
 			MinecraftToolkit.initializeMTK();
 		}
 		

@@ -78,7 +78,7 @@ if [ "$modloader" != "" ]; then
 fi
 
 if [ "$mappings" != "auto" ]; then
-	extraargs+=" -DoverrideMappingsVersion=\"$mappings\""
+	extraargs+=" -PoverrideMappingsVersion=\"$mappings\""
 fi
 
 eval './gradlew '"$extraargs"' -PresetLibSourceCache -PoverrideCyanLibraryURL="" -PcurrentXML processResources && ./gradlew '"$extraargs"' -PoverrideCyanLibraryURL="" -PcurrentXML build '"$BUILDCMD"' && echo && echo Done, saved in build.'

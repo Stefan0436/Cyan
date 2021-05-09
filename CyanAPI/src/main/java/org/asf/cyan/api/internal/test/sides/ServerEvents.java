@@ -27,12 +27,12 @@ public class ServerEvents implements IEventListenerContainer {
 	public static EntityType<TestEntity> TEST_ENTITY;
 
 	@SimpleEvent(EntityAttributesEvent.class)
-	public void test(EntityAttributesEventObject event) { // OK 2
+	public void test(EntityAttributesEventObject event) { // OK
 		event.addSupplier(TEST_ENTITY, TestEntity.createAttributes().build());
 	}
 
 	@SimpleEvent(value = EntityRegistryEvent.class)
-	public void test(EntityRegistryEventObject event) { // OK 2
+	public void test(EntityRegistryEventObject event) { // OK
 		event.addEntity("testmod", "testentity", TestEntity::new,
 				EntityType.Builder.of(TestEntity::new, MobCategory.MISC), new EntityRegistryCallback<TestEntity>() {
 
@@ -45,22 +45,22 @@ public class ServerEvents implements IEventListenerContainer {
 	}
 
 	@SimpleEvent(value = ReloadEvent.class)
-	public void reload(ReloadEventObject event) { // OK 2
+	public void reload(ReloadEventObject event) {
 		event = event;
 	}
 
 	@SimpleEvent(value = CommandManagerStartupEvent.class)
-	public void startCommandManager(CommandManagerEventObject event) { // OK 2
+	public void startCommandManager(CommandManagerEventObject event) {
 		event = event;
 	}
 
 	@SimpleEvent(value = ResourceManagerStartupEvent.class)
-	public void startResourceManager(ResourceManagerEventObject event) { // OK 2
+	public void startResourceManager(ResourceManagerEventObject event) {
 		event = event;
 	}
 
 	@SimpleEvent(value = TagManagerStartupEvent.class)
-	public void startTagManager(TagManagerEventObject event) { // OK 2
+	public void startTagManager(TagManagerEventObject event) {
 		event = event;
 	}
 
@@ -71,7 +71,7 @@ public class ServerEvents implements IEventListenerContainer {
 
 	@SimpleEvent(ServerSideConnectedEvent.class)
 	private void login(ServerConnectionEventObject event) {
-		event = event; // OK
+		event = event;
 //		event.sendNewClientPacket("test", new FriendlyByteBuf(Unpooled.buffer()).writeUtf("tester 123"));
 	}
 

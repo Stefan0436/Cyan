@@ -245,7 +245,6 @@ public class CyanLoader extends Modloader implements IModProvider {
 		}
 
 		mappings = MinecraftMappingsToolkit.loadMappings(mcVersion, CyanCore.getSide());
-		Modloader.getModloader(CyanLoader.class).startCore();
 	}
 
 	private static boolean setup = false;
@@ -1126,6 +1125,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 		try {
 			if (!loaded)
 				prepare(side);
+			Modloader.getModloader(CyanLoader.class).startCore();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

@@ -71,6 +71,7 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 	public void generateCyanRiftTargetsTest() throws IOException {
 		CyanCore.enableLog(); // trace slows down too much and debug is unreadable for this test
 		if (!CyanCore.isInitialized()) {
+			MinecraftToolkit.resetServerConnectionState();
 			MinecraftInstallationToolkit.setMinecraftDirectory(new File("bin/test/mtk"));
 			// CyanCore.initializeComponents();
 			MinecraftToolkit.initializeMTK();
@@ -110,6 +111,7 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 		CyanCore.enableLog(); // trace slows down too much and debug is unreadable for this test
 
 		if (!CyanCore.isInitialized()) {
+			MinecraftToolkit.resetServerConnectionState();
 			MinecraftInstallationToolkit.setMinecraftDirectory(new File("bin/test/mtk"));
 			// CyanCore.initializeComponents();
 			MinecraftToolkit.initializeMTK();
@@ -163,6 +165,7 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 		CyanCore.enableLog(); // trace slows down too much and debug is unreadable for this test
 
 		if (!CyanCore.isInitialized()) {
+			MinecraftToolkit.resetServerConnectionState();
 			MinecraftInstallationToolkit.setMinecraftDirectory(new File("bin/test/mtk"));
 			// CyanCore.initializeComponents();
 			MinecraftToolkit.initializeMTK();
@@ -217,6 +220,7 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 		CyanCore.enableLog(); // trace slows down too much and debug is unreadable for this test
 
 		if (!CyanCore.isInitialized()) {
+			MinecraftToolkit.resetServerConnectionState();
 			MinecraftInstallationToolkit.setMinecraftDirectory(new File("bin/test/mtk"));
 			// CyanCore.initializeComponents();
 			MinecraftToolkit.initializeMTK();

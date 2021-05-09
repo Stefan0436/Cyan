@@ -147,7 +147,7 @@ public String getLatestYarnVersion(String version) throws IOException {
 
 ext.mappingsVersion = minecraft
 if (project.hasProperty("overrideMappingsVersion"))
-	mappingVersion = project.getProperty("overrideMappingsVersion")
+	mappingsVersion = project.getProperty("overrideMappingsVersion")
 
 ext.craftBukkitPOMUrl = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit/raw/pom.xml?at=%commit%"
 ext.spigotInfoUrl = "https://hub.spigotmc.org/versions/%mcver%.json";
@@ -168,7 +168,10 @@ if (modloader.startsWith("paper-")) {
 		def paper = ""
 
 		if (mappingsVersion == null) {
-			mappingsVersion = getLatestSpigotMappings(minecraft)
+			if (project.hasProperty("overrideMappingsVersion"))
+				mappingsVersion = project.getProperty("overrideMappingsVersion")
+			else
+				mappingsVersion = getLatestSpigotMappings(minecraft)
 		}
 
 		paper = info.paperByMappings.get(mappingsVersion)
@@ -385,7 +388,7 @@ dependencies {
 	wrapper group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: '2.14.1'
 	implementation group: 'org.fusesource.jansi', name: 'jansi', version: '2.3.2'
-	
+
 	wrapper group: 'org.fusesource.jansi', name: 'jansi', version: '2.3.2'
 	wrapper group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
 	wrapper group: 'org.jboss.windup.decompiler.fernflower', name: 'windup-fernflower', version: '1.0.0.20171018'
@@ -644,7 +647,7 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 
 		File jar = MinecraftModdingToolkit.deobfuscateJar(version, GameSide.CLIENT)
 		classpath jar
-		
+
 		libsMC.forEach { k, v ->
 			if (v != null) {
 				classpath k, v
@@ -652,7 +655,7 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 				classpath k
 			}
 		}
-		
+
 		project(":").childProjects.each { proj ->
 			classpath proj.value
 		}
@@ -661,7 +664,7 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 		sourceLookup MinecraftModdingToolkit.sourcesJar(version, GameSide.CLIENT)
 
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "clients/cyan/"+minecraft)
-		
+
 		jvm "-DassetRoot="+MinecraftInstallationToolkit.getAssetsRoot().getCanonicalPath()
 		jvm "-DassetIndex="+MinecraftInstallationToolkit.getAssetId(version)
 		jvm "-DcyanAgentJar="+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
@@ -693,7 +696,7 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 
 		File jar = MinecraftInstallationToolkit.getVersionJar(version, GameSide.CLIENT)
 		classpath jar
-		
+
 		libsMC.forEach { k, v ->
 			if (v != null) {
 				classpath k, v
@@ -701,7 +704,7 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 				classpath k
 			}
 		}
-		
+
 		project(":").childProjects.each { proj ->
 			classpath proj.value
 		}
@@ -744,7 +747,7 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 
 		File jar = MinecraftModdingToolkit.deobfuscateJar(version, GameSide.SERVER)
 		classpath jar
-		
+
 		libsMC.forEach { k, v ->
 			if (v != null) {
 				classpath k, v
@@ -752,7 +755,7 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 				classpath k
 			}
 		}
-		
+
 		project(":").childProjects.each { proj ->
 			classpath proj.value
 		}
@@ -789,7 +792,7 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 
 		File jar = MinecraftInstallationToolkit.getVersionJar(version, GameSide.SERVER)
 		classpath jar
-		
+
 		libsMC.forEach { k, v ->
 			if (v != null) {
 				classpath k, v
@@ -797,11 +800,11 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 				classpath k
 			}
 		}
-		
+
 		project(":").childProjects.each { proj ->
 			classpath proj.value
 		}
-	
+
 		workingDir new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft)
 		if (!new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft).exists())
 			new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft).mkdirs()
@@ -1343,7 +1346,7 @@ processResources {
 			def val = info.spigotTestingMappings.get(ver)
 			testingSpigotMappings.put(ver, val)
 		}
-		
+
 		for (def ver : info.libraryVersions.keySet()) {
 			if (ver.startsWith("ModKit-")) {
 				libraryVersionMap.put(ver, info.libraryVersions.get(ver))
@@ -2014,7 +2017,7 @@ HashMap<String, File> scanFiles(File inp, String start, String... extensions) {
 task serverJar (type: Jar, dependsOn: build) {
 	def dest = null
 	def apiID = null
-	
+
 	dest = file('../build/Wrapper/Server jars/'+cyanversion+"-mc-"+exactgameversion)
 	if (!dest.exists())
 		dest.mkdirs();
@@ -2036,13 +2039,14 @@ task serverJar (type: Jar, dependsOn: build) {
 	includeEmptyDirs = false
 
 	outputs.upToDateWhen { return false; }
-	
+
 	if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
 	cyanclasspath+="vanilla-server.jar"
 	if (!modloader.isEmpty() && modloader.startsWith("paper-")) {
 		def paperversion = modloader.substring("paper-".length())
 		if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
 		cyanclasspath+="paper-server-${paperversion}.jar"
+		cyanclasspath+=" cache/patched_${minecraft}.jar"
 	}
 
 	from sourceSets.main.output
@@ -2055,7 +2059,7 @@ task serverJar (type: Jar, dependsOn: build) {
 			}
 		}
 	}
-	
+
 	doFirst {
 		def apiJarTask = tasks.getByPath(":CyanAPI:platformRiftJarServer")
 		apiID = "org.asf.cyan:CyanAPI:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
@@ -2213,6 +2217,14 @@ task serverJar (type: Jar, dependsOn: build) {
 			if (new File(dest, "paper-server-${paperversion}.jar").exists()) new File(dest, "paper-server-${paperversion}.jar").delete()
 			println " +-- Installing paper server..."
 			Files.copy(server.toPath(), new File(dest, "paper-server-${paperversion}.jar").toPath())
+
+			println " |"
+			println " +-- Patching vanilla server..."
+			javaexec {
+				workingDir dest
+				classpath new File(dest, "paper-server-${paperversion}.jar")
+				jvmArgs '-Dpaperclip.patchonly=true'
+			}
 		}
 		println " +-- Server build completed."
 	}

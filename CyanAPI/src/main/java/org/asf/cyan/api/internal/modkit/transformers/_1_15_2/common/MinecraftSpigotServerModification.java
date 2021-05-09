@@ -7,7 +7,6 @@ import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
-import org.asf.cyan.fluid.api.transforming.TargetType;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
 import net.minecraft.core.BlockPos;
@@ -21,12 +20,7 @@ import net.minecraft.server.level.progress.ChunkProgressListener;
 public abstract class MinecraftSpigotServerModification {
 
 	@InjectAt(location = InjectLocation.TAIL)
-	private void prepareLevels(
-
-			@TargetType(target = "net.minecraft.server.level.progress.ChunkProgressListener") ChunkProgressListener listener,
-			@TargetType(target = "net.minecraft.server.level.ServerLevel") ServerLevel world
-
-	) {
+	private void loadSpawn(ChunkProgressListener listener, ServerLevel world) {
 		BlockPos spawn = world.getSharedSpawnPos();
 		ResourceLocation path = world.dimension().location();
 		ServerLevelLoadEvent.getInstance()
