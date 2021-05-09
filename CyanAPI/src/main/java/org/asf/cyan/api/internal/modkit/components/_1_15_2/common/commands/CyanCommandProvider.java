@@ -15,6 +15,7 @@ import org.asf.cyan.api.internal.modkit.handshake.packets.HandshakeLoaderPacketP
 import org.asf.cyan.api.internal.modkit.handshake.packets.HandshakeProtocolPacketProcessor;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.mods.IModManifest;
+import org.asf.cyan.api.permissions.PermissionManager;
 import org.asf.cyan.api.util.server.language.ClientLanguage;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.api.transforming.information.metadata.TransformerMetadata;
@@ -60,7 +61,14 @@ public class CyanCommandProvider extends CyanComponent implements IEventListener
 	@SimpleEvent(CommandManagerStartupEvent.class)
 	public void startupCommandManager(CommandManagerEventObject event) {
 		LiteralArgumentBuilder<CommandSourceStack> cyanInfo = LiteralArgumentBuilder.literal("cyan");
-		cyanInfo = cyanInfo.then(Commands.literal("backtrace").requires(t -> t.hasPermission(4)).executes(cmd -> {
+		cyanInfo = cyanInfo.then(Commands.literal("backtrace").requires(t -> {
+			try {
+				return PermissionManager.getInstance().hasPermission(t.getPlayerOrException(),
+						"cyan.commands.cyan.dump");
+			} catch (CommandSyntaxException ex) {
+				return t.hasPermission(4);
+			}
+		}).executes(cmd -> {
 			return dump("info", cmd);
 		}).then(Commands.literal("debug").executes(cmd -> {
 			return dump("debug", cmd);
@@ -70,15 +78,22 @@ public class CyanCommandProvider extends CyanComponent implements IEventListener
 			return dump("warn", cmd);
 		})).then(Commands.literal("error").executes(cmd -> {
 			return dump("error", cmd);
-		}))).then(Commands.literal("info").executes(cmd -> {
+		}))).then(Commands.literal("info").requires(t -> {
+			try {
+				return PermissionManager.getInstance().hasPermission(t.getPlayerOrException(),
+						"cyan.commands.player.cyan.info");
+			} catch (CommandSyntaxException ex) {
+				return true;
+			}
+		}).executes(cmd -> {
 			ServerPlayer player = header(cmd);
 			ClientInformation info = CyanHandshakePacketChannel.getClientInfo(player);
 			if (player == null) {
-				cmd.getSource().sendSuccess(new TextComponent("\n" + ClientLanguage
-						.createComponent(player, "cyan.info.data", cmd.getSource().getServer().getServerModName(),
-								info.getBrand(), Modloader.getModloaderVersion(), Modloader.getModloaderGameVersion(),
-								Modloader.getAllMods().length, info.getMods().size())
-						.getString()), true);
+				cmd.getSource()
+						.sendSuccess(new TextComponent("\n" + ClientLanguage.createComponent(player, "cyan.info.data",
+								cmd.getSource().getServer().getServerModName(), info.getBrand(),
+								Modloader.getModloaderVersion(), Modloader.getModloaderGameVersion(),
+								Modloader.getAllMods().length, info.getMods().size()).getString()), true);
 			} else {
 				cmd.getSource()
 						.sendSuccess(ClientLanguage.createComponent(player, "cyan.info.data",
@@ -87,7 +102,14 @@ public class CyanCommandProvider extends CyanComponent implements IEventListener
 								Modloader.getAllMods().length, info.getMods().size()), true);
 			}
 			return 0;
-		})).then(Commands.literal("mods").executes(cmd -> {
+		})).then(Commands.literal("mods").requires(t -> {
+			try {
+				return PermissionManager.getInstance().hasPermission(t.getPlayerOrException(),
+						"cyan.commands.player.cyan.mods");
+			} catch (CommandSyntaxException ex) {
+				return true;
+			}
+		}).executes(cmd -> {
 			ServerPlayer player = header(cmd);
 
 			String serverMods = "";
@@ -131,7 +153,14 @@ public class CyanCommandProvider extends CyanComponent implements IEventListener
 						ClientLanguage.createComponent(player, "cyan.info.mods", serverMods, clientMods), true);
 			}
 			return 0;
-		})).then(Commands.literal("technical").executes(cmd -> {
+		})).then(Commands.literal("technical").requires(t -> {
+			try {
+				return PermissionManager.getInstance().hasPermission(t.getPlayerOrException(),
+						"cyan.commands.player.cyan.technical");
+			} catch (CommandSyntaxException ex) {
+				return true;
+			}
+		}).executes(cmd -> {
 			ServerPlayer player = header(cmd);
 			ClientInformation info = CyanHandshakePacketChannel.getClientInfo(player);
 			if (player == null) {
