@@ -140,7 +140,7 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 			}
 			Map<String, String> mods = info.getMods();
 			for (String mod : mods.keySet()) {
-				if (!serverMods.isEmpty())
+				if (!clientMods.isEmpty())
 					clientMods += "§7, ";
 				clientMods += "§2";
 				clientMods += mod;

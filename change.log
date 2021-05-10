@@ -11,7 +11,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
   
  - ModKit Resource API (CyanAPI ModKit 1.0)
  - ModKit Language Manager (with server support using custom implementation instead of vanilla language manager, CyanAPI ModKit 1.0) -- TODO
- - ModKit Config Manager (CyanAPI ModKit 1.0) -- TODO
+ - ModKit Config Manager (CyanAPI ModKit 1.0)
  
  - ModKit Entity Registry Events (CyanAPI ModKit 1.0)
  - ModKit Entity Renderer Registry Events (CyanAPI ModKit 1.0)
