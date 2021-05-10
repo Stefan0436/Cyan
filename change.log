@@ -33,6 +33,14 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - ModKit Item Registry Events (CyanAPI ModKit 1.0) -- TODO
  - ModKit Dimension Registry Events (CyanAPI ModKit 1.0) -- TODO
  
+ // IMPORTANT: FIRST PRIORITY:
+ - ModKit CyanAPI selected by specific version or if not present, the major version (CyanAPI AND ModKit 1.0) -- TODO
+ - ModKit CyanAPI shared implementations in CyanLoader (CyanAPI ModKit 1.0) -- TODO
+ - Cornflower Rift Version Handler (Cornflower A36, selects normal versions with the ModKit and such) -- TODO
+ - ModKit Tested on Fabric and Forge (CyanAPI 1.0.0.A2) -- TODO
+ - ModKit ported to 1.15.2 and fully tested (CyanAPI 1.0.0.A3) -- TODO
+ - Cyan Version Support Map -- TODO
+ - Cyan Modloader Version Support Map -- TODO
  
  // A14
  - World Load Warning on Vanilla and when mods have changed (CyanAPI ModKit 1.1) -- TODO
@@ -61,3 +69,5 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - ModKit Item API (CyanAPI ModKit 1.3) -- TODO
  - ModKit GUI API (CyanAPI ModKit 1.3) -- TODO
  
+ // B2:
+ - ModKit Player, Entity and other interface types (ModKit 2.0, replacaes the vanilla types) -- TODO
