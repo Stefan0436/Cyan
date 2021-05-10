@@ -1,46 +1,50 @@
 package org.asf.cyan.api.commands;
 
-import org.asf.cyan.api.events.ingame.commands.CommandManagerStartupEvent;
-import org.asf.cyan.api.events.objects.ingame.commands.CommandManagerEventObject;
 import org.asf.cyan.mods.events.IEventListenerContainer;
-import org.asf.cyan.mods.events.SimpleEvent;
-import org.asf.cyan.mods.internal.BaseEventController;
 
 /**
  * 
- * Command Manager - Mod Command System (<b>NOT YET IMPLEMENTED, ModKit 1.2</b>)
+ * Command Manager - Mod Command System (<b>NOT FULLY IMPLEMENTED, full
+ * implementation coming in ModKit 1.2</b>)
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public class CommandManager implements IEventListenerContainer { // TODO
-	private static CommandManager implementation;
-
-	private CommandManager() {
-	}
+public abstract class CommandManager implements IEventListenerContainer { // TODO
+	protected static CommandManager implementation;
 
 	/**
 	 * Retrieves the main command manager
 	 */
 	public static CommandManager getMain() {
-		if (implementation == null) {
-			implementation = new CommandManager();
-			BaseEventController.addEventContainer(implementation);
-		}
-
 		return implementation;
 	}
 
-	@SimpleEvent(CommandManagerStartupEvent.class)
-	private void commandSetup(CommandManagerEventObject event) {
-		
+	/**
+	 * Retrieves a new command manager
+	 */
+	public static CommandManager create() {
+		return implementation.newInstance();
 	}
 
 	/**
 	 * Instantiates a new command manager
 	 */
-	public CommandManager newInstance() {
-		return new CommandManager();
-	}
+	public abstract CommandManager newInstance();
+
+	/**
+	 * Registers the given command
+	 * 
+	 * @param command Command to register
+	 * @return Self
+	 */
+	public abstract CommandManager registerCommand(Command command);
+
+	/**
+	 * Retrieves all known commands
+	 * 
+	 * @return Array of known commands
+	 */
+	public abstract Command[] getCommands();
 
 }

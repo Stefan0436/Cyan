@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.asf.cyan.CyanLoader;
+import org.asf.cyan.api.commands.Command;
+import org.asf.cyan.api.commands.CommandManager;
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.events.ingame.commands.CommandManagerStartupEvent;
 import org.asf.cyan.api.events.objects.ingame.commands.CommandManagerEventObject;
@@ -15,7 +17,9 @@ import org.asf.cyan.api.internal.modkit.handshake.packets.HandshakeLoaderPacketP
 import org.asf.cyan.api.internal.modkit.handshake.packets.HandshakeProtocolPacketProcessor;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.mods.IModManifest;
+import org.asf.cyan.api.permissions.Permission;
 import org.asf.cyan.api.permissions.PermissionManager;
+import org.asf.cyan.api.permissions.Permission.Mode;
 import org.asf.cyan.api.util.server.language.ClientLanguage;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.api.transforming.information.metadata.TransformerMetadata;
@@ -32,7 +36,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 
-public class CyanCommandProvider extends CyanComponent implements IEventListenerContainer, IModKitComponent {
+public class CyanCommandProvider extends CyanComponent implements Command, IEventListenerContainer, IModKitComponent {
 
 	private static boolean dumping = false;
 
@@ -56,6 +60,11 @@ public class CyanCommandProvider extends CyanComponent implements IEventListener
 		ClientLanguage.registerLanguageKey("cyan.info.technical",
 				"§4ModKit Protocol Version: §6%s\n§4Modloader Protocol Version: §6%s\n§4Client ModKit Protocol Version: §6%s\n§4Client Modloader Protocol Version: §6%s\n§4Client Game Version: §6%s\n§4Client Modloader Version: §6%s\n");
 		ClientLanguage.registerLanguageKey("cyan.info.mods", "§5Server Mods:\n§4%s\n\n§5Client Mods:\n§4%s\n");
+
+		ClientLanguage.registerLanguageKey("cyan.commands.cyan.description", "Utility command for the cyan modlaoder.");
+		ClientLanguage.registerLanguageKey("cyan.commands.cyan.usage", "<task> [arguments...]");
+
+		CommandManager.getMain().registerCommand(this);
 	}
 
 	@SimpleEvent(CommandManagerStartupEvent.class)
@@ -63,8 +72,8 @@ public class CyanCommandProvider extends CyanComponent implements IEventListener
 		LiteralArgumentBuilder<CommandSourceStack> cyanInfo = LiteralArgumentBuilder.literal("cyan");
 		cyanInfo = cyanInfo.then(Commands.literal("backtrace").requires(t -> {
 			try {
-				return PermissionManager.getInstance().hasPermission(t.getPlayerOrException(),
-						"cyan.commands.cyan.dump");
+				return PermissionManager.getInstance().hasPermission(t.getEntityOrException(),
+						"cyan.commands.admin.cyan.dump");
 			} catch (CommandSyntaxException ex) {
 				return t.hasPermission(4);
 			}
@@ -80,7 +89,7 @@ public class CyanCommandProvider extends CyanComponent implements IEventListener
 			return dump("error", cmd);
 		}))).then(Commands.literal("info").requires(t -> {
 			try {
-				return PermissionManager.getInstance().hasPermission(t.getPlayerOrException(),
+				return PermissionManager.getInstance().hasPermission(t.getEntityOrException(),
 						"cyan.commands.player.cyan.info");
 			} catch (CommandSyntaxException ex) {
 				return true;
@@ -104,7 +113,7 @@ public class CyanCommandProvider extends CyanComponent implements IEventListener
 			return 0;
 		})).then(Commands.literal("mods").requires(t -> {
 			try {
-				return PermissionManager.getInstance().hasPermission(t.getPlayerOrException(),
+				return PermissionManager.getInstance().hasPermission(t.getEntityOrException(),
 						"cyan.commands.player.cyan.mods");
 			} catch (CommandSyntaxException ex) {
 				return true;
@@ -155,7 +164,7 @@ public class CyanCommandProvider extends CyanComponent implements IEventListener
 			return 0;
 		})).then(Commands.literal("technical").requires(t -> {
 			try {
-				return PermissionManager.getInstance().hasPermission(t.getPlayerOrException(),
+				return PermissionManager.getInstance().hasPermission(t.getEntityOrException(),
 						"cyan.commands.player.cyan.technical");
 			} catch (CommandSyntaxException ex) {
 				return true;
@@ -251,6 +260,31 @@ public class CyanCommandProvider extends CyanComponent implements IEventListener
 			dumping = false;
 		}).start();
 		return 0;
+	}
+
+	@Override
+	public Permission getPermission() {
+		return new Permission("cyan.commands.player", Mode.ALLOW);
+	}
+
+	@Override
+	public String getId() {
+		return "cyan";
+	}
+
+	@Override
+	public String getDisplayName() {
+		return getId();
+	}
+
+	@Override
+	public String getDescription() {
+		return ClientLanguage.createComponent(null, "cyan.commands.cyan.description").getString();
+	}
+
+	@Override
+	public String getUsage() {
+		return ClientLanguage.createComponent(null, "cyan.commands.cyan.usage").getString();
 	}
 
 }

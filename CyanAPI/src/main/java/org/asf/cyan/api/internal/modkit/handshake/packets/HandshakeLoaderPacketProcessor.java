@@ -42,7 +42,6 @@ public class HandshakeLoaderPacketProcessor extends ClientPacketProcessor {
 			response.displayVersion = version.toString();
 			response.version = minimalLoader;
 			response.write(getChannel());
-			getChannel().getConnection().tick();
 			getChannel().getConnection().disconnect(new TranslatableComponent(response.language,
 					packet.version.toString(), response.displayVersion, response.version));
 		} else if (packet.protocol > maximalLoader) {
@@ -52,7 +51,6 @@ public class HandshakeLoaderPacketProcessor extends ClientPacketProcessor {
 			response.displayVersion = version.toString();
 			response.version = maximalLoader;
 			response.write(getChannel());
-			getChannel().getConnection().tick();
 			getChannel().getConnection().disconnect(new TranslatableComponent(response.language,
 					packet.version.toString(), response.displayVersion, response.version));
 		} else {
@@ -66,7 +64,6 @@ public class HandshakeLoaderPacketProcessor extends ClientPacketProcessor {
 			}
 			
 			response.write(getChannel());
-			getChannel().getConnection().tick();
 		}
 	}
 

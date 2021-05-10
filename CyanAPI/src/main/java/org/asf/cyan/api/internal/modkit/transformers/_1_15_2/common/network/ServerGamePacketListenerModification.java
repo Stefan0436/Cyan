@@ -43,7 +43,7 @@ public class ServerGamePacketListenerModification implements ServerGamePacketLis
 	}
 
 	@InjectAt(location = InjectLocation.TAIL)
-	public void onDisconnect(Component message) {
+	public void onDisconnect(@TargetType(target = "net.minecraft.network.chat.Component") Component message) {
 		if (connectedCyan)
 			PlayerLogoutEvent.getInstance()
 					.dispatch(new PlayerLogoutEventObject(connection, server, player, clientBrand, message))

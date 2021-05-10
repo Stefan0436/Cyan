@@ -5,6 +5,9 @@ import java.util.Iterator;
 import java.util.UUID;
 
 import org.asf.cyan.api.internal.IModKitComponent;
+import org.asf.cyan.api.modloader.Modloader;
+import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.api.permissions.Permission;
 import org.asf.cyan.api.permissions.PermissionManager;
 import org.asf.cyan.api.permissions.PermissionProvider;
@@ -70,29 +73,39 @@ public class PermissionManagerImplementation extends PermissionManager implement
 	public void initializeComponent() {
 		implementation = this;
 		addPermissionProvider(new OpPermissionProvider());
+		if (Modloader.getModloaderGameSide() == GameSide.SERVER
+				&& Modloader.getModloaderLaunchPlatform() == LaunchPlatform.SPIGOT) {
+			addPermissionProvider(new BukkitPermissionProvider());
+		}
 		defaults.add(new Permission("cyan.commands.player", Mode.ALLOW));
 	}
 
 	@Override
 	public boolean hasPermission(UUID user, MinecraftServer server, String permissionNode) {
+		int state = 2;
 		for (PermissionProvider provider : providers) {
 			int i = provider.checkPermission(user, permissionNode, server);
 			if (i == 1)
 				return false;
 			else if (i == 0)
-				return true;
+				state = 0;
 		}
+		if (state == 0)
+			return true;
 
+		state = 2;
 		for (Permission defaultPerm : defaults) {
 			if (checkPermissionApplies(defaultPerm, permissionNode)) {
 				if (defaultPerm.getMode() == Mode.ALLOW)
-					return true;
+					state = 0;
 				else
 					return false;
 			}
 		}
-
-		return false;
+		if (state == 0)
+			return true;
+		else
+			return false;
 	}
 
 	@Override

@@ -92,7 +92,6 @@ public class HandshakeModPacketProcessor extends ServerPacketProcessor {
 			response.displayVersion = missingClient + "\n" + missingServer;
 			response.version = 0d;
 			response.write(getChannel());
-			getPlayer().connection.tick();
 			getPlayer().connection.disconnect(new TranslatableComponent(response.language, missingClient));
 		} else if (!failClient && failServer) {
 			info("Player " + getPlayer().getName().getString() + " is missing " + output2.size()
@@ -104,7 +103,6 @@ public class HandshakeModPacketProcessor extends ServerPacketProcessor {
 			response.displayVersion = missingClient + "\n" + missingServer;
 			response.version = 0d;
 			response.write(getChannel());
-			getPlayer().connection.tick();
 			getPlayer().connection.disconnect(new TranslatableComponent(response.language, missingServer));
 		} else if (failClient && failServer) {
 			info("Player " + getPlayer().getName().getString() + " is missing " + output2.size()
@@ -117,7 +115,6 @@ public class HandshakeModPacketProcessor extends ServerPacketProcessor {
 			response.displayVersion = missingClient + "\n" + missingServer;
 			response.version = 0d;
 			response.write(getChannel());
-			getPlayer().connection.tick();
 			getPlayer().connection
 					.disconnect(new TranslatableComponent(response.language, missingClient, missingServer));
 		} else {
