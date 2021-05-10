@@ -1,5 +1,7 @@
 package org.asf.cyan.api.internal.test.sides;
 
+import java.util.Optional;
+
 import org.asf.cyan.api.events.core.ReloadEvent;
 import org.asf.cyan.api.events.entities.EntityAttributesEvent;
 import org.asf.cyan.api.events.entities.EntityRegistryEvent;
@@ -56,6 +58,7 @@ public class ServerEvents implements IEventListenerContainer {
 
 	@SimpleEvent(value = ResourceManagerStartupEvent.class)
 	public void startResourceManager(ResourceManagerEventObject event) {
+		Optional<EntityType<?>> type = EntityType.byString("testmod:testentity");
 		event = event; // OK
 	}
 

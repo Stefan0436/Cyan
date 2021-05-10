@@ -579,38 +579,7 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 									+ clsMapping.obfuscated.substring(clsMapping.obfuscated.indexOf("$") + 1);
 						}
 					}
-
-					map.mappings = clsMapping.mappings.clone();
-					for (Mapping<?> member : map.mappings) {
-						if (member.mappingType == MAPTYPE.PROPERTY) {
-							String type = member.type;
-							Mapping<?> mp = fallback.mapClassToMapping(type, t -> true, false);
-							if (mp != null)
-								type = mp.obfuscated;
-
-							if (tempMappings.containsKey(type))
-								member.type = tempMappings.get(type).name;
-						} else if (member.mappingType == MAPTYPE.METHOD) {
-							String type = member.type;
-							Mapping<?> mp = fallback.mapClassToMapping(type, t -> true, false);
-							if (mp != null)
-								type = mp.obfuscated;
-
-							if (tempMappings.containsKey(type))
-								member.type = tempMappings.get(type).name;
-
-							int i = 0;
-							for (String argtype : member.argumentTypes) {
-								mp = fallback.mapClassToMapping(argtype, t -> true, false);
-								if (mp != null)
-									argtype = mp.obfuscated;
-
-								if (tempMappings.containsKey(argtype))
-									member.argumentTypes[i] = tempMappings.get(argtype).name;
-								i++;
-							}
-						}
-					}
+					
 					classes.put(map.name, map);
 					tempMappings.put(map.obfuscated, map);
 					obfusCache.add(clsMapping.name);
