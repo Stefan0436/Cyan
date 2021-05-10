@@ -11,7 +11,7 @@ sourceCompatibility = '1.9'
 targetCompatibility = '1.9'
 
 group="org.asf.cyan"
-version="1.0.0.A15"
+version="1.0.0.A16"
 
 def authorname="AerialWorks Software Foundation"
 

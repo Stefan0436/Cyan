@@ -53,7 +53,7 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 				"§bDump has been created on the server, §6please remember that you are not allowed to distribute the dump.");
 
 		ClientLanguage.registerLanguageKey("cyan.info.header",
-				"§bMinecraft Cyan %s, Modloader Version: %s\n---------------%s---------------------%s\n");
+				"§bMinecraft Cyan %s§b, Modloader Version: %s§b\n---------------%s§b---------------------%s§b\n");
 
 		ClientLanguage.registerLanguageKey("cyan.info.data",
 				"§5Server Brand: §6%s\n§5Client Brand: §6%s\n§5Server Modloader Version: §6%s\n§5Game Version: §6%s\n§5Server Mods: §6%s\n§5Client Mods: §6%s\n");
@@ -100,15 +100,15 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 			if (player == null) {
 				cmd.getSource()
 						.sendSuccess(new TextComponent("\n" + ClientLanguage.createComponent(player, "cyan.info.data",
-								cmd.getSource().getServer().getServerModName(), info.getBrand(),
-								Modloader.getModloaderVersion(), Modloader.getModloaderGameVersion(),
-								Modloader.getAllMods().length, info.getMods().size()).getString()), true);
+								"§6" + cmd.getSource().getServer().getServerModName(), "§6" + info.getBrand(),
+								"§6" + Modloader.getModloaderVersion(), "§6" + Modloader.getModloaderGameVersion(),
+								"§6" + Modloader.getAllMods().length, "§6" + info.getMods().size()).getString()), true);
 			} else {
 				cmd.getSource()
 						.sendSuccess(ClientLanguage.createComponent(player, "cyan.info.data",
-								cmd.getSource().getServer().getServerModName(), info.getBrand(),
-								Modloader.getModloaderVersion(), Modloader.getModloaderGameVersion(),
-								Modloader.getAllMods().length, info.getMods().size()), true);
+								"§6" + cmd.getSource().getServer().getServerModName(), "§6" + info.getBrand(),
+								"§6" + Modloader.getModloaderVersion(), "§6" + Modloader.getModloaderGameVersion(),
+								"§6" + Modloader.getAllMods().length, "§6" + info.getMods().size()), true);
 			}
 			return 0;
 		})).then(Commands.literal("mods").requires(t -> {
@@ -147,9 +147,9 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 			}
 
 			if (serverMods.isEmpty())
-				serverMods = "None installed";
+				serverMods = "§4None installed";
 			if (clientMods.isEmpty())
-				clientMods = "None installed";
+				clientMods = "§4None installed";
 
 			if (player == null) {
 				cmd.getSource()
@@ -173,16 +173,23 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 			ServerPlayer player = header(cmd);
 			ClientInformation info = CyanHandshakePacketChannel.getClientInfo(player);
 			if (player == null) {
-				cmd.getSource().sendSuccess(new TextComponent("\n" + ClientLanguage
-						.createComponent(player, "cyan.info.technical", HandshakeProtocolPacketProcessor.PROTOCOL,
-								HandshakeLoaderPacketProcessor.PROTOCOL, info.getProtocol(),
-								info.getModloaderProtocol(), info.getGameVersion(), info.getModloaderVersion())
-						.getString()), true);
+				cmd.getSource()
+						.sendSuccess(
+								new TextComponent("\n" + ClientLanguage
+										.createComponent(player, "cyan.info.technical",
+												"§6" + HandshakeProtocolPacketProcessor.PROTOCOL,
+												"§6" + HandshakeLoaderPacketProcessor.PROTOCOL,
+												"§6" + info.getProtocol(), "§6" + info.getModloaderProtocol(),
+												"§6" + info.getGameVersion(), "§6" + info.getModloaderVersion())
+										.getString()),
+								true);
 			} else {
-				cmd.getSource().sendSuccess(ClientLanguage.createComponent(player, "cyan.info.technical",
-						HandshakeProtocolPacketProcessor.PROTOCOL, HandshakeLoaderPacketProcessor.PROTOCOL,
-						info.getProtocol(), info.getModloaderProtocol(), info.getGameVersion(),
-						info.getModloaderVersion()), true);
+				cmd.getSource()
+						.sendSuccess(ClientLanguage.createComponent(player, "cyan.info.technical",
+								"§6" + HandshakeProtocolPacketProcessor.PROTOCOL,
+								"§6" + HandshakeLoaderPacketProcessor.PROTOCOL, "§6" + info.getProtocol(),
+								"§6" + info.getModloaderProtocol(), "§6" + info.getGameVersion(),
+								"§6" + info.getModloaderVersion()), true);
 			}
 			return 0;
 		}));
@@ -208,9 +215,8 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 			line2 += "-";
 
 		if (player != null)
-			cmd.getSource().sendSuccess(
-					ClientLanguage.createComponent(player, "cyan.info.header", game, modloaderVersion, line1, line2),
-					true);
+			cmd.getSource().sendSuccess(ClientLanguage.createComponent(player, "cyan.info.header", "§b" + game,
+					"§b" + modloaderVersion, "§b" + line1, "§b" + line2), true);
 		return player;
 	}
 

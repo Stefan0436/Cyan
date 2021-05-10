@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.asf.cyan.api.config.annotations.Comment;
@@ -33,6 +34,14 @@ public abstract class Configuration<T extends Configuration<T>> {
 	@Exclude
 	public static String baseDir = ".";
 
+	private static Consumer<String> warnLogger = null;
+	private static Consumer<String> errorLogger = null;
+
+	public static void setLoggers(Consumer<String> warnLogger, Consumer<String> errorLogger) {
+		Configuration.warnLogger = warnLogger;
+		Configuration.errorLogger = errorLogger;
+	}
+
 	boolean enableSave = false;
 	static ArrayList<Configuration<?>> configStore = new ArrayList<Configuration<?>>();
 	String localBaseDir = "";
@@ -53,7 +62,9 @@ public abstract class Configuration<T extends Configuration<T>> {
 				try {
 					config.writeAll();
 				} catch (IOException e) {
-					// TODO: log error
+					if (errorLogger != null)
+						errorLogger.accept("Failed to write configuration " + config.filename() + ", exception: "
+								+ e.getClass().getTypeName() + ": " + e.getMessage());
 				}
 			}
 		}
@@ -73,6 +84,15 @@ public abstract class Configuration<T extends Configuration<T>> {
 	 * @param baseDir The base directory to use
 	 */
 	public Configuration(String baseDir) {
+		localBaseDir = baseDir;
+		configStore.add(this);
+		if (filename() != null && folder() != null && localBaseDir != null) {
+			base = new File(localBaseDir + "/" + folder());
+			conf = new File(base, filename());
+		}
+	}
+
+	protected void assignFile(String baseDir) {
 		localBaseDir = baseDir;
 		configStore.add(this);
 		if (filename() != null && folder() != null && localBaseDir != null) {
@@ -141,9 +161,12 @@ public abstract class Configuration<T extends Configuration<T>> {
 					f.setAccessible(true);
 					setProp(f, txt, true);
 				} catch (NoSuchFieldException | SecurityException e) {
-					// TODO: Warning log for unrecognized keys
+					if (warnLogger != null)
+						warnLogger.accept("Unrecognized config key '" + key + "', config: " + filename());
 				} catch (IllegalArgumentException | IOException e) {
-					// TODO: Write error to logs
+					if (errorLogger != null)
+						errorLogger.accept("Failed to read configuration '" + filename() + "', exception: "
+								+ e.getClass().getTypeName() + ": " + e.getMessage());
 				}
 			}
 		});
@@ -195,7 +218,10 @@ public abstract class Configuration<T extends Configuration<T>> {
 			}
 		}
 		if (hasChanges() && !hasChanges(false)) { // FIXME: change when value overwriting is implemented
-			oldcontent += System.lineSeparator();
+			if (oldcontent.isBlank()) {
+				oldcontent = "";
+			} else
+				oldcontent += System.lineSeparator();
 		}
 		String ccfg = toString(newfile, oldcontent);
 		if (!ccfg.endsWith(System.lineSeparator()))
@@ -231,14 +257,14 @@ public abstract class Configuration<T extends Configuration<T>> {
 		if (!hasChanges() && !newfile) {
 			return oldContent;
 		}
-		
+
 		if (!newfile && hasChanges() && hasChanges(false)) { // FIXME: change when value overwriting is implemented
 			return toString(true, null);
 		}
 		String value = ObjectSerializer.getCCFGString(this, new CCFGConfigGenerator<T>(this, newfile, oldContent));
 		if (!newfile) {
 			if (!value.isEmpty())
-				value = oldContent + System.lineSeparator() + value;
+				value = (oldContent.isBlank() ? "" : oldContent + System.lineSeparator()) + value;
 			else
 				value = oldContent;
 		}
@@ -250,7 +276,9 @@ public abstract class Configuration<T extends Configuration<T>> {
 						propertiesMemory.put(f.getName(), ObjectSerializer.serialize(val));
 				}
 			} catch (IllegalArgumentException | IllegalAccessException | IOException e) {
-				// TODO: log error
+				if (errorLogger != null)
+					errorLogger.accept("Failed to generate configuration " + filename() + ", exception: "
+							+ e.getClass().getTypeName() + ": " + e.getMessage());
 			}
 		}
 		return value;

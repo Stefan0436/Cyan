@@ -17,6 +17,10 @@ public class OpPermissionProvider implements PermissionProvider {
 
 	@Override
 	public Permission[] getPermissions(UUID target, MinecraftServer server) {
+		if (server.isSingleplayer() && server.getProfileCache().get(target) != null
+				&& server.isSingleplayerOwner(server.getProfileCache().get(target)))
+			return new Permission[] { new Permission("*", Mode.ALLOW) };
+
 		for (ServerOpListEntry op : server.getPlayerList().getOps().getEntries()) {
 			String str = ((GameProfile) ((PlayerEntryExtension) op).getUserCyan()).getId().toString();
 			if (str.equals(target.toString())) {

@@ -32,7 +32,7 @@ public class YggdrasilAuthentication {
 	static UUID token = null;
 	static String authServer = "https://authserver.mojang.com/";
 
-	static class AuthHolder extends Configuration<AuthHolder> {
+	public static class AuthHolder extends Configuration<AuthHolder> {
 
 		public String playerName;
 		public String accessToken;

@@ -393,8 +393,6 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 	 * Retrieves this mod's localized description (localized on language init)
 	 */
 	public String getDescription() {
-		// TODO: localized description
-
 		return desc;
 	}
 

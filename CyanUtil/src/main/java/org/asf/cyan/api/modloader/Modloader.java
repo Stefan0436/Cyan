@@ -14,6 +14,7 @@ import org.asf.cyan.api.events.core.IEventListener;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.api.modloader.information.modloader.LoadPhase;
+import org.asf.cyan.api.modloader.information.mods.IBaseMod;
 import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.api.modloader.information.providers.IGameProvider;
 import org.asf.cyan.api.modloader.information.providers.ILaunchPlatformProvider;
@@ -895,6 +896,16 @@ public abstract class Modloader extends CyanComponent {
 	 * default but can be used to define events.
 	 */
 	protected void postRegister() {
+	}
+
+	/**
+	 * Retrieves a mod instance by its class
+	 * 
+	 * @param modClass Mod class
+	 * @return Mod instance or null
+	 */
+	public <T extends IBaseMod> T getModByClass(Class<T> modClass) {
+		return null;
 	}
 
 }

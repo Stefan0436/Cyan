@@ -152,7 +152,7 @@ public class CyanIDEWrapper {
 		CyanCore.startGame(wrapper, arguments);
 	}
 
-	static class AuthStorage extends Configuration<AuthStorage> {
+	public static class AuthStorage extends Configuration<AuthStorage> {
 		public MinecraftAccountType type;
 		public String login = "";
 

@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import org.asf.cyan.api.internal.ServerGamePacketListenerExtension;
 import org.asf.cyan.api.network.PacketWriter;
 import org.asf.cyan.api.network.channels.PacketChannel;
+import org.asf.cyan.api.util.Colors;
 
 /**
  * 
@@ -71,7 +72,7 @@ public class ClientLanguage {
 						newMessage += "%" + ch;
 						last = false;
 					} else if (last) {
-						newMessage += arguments[i++].toString();
+						newMessage += Colors.RESET + arguments[i++].toString();
 						last = false;
 					} else {
 						newMessage += ch;

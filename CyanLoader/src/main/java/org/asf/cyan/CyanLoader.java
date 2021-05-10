@@ -25,6 +25,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
+import org.asf.cyan.api.config.Configuration;
 import org.asf.cyan.api.events.IEventProvider;
 import org.asf.cyan.api.events.core.EventBusFactory;
 import org.asf.cyan.api.events.extended.IExtendedEvent;
@@ -37,6 +38,7 @@ import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.api.modloader.information.modloader.LoadPhase;
+import org.asf.cyan.api.modloader.information.mods.IBaseMod;
 import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.api.modloader.information.providers.IModProvider;
 import org.asf.cyan.api.versioning.StringVersionProvider;
@@ -216,6 +218,7 @@ public class CyanLoader extends Modloader implements IModProvider {
 	}
 
 	private static void prepare(String side) throws IOException {
+		Configuration.setLoggers(str -> warn(str), str -> error(str));
 		setupModloader(side);
 		loaded = true;
 
@@ -1761,6 +1764,29 @@ public class CyanLoader extends Modloader implements IModProvider {
 
 	public void loadMods() {
 		// TODO
+	}
+
+	/**
+	 * Retrieves a mod instance by its class
+	 * 
+	 * @param modClass Mod class
+	 * @return Mod instance or null
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends IBaseMod> T getModByClass(Class<T> modClass) {
+		for (IMod md : mods) {
+			if (md.getClass().isAssignableFrom(modClass))
+				return (T) md;
+		}
+		for (IMod md : coremods) {
+			if (md.getClass().isAssignableFrom(modClass))
+				return (T) md;
+		}
+		return null;
+	}
+
+	public static void testMod(IMod testEventListeners) { // FIXME: remove
+		CyanLoader.getModloader(CyanLoader.class).mods.add(testEventListeners);
 	}
 
 }

@@ -14,7 +14,7 @@
 	"cyan.dump.message2": "§bDump has been created on the server, §6please remember that you are not allowed to distribute the dump.",
 	"cyan.dump.error": "§bAn error occured on the server, Exception: %s",
 	
-	"cyan.info.header": "§bMinecraft Cyan %s, Modloader Version: %s\n---------------%s---------------------%s\n",
+	"cyan.info.header": "§bMinecraft Cyan %s§b, Modloader Version: %s§b\n---------------%s§b---------------------%s§b\n",
 	"cyan.info.data": "§5Server Brand: §6%s\n§5Client Brand: §6%s\n§5Server Modloader Version: §6%s\n§5Game Version: §6%s\n§5Server Mods: §6%s\n§5Client Mods: §6%s\n",
 	"cyan.info.technical": "§4ModKit Protocol Version: §6%s\n§4Modloader Protocol Version: §6%s\n§4Client ModKit Protocol Version: §6%s\n§4Client Modloader Protocol Version: §6%s\n§4Client Game Version: §6%s\n§4Client Modloader Version: §6%s\n",
 	"cyan.info.mods": "§5Server Mods:\n§4%s\n\n§5Client Mods:\n§4%s\n",

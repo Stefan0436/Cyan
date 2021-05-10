@@ -30,7 +30,7 @@ public abstract class MinecraftSpigotServerModification {
 				.dispatch(new ServerLevelLoadEventObject(world.getServer(), world, spawn, path)).getResult();
 	}
 
-	@InjectAt(location = InjectLocation.TAIL)
+	@InjectAt(location = InjectLocation.HEAD)
 	public void safeShutdown(boolean wait, boolean restart) {
 		Object self = this;
 		ServerShutdownEvent.getInstance().dispatch(new ServerShutdownEventObject((MinecraftServer) self)).getResult();
