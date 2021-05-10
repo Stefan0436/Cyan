@@ -23,6 +23,7 @@ import org.asf.cyan.api.permissions.Permission.Mode;
 import org.asf.cyan.api.util.server.language.ClientLanguage;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.api.transforming.information.metadata.TransformerMetadata;
+import org.asf.cyan.mods.events.AttachEvent;
 import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.events.SimpleEvent;
 import org.asf.cyan.mods.internal.BaseEventController;
@@ -63,7 +64,10 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 
 		ClientLanguage.registerLanguageKey("cyan.commands.cyan.description", "Utility command for the cyan modlaoder.");
 		ClientLanguage.registerLanguageKey("cyan.commands.cyan.usage", "<task> [arguments...]");
+	}
 
+	@AttachEvent(value = "mods.preinit", synchronize = true)
+	public void preInit() {
 		CommandManager.getMain().registerCommand(this);
 	}
 

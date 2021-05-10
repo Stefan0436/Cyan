@@ -621,6 +621,7 @@ configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each {
 createEclipseLaunches {
 	disable = true;
 }
+createEclipseLaunches.dependsOn tasks.getByPath(":Fluid:jar")
 createEclipseLaunches.dependsOn 'eclipse'
 
 task createDeobfLaunch (type: EclipseLaunchGenerator) {

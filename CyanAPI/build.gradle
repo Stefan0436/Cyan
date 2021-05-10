@@ -206,6 +206,7 @@ dependencies {
     
 	implementation project(":CyanComponents")
 	implementation project(":Fluid")
+	implementation project(":MTK")
 	implementation project(":CyanUtil")
 	implementation project(":CCFG")
 	implementation project(":CyanCore")

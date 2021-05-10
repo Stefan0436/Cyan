@@ -33,7 +33,7 @@ public abstract class CommandManager implements IEventListenerContainer { // TOD
 	public abstract CommandManager newInstance();
 
 	/**
-	 * Registers the given command
+	 * Registers the given command (do not call more than once)
 	 * 
 	 * @param command Command to register
 	 * @return Self
