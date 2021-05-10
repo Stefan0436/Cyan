@@ -60,8 +60,8 @@ import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType
 
 apply from: '../config.gradle'
 project(":").childProjects.each { proj ->
-	if (!proj.value.name.equals(project.name) && !proj.value.name.equals("CyanAPI")) {
-		project.evaluationDependsOn ":"+proj.value.name
+	if (!proj.value.name.equals(project.name) && !proj.value.name.contains("CyanAPI") && !proj.value.name.contains("ModKit")) {
+		project.evaluationDependsOn ":" + proj.value.name
 	}
 }
 
@@ -355,7 +355,7 @@ dependencies {
 	wrapper group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
-
+	
 	wrapper project(":CCFG")
 	implementation project(":CCFG")
 
@@ -621,6 +621,7 @@ configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each {
 createEclipseLaunches {
 	disable = true;
 }
+createEclipseLaunches.dependsOn 'processResources'
 createEclipseLaunches.dependsOn tasks.getByPath(":Fluid:jar")
 createEclipseLaunches.dependsOn 'eclipse'
 
@@ -648,7 +649,7 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 
 		File jar = MinecraftModdingToolkit.deobfuscateJar(version, GameSide.CLIENT)
 		classpath jar
-
+		
 		libsMC.forEach { k, v ->
 			if (v != null) {
 				classpath k, v
@@ -697,7 +698,7 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 
 		File jar = MinecraftInstallationToolkit.getVersionJar(version, GameSide.CLIENT)
 		classpath jar
-
+		
 		libsMC.forEach { k, v ->
 			if (v != null) {
 				classpath k, v
@@ -747,8 +748,6 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 		mainClass project.group+".CyanIDEWrapper"
 
 		File jar = MinecraftModdingToolkit.deobfuscateJar(version, GameSide.SERVER)
-		classpath jar
-
 		libsMC.forEach { k, v ->
 			if (v != null) {
 				classpath k, v
@@ -756,6 +755,7 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 				classpath k
 			}
 		}
+		classpath jar
 
 		project(":").childProjects.each { proj ->
 			classpath proj.value
@@ -792,8 +792,6 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 		mainClass project.group+".CyanIDEWrapper"
 
 		File jar = MinecraftInstallationToolkit.getVersionJar(version, GameSide.SERVER)
-		classpath jar
-
 		libsMC.forEach { k, v ->
 			if (v != null) {
 				classpath k, v
@@ -801,6 +799,7 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 				classpath k
 			}
 		}
+		classpath jar
 
 		project(":").childProjects.each { proj ->
 			classpath proj.value
@@ -1627,7 +1626,8 @@ processResources {
 		}
 	}
 
-	def apiID = null
+	def apiID1 = null
+	def apiID2 = null
 	libraries.each { k, v ->
 		def name = null
 		def version = null
@@ -1643,7 +1643,7 @@ processResources {
 		}
 	}
 
-	libraryVersionMap.put("ModKit-" + project(":CyanAPI").ext.specVersion, project(":CyanAPI").version);
+	libraryVersionMap.put("ModKit-" + modkit, project(":CyanAPI").version);
 
 	for (String key : gameVersions.keySet()) {
 		def val = gameVersions.get(key).replaceAll("\n", "\n    ")
@@ -1780,16 +1780,21 @@ processResources {
 	inputs.property "cyanfabricsupportversions", "${cyanfabricsupportversions}"
 	inputs.property "cyanpapersupportversions", "${cyanpapersupportversions}"
 
-	project(":CyanAPI").afterEvaluate {
+	project(":ModKit").afterEvaluate {
 		def projbins = ""
 		def resources = ""
 		def libs="["+System.lineSeparator()
 
 		if (!modloader.startsWith("paper-")) {
 			def apiJarTask = project(":CyanAPI").tasks.getByName("platformRiftJarClient")
-			apiID = "org.asf.cyan:CyanAPI:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
-			libraries.put(apiID, apiJarTask.getArchiveFile().get().getAsFile());
-			librarysources.put(apiID, fallback_url)
+			apiID1 = "org.asf.cyan:CyanAPI:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
+			libraries.put(apiID1, apiJarTask.getArchiveFile().get().getAsFile());
+			librarysources.put(apiID1, fallback_url)
+			
+			apiJarTask = project(":ModKit").tasks.getByName("platformRiftJarClient")
+			apiID2 = "org.asf.cyan:ModKit:" + project(":ModKit").version + "-" + apiJarTask.getArchiveClassifier().get()
+			libraries.put(apiID2, apiJarTask.getArchiveFile().get().getAsFile());
+			librarysources.put(apiID2, fallback_url)
 		}
 
 		libraries.each { k, v ->
@@ -1887,8 +1892,10 @@ processResources {
 			expand(props)
 		}
 
-		if (apiID != null)
-			libraries.remove(apiID)
+		if (apiID1 != null)
+			libraries.remove(apiID1)
+		if (apiID2 != null)
+			libraries.remove(apiID2)
 	}
 }
 
@@ -1901,12 +1908,19 @@ def versionFilesDbg = [
 ]
 
 task gameData () {
-	def apiID = ""
+	def apiID1 = ""
+	def apiID2 = ""
 	doLast {
 		def apiJarTask = tasks.getByPath(":CyanAPI:platformRiftJarClient")
-		apiID = "org.asf.cyan:CyanAPI:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
-		libraries.put(apiID, apiJarTask.archivePath);
+		apiID1 = "org.asf.cyan:CyanAPI:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
+		libraries.put(apiID1, apiJarTask.archivePath);
+		
+		apiJarTask = tasks.getByPath(":ModKit:platformRiftJarClient")
+		apiID2 = "org.asf.cyan:ModKit:" + project(":ModKit").version + "-" + apiJarTask.getArchiveClassifier().get()
+		libraries.put(apiID2, apiJarTask.archivePath);
+		
 		println "Generating client folders..."
+		
 		def versions = new File("${buildDir}", project.version+"/.minecraft/versions/${exactgameversion}-cyan-"+cyanversion)
 		versions.mkdirs()
 		def libs = new File("${buildDir}", project.version+"/.minecraft/libraries/")
@@ -1978,7 +1992,8 @@ task gameData () {
 				rename v.getName(), k
 			}
 		}
-		libraries.remove(apiID)
+		libraries.remove(apiID1)
+		libraries.remove(apiID2)
 	}
 }
 gameData.dependsOn processResources
@@ -2017,7 +2032,8 @@ HashMap<String, File> scanFiles(File inp, String start, String... extensions) {
 
 task serverJar (type: Jar, dependsOn: build) {
 	def dest = null
-	def apiID = null
+	def apiID1 = null
+	def apiID2 = null
 
 	dest = file('../build/Wrapper/Server jars/'+cyanversion+"-mc-"+exactgameversion)
 	if (!dest.exists())
@@ -2063,8 +2079,13 @@ task serverJar (type: Jar, dependsOn: build) {
 
 	doFirst {
 		def apiJarTask = tasks.getByPath(":CyanAPI:platformRiftJarServer")
-		apiID = "org.asf.cyan:CyanAPI:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
-		libraries.put(apiID, apiJarTask.archivePath);
+		apiID1 = "org.asf.cyan:CyanAPI:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
+		libraries.put(apiID1, apiJarTask.archivePath);
+		
+		apiJarTask = tasks.getByPath(":ModKit:platformRiftJarServer")
+		apiID2 = "org.asf.cyan:ModKit:" + project(":ModKit").version + "-" + apiJarTask.getArchiveClassifier().get()
+		libraries.put(apiID2, apiJarTask.archivePath);
+		
 		libraries.forEach { k, v ->
 			String[] information = k.split(":")
 			String group = ""
@@ -2091,7 +2112,8 @@ task serverJar (type: Jar, dependsOn: build) {
 				cyanclasspath += " "+lib
 			}
 		}
-		libraries.remove(apiID)
+		libraries.remove(apiID1)
+		libraries.remove(apiID2)
 
 		manifest {
 			attributes([

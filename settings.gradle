@@ -11,4 +11,10 @@ include('MTK')
 include('Fluid')
 include('ClassTrust')
 include('TrustExplorer')
-include('CyanAPI')
+
+apply from: 'config.gradle'
+include("ModKit-$modkit")
+project(":ModKit-$modkit").name = "ModKit"
+
+include("CyanAPI-$modkit-$minecraft")
+project(":CyanAPI-$modkit-$minecraft").name = "CyanAPI"

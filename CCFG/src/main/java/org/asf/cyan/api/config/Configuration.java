@@ -218,7 +218,7 @@ public abstract class Configuration<T extends Configuration<T>> {
 			}
 		}
 		if (hasChanges() && !hasChanges(false)) { // FIXME: change when value overwriting is implemented
-			if (oldcontent.isBlank()) {
+			if (oldcontent == null || oldcontent.isBlank()) {
 				oldcontent = "";
 			} else
 				oldcontent += System.lineSeparator();

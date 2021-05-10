@@ -350,8 +350,8 @@ public abstract class TransformerMetadata extends CyanComponent {
 		if (!errorReportFile.exists())
 			Files.writeString(errorReportFile.toPath(), errorReport.toString());
 
-		dumpBacktraceNoStacktrace(output, pool, classesNew, TransformerMetadata::debug, TransformerMetadata::warn,
-				TransformerMetadata::warn, TransformerMetadata::error);
+		dumpBacktraceNoStacktrace(output, pool, classesNew, str -> debug(str), str -> warn(str), str -> warn(str),
+				(str, e) -> error(str, e));
 	}
 
 	public void dumpBacktraceNoStacktrace(File output, FluidClassPool pool, boolean classesNew,

@@ -21,6 +21,10 @@ import org.asf.cyan.cornflower.gradle.utilities.ITaskExtender;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Internal;
+import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.AbstractArchiveTask;
@@ -77,10 +81,12 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 	public String ctcVersion = null;
 	public File outputFile = null;
 
+	@Internal
 	public String getVersion() {
 		return ctcVersion;
 	}
 
+	@OutputFile
 	public File getOutput() {
 		return outputFile;
 	}
@@ -123,6 +129,7 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 		}
 	}
 
+	@InputFiles
 	private void addInput(File[] input) throws IOException {
 		for (File file : input) {
 			if (!file.exists())
@@ -151,23 +158,28 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 		inputCache.add(input.get().getAsFile());
 	}
 
+	@Input
 	public void source(String input) {
 		inputs.add(input);
 	}
 
+	@Input
 	public void source(String[] input) {
 		for (String inp : input)
 			source(inp);
 	}
 
+	@OutputFile
 	public void destination(File output) throws IOException {
 		destination(output.getCanonicalPath());
 	}
 
+	@Internal
 	public void destination(String output) {
 		this.outputStr = output;
 	}
 
+	@Internal
 	public void destination(URL output) {
 		destination(output.toString());
 	}
