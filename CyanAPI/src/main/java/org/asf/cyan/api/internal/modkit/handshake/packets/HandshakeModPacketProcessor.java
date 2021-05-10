@@ -3,7 +3,9 @@ package org.asf.cyan.api.internal.modkit.handshake.packets;
 import java.util.HashMap;
 
 import org.asf.cyan.api.events.network.CyanServerHandshakeEvent;
+import org.asf.cyan.api.events.network.ServerSideConnectedEvent;
 import org.asf.cyan.api.events.objects.network.ServerConnectionEventObject;
+import org.asf.cyan.api.internal.ServerGamePacketListenerExtension;
 import org.asf.cyan.api.internal.modkit.handshake.CyanHandshakePacketChannel;
 import org.asf.cyan.api.internal.modkit.handshake.packets.content.HandshakeFailedPacket;
 import org.asf.cyan.api.internal.modkit.handshake.packets.content.HandshakeModPacket;
@@ -119,19 +121,22 @@ public class HandshakeModPacketProcessor extends ServerPacketProcessor {
 			getPlayer().connection
 					.disconnect(new TranslatableComponent(response.language, missingClient, missingServer));
 		} else {
-			CyanHandshakePacketChannel.assignModloader(getPlayer(), packet.entries.get("game"),
-					packet.clientProtocol, packet.entries.get("modloader"));
-			
+			CyanHandshakePacketChannel.assignModloader(getPlayer(), packet.entries.get("game"), packet.clientProtocol,
+					packet.entries.get("modloader"));
+
 			for (String id : packet.entries.keySet()) {
 				if (!id.equals("modloader") && !id.equals("game")) {
 					CyanHandshakePacketChannel.assignMod(getPlayer(), id, packet.entries.get(id));
 				}
 			}
 
+			((ServerGamePacketListenerExtension) getPlayer().connection).setConnectedCyan(true);
 			getChannel().sendPacket("handshake.finish");
 			CyanServerHandshakeEvent.getInstance().dispatch(
 					new ServerConnectionEventObject(getConnection(), getServer(), getPlayer(), getClientBrand()))
 					.getResult();
+			ServerSideConnectedEvent.getInstance().dispatch(
+					new ServerConnectionEventObject(getConnection(), getServer(), getPlayer(), getClientBrand()));
 		}
 	}
 

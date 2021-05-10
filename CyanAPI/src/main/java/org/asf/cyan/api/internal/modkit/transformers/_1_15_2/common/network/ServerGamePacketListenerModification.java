@@ -1,5 +1,7 @@
 package org.asf.cyan.api.internal.modkit.transformers._1_15_2.common.network;
 
+import org.asf.cyan.api.events.network.PlayerLogoutEvent;
+import org.asf.cyan.api.events.objects.network.PlayerLogoutEventObject;
 import org.asf.cyan.api.internal.ServerGamePacketListenerExtension;
 import org.asf.cyan.api.internal.modkit.components._1_15_2.common.network.packets.NetworkHooks;
 import org.asf.cyan.fluid.api.FluidTransformer;
@@ -9,6 +11,7 @@ import org.asf.cyan.fluid.api.transforming.TargetType;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
 import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,14 +25,29 @@ public class ServerGamePacketListenerModification implements ServerGamePacketLis
 	public final Connection connection = null;
 	public ServerPlayer player;
 
+	public boolean connectedCyan = false;
+
 	@InjectAt(location = InjectLocation.HEAD)
 	public void handleCustomPayload(
 			@TargetType(target = "net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket") ServerboundCustomPayloadPacket packet) {
-		if (NetworkHooks.handlePayload(packet, server, connection, player, clientBrand, this::setBrand)) {
+		if (NetworkHooks.handlePayload(packet, server, connection, player, clientBrand, this::setBrand,
+				this::setConnectedCyan)) {
 			return;
 		}
 
 		return;
+	}
+
+	public void setConnectedCyan(boolean state) {
+		connectedCyan = state;
+	}
+
+	@InjectAt(location = InjectLocation.TAIL)
+	public void onDisconnect(Component message) {
+		if (connectedCyan)
+			PlayerLogoutEvent.getInstance()
+					.dispatch(new PlayerLogoutEventObject(connection, server, player, clientBrand, message))
+					.getResult();
 	}
 
 	private void setBrand(String brand) {

@@ -764,8 +764,7 @@ public class Fluid extends CyanComponent {
 						if (methodMap.mappingType.equals(MAPTYPE.METHOD) && !Modifier.isPrivate(method.access)
 								&& methodMap.obfuscated.equals(method.name)
 								&& Arrays.equals(types, methodMap.argumentTypes)) {
-							if (!target.methods.containsKey(methodMap.obfuscated + " " + method.desc))
-								target.methods.put(methodMap.obfuscated + " " + method.desc, methodMap.name);
+							target.methods.put(methodMap.obfuscated + " " + method.desc, methodMap.name);
 							break;
 						}
 					}
@@ -775,8 +774,7 @@ public class Fluid extends CyanComponent {
 					for (Mapping<?> fieldMap : clsMapping.mappings) {
 						if (fieldMap.mappingType.equals(MAPTYPE.PROPERTY) && !Modifier.isPrivate(field.access)
 								&& fieldMap.obfuscated.equals(field.name)) {
-							if (!target.fields.containsKey(fieldMap.obfuscated + " " + field.desc))
-								target.fields.put(fieldMap.obfuscated + " " + field.desc, fieldMap.name);
+							target.fields.put(fieldMap.obfuscated + " " + field.desc, fieldMap.name);
 							break;
 						}
 					}
@@ -832,8 +830,7 @@ public class Fluid extends CyanComponent {
 						if (methodMap.mappingType.equals(MAPTYPE.METHOD) && !Modifier.isPrivate(method.access)
 								&& methodMap.obfuscated.equals(method.name)
 								&& Arrays.equals(types, methodMap.argumentTypes)) {
-							if (!target.methods.containsKey(methodMap.obfuscated + " " + method.desc))
-								target.methods.put(methodMap.obfuscated + " " + method.desc, methodMap.name);
+							target.methods.put(methodMap.obfuscated + " " + method.desc, methodMap.name);
 							break;
 						}
 					}
@@ -843,8 +840,7 @@ public class Fluid extends CyanComponent {
 					for (Mapping<?> fieldMap : clsMapping.mappings) {
 						if (fieldMap.mappingType.equals(MAPTYPE.PROPERTY) && !Modifier.isPrivate(field.access)
 								&& fieldMap.obfuscated.equals(field.name)) {
-							if (!target.fields.containsKey(fieldMap.obfuscated + " " + field.desc))
-								target.fields.put(fieldMap.obfuscated + " " + field.desc, fieldMap.name);
+							target.fields.put(fieldMap.obfuscated + " " + field.desc, fieldMap.name);
 							break;
 						}
 					}

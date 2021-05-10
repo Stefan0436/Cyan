@@ -54,7 +54,8 @@ public class NetworkHooks {
 	}
 
 	public static boolean handlePayload(ServerboundCustomPayloadPacket packet, MinecraftServer server,
-			Connection connection, ServerPlayer player, String clientBrand, Consumer<String> brandOutput) {
+			Connection connection, ServerPlayer player, String clientBrand, Consumer<String> brandOutput,
+			Consumer<Boolean> connectedOutput) {
 
 		FriendlyByteBuf data = ((ServerboundCustomPayloadPacketExtension) packet).readDataCyan();
 		ResourceLocation id = ((ServerboundCustomPayloadPacketExtension) packet).getIdentifierCyan();
@@ -79,8 +80,6 @@ public class NetworkHooks {
 			brandOutput.accept(clientBrand);
 			CyanHandshakePacketChannel.assignBrand(player, clientBrand);
 			if (first) {
-				ServerSideConnectedEvent.getInstance()
-						.dispatch(new ServerConnectionEventObject(connection, server, player, clientBrand)).getResult();
 				connection.send(new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.BRAND,
 						new FriendlyByteBuf(Unpooled.buffer()).writeUtf(server.getServerModName())));
 				if (clientBrand.startsWith("Cyan")) {
@@ -93,6 +92,11 @@ public class NetworkHooks {
 					player.connection.disconnect(new TextComponent(
 							"§9This server runs a Cyan-like modloader and requires some client mods.\nPlease install a compatible modloader before trying again."));
 					return true;
+				} else {
+					ServerSideConnectedEvent.getInstance()
+							.dispatch(new ServerConnectionEventObject(connection, server, player, clientBrand))
+							.getResult();
+					connectedOutput.accept(true);
 				}
 			}
 

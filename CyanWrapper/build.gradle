@@ -6,7 +6,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A33'
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A35'
 	}
 }
 

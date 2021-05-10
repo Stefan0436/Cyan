@@ -3,18 +3,24 @@ package org.asf.cyan.api.internal.test.sides;
 import java.util.Optional;
 
 import org.asf.cyan.api.events.core.ReloadEvent;
+import org.asf.cyan.api.events.core.ServerShutdownEvent;
 import org.asf.cyan.api.events.entities.EntityAttributesEvent;
 import org.asf.cyan.api.events.entities.EntityRegistryEvent;
 import org.asf.cyan.api.events.ingame.commands.CommandManagerStartupEvent;
+import org.asf.cyan.api.events.ingame.level.ServerLevelLoadEvent;
 import org.asf.cyan.api.events.ingame.tags.TagManagerStartupEvent;
 import org.asf.cyan.api.events.network.CyanServerHandshakeEvent;
+import org.asf.cyan.api.events.network.PlayerLogoutEvent;
 import org.asf.cyan.api.events.network.ServerSideConnectedEvent;
 import org.asf.cyan.api.events.objects.core.ReloadEventObject;
+import org.asf.cyan.api.events.objects.core.ServerShutdownEventObject;
 import org.asf.cyan.api.events.objects.entities.EntityAttributesEventObject;
 import org.asf.cyan.api.events.objects.entities.EntityRegistryEventObject;
 import org.asf.cyan.api.events.objects.entities.EntityRegistryEventObject.EntityRegistryCallback;
 import org.asf.cyan.api.events.objects.ingame.commands.CommandManagerEventObject;
+import org.asf.cyan.api.events.objects.ingame.level.ServerLevelLoadEventObject;
 import org.asf.cyan.api.events.objects.ingame.tags.TagManagerEventObject;
+import org.asf.cyan.api.events.objects.network.PlayerLogoutEventObject;
 import org.asf.cyan.api.events.objects.network.ServerConnectionEventObject;
 import org.asf.cyan.api.events.objects.resources.ResourceManagerEventObject;
 import org.asf.cyan.api.events.resources.manager.ResourceManagerStartupEvent;
@@ -69,6 +75,21 @@ public class ServerEvents implements IEventListenerContainer {
 
 	@SimpleEvent(CyanServerHandshakeEvent.class)
 	private void successfulCyanHandshakeServer(ServerConnectionEventObject event) {
+		event = event;
+	}
+
+	@SimpleEvent(PlayerLogoutEvent.class)
+	private void logout(PlayerLogoutEventObject event) {
+		event = event;
+	}
+
+	@SimpleEvent(ServerShutdownEvent.class)
+	private void shutdown(ServerShutdownEventObject event) {
+		event = event;
+	}
+
+	@SimpleEvent(ServerLevelLoadEvent.class)
+	private void loadWorld(ServerLevelLoadEventObject event) {
 		event = event;
 	}
 

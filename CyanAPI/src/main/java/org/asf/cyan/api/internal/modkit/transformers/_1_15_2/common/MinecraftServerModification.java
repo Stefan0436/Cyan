@@ -1,6 +1,8 @@
 package org.asf.cyan.api.internal.modkit.transformers._1_15_2.common;
 
+import org.asf.cyan.api.events.core.ServerShutdownEvent;
 import org.asf.cyan.api.events.ingame.level.ServerLevelLoadEvent;
+import org.asf.cyan.api.events.objects.core.ServerShutdownEventObject;
 import org.asf.cyan.api.events.objects.ingame.level.ServerLevelLoadEventObject;
 import org.asf.cyan.api.fluid.annotations.PlatformExclude;
 import org.asf.cyan.fluid.api.FluidTransformer;
@@ -12,6 +14,7 @@ import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 
@@ -30,5 +33,11 @@ public abstract class MinecraftServerModification {
 		ResourceLocation path = world.dimension().location();
 		ServerLevelLoadEvent.getInstance()
 				.dispatch(new ServerLevelLoadEventObject(world.getServer(), world, spawn, path)).getResult();
+	}
+
+	@InjectAt(location = InjectLocation.TAIL)
+	public void halt(boolean wait) {
+		Object self = this;
+		ServerShutdownEvent.getInstance().dispatch(new ServerShutdownEventObject((MinecraftServer) self)).getResult();
 	}
 }
