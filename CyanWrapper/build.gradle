@@ -1785,7 +1785,7 @@ processResources {
 		def libs="["+System.lineSeparator()
 
 		if (!modloader.startsWith("paper-")) {
-			def apiJarTask = tasks.getByPath(":CyanAPI:platformRiftJarClient")
+			def apiJarTask = project(":CyanAPI").tasks.getByName("platformRiftJarClient")
 			apiID = "org.asf.cyan:CyanAPI:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
 			libraries.put(apiID, apiJarTask.getArchiveFile().get().getAsFile());
 			librarysources.put(apiID, fallback_url)

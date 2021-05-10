@@ -55,12 +55,15 @@ if (!MinecraftInstallationToolkit.isVersionManifestSaved(info))
 	MinecraftInstallationToolkit.saveVersionManifest(info)
 if (!project.hasProperty("uncheckedClient") && !MinecraftInstallationToolkit.checkVersion(info))
 	MinecraftInstallationToolkit.downloadVersionAndLibraries(info)
+	
+MinecraftInstallationToolkit.downloadVersionJar(info, GameSide.CLIENT)
+MinecraftInstallationToolkit.downloadVersionJar(info, GameSide.SERVER)
 
 eclipseClasspath {
 	doFirst {		
 		MinecraftModdingToolkit.sourcesJar(info, GameSide.CLIENT)
 		MinecraftModdingToolkit.deobfuscateJar(info, GameSide.SERVER)
-//		MinecraftModdingToolkit.sourcesJar(info, GameSide.SERVER)
+		MinecraftModdingToolkit.sourcesJar(info, GameSide.SERVER)
 	}
 }	
 
