@@ -43,12 +43,16 @@ import java.time.OffsetDateTime
 Log4jToGradleAppender.logInfo()
 
 MinecraftVersionInfo info = MinecraftVersionToolkit.createOrGetVersion(minecraft, MinecraftVersionType.UNKNOWN, null, OffsetDateTime.now())
-if (!MinecraftMappingsToolkit.areMappingsAvailable(info, GameSide.CLIENT))
+if (!MinecraftMappingsToolkit.areMappingsAvailable(info, GameSide.CLIENT)) {
 	MinecraftMappingsToolkit.downloadVanillaMappings(info, GameSide.CLIENT)
+	MinecraftMappingsToolkit.saveMappingsToDisk(info, GameSide.CLIENT)
+}
 MinecraftMappingsToolkit.loadMappings(info, GameSide.CLIENT)
 
-if (!MinecraftMappingsToolkit.areMappingsAvailable(info, GameSide.SERVER))
+if (!MinecraftMappingsToolkit.areMappingsAvailable(info, GameSide.SERVER)) {
 	MinecraftMappingsToolkit.downloadVanillaMappings(info, GameSide.SERVER)
+	MinecraftMappingsToolkit.saveMappingsToDisk(info, GameSide.SERVER)
+}
 MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER)
 
 if (!MinecraftInstallationToolkit.isVersionManifestSaved(info))
