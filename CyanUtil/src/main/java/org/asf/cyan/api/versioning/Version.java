@@ -159,6 +159,11 @@ public class Version {
 				return false;
 			i++;
 		}
+		if (i < other.segments.size()) {
+			if (isSnapshot(other.segments.get(i)))
+				return true;
+			return false;
+		}
 
 		return true;
 	}

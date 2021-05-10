@@ -22,15 +22,6 @@ import org.asf.cyan.mods.internal.BaseEventController;
 @CYAN_COMPONENT
 public class TestEventListeners extends CyanComponent implements IEventListenerContainer, IMod {
 
-	public TestEventListeners() throws IOException {
-		CyanLoader.testMod(this);
-		@SuppressWarnings("unchecked")
-		ConfigManager<TestEventListeners> manager = (ConfigManager<TestEventListeners>) ConfigManager
-				.getFor(getClass());
-		ModConfigTest config = manager.getConfiguration(ModConfigTest.class);
-		config = config;
-	}
-
 	protected static void initComponent() throws IOException {
 		BaseEventController.addEventContainer(new TestEventListeners());
 		BaseEventController.addEventContainer(new ServerEvents());
@@ -41,8 +32,14 @@ public class TestEventListeners extends CyanComponent implements IEventListenerC
 		}
 	}
 
-	@AttachEvent("mods.preinit")
-	private void preInit() {
+	@AttachEvent(value = "mods.preinit", synchronize = true)
+	private void preInit() throws IOException {
+		CyanLoader.testMod(this);
+		@SuppressWarnings("unchecked")
+		ConfigManager<TestEventListeners> manager = (ConfigManager<TestEventListeners>) ConfigManager
+				.getFor(getClass());
+		ModConfigTest config = manager.getConfiguration(ModConfigTest.class);
+		config = config;
 		this.equals(this); // OK
 	}
 
