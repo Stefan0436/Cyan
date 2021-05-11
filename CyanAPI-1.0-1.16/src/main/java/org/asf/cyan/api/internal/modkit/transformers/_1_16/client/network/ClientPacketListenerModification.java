@@ -5,7 +5,7 @@ import org.asf.cyan.api.events.entities.EntityRegistryEvent.EntityTypeEntry;
 import org.asf.cyan.api.events.network.ClientSideLoginEvent;
 import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;
 import org.asf.cyan.api.internal.ClientPacketListenerExtension;
-import org.asf.cyan.api.internal.modkit.components._1_16.common.network.packets.NetworkHooks;
+import org.asf.cyan.api.internal.modkit.components._1_16.common.network.NetworkHooks;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.LocalVariable;

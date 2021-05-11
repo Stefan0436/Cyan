@@ -577,14 +577,6 @@ public class Fluid extends CyanComponent {
 							}
 						}
 
-						if (cls.name.contains("$")) {
-							String host = cls.name.substring(0, cls.name.lastIndexOf("$"));
-							try {
-								mapNested(root, mp, target, pool.getClassNode(host), pool);
-							} catch (ClassNotFoundException e) {
-							}
-						}
-
 						mp.put(clsMapping.obfuscated.replaceAll("\\.", "/"), target);
 						if (i % 100 == 0) {
 							info("Mapped " + i + "/" + classes.length + " classes.");
@@ -789,80 +781,6 @@ public class Fluid extends CyanComponent {
 				for (String inter : cls.interfaces) {
 					try {
 						mapSuperAndInterfaces(root, mp, target, pool.getClassNode(inter), pool);
-					} catch (ClassNotFoundException e) {
-					}
-				}
-
-				break;
-			}
-		}
-	}
-
-	static void mapNested(Mapping<?> root, DeobfuscationTargetMap mp, DeobfuscationTarget target, ClassNode cls,
-			FluidClassPool pool) {
-
-		for (Mapping<?> clsMapping : root.mappings) {
-			if (clsMapping.obfuscated.equals(cls.name.replaceAll("/", "."))) {
-				for (MethodNode method : cls.methods) {
-					String str = "";
-					String desc = method.desc;
-					String[] types = Fluid.parseMultipleDescriptors(
-							desc.substring(1).substring(0, desc.substring(1).lastIndexOf(")")));
-
-					for (int index = 0; index < types.length; index++) {
-						String type = types[index];
-						String tSuffix = "";
-						if (type.contains("[]")) {
-							tSuffix = type.substring(type.indexOf("["));
-							type = type.substring(0, type.indexOf("["));
-						}
-						Mapping<?> mp2 = root.mapClassToMapping(type, t -> true, true);
-						if (mp2 != null)
-							types[index] = mp2.name + tSuffix;
-
-						if (str.equals(""))
-							str = type + tSuffix;
-						else
-							str += ", " + type + tSuffix;
-					}
-
-					for (Mapping<?> methodMap : clsMapping.mappings) {
-						if (methodMap.mappingType.equals(MAPTYPE.METHOD) && !Modifier.isPrivate(method.access)
-								&& methodMap.obfuscated.equals(method.name)
-								&& Arrays.equals(types, methodMap.argumentTypes)) {
-							target.methods.put(methodMap.obfuscated + " " + method.desc, methodMap.name);
-							break;
-						}
-					}
-				}
-
-				for (FieldNode field : cls.fields) {
-					for (Mapping<?> fieldMap : clsMapping.mappings) {
-						if (fieldMap.mappingType.equals(MAPTYPE.PROPERTY) && !Modifier.isPrivate(field.access)
-								&& fieldMap.obfuscated.equals(field.name)) {
-							target.fields.put(fieldMap.obfuscated + " " + field.desc, fieldMap.name);
-							break;
-						}
-					}
-				}
-
-				if (cls.superName != null && !cls.superName.equals(Object.class.getTypeName().replaceAll("\\.", "/"))) {
-					try {
-						mapSuperAndInterfaces(root, mp, target, pool.getClassNode(cls.superName), pool);
-					} catch (ClassNotFoundException e) {
-					}
-				}
-				for (String inter : cls.interfaces) {
-					try {
-						mapSuperAndInterfaces(root, mp, target, pool.getClassNode(inter), pool);
-					} catch (ClassNotFoundException e) {
-					}
-				}
-
-				if (cls.name.contains("$")) {
-					String host = cls.name.substring(0, cls.name.lastIndexOf("$"));
-					try {
-						mapNested(root, mp, target, pool.getClassNode(host), pool);
 					} catch (ClassNotFoundException e) {
 					}
 				}

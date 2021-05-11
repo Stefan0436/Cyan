@@ -45,7 +45,7 @@ public abstract class AbstractPacketProcessor extends CyanComponent {
 	/**
 	 * Retrieves the packet channel
 	 */
-	protected PacketChannel getChannel() {
+	public PacketChannel getChannel() {
 		return channel;
 	}
 

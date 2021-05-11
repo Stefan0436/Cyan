@@ -11,10 +11,6 @@ import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.events.ingame.commands.CommandManagerStartupEvent;
 import org.asf.cyan.api.events.objects.ingame.commands.CommandManagerEventObject;
 import org.asf.cyan.api.internal.IModKitComponent;
-import org.asf.cyan.api.internal.modkit.handshake.CyanHandshakePacketChannel;
-import org.asf.cyan.api.internal.modkit.handshake.CyanHandshakePacketChannel.ClientInformation;
-import org.asf.cyan.api.internal.modkit.handshake.packets.HandshakeLoaderPacketProcessor;
-import org.asf.cyan.api.internal.modkit.handshake.packets.HandshakeProtocolPacketProcessor;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.api.permissions.Permission;
@@ -23,6 +19,9 @@ import org.asf.cyan.api.permissions.Permission.Mode;
 import org.asf.cyan.api.util.server.language.ClientLanguage;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.api.transforming.information.metadata.TransformerMetadata;
+import org.asf.cyan.internal.modkitimpl.handshake.CyanHandshakePacketChannel;
+import org.asf.cyan.internal.modkitimpl.handshake.CyanHandshakePacketChannel.ClientInformation;
+import org.asf.cyan.internal.modkitimpl.info.Protocols;
 import org.asf.cyan.mods.events.AttachEvent;
 import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.events.SimpleEvent;
@@ -181,8 +180,8 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 						.sendSuccess(
 								new TextComponent("\n" + ClientLanguage
 										.createComponent(player, "cyan.info.technical",
-												"§6" + HandshakeProtocolPacketProcessor.PROTOCOL,
-												"§6" + HandshakeLoaderPacketProcessor.PROTOCOL,
+												"§6" + Protocols.MODKIT_PROTOCOL,
+												"§6" + Protocols.LOADER_PROTOCOL,
 												"§6" + info.getProtocol(), "§6" + info.getModloaderProtocol(),
 												"§6" + info.getGameVersion(), "§6" + info.getModloaderVersion())
 										.getString()),
@@ -190,8 +189,8 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 			} else {
 				cmd.getSource()
 						.sendSuccess(ClientLanguage.createComponent(player, "cyan.info.technical",
-								"§6" + HandshakeProtocolPacketProcessor.PROTOCOL,
-								"§6" + HandshakeLoaderPacketProcessor.PROTOCOL, "§6" + info.getProtocol(),
+								"§6" + Protocols.MODKIT_PROTOCOL,
+								"§6" + Protocols.LOADER_PROTOCOL, "§6" + info.getProtocol(),
 								"§6" + info.getModloaderProtocol(), "§6" + info.getGameVersion(),
 								"§6" + info.getModloaderVersion()), true);
 			}

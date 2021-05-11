@@ -32,7 +32,19 @@ public abstract class PermissionManager {
 	 * @param permissionNode Permission node
 	 * @return True if the node applies, false otherwise
 	 */
-	public abstract boolean hasPermission(UUID user, MinecraftServer server, String permissionNode);
+	public boolean hasPermission(UUID user, MinecraftServer server, String permissionNode) {
+		return hasPermissionImpl(user, (Object) server, permissionNode);
+	}
+
+	/**
+	 * Checks if a player has the given permission node
+	 * 
+	 * @param user           UUID to check
+	 * @param server         Minecraft server
+	 * @param permissionNode Permission node
+	 * @return True if the node applies, false otherwise
+	 */
+	protected abstract boolean hasPermissionImpl(UUID user, Object server, String permissionNode);
 
 	/**
 	 * Checks if an entity has the given permission node
@@ -63,7 +75,18 @@ public abstract class PermissionManager {
 	 * @param server Minecraft server
 	 * @return Array of permissions
 	 */
-	public abstract Permission[] getPermissions(UUID user, MinecraftServer server);
+	public Permission[] getPermissions(UUID user, MinecraftServer server) {
+		return getPermissionsImpl(user, (Object)server);
+	}
+
+	/**
+	 * Retrieves the permissions of a player
+	 * 
+	 * @param user   UUID of player
+	 * @param server Minecraft server
+	 * @return Array of permissions
+	 */
+	protected abstract Permission[] getPermissionsImpl(UUID user, Object server);
 
 	/**
 	 * Retrieves the permissions of a player

@@ -3,7 +3,7 @@ package org.asf.cyan.api.internal.modkit.transformers._1_16.common.network;
 import org.asf.cyan.api.events.network.PlayerLogoutEvent;
 import org.asf.cyan.api.events.objects.network.PlayerLogoutEventObject;
 import org.asf.cyan.api.internal.ServerGamePacketListenerExtension;
-import org.asf.cyan.api.internal.modkit.components._1_16.common.network.packets.NetworkHooks;
+import org.asf.cyan.api.internal.modkit.components._1_16.common.network.NetworkHooks;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.TargetClass;

@@ -91,6 +91,54 @@ public class CyanAPIComponent extends CyanComponent {
 		} catch (IllegalStateException | ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
+
+		minecraft = Version.fromString(CyanInfo.getMinecraftVersion());
+		last = Version.fromString("0.0.0");
+
+		classes = findClasses(getMainImplementation(), IRequiredModKitComponent.class);
+		selectedPackage = "";
+
+		for (Class<?> cls : classes) {
+			String pkg = cls.getPackageName();
+			if (!pkg.startsWith("org.asf.cyan.api.internal.modkit.components."))
+				continue;
+
+			if (pkg.contains(".common")) {
+				pkg = pkg.substring(0, pkg.lastIndexOf(".common"));
+			} else if (pkg.contains(".client")) {
+				pkg = pkg.substring(0, pkg.lastIndexOf(".client"));
+			} else if (pkg.contains(".server")) {
+				pkg = pkg.substring(0, pkg.lastIndexOf(".server"));
+			}
+
+			String version = pkg.substring(pkg.lastIndexOf(".") + 1).substring(1).replace("_", ".");
+			if (Version.fromString(version).isGreaterThan(minecraft) || Version.fromString(version).isLessThan(last))
+				continue;
+
+			selectedPackage = pkg;
+			last = Version.fromString(version);
+		}
+
+		for (Class<?> cls : classes) {
+			String pkg = cls.getPackageName();
+			if (!pkg.startsWith("org.asf.cyan.api.internal.modkit.components.")
+					|| (!pkg.equals(selectedPackage) && !pkg.startsWith(selectedPackage + ".")))
+				continue;
+
+			if (pkg.contains(".client") && CyanInfo.getSide() != GameSide.CLIENT) {
+				continue;
+			} else if (pkg.contains(".server") && CyanInfo.getSide() != GameSide.SERVER) {
+				continue;
+			}
+
+			try {
+				IRequiredModKitComponent inst = (IRequiredModKitComponent) cls.getConstructor().newInstance();
+				inst.initializeComponent();
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	protected static void initComponent() {

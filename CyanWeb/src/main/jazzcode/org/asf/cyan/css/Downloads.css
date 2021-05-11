@@ -34,7 +34,7 @@ hr.ln {
 
 .menu-entry:hover a {
 	transition: 0.5s;
-	background-color: #fafafa;
+	background-color: #e3e3e3;
 }
 
 .active-entry a {
@@ -44,13 +44,13 @@ hr.ln {
 	text-align: center;
 	padding: 14px 16px;
 	transition: 0.5s;
-	background-color: #f5f5f5;
+	background-color: #e3e3e3;
 	border-left: 1px solid;
 }
 
 .active-entry:hover a {
 	transition: 0.5s;
-	background-color: #e0e0e0;
+	background-color: #cfcccc;
 }
 
 #downloadcontent {

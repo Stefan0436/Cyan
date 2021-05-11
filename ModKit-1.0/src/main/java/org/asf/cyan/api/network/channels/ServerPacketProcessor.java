@@ -14,14 +14,14 @@ public abstract class ServerPacketProcessor extends AbstractPacketProcessor {
 	/**
 	 * Retrieves the server instance
 	 */
-	protected MinecraftServer getServer() {
+	public MinecraftServer getServer() {
 		return getChannel().getPlayer().getServer();
 	}
 
 	/**
 	 * Retrieves the player
 	 */
-	protected ServerPlayer getPlayer() {
+	public ServerPlayer getPlayer() {
 		return (ServerPlayer) getChannel().getPlayer();
 	}
 
@@ -35,14 +35,14 @@ public abstract class ServerPacketProcessor extends AbstractPacketProcessor {
 	/**
 	 * Retrieves the client connection
 	 */
-	protected Connection getConnection() {
+	public Connection getConnection() {
 		return getChannel().getConnection();
 	}
 
 	/**
 	 * Retrieves the client brand (mod name) of the remote client
 	 */
-	protected String getClientBrand() {
+	public String getClientBrand() {
 		return getChannel().getRemoteBrand();
 	}
 

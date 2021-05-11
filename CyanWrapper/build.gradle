@@ -60,7 +60,7 @@ import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType
 
 apply from: '../config.gradle'
 project(":").childProjects.each { proj ->
-	if (!proj.value.name.equals(project.name) && !proj.value.name.contains("CyanAPI") && !proj.value.name.contains("ModKit")) {
+	if (!proj.value.name.equals(project.name) && !proj.value.name.equals("CyanLoader") && !proj.value.name.contains("CyanAPI") && !proj.value.name.contains("ModKit")) {
 		project.evaluationDependsOn ":" + proj.value.name
 	}
 }
@@ -1780,7 +1780,7 @@ processResources {
 	inputs.property "cyanfabricsupportversions", "${cyanfabricsupportversions}"
 	inputs.property "cyanpapersupportversions", "${cyanpapersupportversions}"
 
-	project(":ModKit").afterEvaluate {
+	project(":CyanAPI").afterEvaluate {
 		def projbins = ""
 		def resources = ""
 		def libs="["+System.lineSeparator()
