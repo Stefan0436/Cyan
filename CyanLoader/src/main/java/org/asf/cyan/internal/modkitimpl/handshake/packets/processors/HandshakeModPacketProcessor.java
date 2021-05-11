@@ -5,6 +5,7 @@ import java.util.HashMap;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.network.PacketReader;
 import org.asf.cyan.api.network.channels.ServerPacketProcessor;
+import org.asf.cyan.api.util.Colors;
 import org.asf.cyan.internal.modkitimpl.handshake.CyanHandshakePacketChannel;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket.FailureType;
@@ -115,12 +116,15 @@ public class HandshakeModPacketProcessor extends ServerPacketProcessor {
 			CyanHandshakePacketChannel.assignModloader(this, packet.entries.get("game"), packet.clientProtocol,
 					packet.entries.get("modloader"));
 
+			int mods = 0;
 			for (String id : packet.entries.keySet()) {
 				if (!id.equals("modloader") && !id.equals("game")) {
 					CyanHandshakePacketChannel.assignMod(this, id, packet.entries.get(id));
+					mods++;
 				}
 			}
 
+			info(Colors.GOLD + "Player " + HandshakeUtils.getImpl().getPlayerName(this) + " logged in with a CYAN client, " + mods + " mods installed.");
 			HandshakeUtils.getImpl().switchStateConnected(this, true);
 			getChannel().sendPacket("handshake.finish");
 			HandshakeUtils.getImpl().dispatchFinishEvent(this);
