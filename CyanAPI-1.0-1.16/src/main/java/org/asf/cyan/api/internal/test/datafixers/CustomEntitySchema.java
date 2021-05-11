@@ -19,13 +19,20 @@ public class CustomEntitySchema extends NamespacedSchema {
 	protected TypeTemplate createTemplate(Schema schema) {
 		return DSL.list(References.ITEM_STACK.in(schema));
 	}
+	
+	protected void registerCustomEntity(String entity, Schema schema, Map<String, Supplier<TypeTemplate>> map) {
+		schema.register(map, entity, () -> {
+			return createTemplate(schema);
+		});
+	}
 
 	@Override
 	public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
 		Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
-		schema.register(map, "testmod:testentity", () -> {
-			return createTemplate(schema);
-		});
+		
+		// Custom entities
+		registerCustomEntity("testmod:testentity", schema, map);
+		
 		return map;
 	}
 
