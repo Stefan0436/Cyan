@@ -59,12 +59,6 @@ import org.asf.cyan.api.modloader.information.game.GameSide
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType
 
 apply from: '../config.gradle'
-project(":").childProjects.each { proj ->
-	if (!proj.value.name.equals(project.name) && !proj.value.name.equals("CyanLoader") && !proj.value.name.contains("CyanAPI") && !proj.value.name.contains("ModKit")) {
-		project.evaluationDependsOn ":" + proj.value.name
-	}
-}
-
 sourceCompatibility = '1.9'
 targetCompatibility = '1.9'
 
@@ -152,6 +146,15 @@ if (project.hasProperty("overrideMappingsVersion"))
 ext.craftBukkitPOMUrl = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit/raw/pom.xml?at=%commit%"
 ext.spigotInfoUrl = "https://hub.spigotmc.org/versions/%mcver%.json";
 
+project(":").childProjects.each { proj ->
+	if (!proj.value.name.equals(project.name) && !proj.value.name.equals("CyanLoader") && !proj.value.name.contains("CyanAPI") && !proj.value.name.contains("ModKit")) {
+		project.evaluationDependsOn ":" + proj.value.name
+	}
+}
+
+File cyanCache = new File(getCacheRoot(), "cyan-wrapper-project");
+if (!cyanCache.exists()) cyanCache.mkdirs();
+
 if (modloader.startsWith("paper-")) {
 	def paperversion = modloader.substring("paper-".length())
 	if (paperversion.equals("latestsupported")) {
@@ -170,8 +173,10 @@ if (modloader.startsWith("paper-")) {
 		if (mappingsVersion == null) {
 			if (project.hasProperty("overrideMappingsVersion"))
 				mappingsVersion = project.getProperty("overrideMappingsVersion")
-			else
+			else {
+                println "Resolving latest SPIGOT mappings..."
 				mappingsVersion = getLatestSpigotMappings(minecraft)
+            }
 		}
 
 		paper = info.paperByMappings.get(mappingsVersion)
@@ -185,7 +190,56 @@ if (modloader.startsWith("paper-")) {
 		}
 
 		modloader = "paper-" + paper
+	} else {
+        println "Resolving latest SPIGOT mappings..."
+        mappingsVersion = getLatestSpigotMappings(minecraft)
 	}
+} else if (modloader.startsWith("forge-")) {
+    def forgeversion = modloader.substring("forge-".length())
+    File forgeInstaller = new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-installer.jar")
+    File downloadmarker = new File(cyanCache, forgeInstaller.getName()+".lck")
+    File serverFolder = new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server")
+    URL url = new URL(forgeurltemplate.replaceAll("\\%game\\%", minecraft).replaceAll("\\%forgeversion\\%", forgeversion))
+    if (!forgeInstaller.exists() || downloadmarker.exists()) {
+        if (!forgeInstaller.getParentFile().exists())
+            forgeInstaller.getParentFile().mkdirs()
+        if (downloadmarker.exists()) downloadmarker.delete()
+        downloadmarker.createNewFile()
+
+        println "Downloading forge installer to cache..."
+        if (forgeInstaller.exists()) forgeInstaller.delete()
+        FileOutputStream strm = new FileOutputStream(forgeInstaller);
+        InputStream inp = url.openStream()
+        inp.transferTo(strm)
+        strm.close()
+        inp.close()
+        downloadmarker.delete()
+    }
+
+    println "Searching for MCP version in forge jar..."
+    String mcpVersion = "";
+    ZipFile installerZip = new ZipFile(forgeInstaller);
+    ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + minecraft + "-" + forgeversion + "/forge-" + minecraft + "-" + forgeversion + ".jar");
+    ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
+    while (forgeStrm.available() != 0) {
+        ZipEntry entry = forgeStrm.getNextEntry();
+        if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+            Manifest manifest = new Manifest(forgeStrm);
+            Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+            mcpVersion = MCP.getValue("Implementation-Version");
+            break;
+        }
+    }
+    forgeStrm.close();
+    installerZip.close();
+    if (!project.hasProperty("overrideMappingsVersion"))
+        mappingsVersion = mcpVersion;
+} else if (modloader.startsWith("fabric-loader-")) {
+    if (!project.hasProperty("overrideMappingsVersion")) {
+        println "Resolving latest YARN mappings..."
+        String version = getLatestYarnVersion(minecraft)
+        mappingsVersion = version
+    }
 }
 
 private JsonObject getRefs(String version) throws IOException {
@@ -464,9 +518,6 @@ task specialTest (type: Test, dependsOn: test) {
 def libraries = [
 	(project.group+":"+project.name+":"+project.version): tasks.jar.archivePath
 ]
-
-File cyanCache = new File(getCacheRoot(), "cyan-wrapper-project");
-if (!cyanCache.exists()) cyanCache.mkdirs();
 
 if (!fallback_url.equals("") && !fallback_url.endsWith("/")) fallback_url+="/"
 
@@ -884,44 +935,7 @@ if (!modloader.equals("")) {
 	if (modloader.startsWith("forge-")) {
 		def forgeversion = modloader.substring("forge-".length())
 		File forgeInstaller = new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-installer.jar")
-		File downloadmarker = new File(cyanCache, forgeInstaller.getName()+".lck")
 		File serverFolder = new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server")
-		URL url = new URL(forgeurltemplate.replaceAll("\\%game\\%", minecraft).replaceAll("\\%forgeversion\\%", forgeversion))
-		if (!forgeInstaller.exists() || downloadmarker.exists()) {
-			if (!forgeInstaller.getParentFile().exists())
-				forgeInstaller.getParentFile().mkdirs()
-			if (downloadmarker.exists()) downloadmarker.delete()
-			downloadmarker.createNewFile()
-
-			println "Downloading forge installer to cache..."
-			if (forgeInstaller.exists()) forgeInstaller.delete()
-			FileOutputStream strm = new FileOutputStream(forgeInstaller);
-			InputStream inp = url.openStream()
-			inp.transferTo(strm)
-			strm.close()
-			inp.close()
-			downloadmarker.delete()
-		}
-
-		println "Searching for MCP version in forge jar..."
-		String mcpVersion = "";
-		ZipFile installerZip = new ZipFile(forgeInstaller);
-		ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + minecraft + "-" + forgeversion + "/forge-" + minecraft + "-" + forgeversion + ".jar");
-		ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
-		while (forgeStrm.available() != 0) {
-			ZipEntry entry = forgeStrm.getNextEntry();
-			if (entry.getName().equals("META-INF/MANIFEST.MF")) {
-				Manifest manifest = new Manifest(forgeStrm);
-				Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
-				mcpVersion = MCP.getValue("Implementation-Version");
-				break;
-			}
-		}
-		forgeStrm.close();
-		installerZip.close();
-		if (!project.hasProperty("overrideMappingsVersion"))
-			mappingsVersion = mcpVersion;
-
 		if (!serverFolder.exists()) {
 			println "Installing forge server for dependencies..."
 			javaexec {
@@ -1122,18 +1136,6 @@ if (!modloader.equals("")) {
 		}
 
 		println "Done."
-
-		if (!project.hasProperty("overrideMappingsVersion")) {
-			println "Resolving latest YARN mappings..."
-			String version = getLatestYarnVersion(minecraft)
-			mappingsVersion = version
-		}
-	} else if (modloader.startsWith("paper-")) {
-		if (!project.hasProperty("overrideMappingsVersion")) {
-			println "Resolving latest SPIGOT mappings..."
-			String version = getLatestSpigotMappings(minecraft)
-			mappingsVersion = version
-		}
 	}
 }
 
@@ -1176,55 +1178,6 @@ processResources {
 		useurl = netTestUrl
 
 	def url = useurl+"/"+cyanloader_package+"/"+cyanloader_logconf_version+"/CyanLoader-${cyanloader_logconf_version}-log4j2.xml"
-
-	File logShaFile = new File(cyanCache, "logsha.info")
-	File logSizeFile = new File(cyanCache, "logsize.info")
-	if (!project.hasProperty("noDownload") && !project.hasProperty("currentXML")) {
-		if (getServerConnection()) {
-			println "Downloading CyanLoader logging context..."
-			URL xml = new URL(url)
-			URL sha = new URL(url+".sha1")
-
-			BufferedInputStream strm = new BufferedInputStream(xml.openStream())
-			logSize = strm.readAllBytes().length.toString()
-
-			Scanner scanner = new Scanner(sha.openStream())
-			StringBuilder builder = new StringBuilder()
-			while (scanner.hasNext())
-				builder.append(scanner.next())
-
-			logSha = builder.toString()
-			scanner.close()
-			builder = null
-
-			println "Saving information to cache..."
-			Files.writeString(logShaFile.toPath(), logSha)
-			Files.writeString(logSizeFile.toPath(), logSize)
-		} else {
-			if (logShaFile.exists() && logSizeFile.exists() ) {
-				logSha = Files.readString(logShaFile.toPath())
-				logSize = Files.readString(logSizeFile.toPath())
-			} else {
-				throw new IOException("No connection to the fallback url, cannot download logging information, it is not stored in cache either!")
-			}
-		}
-	} else if (project.hasProperty("currentXML")) {
-		println "Using local file for log sha1 and size properties"
-		File xml = new File(project(":CyanLoader").sourceSets.main.output.resourcesDir, "log4j2.xml")
-		if (!xml.exists()) {
-			logger.error ""
-			logger.error "CyanLoader has not yet created its resources, cannot parse sha and size, please rerun the build after it has completed"
-			logger.error ""
-			return
-		}
-		logSize = xml.length()
-		logSha = calcSha1(xml)
-	}
-
-	println ""
-	println "Logging file size: "+logSize
-	println "Logging file SHA1: "+logSha
-	println ""
 
 	boolean wasLTS = false
 	def ltscyanversions=[]
@@ -1761,8 +1714,6 @@ processResources {
 	inputs.property "mcver", "${minecraft}"
 	inputs.property "allcyan", "${allcyan}"
 	inputs.property "gameexact", "${exactgameversion}"
-	inputs.property "logsha", "${logSha}"
-	inputs.property "logsize", "${logSize}"
 	inputs.property "logurl", "${url}"
 	inputs.property "modloader", "${modloader}"
 	inputs.property "cyanver", cyanversion
@@ -1780,7 +1731,56 @@ processResources {
 	inputs.property "cyanfabricsupportversions", "${cyanfabricsupportversions}"
 	inputs.property "cyanpapersupportversions", "${cyanpapersupportversions}"
 
-	project(":ModKit").afterEvaluate {
+	project(":CyanAPI").afterEvaluate {
+        File logShaFile = new File(cyanCache, "logsha.info")
+        File logSizeFile = new File(cyanCache, "logsize.info")
+        if (!project.hasProperty("noDownload") && !project.hasProperty("currentXML")) {
+            if (getServerConnection()) {
+                println "Downloading CyanLoader logging context..."
+                URL xml = new URL(url)
+                URL sha = new URL(url+".sha1")
+
+                BufferedInputStream strm = new BufferedInputStream(xml.openStream())
+                logSize = strm.readAllBytes().length.toString()
+
+                Scanner scanner = new Scanner(sha.openStream())
+                StringBuilder builder = new StringBuilder()
+                while (scanner.hasNext())
+                    builder.append(scanner.next())
+
+                logSha = builder.toString()
+                scanner.close()
+                builder = null
+
+                println "Saving information to cache..."
+                Files.writeString(logShaFile.toPath(), logSha)
+                Files.writeString(logSizeFile.toPath(), logSize)
+            } else {
+                if (logShaFile.exists() && logSizeFile.exists() ) {
+                    logSha = Files.readString(logShaFile.toPath())
+                    logSize = Files.readString(logSizeFile.toPath())
+                } else {
+                    throw new IOException("No connection to the fallback url, cannot download logging information, it is not stored in cache either!")
+                }
+            }
+        } else if (project.hasProperty("currentXML")) {
+            println "Using local file for log sha1 and size properties"
+            File xml = new File(project(":CyanLoader").sourceSets.main.output.resourcesDir, "log4j2.xml")
+            if (!xml.exists()) {
+                logger.error ""
+                logger.error "CyanLoader has not yet created its resources, cannot parse sha and size, please rerun the build after it has completed"
+                logger.error ""
+                return
+            }
+            logSize = xml.length()
+            logSha = calcSha1(xml)
+        }
+
+        println ""
+        println "Logging file size: "+logSize
+        println "Logging file SHA1: "+logSha
+        println ""
+	
 		def projbins = ""
 		def resources = ""
 		def libs="["+System.lineSeparator()

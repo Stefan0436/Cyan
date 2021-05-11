@@ -211,7 +211,7 @@ createEclipseLaunches {
 dependencies {
 	implementation name: 'client', version: minecraft + "-deobf"
  	implementation name: 'server', version: minecraft + "-deobf"
-	 
+	
     testImplementation 'junit:junit:4.12'
     
 	implementation project(":ModKit")

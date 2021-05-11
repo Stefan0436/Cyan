@@ -13,17 +13,17 @@ plugins {
 	id 'maven-publish'
 }
 
-apply from: '../asf.mvn.publish.gradle'
 apply from: '../config.gradle'
-
-apply plugin: 'eclipse'
-apply plugin: 'org.asf.cyan.cornflower'
-
-buildDir = '../build/CyanLoader'
 
 group="org.asf.cyan"
 def authorname="AerialWorks Software Foundation"
 version=cyanversion
+
+apply from: '../asf.mvn.publish.gradle'
+apply plugin: 'eclipse'
+apply plugin: 'org.asf.cyan.cornflower'
+
+buildDir = '../build/CyanLoader'
 
 sourceCompatibility = '1.9'
 targetCompatibility = '1.9'
