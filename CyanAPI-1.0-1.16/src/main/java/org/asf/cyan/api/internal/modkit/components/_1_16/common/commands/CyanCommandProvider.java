@@ -61,7 +61,7 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 				"§4ModKit Protocol Version: §6%s\n§4Modloader Protocol Version: §6%s\n§4Client ModKit Protocol Version: §6%s\n§4Client Modloader Protocol Version: §6%s\n§4Client Game Version: §6%s\n§4Client Modloader Version: §6%s\n");
 		ClientLanguage.registerLanguageKey("cyan.info.mods", "§5Server Mods:\n§4%s\n\n§5Client Mods:\n§4%s\n");
 
-		ClientLanguage.registerLanguageKey("cyan.commands.cyan.description", "Utility command for the cyan modlaoder.");
+		ClientLanguage.registerLanguageKey("cyan.commands.cyan.description", "Utility command for the cyan modloader.");
 		ClientLanguage.registerLanguageKey("cyan.commands.cyan.usage", "<task> [arguments...]");
 	}
 
