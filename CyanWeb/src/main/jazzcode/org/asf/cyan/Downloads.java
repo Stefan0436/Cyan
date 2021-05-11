@@ -139,9 +139,14 @@ public class Downloads extends AbstractWebComponent {
 		} catch (IOException e) {
 		}
 		if (ready) {
-			function.variables.put("http.path",
-					URLEncoder.encode(URLEncoder.encode(getRequest().path, "UTF-8"), "UTF-8"));
-			function.variables.putIfAbsent("menuentry", backend.getFirstType(function));
+			if (backend.isDown()) {
+				function.writeLine(
+						"<br /><center>We're sorry, but our download backend has been stopped for maintenance.<br />Please try again later.</center>");
+			} else {
+				function.variables.put("http.path",
+						URLEncoder.encode(URLEncoder.encode(getRequest().path, "UTF-8"), "UTF-8"));
+				function.variables.putIfAbsent("menuentry", backend.getFirstType(function));
+			}
 		} else {
 			function.writeLine("<script>");
 			function.writeLine("\tfunction checkBackend() {");

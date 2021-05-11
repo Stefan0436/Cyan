@@ -105,7 +105,7 @@ public class ServerGame implements IGameExecutionContext, ILaunchProvider {
 	@Override
 	public String[] runtimeLibraries() {
 		prepare();
-		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion);
+		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion, true);
 	}
 
 	@Override
@@ -144,7 +144,7 @@ public class ServerGame implements IGameExecutionContext, ILaunchProvider {
 
 	@Override
 	public String[] libraries() {
-		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion);
+		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion, true);
 	}
 
 	@Override

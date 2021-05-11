@@ -36,7 +36,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  // IMPORTANT: FIRST PRIORITY:
  - ModKit CyanAPI selected by specific version or if not present, the major version (CyanAPI AND ModKit 1.0)
  - ModKit CyanAPI shared implementations in CyanLoader (CyanAPI ModKit 1.0)
- - Cornflower Rift Version Handler (Cornflower A36, selects normal versions with the ModKit and such) -- TODO
+ - Cornflower Rift Version Handler (Cornflower A36, selects normal versions with the ModKit and such)
  - ModKit Tested on Fabric and Forge (CyanAPI 1.0.0.A2) -- TODO
  - ModKit ported to 1.15.2 and fully tested (CyanAPI 1.0.0.A3) -- TODO
  - Cyan Version Support Map -- TODO

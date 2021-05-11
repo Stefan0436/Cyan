@@ -298,11 +298,32 @@ configurePublish {
         task tasks.jar
         task tasks.javadocJar
         task tasks.sourcesJar
-		
-		if (!modloader.startsWith("paper-")) {
-			task tasks.platformRiftJarClient
+	}
+	
+	if (!modloader.startsWith("paper-")) {
+		artifact {
+			name project.name + "-RIFT-CLIENT"
+			artifact_version project.version + "-RIFT-" + config.getPlatform().toString().toUpperCase() + "-" + config.getCommonMappingsVersion().replaceAll("[!?/:\\\\]", "-") + "-CLIENT"
+			pretty_name "ModKit API"
+	        
+			task {
+				artifact tasks.platformRiftJarClient
+				classifier ""
+				extension "jar"
+			}
 		}
-        task tasks.platformRiftJarServer
+	}
+	
+	artifact {
+        name project.name + "-RIFT-SERVER"
+		artifact_version project.version + "-RIFT-" + config.getPlatform().toString().toUpperCase() + "-" + config.getCommonMappingsVersion().replaceAll("[!?/:\\\\]", "-") + "-SERVER"
+        pretty_name "ModKit API"
+        
+        task {
+			artifact tasks.platformRiftJarServer
+			classifier ""
+			extension "jar"
+		}
 	}
 }
 

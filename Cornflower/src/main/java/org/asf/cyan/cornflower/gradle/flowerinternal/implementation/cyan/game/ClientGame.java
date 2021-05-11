@@ -80,7 +80,7 @@ public class ClientGame implements IGameExecutionContext, ILaunchProvider {
 	@Override
 	public String[] libraries() {
 		prepare();
-		return MinecraftInstallationToolkit.getLibrariesMavenFormat(gameVersion);
+		return MinecraftInstallationToolkit.getLibrariesMavenFormat(gameVersion, true);
 	}
 
 	@Override
@@ -162,7 +162,7 @@ public class ClientGame implements IGameExecutionContext, ILaunchProvider {
 	@Override
 	public String[] runtimeLibraries() {
 		prepare();
-		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion);
+		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion, true);
 	}
 
 	@Override

@@ -31,6 +31,7 @@ public class FlowPacketParser extends PacketParser {
 		/**
 		 * Reads the next byte
 		 * 
+		 * @param flow Input flow
 		 * @return Byte or -1
 		 */
 		public static int readRawByte(ByteFlow flow) {
@@ -40,6 +41,7 @@ public class FlowPacketParser extends PacketParser {
 		/**
 		 * Reads the given amount of bytes
 		 * 
+		 * @param flow Input flow
 		 * @param count Byte count
 		 * @return Byte array
 		 */
@@ -58,7 +60,7 @@ public class FlowPacketParser extends PacketParser {
 		 * Reads all available bytes (stops if size reaches integer max or if the end of
 		 * the byte flow is reached)
 		 * 
-		 * @param count Byte count
+		 * @param flow Input flow
 		 * @return Byte array
 		 */
 		public static byte[] readAllBytes(ByteFlow flow) {

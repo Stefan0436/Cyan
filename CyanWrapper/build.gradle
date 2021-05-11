@@ -1787,12 +1787,12 @@ processResources {
 
 		if (!modloader.startsWith("paper-")) {
 			def apiJarTask = project(":CyanAPI").tasks.getByName("platformRiftJarClient")
-			apiID1 = "org.asf.cyan:CyanAPI:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
+			apiID1 = "org.asf.cyan:CyanAPI-RIFT-CLIENT:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
 			libraries.put(apiID1, apiJarTask.getArchiveFile().get().getAsFile());
 			librarysources.put(apiID1, fallback_url)
 			
 			apiJarTask = project(":ModKit").tasks.getByName("platformRiftJarClient")
-			apiID2 = "org.asf.cyan:ModKit:" + project(":ModKit").version + "-" + apiJarTask.getArchiveClassifier().get()
+			apiID2 = "org.asf.cyan:ModKit-RIFT-CLIENT:" + project(":ModKit").version + "-" + apiJarTask.getArchiveClassifier().get()
 			libraries.put(apiID2, apiJarTask.getArchiveFile().get().getAsFile());
 			librarysources.put(apiID2, fallback_url)
 		}
@@ -1912,11 +1912,11 @@ task gameData () {
 	def apiID2 = ""
 	doLast {
 		def apiJarTask = tasks.getByPath(":CyanAPI:platformRiftJarClient")
-		apiID1 = "org.asf.cyan:CyanAPI:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
+		apiID1 = "org.asf.cyan:CyanAPI-RIFT-CLIENT:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
 		libraries.put(apiID1, apiJarTask.archivePath);
 		
 		apiJarTask = tasks.getByPath(":ModKit:platformRiftJarClient")
-		apiID2 = "org.asf.cyan:ModKit:" + project(":ModKit").version + "-" + apiJarTask.getArchiveClassifier().get()
+		apiID2 = "org.asf.cyan:ModKit-RIFT-CLIENT:" + project(":ModKit").version + "-" + apiJarTask.getArchiveClassifier().get()
 		libraries.put(apiID2, apiJarTask.archivePath);
 		
 		println "Generating client folders..."
@@ -2079,11 +2079,11 @@ task serverJar (type: Jar, dependsOn: build) {
 
 	doFirst {
 		def apiJarTask = tasks.getByPath(":CyanAPI:platformRiftJarServer")
-		apiID1 = "org.asf.cyan:CyanAPI:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
+		apiID1 = "org.asf.cyan:CyanAPI-RIFT-SERVER:" + project(":CyanAPI").version + "-" + apiJarTask.getArchiveClassifier().get()
 		libraries.put(apiID1, apiJarTask.archivePath);
 		
 		apiJarTask = tasks.getByPath(":ModKit:platformRiftJarServer")
-		apiID2 = "org.asf.cyan:ModKit:" + project(":ModKit").version + "-" + apiJarTask.getArchiveClassifier().get()
+		apiID2 = "org.asf.cyan:ModKit-RIFT-SERVER:" + project(":ModKit").version + "-" + apiJarTask.getArchiveClassifier().get()
 		libraries.put(apiID2, apiJarTask.archivePath);
 		
 		libraries.forEach { k, v ->

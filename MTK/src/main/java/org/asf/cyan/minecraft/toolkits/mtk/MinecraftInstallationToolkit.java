@@ -1003,9 +1003,10 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 * 
 	 * @param version The MinecraftVersionInfo object representing the version.
 	 *                (might not have all installed, use checkVersion to verify)
+	 * @param removeRift True to remove rift identifiers (remapped jars, use this for deobfuscated environments)
 	 * @return Array of library files
 	 */
-	public static String[] getLibrariesMavenFormat(MinecraftVersionInfo version) {
+	public static String[] getLibrariesMavenFormat(MinecraftVersionInfo version, boolean removeRift) {
 		ArrayList<String> libraries = new ArrayList<String>();
 
 		JsonObject manifest;
@@ -1047,6 +1048,14 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 				} else if (info.length == 1) {
 					libname = info[0];
 				}
+				
+				if (removeRift) {
+					if (libversion.contains("-RIFT"))
+						libversion = libversion.substring(0, libversion.indexOf("-RIFT"));
+					if (libname.contains("-RIFT"))
+						libname = libname.substring(0, libname.indexOf("-RIFT"));
+				}
+				
 				libraries.add(group + ":" + libname + ":" + libversion);
 			}
 			for (String key : obj.keySet()) {

@@ -486,6 +486,8 @@ public class DownloadsBackend extends JWebService {
 
 	@Function
 	public void setupWizard(FunctionInfo function) throws InvocationTargetException, IOException {
+		if (isDown())
+			return;
 		setup(function);
 		String page = function.namedParameters.getOrDefault("page", "home");
 
@@ -1207,6 +1209,10 @@ public class DownloadsBackend extends JWebService {
 			}
 			progress(progressMessage, 100, 100);
 		}
+	}
+
+	public boolean isDown() {
+		return new File(System.getProperty("java.io.tmpdir"), "cyanserver.shutdownbackend").exists();
 	}
 
 }
