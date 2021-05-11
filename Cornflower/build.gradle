@@ -4,7 +4,6 @@ buildscript {
 	}
 }
 plugins {
-	id 'com.github.johnrengelman.shadow' version '6.1.0'
 	id 'maven-publish'
 	id 'java'
 }
@@ -85,7 +84,10 @@ dependencies {
 	implementation project(":Fluid")
 	implementation project(":CCFG")
 	implementation project(":ClassTrust")
-	implementation project(":CyanLoader")
+	implementation (project(":CyanLoader")) {
+        exclude group: 'org.asf.cyan', module: 'ModKit'
+        exclude group: 'org.asf.cyan', module: 'CyanAPI'
+	}
 	implementation project(":TrustExplorer")
 	
 	mavendependency group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.7'
@@ -156,22 +158,7 @@ task compileAgent(type: Jar, dependsOn: classes) {
 }
 classes.finalizedBy('compileAgent')
 
-shadowJar {
-	archiveClassifier.set('full')
-	destinationDirectory = libsDirectory.dir("Fat Jars")
-	from javadoc
-	from sourceSets.main.allJava
-	from sourceSets.main.output
-	exclude "**/tests/**"
-	exclude "**/org/gradle/**"
-	exclude "**/groovy/**"
-	exclude "**/groovyjar**/**"
-	exclude "**/gradle-*.properties"
-}
-
-shadowJar.dependsOn('processResources')
 jar.dependsOn('processResources')
-shadowJar.dependsOn('javaDocs')
 configurations.implementation.dependencies.remove dependencies.gradleApi()
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -406,7 +393,6 @@ configurePublish {
 artifacts {
 	archives sourcesJar
 	archives javadocJar
-	archives shadowJar
 }
 
 processResources {

@@ -15,10 +15,14 @@ plugins {
 	id 'maven-publish'
 }
 
+sourceCompatibility = '1.9'
+targetCompatibility = '1.9'
+
 group="org.asf.cyan"
 def authorname="AerialWorks Software Foundation"
 
 project.evaluationDependsOn ":CyanWrapper"
+project.evaluationDependsOn ":ModKit"
 
 apply plugin: 'eclipse'
 apply plugin: 'org.asf.cyan.cornflower'
@@ -79,9 +83,6 @@ File jarFile = MinecraftModdingToolkit.deobfuscateJar(info, GameSide.CLIENT)
 Log4jToGradleAppender.noLogInfo()
 ext.cornflowerCachesDir = jarFile.getParent()
 
-
-sourceCompatibility = '1.9'
-targetCompatibility = '1.9'
 
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 def loaderversion = "";

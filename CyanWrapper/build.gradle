@@ -1780,7 +1780,7 @@ processResources {
 	inputs.property "cyanfabricsupportversions", "${cyanfabricsupportversions}"
 	inputs.property "cyanpapersupportversions", "${cyanpapersupportversions}"
 
-	project(":CyanAPI").afterEvaluate {
+	project(":ModKit").afterEvaluate {
 		def projbins = ""
 		def resources = ""
 		def libs="["+System.lineSeparator()
