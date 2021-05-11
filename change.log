@@ -34,7 +34,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - ModKit Dimension Registry Events (CyanAPI ModKit 1.0) -- TODO
  
  // IMPORTANT: FIRST PRIORITY:
- - ModKit CyanAPI selected by specific version or if not present, the major version (CyanAPI AND ModKit 1.0) -- TODO
+ - ModKit CyanAPI selected by specific version or if not present, the major version (CyanAPI AND ModKit 1.0)
  - ModKit CyanAPI shared implementations in CyanLoader (CyanAPI ModKit 1.0) -- TODO
  - Cornflower Rift Version Handler (Cornflower A36, selects normal versions with the ModKit and such) -- TODO
  - ModKit Tested on Fabric and Forge (CyanAPI 1.0.0.A2) -- TODO

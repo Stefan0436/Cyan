@@ -13,8 +13,22 @@ include('ClassTrust')
 include('TrustExplorer')
 
 apply from: 'config.gradle'
-include("ModKit-$modkit")
-project(":ModKit-$modkit").name = "ModKit"
+def nameModKit = "ModKit-$modkit"
+def majorversion = minecraft
+if (majorversion.split("\\.").length >= 3)
+    majorversion = majorversion.substring(0, majorversion.lastIndexOf("."))
 
-include("CyanAPI-$modkit-$minecraft")
-project(":CyanAPI-$modkit-$minecraft").name = "CyanAPI"
+if (file("ModKit-$modkit-$minecraft").exists())
+    nameModKit = "ModKit-$modkit-$minecraft";
+else if (file("ModKit-$modkit-$majorversion").exists())
+    nameModKit = "ModKit-$modkit-$majorversion";
+
+include(nameModKit)
+project(":$nameModKit").name = "ModKit"
+
+def nameCyanAPI = "CyanAPI-$modkit-$minecraft"
+if (!file(nameCyanAPI).exists() && file("CyanAPI-$modkit-$majorversion").exists())
+    nameCyanAPI = "CyanAPI-$modkit-$majorversion"
+    
+include(nameCyanAPI)
+project(":$nameCyanAPI").name = "CyanAPI"

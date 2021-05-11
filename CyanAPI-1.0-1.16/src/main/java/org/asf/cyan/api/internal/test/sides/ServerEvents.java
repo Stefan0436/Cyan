@@ -27,7 +27,7 @@ import org.asf.cyan.api.events.objects.network.ServerConnectionEventObject;
 import org.asf.cyan.api.events.objects.resources.ResourceManagerEventObject;
 import org.asf.cyan.api.events.resources.manager.ResourceManagerStartupEvent;
 import org.asf.cyan.api.internal.test.TestEntity;
-import org.asf.cyan.api.internal.test.datafixers.CustomEntityFixer.CustomEntityAddSchema;
+import org.asf.cyan.api.internal.test.datafixers.CustomEntitySchema;
 import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.events.SimpleEvent;
 
@@ -50,7 +50,7 @@ public class ServerEvents implements IEventListenerContainer {
 	@SimpleEvent(DataFixerEvent.class)
 	public void test(DataFixerEventObject event) {
 		Schema schem = event.getBuilder().addSchema(SharedConstants.getCurrentVersion().getWorldVersion(),
-				CustomEntityAddSchema::new);
+				CustomEntitySchema::new);
 		event.getBuilder().addFixer(new AddNewChoices(schem, "Add custom entities", References.ENTITY));
 	}
 
