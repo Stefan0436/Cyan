@@ -93,6 +93,7 @@ if (modloader.startsWith("paper-")) {
     loaderversion = modloader.substring("fabric-loader-".length())
 }
 def targetplatform = null
+
 platforms {
     VANILLA {
         version minecraft
@@ -108,7 +109,7 @@ platforms {
         }
     } else if (modloader.startsWith("forge-")) {
         targetplatform = LaunchPlatform.MCP
-        SPIGOT {
+        MCP {
             version mappingsVersion
             modloader loaderversion
         }

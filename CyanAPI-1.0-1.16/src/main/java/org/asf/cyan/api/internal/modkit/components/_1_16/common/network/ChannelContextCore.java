@@ -140,12 +140,12 @@ public class ChannelContextCore extends PacketChannelContext implements IModKitC
 	}
 
 	@Override
-	protected Minecraft getClient(LocalPlayer connection) {
-		return ((ClientPacketListenerExtension)connection.connection).cyanGetMinecraft();
+	protected Supplier<Minecraft> getClientSupplier(Object connection) {
+		return () -> ((ClientPacketListenerExtension) ((LocalPlayer) connection).connection).cyanGetMinecraft();
 	}
 
 	@Override
 	public String getClientBrand(ServerPlayer player) {
-		return ((ServerGamePacketListenerExtension)player.connection).cyanClientBrand();
+		return ((ServerGamePacketListenerExtension) player.connection).cyanClientBrand();
 	}
 }

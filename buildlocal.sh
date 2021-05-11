@@ -52,7 +52,7 @@ modloader=${modloader,,}
 if [ "$modloader" != "" ]; then
     case $modloader in
         forge)
-        if [ "$modloaderversion" == "" ]; then forgeversion="$(curl https://files.minecraftforge.net/maven/net/minecraftforge/forge/promotions_slim.json -s --output - | jq ".promos.\"$gameversion-latest\"" -r)"
+        if [ "$modloaderversion" == "" ]; then forgeversion="$(curl -L https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json -s --output - | jq ".promos.\"$gameversion-latest\"" -r)"
         else forgeversion=$modloaderversion; fi
         extraargs+=" -PoverrideLaunchWrapperClient=CyanForgeClientWrapper -PoverrideLaunchWrapperServer=CyanForgeServerWrapper -PsetModLoader=\"forge-$forgeversion\" -PsetInheritsFromVersion=\"$gameversion-forge-$forgeversion\""
         ;;
@@ -80,5 +80,7 @@ fi
 if [ "$mappings" != "auto" ]; then
 	extraargs+=" -PoverrideMappingsVersion=\"$mappings\""
 fi
+
+echo $extraargs
 
 eval './gradlew '"$extraargs"' -PresetLibSourceCache -PoverrideCyanLibraryURL="" -PcurrentXML processResources && ./gradlew '"$extraargs"' -PoverrideCyanLibraryURL="" -PcurrentXML build '"$BUILDCMD"' && echo && echo Done, saved in build.'

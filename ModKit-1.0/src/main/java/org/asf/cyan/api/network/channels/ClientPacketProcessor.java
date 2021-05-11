@@ -13,7 +13,7 @@ public abstract class ClientPacketProcessor extends AbstractPacketProcessor {
 	 * Retrieves the client
 	 */
 	public Minecraft getClient() {
-		return PacketChannelContext.getCore().getClient(getPlayer());
+		return PacketChannelContext.getCore().getClientSupplier(getPlayer()).get();
 	}
 
 	/**

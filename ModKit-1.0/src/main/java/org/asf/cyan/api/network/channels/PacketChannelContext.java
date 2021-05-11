@@ -9,7 +9,6 @@ import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.network.PacketWriter;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.Connection;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -88,7 +87,7 @@ public abstract class PacketChannelContext extends CyanComponent {
 	protected void disconnectClient() {
 	}
 
-	protected Minecraft getClient(LocalPlayer connection) {
+	protected Supplier<Minecraft> getClientSupplier(Object connection) {
 		return null;
 	}
 
