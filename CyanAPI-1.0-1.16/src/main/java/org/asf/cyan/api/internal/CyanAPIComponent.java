@@ -107,9 +107,6 @@ public class CyanAPIComponent extends CyanComponent {
 	}
 
 	protected static void initComponent() {
-		if (Modloader.getModloaderLaunchPlatform() != LaunchPlatform.MCP) {
-			new ModKitController().begin(CyanAPIComponent.class.getClassLoader());
-		}
 	}
 	
 	public static URL getResource(String path) {

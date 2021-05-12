@@ -41,10 +41,13 @@ public class TransformingClassLoaderModification {
 				"org.asf.cyan.api.config.Configuration",
 				"org.asf.cyan.api.util.EventUtil",
 				"org.asf.cyan.api.util.ContainerConditions",
-				"org.asf.cyan.api.internal.CyanAPIComponent"
+				"org.asf.cyan.api.internal.CyanAPIComponent",
+				"org.asf.cyan.core.",
+				"org.asf.cyan.minecraft.toolkits.mtk."
 			};
 		}
-		if (Stream.of(cyanClasses).anyMatch(t -> t.equals(name)) || CyanLoader.noLoadClassForge(name)) {
+		if (Stream.of(cyanClasses).anyMatch(t -> t.equals(name) || (t.endsWith(".") && name.startsWith(t)))
+				|| CyanLoader.noLoadClassForge(name)) {
 			return getParent().loadClass(name);
 		}
 

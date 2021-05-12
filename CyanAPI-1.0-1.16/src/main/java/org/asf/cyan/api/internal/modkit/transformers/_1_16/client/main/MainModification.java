@@ -9,7 +9,6 @@ import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
 @FluidTransformer
-@PlatformOnly(LaunchPlatform.MCP)
 @TargetClass(target = "net.minecraft.client.main.Main")
 public class MainModification {
 	
