@@ -25,6 +25,7 @@ import org.asf.cyan.fluid.FluidAgent;
 import org.asf.cyan.fluid.implementation.CyanTransformer;
 import org.asf.cyan.fluid.implementation.CyanTransformerMetadata;
 import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ConfigurationBuilder;
 
 /**
@@ -290,7 +291,7 @@ public class CyanCore extends CyanComponent {
 			}
 		}
 		allowedAutodetectClasses.clear();
-		
+
 		trace("CLOSE FluidAPI Transformer and Mappings loader, caller: " + CallTrace.traceCallName());
 		Fluid.closeFluidLoader();
 
@@ -481,6 +482,35 @@ public class CyanCore extends CyanComponent {
 		return classes.toArray(t -> new Class[t]);
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T> Class<T>[] findClasses(Class<T> interfaceOrSupertype, ClassLoader loader) {
+		if (reflections == null) {
+			initReflections();
+		}
+
+		if (LOG == null)
+			initLogger();
+
+		ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
+		for (String cls : reflections.getStore().getAll(SubTypesScanner.class, interfaceOrSupertype.getTypeName())) {
+			try {
+				Class<?> ct = loader.loadClass(cls);
+				classes.add(ct);
+			} catch (ClassNotFoundException e) {
+				e = e;
+			}
+		}
+
+		for (Class<?> cls : additionalClasses) {
+			if (interfaceOrSupertype.isAssignableFrom(cls)
+					&& !classes.stream().anyMatch(t -> t.getTypeName().equals(cls.getTypeName()))) {
+				classes.add(cls);
+			}
+		}
+
+		return classes.toArray(t -> new Class[t]);
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	protected <T extends Annotation> Class<T>[] findAnnotatedClassesInternal(Class<T> annotation) {
@@ -653,10 +683,11 @@ public class CyanCore extends CyanComponent {
 	}
 
 	private static boolean ide = false;
+
 	public static void setIDE() {
 		ide = true;
 	}
-	
+
 	public static boolean isIdeMode() {
 		return ide;
 	}

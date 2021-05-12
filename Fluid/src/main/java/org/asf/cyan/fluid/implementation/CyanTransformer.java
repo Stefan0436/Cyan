@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -26,6 +27,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -1657,6 +1659,22 @@ public class CyanTransformer extends Transformer {
 					if (AnnotationInfo.isAnnotationPresent(TargetClass.class, clsT)) {
 						String newClName = AnnotationInfo.getAnnotation(TargetClass.class, clsT).get("target");
 						tnode.desc = Fluid.mapClass(newClName).replace(".", "/");
+					}
+				}
+			} else if (node instanceof LdcInsnNode) {
+				LdcInsnNode tnode = (LdcInsnNode) node;
+				if (tnode.cst instanceof Type) {
+					Type type = (Type) tnode.cst;
+					ClassNode clsT = null;
+					try {
+						clsT = pool.getClassNode(Fluid.parseDescriptor(type.getDescriptor()));
+					} catch (ClassNotFoundException e1) {
+					}
+					if (clsT != null) {
+						if (AnnotationInfo.isAnnotationPresent(TargetClass.class, clsT)) {
+							String newClName = AnnotationInfo.getAnnotation(TargetClass.class, clsT).get("target");
+							tnode.cst = Type.getType("L" + Fluid.mapClass(newClName).replace(".", "/") + ";");
+						}
 					}
 				}
 			}

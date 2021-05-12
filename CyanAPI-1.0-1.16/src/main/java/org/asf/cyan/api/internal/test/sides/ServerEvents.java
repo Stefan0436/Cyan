@@ -2,7 +2,6 @@ package org.asf.cyan.api.internal.test.sides;
 
 import java.util.Optional;
 
-import org.asf.cyan.api.events.core.DataFixerEvent;
 import org.asf.cyan.api.events.core.ReloadEvent;
 import org.asf.cyan.api.events.core.ServerShutdownEvent;
 import org.asf.cyan.api.events.entities.EntityAttributesEvent;
@@ -13,7 +12,6 @@ import org.asf.cyan.api.events.ingame.tags.TagManagerStartupEvent;
 import org.asf.cyan.api.events.network.CyanServerHandshakeEvent;
 import org.asf.cyan.api.events.network.PlayerLogoutEvent;
 import org.asf.cyan.api.events.network.ServerSideConnectedEvent;
-import org.asf.cyan.api.events.objects.core.DataFixerEventObject;
 import org.asf.cyan.api.events.objects.core.ReloadEventObject;
 import org.asf.cyan.api.events.objects.core.ServerShutdownEventObject;
 import org.asf.cyan.api.events.objects.entities.EntityAttributesEventObject;
@@ -27,15 +25,9 @@ import org.asf.cyan.api.events.objects.network.ServerConnectionEventObject;
 import org.asf.cyan.api.events.objects.resources.ResourceManagerEventObject;
 import org.asf.cyan.api.events.resources.manager.ResourceManagerStartupEvent;
 import org.asf.cyan.api.internal.test.TestEntity;
-import org.asf.cyan.api.internal.test.datafixers.CustomEntitySchema;
 import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.events.SimpleEvent;
 
-import com.mojang.datafixers.schemas.Schema;
-
-import net.minecraft.SharedConstants;
-import net.minecraft.util.datafix.fixes.AddNewChoices;
-import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 
@@ -45,13 +37,6 @@ public class ServerEvents implements IEventListenerContainer {
 	@SimpleEvent(EntityAttributesEvent.class)
 	public void test(EntityAttributesEventObject event) {
 		event.addSupplier(TEST_ENTITY, TestEntity.createAttributes().build());
-	}
-
-	@SimpleEvent(DataFixerEvent.class)
-	public void test(DataFixerEventObject event) {
-		Schema schem = event.getBuilder().addSchema(SharedConstants.getCurrentVersion().getWorldVersion(),
-				CustomEntitySchema::new);
-		event.getBuilder().addFixer(new AddNewChoices(schem, "Add custom entities", References.ENTITY));
 	}
 
 	@SimpleEvent(value = EntityRegistryEvent.class)

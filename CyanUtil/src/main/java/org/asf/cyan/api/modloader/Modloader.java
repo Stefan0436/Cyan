@@ -71,11 +71,20 @@ public abstract class Modloader extends CyanComponent {
 
 	private ArrayList<Class<IModloaderComponent>> postLoadComponents = new ArrayList<Class<IModloaderComponent>>();
 
-	protected void loadPostponedComponents() {
+	protected void loadPostponedComponents(ClassLoader loader) {
 		for (Class<IModloaderComponent> componentCls : postLoadComponents) {
 			Constructor<IModloaderComponent> ctor;
 			IModloaderComponent component;
 			try {
+				try {
+					if (loader != componentCls.getClassLoader()) {
+						@SuppressWarnings("unchecked")
+						Class<IModloaderComponent> newComponent = (Class<IModloaderComponent>) loader
+								.loadClass(componentCls.getTypeName());
+						componentCls = newComponent;
+					}
+				} catch (ClassNotFoundException e) {
+				}
 				ctor = componentCls.getDeclaredConstructor();
 				ctor.setAccessible(true);
 				component = ctor.newInstance();

@@ -66,6 +66,8 @@ import org.asf.cyan.mods.AbstractMod;
 import org.asf.cyan.mods.ICoremod;
 import org.asf.cyan.mods.IMod;
 import org.asf.cyan.mods.config.CyanModfileManifest;
+import org.asf.cyan.mods.events.AttachEvent;
+import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.internal.BaseEventController;
 import org.asf.cyan.mods.internal.IAcceptableComponent;
 import org.asf.cyan.mods.internal.ModInfoCache;
@@ -78,7 +80,7 @@ import org.asf.cyan.security.TrustContainer;
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public class CyanLoader extends Modloader implements IModProvider {
+public class CyanLoader extends Modloader implements IModProvider, IEventListenerContainer {
 
 	private CyanLoader() {
 		mavenRepositories.put("AerialWorks", "https://aerialworks.ddns.net/maven");
@@ -1666,20 +1668,30 @@ public class CyanLoader extends Modloader implements IModProvider {
 				}
 			}
 		});
+		
+		createEventChannel("mods.prestartgame");
+		createEventChannel("mod.loaded");
+		
+		BaseEventController.addEventContainer(this);
+		BaseEventController.work();
 
 		info("Starting CyanCore...");
 		CyanCore.addAllowedTransformerAutoDetectClass("org.asf.cyan.api.internal.CyanAPIComponent");
 		CyanCore.initializeComponents();
 
+		info("Downloading maven dependencies...");
+		downloadMavenDependencies(coremodMavenDependencies);
+	}
+
+	@AttachEvent(value = "mods.prestartgame", synchronize = true)
+	public void beforeGame(ClassLoader loader) {
 		info("Finishing bootstrap... Loading postponed components...");
-		loadPostponedComponents();
+		loadPostponedComponents(loader);
 
 		info("Loading final events...");
 		loadEvents();
-		createEventChannel("mod.loaded");
 
 		info("Loading coremods...");
-		downloadMavenDependencies(coremodMavenDependencies);
 		loadCoreMods();
 
 		BaseEventController.work();

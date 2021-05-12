@@ -71,9 +71,9 @@ public class ProcessingOutputAppender extends AbstractAppender {
 					} else if (ch == '6') {
 						newMsg += ansi().fgYellow();
 					} else if (ch == '7') {
-						newMsg += ansi().a(37);
+						newMsg += ansi().fg(Color.WHITE);
 					} else if (ch == '8') {
-						newMsg += ansi().a(90);
+						newMsg += ansi().fgBrightBlack();
 					} else if (ch == '9') {
 						newMsg += ansi().fgBlue();
 					} else if (ch == 'a') {
@@ -87,7 +87,7 @@ public class ProcessingOutputAppender extends AbstractAppender {
 					} else if (ch == 'e') {
 						newMsg += ansi().fgBrightYellow();
 					} else if (ch == 'f') {
-						newMsg += ansi().fg(Color.WHITE);
+						newMsg += ansi().fgBright(Color.WHITE);
 					} else if (ch == 'l') {
 						newMsg += ansi().bold();
 					} else if (ch == 'm') {

@@ -1,15 +1,18 @@
 package org.asf.cyan.api.internal.test;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.config.ConfigManager;
+import org.asf.cyan.api.internal.test.datafixers.FixerEvents;
 import org.asf.cyan.api.internal.test.sides.ClientEvents;
 import org.asf.cyan.api.internal.test.sides.ServerEvents;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.api.util.server.language.ClientLanguage;
 import org.asf.cyan.api.versioning.Version;
@@ -24,9 +27,24 @@ public class TestEventListeners extends CyanComponent implements IEventListenerC
 
 	protected static void initComponent() throws IOException {
 		BaseEventController.addEventContainer(new TestEventListeners());
-		BaseEventController.addEventContainer(new ServerEvents());
+	}
+
+	@AttachEvent(value = "mods.prestartgame", synchronize = true)
+	private void attachAll(ClassLoader loader)
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+			NoSuchMethodException, SecurityException, ClassNotFoundException {
+		String tname1 = ServerEvents.class.getTypeName();
+		String tname2 = ClientEvents.class.getTypeName();
+		Class<?> cls1 = loader.loadClass(tname1);
+		Class<?> cls2 = loader.loadClass(tname2);
+		BaseEventController.addEventContainer((ServerEvents) cls1.getConstructor().newInstance());
+
+		if (Modloader.getModloaderLaunchPlatform() != LaunchPlatform.MCP) { // Forge doesn't support datafixers
+			BaseEventController.addEventContainer(new FixerEvents());
+		}
+
 		if (Modloader.getModloaderGameSide() == GameSide.CLIENT) {
-			BaseEventController.addEventContainer(new ClientEvents());
+			BaseEventController.addEventContainer((ClientEvents) cls2.getConstructor().newInstance());
 		} else {
 			ClientLanguage.registerLanguageKey("test.test", "hello world");
 		}

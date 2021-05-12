@@ -139,7 +139,8 @@ public String getLatestYarnVersion(String version) throws IOException {
 	return mappingsVersion;
 }
 
-ext.mappingsVersion = minecraft
+if (!ext.hasProperty("mappingsVersion"))
+	ext.mappingsVersion = minecraft
 if (project.hasProperty("overrideMappingsVersion"))
 	mappingsVersion = project.getProperty("overrideMappingsVersion")
 
@@ -155,46 +156,7 @@ project(":").childProjects.each { proj ->
 File cyanCache = new File(getCacheRoot(), "cyan-wrapper-project");
 if (!cyanCache.exists()) cyanCache.mkdirs();
 
-if (modloader.startsWith("paper-")) {
-	def paperversion = modloader.substring("paper-".length())
-	if (paperversion.equals("latestsupported")) {
-		def useurl = "https://aerialworks.ddns.net/maven"
-		StringBuilder conf = new StringBuilder();
-		URL u = new URL(useurl + infoPath);
-		Scanner sc = new Scanner(u.openStream());
-		while (sc.hasNext())
-			conf.append(sc.nextLine()+System.lineSeparator());
-		sc.close();
-
-		CyanUpdateInfo info = new CyanUpdateInfo(conf.toString())
-		mappingsVersion = info.spigotTestingMappings.get(minecraft)
-		def paper = ""
-
-		if (mappingsVersion == null) {
-			if (project.hasProperty("overrideMappingsVersion"))
-				mappingsVersion = project.getProperty("overrideMappingsVersion")
-			else {
-                println "Resolving latest SPIGOT mappings..."
-				mappingsVersion = getLatestSpigotMappings(minecraft)
-            }
-		}
-
-		paper = info.paperByMappings.get(mappingsVersion)
-		if (paper == null) {
-			URL url = new URL("https://papermc.io/api/v2/projects/paper/versions/" + minecraft);
-			InputStream strm = url.openStream()
-			JsonArray builds = JsonParser.parseString(new String(strm.readAllBytes())).getAsJsonObject().get("builds").getAsJsonArray();
-			strm.close()
-
-			paper = builds.get(builds.size() - 1).getAsString();
-		}
-
-		modloader = "paper-" + paper
-	} else {
-        println "Resolving latest SPIGOT mappings..."
-        mappingsVersion = getLatestSpigotMappings(minecraft)
-	}
-} else if (modloader.startsWith("forge-")) {
+if (modloader.startsWith("forge-")) {
     def forgeversion = modloader.substring("forge-".length())
     File forgeInstaller = new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-installer.jar")
     File downloadmarker = new File(cyanCache, forgeInstaller.getName()+".lck")

@@ -39,10 +39,11 @@ public class CyanForgeClientWrapper {
 		sc.close();
 
 		CyanLoader.setPlatformVersion(mcp.toString());
-		
+
 		CyanCore.setEntryMethod("CyanForgeWrapper Version " + builder.toString().trim() + ", MCP version " + mcp);
 		CyanLoader.disableVanillaMappings();
 		CyanLoader.addCompatibilityMappings(CyanLoader.getForgeCompatibilityMappings(GameSide.CLIENT, mcp.toString()));
+
 		CyanLoader.initializeGame("CLIENT");
 		String wrapper = System.getProperty("cyan.launcher.client.wrapper", "cpw.mods.modlauncher.Launcher");
 		CyanCore.startGame(wrapper, args);
