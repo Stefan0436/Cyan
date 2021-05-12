@@ -13,7 +13,7 @@ import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 public class BlocksModification {
 
 	@Constructor(clinit = true)
-	@InjectAt(location = InjectLocation.TAIL, targetCall = "iterator()", targetOwner = "net.minecraft.core.DefaultedRegistry")
+	@InjectAt(location = InjectLocation.HEAD)
 	public static void clinit() {
 		BlockRegistryEventObject cyanBlocks = new BlockRegistryEventObject();
 		BlockRegistryEvent.getInstance().dispatch(cyanBlocks).getResult();

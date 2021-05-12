@@ -120,4 +120,8 @@ public interface IExtendedEvent<T extends EventObject> extends IModloaderCompone
 	public static IExtendedEvent<?> getInstance() {
 		return null;
 	}
+	
+	public default boolean requiresSynchronizedListeners() {
+		return false;
+	}
 }

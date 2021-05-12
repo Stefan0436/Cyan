@@ -1352,6 +1352,13 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 				}
 
 				return null;
+			}, eventType -> {
+				for (IExtendedEvent<?> ev : extEvents) {
+					if (eventType.isAssignableFrom(ev.getClass()))
+						return ev.requiresSynchronizedListeners();
+				}
+
+				return false;
 			});
 			return true;
 		} else if (component instanceof IAcceptableComponent) {

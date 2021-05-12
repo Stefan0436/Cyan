@@ -16,6 +16,11 @@ public class EntityAttributesEvent extends AbstractExtendedEvent<EntityAttribute
 	private static EntityAttributesEvent implementation;
 
 	@Override
+	public boolean requiresSynchronizedListeners() {
+		return true;
+	}
+
+	@Override
 	public String channelName() {
 		return "modkit.entity.living.attributes.register";
 	}

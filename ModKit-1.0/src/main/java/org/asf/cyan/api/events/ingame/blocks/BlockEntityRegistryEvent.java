@@ -39,6 +39,11 @@ public class BlockEntityRegistryEvent extends AbstractExtendedEvent<BlockEntityR
 		public int id;
 	}
 
+	@Override
+	public boolean requiresSynchronizedListeners() {
+		return true;
+	}
+
 	private static class TypeIterator implements Iterator<EntityTypeEntry> {
 		public EntityTypeEntry itm;
 

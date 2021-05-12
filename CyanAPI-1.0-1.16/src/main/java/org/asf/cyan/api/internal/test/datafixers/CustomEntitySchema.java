@@ -41,7 +41,7 @@ public class CustomEntitySchema extends NamespacedSchema {
 		Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(schema);
 
 		// Custom block entities
-		registerCustomEntity("cyan:testblock", schema, map);
+		//registerCustomEntity("cyan:testblock", schema, map);
 
 		return map;
 	}

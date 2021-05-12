@@ -91,10 +91,10 @@ public class BlockRegistryEventObject extends EventObject {
 	 * @param <T>         Block Class Type
 	 * @param id          Block id
 	 * @param constructor Block constructor
-	 * @param properties  Block builder
+	 * @param properties  Block properties
 	 */
-	public <T extends Block> void addBlock(String id, Function<Properties, T> constructor, Properties builder) {
-		addBlock(id, "cyan", constructor, builder, null);
+	public <T extends Block> void addBlock(String id, Function<Properties, T> constructor, Properties properties) {
+		addBlock(id, "cyan", constructor, properties, null);
 	}
 
 	/**
@@ -104,7 +104,7 @@ public class BlockRegistryEventObject extends EventObject {
 	 * @param namespace   Block namespace
 	 * @param id          Block id
 	 * @param constructor Block constructor
-	 * @param properties  Block builder
+	 * @param properties  Block properties
 	 */
 	public <T extends Block> void addBlock(String namespace, String id, Function<Properties, T> constructor,
 			Properties properties) {

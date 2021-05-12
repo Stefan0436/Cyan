@@ -8,7 +8,6 @@ import org.asf.cyan.api.events.network.CyanClientHandshakeEvent;
 import org.asf.cyan.api.events.resources.manager.LanguageManagerStartupEvent;
 import org.asf.cyan.api.events.resources.manager.ResourceManagerStartupEvent;
 import org.asf.cyan.api.events.resources.manager.TextureManagerStartupEvent;
-import org.asf.cyan.api.internal.test.testing.renderers.TestBlockRenderer;
 import org.asf.cyan.api.internal.test.testing.renderers.TestRenderer;
 import org.asf.cyan.api.events.objects.core.ReloadEventObject;
 import org.asf.cyan.api.events.objects.entities.EntityRendererRegistryEventObject;
@@ -61,11 +60,6 @@ public class ClientEvents implements IEventListenerContainer {
 	@SimpleEvent(CyanClientHandshakeEvent.class)
 	private void successfulCyanHandshakeClient(ClientConnectionEventObject event) { // OK
 		event = event;
-	}
-
-	@SimpleEvent(BlockEntityRendererRegistryEvent.class)
-	public void test(BlockEntityRendererRegistryEventObject event) {
-		event.addEntity(ServerEvents.CUSTOM_BLOCK_ENTITY, new TestBlockRenderer(event.getDispatcher()));
 	}
 
 	@SimpleEvent(EntityRendererRegistryEvent.class)

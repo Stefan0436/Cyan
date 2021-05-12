@@ -62,8 +62,10 @@ public class PacketChannelContextClientImplementation extends PacketChannelConte
 			inst.level = client.player.level;
 			inst.player = client.player;
 		}
-		inst.connection = client.getConnection().getConnection();
-		inst.serverBrand = ((ClientPacketListenerExtension) client.getConnection()).getServerBrand();
+		if (client.getConnection() != null) {
+			inst.connection = client.getConnection().getConnection();
+			inst.serverBrand = ((ClientPacketListenerExtension) client.getConnection()).getServerBrand();
+		}
 		return inst;
 	}
 

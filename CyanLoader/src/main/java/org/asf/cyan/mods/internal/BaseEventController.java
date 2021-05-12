@@ -27,6 +27,7 @@ public class BaseEventController implements IModloaderComponent {
 
 	private static BaseEventController controller;
 	private Function<Class<? extends IExtendedEvent<?>>, String> extendedEventSupplier;
+	private Function<Class<? extends IExtendedEvent<?>>, Boolean> extendedEventRequireSynchSupplier;
 	private BiConsumer<String, IEventListener> attachMethod;
 	private boolean runtime = false;
 
@@ -37,9 +38,11 @@ public class BaseEventController implements IModloaderComponent {
 	}
 
 	public void attachListenerRegistry(BiConsumer<String, IEventListener> attachMethod,
-			Function<Class<? extends IExtendedEvent<?>>, String> extendedEventSupplier) {
+			Function<Class<? extends IExtendedEvent<?>>, String> extendedEventSupplier,
+			Function<Class<? extends IExtendedEvent<?>>, Boolean> extendedEventRequireSynchSupplier) {
 		this.attachMethod = attachMethod;
 		this.extendedEventSupplier = extendedEventSupplier;
+		this.extendedEventRequireSynchSupplier = extendedEventRequireSynchSupplier;
 	}
 
 	public void assign() {
@@ -93,9 +96,10 @@ public class BaseEventController implements IModloaderComponent {
 				SimpleEvent ev = mth.getAnnotation(SimpleEvent.class);
 				if (mth.getParameterCount() == 1
 						&& EventObject.class.isAssignableFrom(mth.getParameters()[0].getType())) {
+
 					String name = extendedEventSupplier.apply(ev.value());
 					if (name != null) {
-						if (ev.synchronize()) {
+						if (ev.synchronize() || extendedEventRequireSynchSupplier.apply(ev.value())) {
 							attachEventListener(name, new IExtendedSynchronizedEventListener<EventObject>() {
 
 								@Override
