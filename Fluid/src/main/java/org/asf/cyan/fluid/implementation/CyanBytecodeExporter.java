@@ -270,7 +270,7 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 
 		if (method.localVariables != null) {
 			for (LocalVariableNode var : method.localVariables) {
-				if (!annotationHead.isEmpty())
+				if (!annotationHead.toString().isEmpty())
 					annotationHead.append("\n");
 
 				AnnotationInfo anno = new AnnotationInfo();
@@ -304,12 +304,12 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 		}
 
 		String annotations = mthAnnotationHeadToString(method);
-		if (!annotationHead.isEmpty() && !annotations.isEmpty())
+		if (!annotationHead.toString().isEmpty() && !annotations.isEmpty())
 			annotationHead.append("\n\n");
 
 		annotationHead.append(annotations);
 
-		if (!annotationHead.isEmpty()) {
+		if (!annotationHead.toString().isEmpty()) {
 			result.append(annotationHead).append("\n");
 		}
 		String mod = Modifier.toString(method.access);
@@ -321,7 +321,7 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 
 		annotationHead = new StringBuilder();
 		for (String line : lines) {
-			if (!annotationHead.isEmpty())
+			if (!annotationHead.toString().isEmpty())
 				annotationHead.append("\n");
 			annotationHead.append(line);
 		}
@@ -508,7 +508,7 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 			}
 		}
 
-		if (!result.isEmpty())
+		if (!result.toString().isEmpty())
 			result.append("\n");
 
 		boolean added = false;
@@ -590,7 +590,7 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 
 		if (field.visibleAnnotations != null) {
 			for (AnnotationNode anode : field.visibleAnnotations) {
-				if (!result.isEmpty())
+				if (!result.toString().isEmpty())
 					result.append("\n");
 
 				AnnotationInfo i = AnnotationInfo.create(anode);
@@ -601,7 +601,7 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 
 		if (field.invisibleAnnotations != null) {
 			for (AnnotationNode anode : field.invisibleAnnotations) {
-				if (!result.isEmpty())
+				if (!result.toString().isEmpty())
 					result.append("\n");
 
 				AnnotationInfo i = AnnotationInfo.create(anode);
@@ -610,7 +610,7 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 			}
 		}
 
-		if (!result.isEmpty())
+		if (!result.toString().isEmpty())
 			result.append("\n");
 
 		String mod = Modifier.toString(field.access);

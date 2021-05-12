@@ -35,55 +35,7 @@ public class CyanEventList implements Iterable<CyanEventList.CELEntry> {
 	}
 
 	private CELEntry mainEntry;
-
-	public long length() {
-		long value = 0;
-		CELEntry cEntry = mainEntry;
-
-		while (cEntry != null) {
-			if (value + 1 != Long.MAX_VALUE) {
-				value++;
-				cEntry = cEntry.nextEntry;
-			} else {
-				value = -1;
-				break;
-			}
-		}
-
-		return value;
-	}
-
-	public IEventListener getAt(long index) {
-		if (length() == -1 || index < length()) {
-			CELEntry cEntry = mainEntry;
-			long ind = index;
-			while (ind != 0) {
-				cEntry = cEntry.nextEntry;
-				if (cEntry == null) {
-					return null;
-				}
-				ind--;
-			}
-			return cEntry.listener;
-		} else {
-			throw new IndexOutOfBoundsException(index + " is outside of the event list!");
-		}
-	}
-
-	public IEventListener getLast() {
-		return getLastInternal().listener;
-	}
-
-	private CELEntry getLastInternal() {
-		CELEntry cEntry = mainEntry;
-		while (cEntry != null) {
-			if (cEntry.nextEntry == null)
-				break;
-
-			cEntry = cEntry.nextEntry;
-		}
-		return cEntry;
-	}
+	private CELEntry currentEntry;
 
 	@Override
 	public Iterator<CELEntry> iterator() {
@@ -102,43 +54,16 @@ public class CyanEventList implements Iterable<CyanEventList.CELEntry> {
 	}
 
 	public void add(IEventListener listener) {
-		CELEntry entry = getLastInternal();
-
 		if (mainEntry == null) {
-			entry = new CELEntry();
-			entry.listener = listener;
-			mainEntry = entry;
+			mainEntry = new CELEntry();
+			mainEntry.listener = listener;
+			currentEntry = mainEntry;
 			return;
 		}
 
-		entry.nextEntry = new CELEntry();
-		entry = entry.nextEntry;
-
-		entry.listener = listener;
+		currentEntry.nextEntry = new CELEntry();
+		currentEntry.nextEntry.listener = listener;
+		currentEntry = currentEntry.nextEntry;
 	}
 
-	public IEventListener[] toArray() {
-		CELEntry cEntry = mainEntry;
-
-		int length = 0;
-		while (cEntry != null) {
-			if (length + 1 != Long.MAX_VALUE) {
-				length++;
-				cEntry = cEntry.nextEntry;
-			} else {
-				break;
-			}
-		}
-
-		cEntry = mainEntry;
-
-		IEventListener[] entries = new IEventListener[length];
-
-		for (int i = 0; i < length; i++) {
-			entries[i] = cEntry.listener;
-			cEntry = cEntry.nextEntry;
-		}
-
-		return entries;
-	}
 }

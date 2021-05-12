@@ -1,23 +1,35 @@
 package org.asf.cyan.api.internal;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.versioning.Version;
-import org.asf.cyan.core.CyanCore;
 import org.asf.cyan.core.CyanInfo;
 
 public class ModKitController extends CyanComponent {
+	static ModKitController instance;
 	public void begin(ClassLoader loader) {
+		instance = this;
 		Modloader.getModloader().dispatchEvent("mods.prestartgame");
 		Modloader.getModloader().dispatchEvent("mods.prestartgame", loader);
 		Version minecraft = Version.fromString(CyanInfo.getMinecraftVersion());
 		Version last = Version.fromString("0.0.0");
 
-		CyanCore core = (CyanCore) getMainImplementation();
-		Class<?>[] classes = core.findClasses(IModKitComponent.class, loader);
+		String[] classNames = findClassNames(getMainImplementation(), IModKitComponent.class);
+		ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
+		for (String name : classNames) {
+			try {
+				classes.add(loader.loadClass(name));
+			} catch (ClassNotFoundException e) {
+				try {
+					classes.add(ClassLoader.getSystemClassLoader().loadClass(name));
+				} catch (ClassNotFoundException e1) {
+				}
+			}
+		}
 		String selectedPackage = "";
 
 		for (Class<?> cls : classes) {

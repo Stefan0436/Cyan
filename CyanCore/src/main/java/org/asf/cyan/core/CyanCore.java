@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -40,6 +42,7 @@ import org.reflections.util.ConfigurationBuilder;
  */
 @CYAN_COMPONENT
 public class CyanCore extends CyanComponent {
+	private static ArrayList<URL> addedUrls = new ArrayList<URL>();
 	static ArrayList<Runnable> preLoadHooks = new ArrayList<Runnable>();
 	static ArrayList<String> allowedPackages = new ArrayList<String>();
 	private static ArrayList<Class<?>> additionalClasses = new ArrayList<Class<?>>();
@@ -482,8 +485,8 @@ public class CyanCore extends CyanComponent {
 		return classes.toArray(t -> new Class[t]);
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> Class<T>[] findClasses(Class<T> interfaceOrSupertype, ClassLoader loader) {
+	@Override
+	public <T> String[] findClassNamesInternal(Class<T> interfaceOrSupertype) {
 		if (reflections == null) {
 			initReflections();
 		}
@@ -491,24 +494,19 @@ public class CyanCore extends CyanComponent {
 		if (LOG == null)
 			initLogger();
 
-		ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
+		ArrayList<String> classes = new ArrayList<String>();
 		for (String cls : reflections.getStore().getAll(SubTypesScanner.class, interfaceOrSupertype.getTypeName())) {
-			try {
-				Class<?> ct = loader.loadClass(cls);
-				classes.add(ct);
-			} catch (ClassNotFoundException e) {
-				e = e;
-			}
+			classes.add(cls);
 		}
 
 		for (Class<?> cls : additionalClasses) {
 			if (interfaceOrSupertype.isAssignableFrom(cls)
-					&& !classes.stream().anyMatch(t -> t.getTypeName().equals(cls.getTypeName()))) {
-				classes.add(cls);
+					&& !classes.stream().anyMatch(t -> t.equals(cls.getTypeName()))) {
+				classes.add(cls.getTypeName());
 			}
 		}
 
-		return classes.toArray(t -> new Class[t]);
+		return classes.toArray(t -> new String[t]);
 	}
 
 	@Override
@@ -644,6 +642,7 @@ public class CyanCore extends CyanComponent {
 			if (loader == null)
 				initLoader();
 			loader.addUrl(url);
+			addedUrls.add(url);
 		} else
 			throw new IllegalStateException("CyanCore is already past CORELOAD");
 	}
@@ -657,6 +656,7 @@ public class CyanCore extends CyanComponent {
 	public static void addUrl(URL url) {
 		if (!loadPhase.ge(LoadPhase.PRELOAD) && loadPhase.lt(LoadPhase.POSTINIT)) {
 			openloader.addUrl(url);
+			addedUrls.add(url);
 		} else
 			throw new IllegalStateException("CyanCore has not yet reached PRELOAD or is past INIT");
 	}
@@ -680,6 +680,17 @@ public class CyanCore extends CyanComponent {
 
 		core = new CyanCore();
 		core.assignImplementation();
+	}
+
+	public static Path[] getAddedPaths() {
+		ArrayList<Path> paths = new ArrayList<Path>();
+		for (URL u : addedUrls) {
+			try {
+				paths.add(Path.of(u.toURI()));
+			} catch (URISyntaxException e) {
+			}
+		}
+		return paths.toArray(t -> new Path[t]);
 	}
 
 	private static boolean ide = false;

@@ -1,18 +1,21 @@
 package org.asf.cyan.internal.modkitimpl.channels.packets;
 
-import org.asf.cyan.api.common.CYAN_COMPONENT;
+import org.asf.cyan.CyanLoader;
+import org.asf.cyan.api.modloader.IPostponedComponent;
+import org.asf.cyan.api.modloader.TargetModloader;
 import org.asf.cyan.api.network.OutputFlow;
 import org.asf.cyan.api.network.PacketWriter;
 import org.asf.cyan.api.packet.PacketEntry;
 import org.asf.cyan.internal.modkitimpl.channels.flow.FlowPacketBuilder;
 
-@CYAN_COMPONENT
-public class PacketWriterImplementation extends PacketWriter {
+@TargetModloader(CyanLoader.class)
+public class PacketWriterImplementation extends PacketWriter implements IPostponedComponent {
 
 	private OutputFlow flow;
 	private FlowPacketBuilder builder;
 
-	protected static void initComponent() {
+	@Override
+	public void initComponent() {
 		implementation = new PacketWriterImplementation();
 	}
 

@@ -67,7 +67,7 @@ class PublishingConfiguration {
 			return name
 		}
 	
-		public def pretty_name(def name) {
+		public def pretty_artifact_name(def name) {
 			this.pretty_name = name
 			return name
 		}
@@ -341,18 +341,8 @@ gradle.allprojects {
 }
 
 def doInitializeASFMVNPublish(def proj) {
-	if (!proj.hasProperty("publishconf")) return
+	if (!proj.ext.has("publishconf")) return
 	ext.publishconf.process()
-
-	configurations {
-		antDep
-	}
-
-	dependencies {
-		antDep 'com.github.lookfirst:sardine:5.10'
-	}
-
-	ant.taskdef(name: 'sardine', classname: 'com.github.sardine.ant.SardineTask', classpath: configurations.antDep.asPath)
 
 	proj.publishing {
 		publications {
@@ -452,46 +442,46 @@ def doInitializeASFMVNPublish(def proj) {
 			}
 		}
 
-		def ind = 0
-		for (def artifact : proj.ext.publishconf.artifacts) {
-			if (artifact.single_resources.size() != 0) publish.dependsOn processResources
-			def id = ind++
-			def artifact2 = artifact
-			tasks.create("prePublishMavenJava${id}") {
-				doFirst {
-					for (def tsk : artifact2.tasks) {
-						ant.sardine(username: "${mavenusername}", password: "${mavenpassword}") {
-							def cpath = ""
-							for (def folder : artifact2.group.split("\\.")) {
-								exists(url: proj.ext.publishconf.address+"/"+cpath+folder.toString(), property: "exists-"+cpath+folder)
-								cpath += folder+"/"
-							}
-							exists(url: proj.ext.publishconf.address+"/"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name, property: "exists-"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name)
-							exists(url: proj.ext.publishconf.address+"/"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name+"/"+artifact2.version, property: "exists-"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name+"/"+artifact2.version)
-						}
-						ant.sardine(username: "${mavenusername}", password: "${mavenpassword}") {
-							def cpath = ""
-							for (def folder : artifact2.group.split("\\.")) {
-								if (!ant.properties["exists-"+cpath+folder].equals("true")) createDirectory(url: proj.ext.publishconf.address+"/"+cpath+folder)
-								cpath += folder+"/"
-							}
-							if (!ant.properties["exists-"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name].equals("true")) createDirectory(url: proj.ext.publishconf.address+"/"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name)
-							if (!ant.properties["exists-"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name+"/"+artifact2.version].equals("true")) createDirectory(url: proj.ext.publishconf.address+"/"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name+"/"+artifact2.version)
-						}
-					}
-				}
-			}
-			//try {
-            //    tasks.getByPath(":" + proj.name + ":publishMavenJava${id}PublicationToMaven2Repository").dependsOn "prePublishMavenJava${id}"
-			//} catch (Exception e) {
-            //    tasks.getByPath(":publishMavenJava${id}PublicationToMaven2Repository").dependsOn "prePublishMavenJava${id}"
-			//}
-		}
+// 		def ind = 0
+// 		for (def artifact : proj.ext.publishconf.artifacts) {
+// 			if (artifact.single_resources.size() != 0) publish.dependsOn processResources
+// 			def id = ind++
+// 			def artifact2 = artifact
+// 			tasks.create("prePublishMavenJava${id}") {
+// 				doFirst {
+// 					for (def tsk : artifact2.tasks) {
+// 						ant.sardine(username: "${mavenusername}", password: "${mavenpassword}") {
+// 							def cpath = ""
+// 							for (def folder : artifact2.group.split("\\.")) {
+// 								exists(url: proj.ext.publishconf.address+"/"+cpath+folder.toString(), property: "exists-"+cpath+folder)
+// 								cpath += folder+"/"
+// 							}
+// 							exists(url: proj.ext.publishconf.address+"/"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name, property: "exists-"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name)
+// 							exists(url: proj.ext.publishconf.address+"/"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name+"/"+artifact2.version, property: "exists-"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name+"/"+artifact2.version)
+// 						}
+// 						ant.sardine(username: "${mavenusername}", password: "${mavenpassword}") {
+// 							def cpath = ""
+// 							for (def folder : artifact2.group.split("\\.")) {
+// 								if (!ant.properties["exists-"+cpath+folder].equals("true")) createDirectory(url: proj.ext.publishconf.address+"/"+cpath+folder)
+// 								cpath += folder+"/"
+// 							}
+// 							if (!ant.properties["exists-"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name].equals("true")) createDirectory(url: proj.ext.publishconf.address+"/"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name)
+// 							if (!ant.properties["exists-"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name+"/"+artifact2.version].equals("true")) createDirectory(url: proj.ext.publishconf.address+"/"+artifact2.group.replaceAll("\\.", "/")+"/"+artifact2.name+"/"+artifact2.version)
+// 						}
+// 					}
+// 				}
+// 			}
+//			try {
+// 			 	tasks.getByPath(":" + proj.name + ":publishMavenJava${id}PublicationToMaven2Repository").dependsOn "prePublishMavenJava${id}"
+// 			} catch (Exception e) {
+// 			 	asks.getByPath(":publishMavenJava${id}PublicationToMaven2Repository").dependsOn "prePublishMavenJava${id}"
+//			}
+//		}
 	}
 }
 task checkAsfMVNPublish {
 	doLast {
-		if (!project.hasProperty("publishconf"))
+		if (!project.ext.has("publishconf"))
 		logger.warn('ASF-Maven-Publish: Hmmm, looks like you have applied this plugin without a configuration,\nplease add a configurePublish code block.')
 	}
 }

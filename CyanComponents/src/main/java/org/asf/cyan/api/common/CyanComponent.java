@@ -3,6 +3,7 @@ package org.asf.cyan.api.common;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.stream.Stream;
 
@@ -58,21 +59,24 @@ public abstract class CyanComponent {
 
 			int currentDepth = 0;
 			for (StackTraceElement element : stack) {
-				if (!element.getClassName().equals(Thread.class.getTypeName())
-						&& !element.getClassName().equals(CallTrace.class.getTypeName())) {
-					Class<?> cls;
-					try {
-						cls = Class.forName(element.getClassName());
-					} catch (ClassNotFoundException e) {
-						continue;
-					}
+				try {
+					if (!element.getClassName().equals(Thread.class.getTypeName())
+							&& !element.getClassName().equals(CallTrace.class.getTypeName())) {
+						Class<?> cls;
+						try {
+							cls = Class.forName(element.getClassName());
+						} catch (ClassNotFoundException e) {
+							continue;
+						}
 
-					if (CyanComponent.class.isAssignableFrom(cls) && currentDepth != componentDepth) {
-						currentDepth++;
-						continue;
-					} else {
-						return cls;
+						if (CyanComponent.class.isAssignableFrom(cls) && currentDepth != componentDepth) {
+							currentDepth++;
+							continue;
+						} else {
+							return cls;
+						}
 					}
+				} catch (Throwable e2) {
 				}
 			}
 
@@ -240,15 +244,19 @@ public abstract class CyanComponent {
 				+ message);
 		trace("PARSE marker of the " + CallTrace.traceCallName(2) + " class");
 		String markerName = CallTrace.traceCallName(2);
-		if (Stream.of(CallTrace.traceCall(2).getDeclaredMethods()).anyMatch(t -> t.getName() == "getMarker")) {
-			trace("OVERRIDE marker name by " + CallTrace.traceCallName(2) + ", getMarker method was found");
-			Method meth = Stream.of(CallTrace.traceCall(2).getDeclaredMethods()).filter(t -> t.getName() == "getMarker")
-					.findFirst().get();
-			try {
-				meth.setAccessible(true);
-				markerName = (String) meth.invoke(null);
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		try {
+			if (Stream.of(CallTrace.traceCall(2).getDeclaredMethods()).anyMatch(t -> t.getName() == "getMarker")) {
+				trace("OVERRIDE marker name by " + CallTrace.traceCallName(2) + ", getMarker method was found");
+				Method meth = Stream.of(CallTrace.traceCall(2).getDeclaredMethods())
+						.filter(t -> t.getName() == "getMarker").findFirst().get();
+				try {
+					meth.setAccessible(true);
+					markerName = (String) meth.invoke(null);
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				}
 			}
+		} catch (Throwable t) {
+
 		}
 		if (markerName.startsWith("Cyan") && !markerName.substring("Cyan".length()).equals("Component")) {
 			trace(CallTrace.traceCallName(2) + " is a CYAN component, stripping 'Cyan' from marker name");
@@ -472,19 +480,67 @@ public abstract class CyanComponent {
 	 * @param implementation       Implementation to use.
 	 * @param interfaceOrSupertype Class supertype or interface.
 	 * @return Array of matching classes.
+	 * @deprecated Please use findClassNames and instantiate with the classloader
+	 *             provided by <code>getClass().getClassLoader()</code> or use
+	 *             <code>findClasses(impl, type, loader)</code>
 	 */
+	@Deprecated
 	protected static <T> Class<T>[] findClasses(CyanComponent implementation, Class<T> interfaceOrSupertype) {
 		return implementation.findClassesInternal(interfaceOrSupertype);
 	}
 
 	/**
-	 * Finds annotated classes. Needs an implementation to work.
+	 * Finds classes of a certain supertype or interface. Needs an implementation to
+	 * work.
 	 * 
 	 * @param implementation       Implementation to use.
-	 * @param annotation Annotation class.
+	 * @param interfaceOrSupertype Class supertype or interface.
+	 * @return Array of matching classes.
+	 * @param loaders Class loader(s) to use
+	 */
+	@SuppressWarnings("unchecked")
+	protected static <T> Class<T>[] findClasses(CyanComponent implementation, Class<T> interfaceOrSupertype,
+			ClassLoader... loaders) {
+		ArrayList<Class<T>> classes = new ArrayList<Class<T>>();
+		
+		for (String cls : implementation.findClassNamesInternal(interfaceOrSupertype)) {
+			for (ClassLoader loader : loaders) {
+				try {
+					classes.add((Class<T>) loader.loadClass(cls));
+					break;
+				} catch (ClassNotFoundException e) {
+				}
+			}
+		}
+		
+		return classes.toArray(t -> new Class[t]);
+	}
+
+	/**
+	 * Finds classes of a certain supertype or interface. Needs an implementation to
+	 * work.
+	 * 
+	 * @param implementation       Implementation to use.
+	 * @param interfaceOrSupertype Class supertype or interface.
+	 * @return Array of matching class names.
+	 */
+	protected static <T> String[] findClassNames(CyanComponent implementation, Class<T> interfaceOrSupertype) {
+		return implementation.findClassNamesInternal(interfaceOrSupertype);
+	}
+
+	protected <T> String[] findClassNamesInternal(Class<T> interfaceOrSupertype) {
+		return new String[0];
+	}
+
+	/**
+	 * Finds annotated classes. Needs an implementation to work.
+	 * 
+	 * @param implementation Implementation to use.
+	 * @param annotation     Annotation class.
 	 * @return Array of matching classes.
 	 */
-	protected static <T extends Annotation> Class<T>[] findAnnotatedClasses(CyanComponent implementation, Class<T> annotation) {
+	protected static <T extends Annotation> Class<T>[] findAnnotatedClasses(CyanComponent implementation,
+			Class<T> annotation) {
 		return implementation.findAnnotatedClassesInternal(annotation);
 	}
 

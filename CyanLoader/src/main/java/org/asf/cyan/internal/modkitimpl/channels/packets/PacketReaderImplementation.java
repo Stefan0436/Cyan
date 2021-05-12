@@ -1,19 +1,22 @@
 package org.asf.cyan.internal.modkitimpl.channels.packets;
 
-import org.asf.cyan.api.common.CYAN_COMPONENT;
+import org.asf.cyan.CyanLoader;
+import org.asf.cyan.api.modloader.IPostponedComponent;
+import org.asf.cyan.api.modloader.TargetModloader;
 import org.asf.cyan.api.network.ByteFlow;
 import org.asf.cyan.api.network.PacketReader;
 import org.asf.cyan.api.packet.PacketEntry;
 import org.asf.cyan.internal.modkitimpl.channels.flow.FlowPacketParser;
 
-@CYAN_COMPONENT
-public class PacketReaderImplementation extends PacketReader {
+@TargetModloader(CyanLoader.class)
+public class PacketReaderImplementation extends PacketReader implements IPostponedComponent {
 
 	private ByteFlow flow;
 	private FlowPacketParser parser = null;
 
-	protected static void initComponent() {
-		implementation = new PacketReaderImplementation();
+	@Override
+	public void initComponent() {
+		implementation = this;
 	}
 
 	@Override

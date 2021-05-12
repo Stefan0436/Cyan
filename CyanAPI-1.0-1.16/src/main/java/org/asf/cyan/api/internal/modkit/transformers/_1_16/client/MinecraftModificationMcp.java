@@ -6,7 +6,7 @@ import org.asf.cyan.api.events.objects.resources.TextureManagerEventObject;
 import org.asf.cyan.api.events.resources.manager.LanguageManagerStartupEvent;
 import org.asf.cyan.api.events.resources.manager.ResourceManagerStartupEvent;
 import org.asf.cyan.api.events.resources.manager.TextureManagerStartupEvent;
-import org.asf.cyan.api.fluid.annotations.PlatformExclude;
+import org.asf.cyan.api.fluid.annotations.PlatformOnly;
 import org.asf.cyan.api.internal.modkit.components._1_16.common.CyanReloadListener;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.fluid.api.FluidTransformer;
@@ -22,9 +22,9 @@ import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 
 @FluidTransformer
-@PlatformExclude(LaunchPlatform.MCP)
+@PlatformOnly(LaunchPlatform.MCP)
 @TargetClass(target = "net.minecraft.client.Minecraft")
-public class MinecraftModification {
+public class MinecraftModificationMcp {
 
 	private final ReloadableResourceManager resourceManager = null;
 	private final LanguageManager languageManager = null;
@@ -49,7 +49,7 @@ public class MinecraftModification {
 	}
 
 	@Constructor
-	@InjectAt(location = InjectLocation.TAIL, targetCall = "<init>(net.minecraft.client.Minecraft)", targetOwner = "net.minecraft.client.gui.Gui")
+	@InjectAt(location = InjectLocation.TAIL, targetCall = "setErrorCallback(org.lwjgl.glfw.GLFWErrorCallbackI)", targetOwner = "com.mojang.blaze3d.systems.RenderSystem")
 	public void init4(@TargetType(target = "net.minecraft.client.main.GameConfig") GameConfig config) {
 		resourceManager.registerReloadListener(new CyanReloadListener());
 	}

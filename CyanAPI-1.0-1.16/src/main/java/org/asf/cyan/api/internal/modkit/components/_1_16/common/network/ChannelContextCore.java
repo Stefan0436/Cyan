@@ -34,10 +34,19 @@ public class ChannelContextCore extends PacketChannelContext implements IModKitC
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected void findChannels() {
+		ClassLoader loader = getClass().getClassLoader();
 		channels = new PacketChannelList();
 		info("Finding mod network channels...");
-		for (Class<? extends PacketChannel> channel : findClasses(getMainImplementation(), PacketChannel.class)) {
+		String[] classes = findClassNames(getMainImplementation(), PacketChannel.class);
+		for (String cls : classes) {
+			Class<? extends PacketChannel> channel;
+			try {
+				channel = (Class<? extends PacketChannel>) Class.forName(cls, false, loader);
+			} catch (ClassNotFoundException e1) {
+				continue;
+			}
 			if (!Modifier.isAbstract(channel.getModifiers())) {
 				info("Loading channel " + channel.getTypeName() + "...");
 				try {

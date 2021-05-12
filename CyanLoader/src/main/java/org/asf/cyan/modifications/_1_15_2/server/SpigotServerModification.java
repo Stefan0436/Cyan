@@ -72,7 +72,7 @@ public class SpigotServerModification {
 			@TargetType(target = "net.minecraft.server.level.progress.ChunkProgressListenerFactory") Object var14) {
 		if (firstLoad) {
 			CyanCore.setPhase(LoadPhase.PRELOAD);
-			CyanLoader.getModloader(CyanLoader.class).loadMods();
+			CyanLoader.getModloader(CyanLoader.class).loadMods(SpigotServerModification.class.getClassLoader());
 			Modloader.getModloader().dispatchEvent("mods.preinit");
 		}
 	}

@@ -63,7 +63,7 @@ public class SpigotServerModification_1_15_2 {
 			String var11) {
 		if (firstLoad) {
 			CyanCore.setPhase(LoadPhase.PRELOAD);
-			CyanLoader.getModloader(CyanLoader.class).loadMods();
+			CyanLoader.getModloader(CyanLoader.class).loadMods(SpigotServerModification_1_15_2.class.getClassLoader());
 			Modloader.getModloader().dispatchEvent("mods.preinit");
 		}
 	}

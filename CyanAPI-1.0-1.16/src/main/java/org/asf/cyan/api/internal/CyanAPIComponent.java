@@ -2,7 +2,6 @@ package org.asf.cyan.api.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 import org.asf.cyan.api.modloader.Modloader;
@@ -12,7 +11,6 @@ import org.asf.cyan.api.fluid.annotations.PlatformExclude;
 import org.asf.cyan.api.fluid.annotations.PlatformOnly;
 import org.asf.cyan.api.fluid.annotations.SideOnly;
 import org.asf.cyan.api.fluid.annotations.VersionRegex;
-import org.asf.cyan.api.internal.modkit.transformers._1_16.server.main.MainModification;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.api.versioning.Version;
@@ -24,8 +22,18 @@ import org.asf.cyan.fluid.api.FluidTransformer;
 @CYAN_COMPONENT
 @FLUID_AUTODETECT
 public class CyanAPIComponent extends CyanComponent {
+	
+	private static String base = null;
 
 	protected static void addTransformers() {
+		base = CyanAPIComponent.class.getProtectionDomain().getCodeSource().getLocation().toString();
+		if (base.toString().startsWith("jar:"))
+			base = base.substring(0, base.lastIndexOf("!"));
+		else if (base.endsWith("/" + CyanAPIComponent.class.getTypeName().replace(".", "/") + ".class")) {
+			base = base.substring(0,
+					base.length() - ("/" + CyanAPIComponent.class.getTypeName().replace(".", "/") + ".class").length());
+		}
+		
 		info("Loading CyanAPI ModKit transformers...");
 		Version minecraft = Version.fromString(CyanInfo.getMinecraftVersion());
 		Version last = Version.fromString("0.0.0");
@@ -96,51 +104,6 @@ public class CyanAPIComponent extends CyanComponent {
 
 		minecraft = Version.fromString(CyanInfo.getMinecraftVersion());
 		last = Version.fromString("0.0.0");
-
-		classes = findClasses(getMainImplementation(), IRequiredModKitComponent.class);
-		selectedPackage = "";
-
-		for (Class<?> cls : classes) {
-			String pkg = cls.getPackageName();
-			if (!pkg.startsWith("org.asf.cyan.api.internal.modkit.components."))
-				continue;
-
-			if (pkg.contains(".common")) {
-				pkg = pkg.substring(0, pkg.lastIndexOf(".common"));
-			} else if (pkg.contains(".client")) {
-				pkg = pkg.substring(0, pkg.lastIndexOf(".client"));
-			} else if (pkg.contains(".server")) {
-				pkg = pkg.substring(0, pkg.lastIndexOf(".server"));
-			}
-
-			String version = pkg.substring(pkg.lastIndexOf(".") + 1).substring(1).replace("_", ".");
-			if (Version.fromString(version).isGreaterThan(minecraft) || Version.fromString(version).isLessThan(last))
-				continue;
-
-			selectedPackage = pkg;
-			last = Version.fromString(version);
-		}
-
-		for (Class<?> cls : classes) {
-			String pkg = cls.getPackageName();
-			if (!pkg.startsWith("org.asf.cyan.api.internal.modkit.components.")
-					|| (!pkg.equals(selectedPackage) && !pkg.startsWith(selectedPackage + ".")))
-				continue;
-
-			if (pkg.contains(".client") && CyanInfo.getSide() != GameSide.CLIENT) {
-				continue;
-			} else if (pkg.contains(".server") && CyanInfo.getSide() != GameSide.SERVER) {
-				continue;
-			}
-
-			try {
-				IRequiredModKitComponent inst = (IRequiredModKitComponent) cls.getConstructor().newInstance();
-				inst.initializeComponent();
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				throw new RuntimeException(e);
-			}
-		}
 	}
 
 	protected static void initComponent() {
@@ -148,16 +111,8 @@ public class CyanAPIComponent extends CyanComponent {
 			new ModKitController().begin(CyanAPIComponent.class.getClassLoader());
 		}
 	}
-
+	
 	public static URL getResource(String path) {
-		String base = CyanAPIComponent.class.getProtectionDomain().getCodeSource().getLocation().toString();
-		if (base.toString().startsWith("jar:"))
-			base = base.substring(0, base.lastIndexOf("!"));
-		else if (base.endsWith("/" + CyanAPIComponent.class.getTypeName().replace(".", "/") + ".class")) {
-			base = base.substring(0,
-					base.length() - ("/" + CyanAPIComponent.class.getTypeName().replace(".", "/") + ".class").length());
-		}
-
 		try {
 			if ((base.endsWith(".jar") || base.endsWith(".zip")) && !base.startsWith("jar:"))
 				base = "jar:" + base + "!";
@@ -168,15 +123,7 @@ public class CyanAPIComponent extends CyanComponent {
 		}
 	}
 
-	public static InputStream getResourceAsStream(String path) {
-		String base = CyanAPIComponent.class.getProtectionDomain().getCodeSource().getLocation().toString();
-		if (base.toString().startsWith("jar:"))
-			base = base.substring(0, base.lastIndexOf("!"));
-		else if (base.endsWith("/" + CyanAPIComponent.class.getTypeName().replace(".", "/") + ".class")) {
-			base = base.substring(0,
-					base.length() - ("/" + CyanAPIComponent.class.getTypeName().replace(".", "/") + ".class").length());
-		}
-
+	public static InputStream getResourceAsStream(String path) {		
 		try {
 			if ((base.endsWith(".jar") || base.endsWith(".zip")) && !base.startsWith("jar:"))
 				base = "jar:" + base + "!";

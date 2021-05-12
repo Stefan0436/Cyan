@@ -2,12 +2,14 @@ package org.asf.cyan.internal.modkitimpl;
 
 import java.util.ArrayList;
 
+import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.commands.Command;
 import org.asf.cyan.api.commands.CommandManager;
-import org.asf.cyan.api.common.CYAN_COMPONENT;
+import org.asf.cyan.api.modloader.IPostponedComponent;
+import org.asf.cyan.api.modloader.TargetModloader;
 
-@CYAN_COMPONENT
-public class CommandManagerImplementation extends CommandManager {
+@TargetModloader(CyanLoader.class)
+public class CommandManagerImplementation extends CommandManager implements IPostponedComponent {
 
 	private ArrayList<Command> commands = new ArrayList<Command>();
 
@@ -27,7 +29,8 @@ public class CommandManagerImplementation extends CommandManager {
 		return commands.toArray(t -> new Command[t]);
 	}
 	
-	protected static void initComponent() {
+	@Override
+	public void initComponent() {
 		implementation = new CommandManagerImplementation();
 	}
 

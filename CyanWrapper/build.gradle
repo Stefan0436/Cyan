@@ -62,8 +62,6 @@ apply from: '../config.gradle'
 sourceCompatibility = '1.9'
 targetCompatibility = '1.9'
 
-apply from: '../asf.mvn.publish.gradle'
-
 import org.asf.cyan.api.config.Configuration;
 public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 	public String latestStableVersion;
@@ -253,41 +251,6 @@ if (project.hasProperty("logXMLLoaderVersion")) {
 	cyanloader_logconf_version=project.getProperty("logXMLLoaderVersion")
 }
 
-configurePublish {
-	pretty_name "Cyan Launch Wrappers"
-	description "Cyan launch wrappers, allows cyan to be launched from the minecraft launcher"
-	page "https://aerialworks.ddns.net/maven"
-	address "https://aerialworks.ddns.net/maven"
-
-	author {
-		name "$authorname"
-		id "ASF"
-	}
-
-	license {
-		name "GNU General Public License v2.0"
-		url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
-	}
-
-	artifact {
-		name "CyanVersionHolder"
-		pretty_name "Generic Cyan Information Artifact"
-		artifact_description "Generic artifact for holding the cyan version information, used for version checking"
-		artifact_version "generic"
-		artifact_resource "versions.ccfg"
-	}
-
-	artifact {
-		name "CyanVersionHolder"
-		pretty_name "Generic Cyan Information Artifact"
-		artifact_description "Generic artifact for holding the cyan version information, used for version checking"
-		artifact_version "${cyanversion}"
-		artifact_resource "versions.ccfg"
-	}
-
-	resource "version-launcher.json", "${minecraft}-cyan-"+cyanversion+".json"
-}
-
 def classWrapperClient="CyanClientWrapper"
 def classWrapperServer="CyanServerWrapper"
 
@@ -462,8 +425,6 @@ artifacts {
 	archives sourcesJar
 	archives javadocJar
 }
-
-initializeASFMVNPublish()
 
 test {
 	include "**/**Test**"
@@ -1100,6 +1061,45 @@ if (!modloader.equals("")) {
 		println "Done."
 	}
 }
+
+apply from: '../asf.mvn.publish.gradle'
+
+configurePublish {
+	pretty_name "Cyan Launch Wrappers"
+	description "Cyan launch wrappers, allows cyan to be launched from the minecraft launcher"
+	page "https://aerialworks.ddns.net/maven"
+	address "https://aerialworks.ddns.net/maven"
+
+	author {
+		name "$authorname"
+		id "ASF"
+	}
+
+	license {
+		name "GNU General Public License v2.0"
+		url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
+	}
+
+	artifact {
+		name "CyanVersionHolder"
+		pretty_artifact_name "Generic Cyan Information Artifact"
+		artifact_description "Generic artifact for holding the cyan version information, used for version checking"
+		artifact_version "generic"
+		artifact_resource "versions.ccfg"
+	}
+
+	artifact {
+		name "CyanVersionHolder"
+		pretty_artifact_name "Generic Cyan Information Artifact"
+		artifact_description "Generic artifact for holding the cyan version information, used for version checking"
+		artifact_version "${cyanversion}"
+		artifact_resource "versions.ccfg"
+	}
+
+	resource "version-launcher.json", "${minecraft}-cyan-"+cyanversion+".json"
+}
+
+initializeASFMVNPublish()
 
 def msg = "CYAN FOR MINECRAFT VERSION ${minecraft}, CYAN ${cyanversion}"+(modloader.equals("") ? "" : ", MODLOADER: "+modloader)
 def msg2 = "Development initiated date: ${timeStartHuman}"

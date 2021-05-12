@@ -2,7 +2,7 @@ package org.asf.cyan.api.internal.modkit.components._1_16.common;
 
 import java.util.UUID;
 
-import org.asf.cyan.api.internal.IRequiredModKitComponent;
+import org.asf.cyan.api.internal.IModKitComponent;
 import org.asf.cyan.api.internal.modkit.components._1_16.common.permissions.BukkitPermissionProvider;
 import org.asf.cyan.api.internal.modkit.components._1_16.common.permissions.OpPermissionProvider;
 import org.asf.cyan.api.modloader.Modloader;
@@ -15,7 +15,7 @@ import org.asf.cyan.internal.modkitimpl.util.PermissionProviderUtils;
 
 import net.minecraft.server.MinecraftServer;
 
-public class PermissionProviderUtilsImpl extends PermissionProviderUtils implements IRequiredModKitComponent {
+public class PermissionProviderUtilsImpl extends PermissionProviderUtils implements IModKitComponent {
 
 	@Override
 	public void initializeComponent() {

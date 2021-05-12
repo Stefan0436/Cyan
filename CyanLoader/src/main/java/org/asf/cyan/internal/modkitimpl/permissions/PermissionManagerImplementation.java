@@ -4,15 +4,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-import org.asf.cyan.api.common.CYAN_COMPONENT;
+import org.asf.cyan.CyanLoader;
+import org.asf.cyan.api.modloader.IPostponedComponent;
+import org.asf.cyan.api.modloader.TargetModloader;
 import org.asf.cyan.api.permissions.Permission;
 import org.asf.cyan.api.permissions.PermissionManager;
 import org.asf.cyan.api.permissions.PermissionProvider;
 import org.asf.cyan.api.permissions.Permission.Mode;
 import org.asf.cyan.internal.modkitimpl.util.PermissionProviderUtils;
+import org.asf.cyan.mods.events.AttachEvent;
+import org.asf.cyan.mods.events.IEventListenerContainer;
+import org.asf.cyan.mods.internal.BaseEventController;
 
-@CYAN_COMPONENT
-public class PermissionManagerImplementation extends PermissionManager {
+@TargetModloader(CyanLoader.class)
+public class PermissionManagerImplementation extends PermissionManager
+		implements IPostponedComponent, IEventListenerContainer {
 
 	private class ProviderEntry {
 		public ProviderEntry next;
@@ -66,8 +72,14 @@ public class PermissionManagerImplementation extends PermissionManager {
 		}
 	}
 
-	protected static void initComponent() {
-		implementation = new PermissionManagerImplementation();
+	@Override
+	public void initComponent() {
+		implementation = this;
+		BaseEventController.addEventContainer(this);
+	}
+
+	@AttachEvent(value = "mods.preinit", synchronize = true)
+	private void preInit() {
 		PermissionProviderUtils.getImpl().addDefaultProviders(implementation);
 		((PermissionManagerImplementation) implementation).defaults
 				.add(new Permission("cyan.commands.player", Mode.ALLOW));

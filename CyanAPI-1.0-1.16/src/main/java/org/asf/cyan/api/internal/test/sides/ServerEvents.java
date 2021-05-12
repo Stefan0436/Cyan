@@ -1,7 +1,10 @@
 package org.asf.cyan.api.internal.test.sides;
 
+import java.io.IOException;
 import java.util.Optional;
 
+import org.asf.cyan.CyanLoader;
+import org.asf.cyan.api.config.ConfigManager;
 import org.asf.cyan.api.events.core.ReloadEvent;
 import org.asf.cyan.api.events.core.ServerShutdownEvent;
 import org.asf.cyan.api.events.entities.EntityAttributesEvent;
@@ -24,7 +27,10 @@ import org.asf.cyan.api.events.objects.network.PlayerLogoutEventObject;
 import org.asf.cyan.api.events.objects.network.ServerConnectionEventObject;
 import org.asf.cyan.api.events.objects.resources.ResourceManagerEventObject;
 import org.asf.cyan.api.events.resources.manager.ResourceManagerStartupEvent;
+import org.asf.cyan.api.internal.test.ModConfigTest;
 import org.asf.cyan.api.internal.test.TestEntity;
+import org.asf.cyan.api.internal.test.TestEventListeners;
+import org.asf.cyan.mods.events.AttachEvent;
 import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.events.SimpleEvent;
 
@@ -33,6 +39,15 @@ import net.minecraft.world.entity.MobCategory;
 
 public class ServerEvents implements IEventListenerContainer {
 	public static EntityType<TestEntity> TEST_ENTITY;
+
+	@AttachEvent(value = "mods.preinit", synchronize = true)
+	private void preInit() throws IOException {
+		ConfigManager<TestEventListeners> manager = (ConfigManager<TestEventListeners>) ConfigManager
+				.getFor(TestEventListeners.class);
+		ModConfigTest config = manager.getConfiguration(ModConfigTest.class);
+		config = config;
+		this.equals(this); // OK
+	}
 
 	@SimpleEvent(EntityAttributesEvent.class)
 	public void test(EntityAttributesEventObject event) {

@@ -10,8 +10,10 @@ import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ import org.asf.cyan.api.fluid.annotations.PlatformOnly;
 import org.asf.cyan.api.fluid.annotations.SideOnly;
 import org.asf.cyan.api.fluid.annotations.VersionRegex;
 import org.asf.cyan.api.modloader.IModloaderComponent;
+import org.asf.cyan.api.modloader.IPostponedComponent;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
@@ -51,6 +54,7 @@ import org.asf.cyan.fluid.api.ClassLoadHook;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.information.metadata.TransformerMetadata;
 import org.asf.cyan.fluid.remapping.Mapping;
+import org.asf.cyan.internal.modkitimpl.util.EventUtilImpl;
 import org.asf.cyan.loader.configs.SecurityConfiguration;
 import org.asf.cyan.loader.eventbus.CyanEventBridge;
 
@@ -386,14 +390,15 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		setup = true;
 	}
 
-	private void loadCoreMods() {
+	private void loadCoreMods(ClassLoader loader) {
 		coreModManifests.forEach((k, manifest) -> {
 			if (k.contains(":"))
-				loadMod(true, manifest, new ArrayList<String>());
+				loadMod(true, manifest, new ArrayList<String>(), loader);
 		});
 	}
 
-	private void loadMod(boolean coremod, CyanModfileManifest manifest, ArrayList<String> loadingMods) {
+	private void loadMod(boolean coremod, CyanModfileManifest manifest, ArrayList<String> loadingMods,
+			ClassLoader loader) {
 		IMod[] mods;
 		if (coremod) {
 			mods = this.coremods.stream().map(t -> (IMod) t).toArray(t -> new IMod[t]);
@@ -437,7 +442,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 			if (!optManifest.isEmpty() && !Stream.of(mods)
 					.anyMatch(t -> t.getManifest().id().equals(manifest.modGroup + ":" + manifest.modId))) {
-				loadMod(coremod, optManifest.get(), loadingMods);
+				loadMod(coremod, optManifest.get(), loadingMods, loader);
 			}
 		});
 
@@ -456,11 +461,11 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 				Version ver = Version.fromString(cVersion);
 				checkDependencyVersion(version, ver, "Missing mod dependency for " + manifest.displayName + ": " + id);
 
-				loadMod(coremod, optManifest.get(), loadingMods);
+				loadMod(coremod, optManifest.get(), loadingMods, loader);
 			}
 		});
 
-		IMod mod = getMod(manifest.modClassPackage + "." + manifest.modClassName, coremod);
+		IMod mod = getMod(manifest.modClassPackage + "." + manifest.modClassName, loader, coremod);
 		if (mod == null) {
 			if (coremod) {
 				fatal("Failed to load coremod " + manifest.modGroup + ":" + manifest.modId
@@ -632,7 +637,10 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends IMod> T getMod(String className, boolean coremod) {
+	private <T extends IMod> T getMod(String className, ClassLoader loader, boolean coremod) {
+		if (loader == ClassLoader.getSystemClassLoader())
+			loader = CyanCore.getClassLoader();
+
 		if (coremod) {
 			if (this.loadedComponents.get(className) instanceof IMod)
 				return (T) this.loadedComponents.get(className);
@@ -641,7 +649,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		}
 
 		try {
-			Class<?> cls = CyanCore.getClassLoader().loadClass(className);
+			Class<?> cls = loader.loadClass(className);
 			if (IMod.class.isAssignableFrom(cls)) {
 				return null;
 			}
@@ -1225,8 +1233,8 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 	protected boolean presentComponent(Class<IModloaderComponent> component) {
 		if (CyanEventBridge.class.isAssignableFrom(component)) {
 			return true;
-		} else if (IEventProvider.class.isAssignableFrom(component)
-				|| IExtendedEvent.class.isAssignableFrom(component)) {
+		} else if (IEventProvider.class.isAssignableFrom(component) || IExtendedEvent.class.isAssignableFrom(component)
+				|| IPostponedComponent.class.isAssignableFrom(component)) {
 			return true;
 		} else if (CyanErrorHandlers.class.isAssignableFrom(component)) {
 			return true;
@@ -1320,7 +1328,11 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			events.add(event.channelName());
 
 			return true;
-		} else if (component instanceof CyanErrorHandlers) {
+		} else if (component instanceof IPostponedComponent) {
+			((IPostponedComponent) component).initComponent();
+			return true;
+		}
+		if (component instanceof CyanErrorHandlers) {
 			((CyanErrorHandlers) component).attach();
 			return true;
 		} else if (component instanceof BaseEventController) {
@@ -1438,7 +1450,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 	@Override
 	protected boolean postLoadOnlyComponent(Class<IModloaderComponent> component) {
-		if (IExtendedEvent.class.isAssignableFrom(component)) {
+		if (IExtendedEvent.class.isAssignableFrom(component) || IPostponedComponent.class.isAssignableFrom(component)) {
 			return true;
 		}
 		return false;
@@ -1488,7 +1500,8 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 					Fluid.registerHook(hook);
 				}
-				for (Class<?> hook : findClasses(getMainImplementation(), ClassLoadHook.class)) {
+				for (Class<?> hook : findClasses(getMainImplementation(), ClassLoadHook.class,
+						getClass().getClassLoader())) {
 					if (hook.isAnnotationPresent(SideOnly.class)
 							&& hook.getAnnotation(SideOnly.class).value() != getModloaderGameSide()) {
 						continue;
@@ -1668,11 +1681,20 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 				}
 			}
 		});
-		
+
+		EventUtilImpl.init();
+		BaseEventController.addEventContainer(this);
+
+		try {
+			registerPath(getClass());
+		} catch (MalformedURLException e) {
+		}
+
+		createEventChannel("mods.aftermodloader");
 		createEventChannel("mods.prestartgame");
 		createEventChannel("mod.loaded");
-		
-		BaseEventController.addEventContainer(this);
+		createEventChannel("modloader.register.path");
+
 		BaseEventController.work();
 
 		info("Starting CyanCore...");
@@ -1683,8 +1705,25 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		downloadMavenDependencies(coremodMavenDependencies);
 	}
 
+	private static ArrayList<Path> paths = new ArrayList<Path>();
+
+	@AttachEvent(value = "modloader.register.path", synchronize = true)
+	public void registerPath(Class<?> owner) throws MalformedURLException {
+		URL u = owner.getProtectionDomain().getCodeSource().getLocation();
+		if (u.toString().startsWith("jar:"))
+			u = new URL(u.toString().substring(4, u.toString().lastIndexOf("!/")));
+		else if (u.toString().endsWith(owner.getTypeName().replace(".", "/") + ".class")) {
+			u = new URL(u.toString().substring(0,
+					u.toString().lastIndexOf(owner.getTypeName().replace(".", "/") + ".class")));
+		}
+		try {
+			paths.add(Path.of(u.toURI()));
+		} catch (URISyntaxException e) {
+		}
+	}
+
 	@AttachEvent(value = "mods.prestartgame", synchronize = true)
-	public void beforeGame(ClassLoader loader) {
+	public void beforeGame(ClassLoader loader) throws ClassNotFoundException {
 		info("Finishing bootstrap... Loading postponed components...");
 		loadPostponedComponents(loader);
 
@@ -1692,8 +1731,9 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		loadEvents();
 
 		info("Loading coremods...");
-		loadCoreMods();
+		loadCoreMods(loader);
 
+		dispatchEvent("mods.aftermodloader", loader);
 		BaseEventController.work();
 	}
 
@@ -1774,7 +1814,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		return mods.toArray(t -> new IMod[t]);
 	}
 
-	public void loadMods() {
+	public void loadMods(ClassLoader loader) {
 		// TODO
 	}
 
@@ -1799,6 +1839,31 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 	public static void testMod(IMod testEventListeners) { // FIXME: remove
 		CyanLoader.getModloader(CyanLoader.class).mods.add(testEventListeners);
+	}
+
+	public static void addCyanPaths(ArrayList<Path> paths) {
+		for (Path pth : CyanCore.getAddedPaths()) {
+			paths.add(pth);
+		}
+		paths.addAll(CyanLoader.paths);
+	}
+
+	public static void crash() {
+		CyanLoader.getModloader(CyanLoader.class);
+	}
+
+	static String[] coremodTypes = null;
+
+	public static boolean noLoadClassForge(String name) {
+		if (coremodTypes == null) {
+			coremodTypes = CyanLoader.getModloader(CyanLoader.class).coremods.stream()
+					.map(t -> t.getClass().getTypeName()).toArray(t -> new String[t]);
+		}
+
+		if (name.contains("TestEventListeners"))
+			return true; // FIXME: Remove
+
+		return Stream.of(coremodTypes).anyMatch(t -> t.equals(name));
 	}
 
 }

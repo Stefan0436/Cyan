@@ -58,8 +58,10 @@ public class PacketChannelContextClientImplementation extends PacketChannelConte
 	protected PacketChannelContext setupNew(Supplier<Minecraft> clientSupplier) {
 		PacketChannelContextClientImplementation inst = new PacketChannelContextClientImplementation();
 		Minecraft client = clientSupplier.get();
-		inst.level = client.player.level;
-		inst.player = client.player;
+		if (client.player != null) {
+			inst.level = client.player.level;
+			inst.player = client.player;
+		}
 		inst.connection = client.getConnection().getConnection();
 		inst.serverBrand = ((ClientPacketListenerExtension) client.getConnection()).getServerBrand();
 		return inst;

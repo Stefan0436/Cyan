@@ -20,6 +20,7 @@ import org.asf.cyan.fluid.api.transforming.Reflect;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.TargetType;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
+import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
 import org.asf.cyan.modifications._1_15_2.typereplacers.CrashReportMock;
 import org.asf.cyan.modifications._1_15_2.typereplacers.MinecraftMock;
 
@@ -76,20 +77,27 @@ public class MinecraftModification {
 	public static void ctor4(@TargetType(target = "net.minecraft.client.main.GameConfig") Object conf) {
 		CyanCore.setPhase(LoadPhase.PRELOAD);
 		if (firstLoad) {
-			CyanLoader.getModloader(CyanLoader.class).loadMods();
+			CyanLoader.getModloader(CyanLoader.class).loadMods(MinecraftModification.class.getClassLoader());
 			Modloader.getModloader().dispatchEvent("mods.preinit");
 		}
 	}
 
 	@Erase
 	public static void crash(@TargetType(target = "net.minecraft.CrashReport") CrashReportMock report) {
+		CyanLoader.crash();
+
 		// using regular format to keep support with some programs, else it would have
 		// been dd-MM-yyyy HH.mm.ss
 
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
 
-		File crashFile = new File(getInstance().gameDirectory,
-				"crash-reports/crash-" + dateFormat.format(new Date()) + "-client.txt");
+		File dir = null;
+		if (getInstance() == null || getInstance().gameDirectory == null)
+			dir = MinecraftInstallationToolkit.getMinecraftDirectory();
+		else
+			dir = getInstance().gameDirectory;
+
+		File crashFile = new File(dir, "crash-reports/crash-" + dateFormat.format(new Date()) + "-client.txt");
 
 		Marker m = MarkerManager.getMarker("CrashHandler");
 
