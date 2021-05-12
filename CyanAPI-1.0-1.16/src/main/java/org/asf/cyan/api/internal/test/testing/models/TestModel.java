@@ -1,4 +1,6 @@
-package org.asf.cyan.api.internal.test;
+package org.asf.cyan.api.internal.test.testing.models;
+
+import org.asf.cyan.api.internal.test.testing.TestEntity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;

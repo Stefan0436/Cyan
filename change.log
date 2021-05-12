@@ -28,8 +28,8 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - ModKit Server/client mod version checking (CyanAPI ModKit 1.0)
  - ModKit Serverbound Language Packet (CyanAPI ModKit 1.0)
  - ModKit Client Add Entity Packet Handlers (CyanAPI ModKit 1.0)
- - ModKit Block Entity Registry Events (CyanAPI ModKit 1.0) -- TODO 
- - ModKit Block Registry Events (CyanAPI ModKit 1.0) -- TODO
+ - ModKit Block Entity Registry Events (CyanAPI ModKit 1.0)
+ - ModKit Block Registry Events (CyanAPI ModKit 1.0)
  - ModKit Item Registry Events (CyanAPI ModKit 1.0) -- TODO
  - ModKit Dimension Registry Events (CyanAPI ModKit 1.0) -- TODO
  

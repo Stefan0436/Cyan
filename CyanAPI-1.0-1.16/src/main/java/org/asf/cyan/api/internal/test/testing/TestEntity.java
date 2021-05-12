@@ -1,4 +1,4 @@
-package org.asf.cyan.api.internal.test;
+package org.asf.cyan.api.internal.test.testing;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;

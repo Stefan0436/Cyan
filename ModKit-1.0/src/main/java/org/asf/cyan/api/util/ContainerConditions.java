@@ -13,5 +13,4 @@ public interface ContainerConditions {
 	public static final ContainerConditions COMMON = new CommonContainerCondition();
 	public static final ContainerConditions CLIENT = new ClientContainerCondition();
 	public static final ContainerConditions SERVER = new ServerContainerCondition();
-	public static final ContainerConditions FIXERS = new DataFixerContainerCondition();
 }

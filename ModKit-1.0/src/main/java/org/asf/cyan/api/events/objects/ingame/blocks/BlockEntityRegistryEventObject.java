@@ -1,34 +1,34 @@
-package org.asf.cyan.api.events.objects.entities;
+package org.asf.cyan.api.events.objects.ingame.blocks;
 
 import java.util.Iterator;
 
 import org.asf.cyan.api.events.extended.EventObject;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EntityType.Builder;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityType.Builder;
 
 /**
  * 
- * Entity Registry Event Object -- Register your entities by using this
+ * Block Entity Registry Event Object -- Register your block entities by using this
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public class EntityRegistryEventObject extends EventObject {
+public class BlockEntityRegistryEventObject extends EventObject {
 
 	private EntityInfo<?> first = null;
 
-	public static interface EntityRegistryCallback<T extends Entity> {
+	public static interface EntityRegistryCallback<T extends BlockEntity> {
 		@SuppressWarnings("unchecked")
 		public default void run(Object out) {
-			call((EntityType<T>) out);
+			call((BlockEntityType<T>) out);
 		}
 
-		public void call(EntityType<T> output);
+		public void call(BlockEntityType<T> output);
 	}
 
-	public class EntityInfo<T extends Entity> {
+	public class EntityInfo<T extends BlockEntity> {
 		public String id;
 		public String namespace;
 		public Builder<?> builder;
@@ -45,20 +45,20 @@ public class EntityRegistryEventObject extends EventObject {
 	}
 
 	/**
-	 * Adds custom entities to the game
+	 * Adds custom block entities to the game
 	 * 
 	 * @param <T>     Entity Class Type
 	 * @param id      Entity id
 	 * @param builder Entity builder
 	 * @param result  Result function (receives the EntityType instance)
 	 */
-	public <T extends Entity> void addEntity(String id, EntityType.Builder<T> builder,
+	public <T extends BlockEntity> void addEntity(String id, BlockEntityType.Builder<T> builder,
 			EntityRegistryCallback<T> result) {
 		addEntity(id, "cyan", builder, result);
 	}
 
 	/**
-	 * Adds custom entities to the game
+	 * Adds custom block entities to the game
 	 * 
 	 * @param <T>       Entity Class Type
 	 * @param namespace Entity namespace
@@ -66,7 +66,7 @@ public class EntityRegistryEventObject extends EventObject {
 	 * @param builder   Entity builder
 	 * @param result    Result function (receives the EntityType instance)
 	 */
-	public <T extends Entity> void addEntity(String namespace, String id, EntityType.Builder<T> builder,
+	public <T extends BlockEntity> void addEntity(String namespace, String id, BlockEntityType.Builder<T> builder,
 			EntityRegistryCallback<T> result) {
 
 		EntityInfo<T> entry = new EntityInfo<T>(id, namespace, builder, result);
@@ -83,13 +83,13 @@ public class EntityRegistryEventObject extends EventObject {
 	}
 
 	/**
-	 * Adds custom entities to the game
+	 * Adds custom block entities to the game
 	 * 
 	 * @param <T>     Entity Class Type
 	 * @param id      Entity id
 	 * @param builder Entity builder
 	 */
-	public <T extends Entity> void addEntity(String id, EntityType.Builder<T> builder) {
+	public <T extends BlockEntity> void addEntity(String id, BlockEntityType.Builder<T> builder) {
 		addEntity(id, "cyan", builder, null);
 	}
 
@@ -101,12 +101,12 @@ public class EntityRegistryEventObject extends EventObject {
 	 * @param id        Entity id
 	 * @param builder   Entity builder
 	 */
-	public <T extends Entity> void addEntity(String namespace, String id, EntityType.Builder<T> builder) {
+	public <T extends BlockEntity> void addEntity(String namespace, String id, BlockEntityType.Builder<T> builder) {
 		addEntity(id, namespace, builder, null);
 	}
 
 	/**
-	 * Retrieves the map of mod entities to be registered
+	 * Retrieves the map of mod block entities to be registered
 	 */
 	public Iterable<EntityInfo<?>> getEntities() {
 		return new EntityInfoIterable(first);

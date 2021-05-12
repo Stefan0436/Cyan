@@ -1,35 +1,39 @@
-package org.asf.cyan.api.events.entities;
+package org.asf.cyan.api.events.ingame.blocks;
 
 import java.util.Iterator;
 import java.util.function.BiFunction;
 
 import org.asf.cyan.api.events.extended.AbstractExtendedEvent;
-import org.asf.cyan.api.events.objects.entities.EntityRegistryEventObject;
-import org.asf.cyan.api.events.objects.entities.EntityRegistryEventObject.EntityInfo;
+import org.asf.cyan.api.events.objects.ingame.blocks.BlockEntityRegistryEventObject;
+import org.asf.cyan.api.events.objects.ingame.blocks.BlockEntityRegistryEventObject.EntityInfo;
 
+import com.mojang.datafixers.types.Type;
+
+import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.util.datafix.fixes.References;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.Level;
 
 /**
  * 
- * Event called to register custom entities
+ * Event called to register custom block entities
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public class EntityRegistryEvent extends AbstractExtendedEvent<EntityRegistryEventObject> {
+public class BlockEntityRegistryEvent extends AbstractExtendedEvent<BlockEntityRegistryEventObject> {
 
 	public static class EntityTypeEntry {
 		public EntityTypeEntry next;
-		public EntityType<?> type;
+		public BlockEntityType<?> type;
 		public BiFunction<?, Level, ?> constructor;
 
 		@SuppressWarnings("unchecked")
-		public BiFunction<EntityType<?>, Level, Entity> getConstructor() {
-			return (BiFunction<EntityType<?>, Level, Entity>) constructor;
+		public BiFunction<BlockEntityType<?>, Level, BlockEntity> getConstructor() {
+			return (BiFunction<BlockEntityType<?>, Level, BlockEntity>) constructor;
 		}
 
 		public int id;
@@ -63,11 +67,11 @@ public class EntityRegistryEvent extends AbstractExtendedEvent<EntityRegistryEve
 			return iter;
 		}
 
-		public void add(EntityType<?> type) {
+		public void add(BlockEntityType<?> type) {
 			if (itm == null) {
 				EntityTypeEntry cont = new EntityTypeEntry();
 				cont.type = type;
-				cont.id = Registry.ENTITY_TYPE.getId(type);
+				cont.id = Registry.BLOCK_ENTITY_TYPE.getId(type);
 				current = cont;
 				itm = cont;
 				return;
@@ -75,7 +79,7 @@ public class EntityRegistryEvent extends AbstractExtendedEvent<EntityRegistryEve
 
 			EntityTypeEntry cont = new EntityTypeEntry();
 			cont.type = type;
-			cont.id = Registry.ENTITY_TYPE.getId(type);
+			cont.id = Registry.BLOCK_ENTITY_TYPE.getId(type);
 			current.next = cont;
 			current = current.next;
 		}
@@ -83,11 +87,11 @@ public class EntityRegistryEvent extends AbstractExtendedEvent<EntityRegistryEve
 	}
 
 	private static TypeIterable entities = new TypeIterable();
-	private static EntityRegistryEvent implementation;
+	private static BlockEntityRegistryEvent implementation;
 
 	@Override
 	public String channelName() {
-		return "modkit.entity.register";
+		return "modkit.block.entity.register";
 	}
 
 	@Override
@@ -95,15 +99,17 @@ public class EntityRegistryEvent extends AbstractExtendedEvent<EntityRegistryEve
 		implementation = this;
 	}
 
-	public static EntityRegistryEvent getInstance() {
+	public static BlockEntityRegistryEvent getInstance() {
 		return implementation;
 	}
 
-	public void registerEntities(EntityRegistryEventObject cyanEntities) {
+	public void registerEntities(BlockEntityRegistryEventObject cyanEntities) {
 		for (EntityInfo<?> entity : cyanEntities.getEntities()) {
-			EntityType<?> type = Registry.register(Registry.ENTITY_TYPE,
-					new ResourceLocation(entity.namespace, entity.id),
-					entity.builder.build(entity.namespace + ":" + entity.id));
+			ResourceLocation loc = new ResourceLocation(entity.namespace, entity.id);
+			
+			Type<?> fixerType = Util.fetchChoiceType(References.BLOCK_ENTITY, loc.toString());
+			BlockEntityType<?> type = Registry.register(Registry.BLOCK_ENTITY_TYPE, loc,
+					entity.builder.build(fixerType));
 
 			entities.add(type);
 			if (entity.callback != null)
@@ -111,7 +117,7 @@ public class EntityRegistryEvent extends AbstractExtendedEvent<EntityRegistryEve
 		}
 	}
 
-	public EntityTypeEntry findEntity(EntityType<?> type) {
+	public EntityTypeEntry findEntity(BlockEntityType<?> type) {
 		for (EntityTypeEntry entity : entities) {
 			if (type == entity.type)
 				return entity;

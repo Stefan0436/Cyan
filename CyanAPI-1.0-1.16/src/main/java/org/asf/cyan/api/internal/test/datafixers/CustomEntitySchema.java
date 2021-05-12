@@ -19,7 +19,7 @@ public class CustomEntitySchema extends NamespacedSchema {
 	protected TypeTemplate createTemplate(Schema schema) {
 		return DSL.list(References.ITEM_STACK.in(schema));
 	}
-	
+
 	protected void registerCustomEntity(String entity, Schema schema, Map<String, Supplier<TypeTemplate>> map) {
 		schema.register(map, entity, () -> {
 			return createTemplate(schema);
@@ -29,10 +29,20 @@ public class CustomEntitySchema extends NamespacedSchema {
 	@Override
 	public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
 		Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
-		
+
 		// Custom entities
 		registerCustomEntity("testmod:testentity", schema, map);
-		
+
+		return map;
+	}
+
+	@Override
+	public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema schema) {
+		Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(schema);
+
+		// Custom block entities
+		registerCustomEntity("cyan:testblock", schema, map);
+
 		return map;
 	}
 

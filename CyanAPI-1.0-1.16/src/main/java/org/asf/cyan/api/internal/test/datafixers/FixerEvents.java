@@ -17,7 +17,8 @@ public class FixerEvents implements IEventListenerContainer {
 	public void test(DataFixerEventObject event) {
 		Schema schem = event.getBuilder().addSchema(SharedConstants.getCurrentVersion().getWorldVersion(),
 				CustomEntitySchema::new);
-		event.getBuilder().addFixer(new AddNewChoices(schem, "Add custom entities", References.ENTITY));
+		event.getBuilder().addFixer(new AddNewChoices(schem, "TestMod Add custom entities", References.ENTITY));
+		event.getBuilder().addFixer(new AddNewChoices(schem, "TestMod Add custom block entities", References.BLOCK_ENTITY));
 	}
 
 }

@@ -25,7 +25,7 @@ public class TestEventListeners extends CyanComponent implements IEventListenerC
 
 		EventUtil.registerContainer(ContainerConditions.COMMON, TestEventListeners::registerServer);
 		EventUtil.registerContainer(ContainerConditions.CLIENT, TestEventListeners::registerClient);
-		EventUtil.registerContainer(ContainerConditions.FIXERS, TestEventListeners::registerFixers);
+		EventUtil.registerContainer(ContainerConditions.COMMON, TestEventListeners::registerFixers);
 	}
 
 	public static String registerServer() {
