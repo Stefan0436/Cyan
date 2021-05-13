@@ -2,7 +2,7 @@
 eval "$(head config.gradle -n12 | tail -n+3 | sed "s/ext\.//g")"
 
 mappingsversion=""
-document="$(curl -s "http://maven.modmuss50.me/net/fabricmc/yarn/maven-metadata.xml")"
+document="$(curl -s "https://maven.modmuss50.me/net/fabricmc/yarn/maven-metadata.xml")"
 
 versions="$(echo "$document" | xq .metadata.versioning.versions.version -r | sed "s/\[/(/g" | sed "s/\]/)/g" | sed "s/,//g")"
 newline=$'\n'

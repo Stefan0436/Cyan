@@ -292,10 +292,6 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			if (MinecraftInstallationToolkit.isIDEModeEnabled()) {
 				url = CyanLoader.class.getResource("/log4j2-server-ide.xml");
 			}
-			if (url == null)
-				url = new URL(CyanLoader.class.getProtectionDomain().getCodeSource().getLocation().toString()
-						+ "/log4j2-server.xml");
-
 			System.setProperty("log4j2.configurationFile", url.toString());
 			System.setProperty("log4j.configurationFile", url.toString());
 			CyanCore.disableAgent();
@@ -1860,8 +1856,25 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 	}
 
 	static String[] coremodTypes = null;
-
-	public static boolean noLoadClassForge(String name) {
+	static String[] cyanClasses = new String[] {
+		"org.asf.cyan.CyanLoader",
+		"org.asf.cyan.mods.events.IEventListenerContainer",
+		"org.asf.cyan.mods.internal.BaseEventController",
+		"org.asf.cyan.mods.IMod",
+		"org.asf.cyan.mods.ICoreMod",
+		"org.asf.cyan.mods.AbstractCoremod",
+		"org.asf.cyan.mods.AbstractMod",
+		"org.asf.cyan.mods.IBaseMod",
+		"org.asf.cyan.core.CyanCore",
+		"org.asf.cyan.api.modloader.Modloader",
+		"org.asf.cyan.api.common.CyanComponent",
+		"org.asf.cyan.api.config.Configuration",
+		"org.asf.cyan.api.util.EventUtil",
+		"org.asf.cyan.api.util.ContainerConditions",
+		"org.asf.cyan.api.internal.CyanAPIComponent"
+	};		
+	
+	public static boolean doNotTransform(String name) {
 		if (coremodTypes == null) {
 			coremodTypes = CyanLoader.getModloader(CyanLoader.class).coremods.stream()
 					.map(t -> t.getClass().getTypeName()).toArray(t -> new String[t]);
@@ -1870,11 +1883,48 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		if (name.contains("TestEventListeners"))
 			return true; // FIXME: Remove
 
-		return Stream.of(coremodTypes).anyMatch(t -> t.equals(name));
+		return Stream.of(cyanClasses).anyMatch(t -> t.equals(name)) || Stream.of(coremodTypes).anyMatch(t -> t.equals(name));
 	}
 
 	public static void setCallTraceClassLoader(ClassLoader loader) {
 		CallTrace.setCallTraceClassLoader(loader);
 	}
 
+	private static ArrayList<String> locations = null;
+	public static InputStream getFabricClassStream(String name) throws MalformedURLException {
+		if (doNotTransform(name))
+			return null;
+		
+		if (locations == null) {
+			locations = new ArrayList<String>();
+			for (Path pth : CyanCore.getAddedPaths()) {
+				String path = pth.toString();
+				if (path.endsWith(".jar") || path.endsWith(".zip"))
+					path = "jar:" + pth.toUri().toURL() + "!/";
+				if (!path.endsWith("/"))
+					path += "/";
+				locations.add(path);
+			}
+			for (Path pth : paths) {
+				String path = pth.toString();
+				if (path.endsWith(".jar") || path.endsWith(".zip"))
+					path = "jar:" + pth.toUri().toURL() + "!/";
+				if (!path.endsWith("/"))
+					path += "/";
+				locations.add(path);
+			}
+		}
+		
+		for (String loc : locations) {
+			try {
+				URL u = new URL(loc + name.replace(".", "/") + ".class");
+				InputStream strm = u.openStream();
+				return strm;
+			} catch (IOException e) {
+			}
+		}
+		
+		return null;
+	}
+	
 }

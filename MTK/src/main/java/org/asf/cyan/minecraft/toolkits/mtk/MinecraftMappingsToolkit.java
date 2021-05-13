@@ -46,7 +46,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 
 	static {
 		try {
-			yarnMetaDataURL = new URL("http://maven.modmuss50.me/net/fabricmc/yarn/maven-metadata.xml");
+			yarnMetaDataURL = new URL("https://maven.modmuss50.me/net/fabricmc/yarn/maven-metadata.xml");
 		} catch (MalformedURLException e1) {
 		}
 	}
@@ -62,7 +62,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 	// Yarn
 	private static String yarnClassifierInput = "official";
 	private static String yarnClassifierOutput = "intermediary";
-	private static String yarnUrl = "http://maven.modmuss50.me/net/fabricmc/yarn/%version%/yarn-%version%-tiny.gz";
+	private static String yarnUrl = "https://maven.modmuss50.me/net/fabricmc/yarn/%version%/yarn-%version%-tiny.gz";
 	private static URL yarnMetaDataURL;
 
 	// Spigot

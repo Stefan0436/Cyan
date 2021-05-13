@@ -159,7 +159,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 
 configurePublish {
 	pretty_name "CyanLoader"
-	description "Cyan main startup system - called from the wrappers"
+	description "Cyan Mod Loader - Loader jar"
 	page "https://aerialworks.ddns.net/maven"
 	address "https://aerialworks.ddns.net/maven"
 

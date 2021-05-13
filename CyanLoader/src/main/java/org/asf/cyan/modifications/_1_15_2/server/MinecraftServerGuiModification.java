@@ -2,6 +2,7 @@ package org.asf.cyan.modifications._1_15_2.server;
 
 import javax.swing.JFrame;
 
+import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
@@ -28,5 +29,10 @@ public class MinecraftServerGuiModification {
 			@LocalVariable JFrame var2) {
 		var2.setTitle("Minecraft Server " + Modloader.getModloaderGameVersion() + " - " + Modloader.getModloaderName()
 				+ " - Version " + Modloader.getModloaderVersion());
+	}
+	
+	@InjectAt(location = InjectLocation.HEAD)
+	public void print(javax.swing.JTextArea a, javax.swing.JScrollPane p, java.lang.String s) {
+		s = s.replaceAll("\\§[0-9a-fk-r]", "");
 	}
 }

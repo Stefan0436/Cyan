@@ -116,7 +116,7 @@ public String getLatestYarnVersion(String version) throws IOException {
 	try {
 		String mapping = "";
 		builder = factory.newDocumentBuilder();
-		Document document = builder.parse(new URL("http://maven.modmuss50.me/net/fabricmc/yarn/maven-metadata.xml").openStream());
+		Document document = builder.parse(new URL("https://maven.modmuss50.me/net/fabricmc/yarn/maven-metadata.xml").openStream());
 		Element root = document.getDocumentElement();
 		NodeList versions = ((Element) root.getElementsByTagName("versioning").item(0))
 				.getElementsByTagName("versions").item(0).getChildNodes();
@@ -1890,7 +1890,6 @@ task gameData () {
 
 		println " | Installing library files..."
 		libraries.forEach { k, v ->
-			println " +-- Installing library: "+k+", file: "+v.name+"..."
 			def information = k.split(":")
 			def group = ""
 			def name = information[0]
@@ -1907,12 +1906,13 @@ task gameData () {
 
 			def dest = new File(libs, group.replaceAll("\\.", "/")+"/"+name+"/"+version)
 			dest.mkdirs()
-			copy {
-				from v.getParent()
-				into dest
-				include v.getName()
-				rename v.getName(), name+"-"+version+".jar"
-			}
+			
+			File output = new File(dest, name + "-" + version + ".jar")
+			if (output.exists())
+				output.delete();
+			
+			println " +-- Installing library: " + k + ", file: " + output.getName() + "..."
+			Files.copy(v.toPath(), output.toPath());
 		}
 		if (project.hasProperty("currentXML")) {
 			def log = new File("${buildDir}", project.version+"/.minecraft/assets/log_configs/")
