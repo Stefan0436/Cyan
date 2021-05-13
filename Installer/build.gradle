@@ -1,0 +1,103 @@
+plugins {
+    id 'java'
+	id 'maven-publish'
+}
+
+apply plugin: 'eclipse'
+apply from: '../asf.mvn.publish.gradle'
+buildDir = '../build/Installer'
+
+group="org.asf.cyan"
+version="1.0.0.A4"
+def authorname = "AerialWorks Software Foundation"
+
+sourceCompatibility = '1.9'
+targetCompatibility = '1.9'
+
+configurePublish {
+	pretty_name "Installer"
+	description "Cyan Installer"
+	page "https://aerialworks.ddns.net/maven"
+	address "https://aerialworks.ddns.net/maven"
+	
+	author {
+		name "$authorname"
+		id "ASF"
+	}
+	
+	license {
+		name "GNU Lesser General Public License v3.0"
+		url "https://www.gnu.org/licenses/lgpl-3.0.txt"
+	}
+}
+
+repositories {
+    mavenCentral()
+	maven { url = "https://aerialworks.ddns.net/maven"; name = "AerialWorks"; }
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.12'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
+	
+	implementation group: 'org.asf.cyan', name: 'CCFG', version: '1.0.0.A15'
+	implementation group: 'org.asf.aos.util.service', name: 'aosutil-service-SLIB-UTIL', version: '0.0.0.13'
+}
+
+jar {
+	destinationDirectory = file('../build/Installer/Jars')
+	manifest {
+		attributes([
+			"Specification-Title": project.name,
+			"Specification-Vendor": "${authorname}",
+			"Specification-Version": project.version,
+			"Implementation-Title": project.name,
+			"Implementation-Version": project.version,
+			"Implementation-Vendor" :"${authorname}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+	exclude "**/extra/**"
+	exclude "**/tests/**"
+	includeEmptyDirs = false
+}
+
+task javaDocs(type: Javadoc) {
+	classpath = sourceSets.main.runtimeClasspath
+	source = sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: 'javaDocs') {
+	from javadoc
+	classifier = 'javadoc'
+	exclude "**/extra/**"
+	destinationDirectory = file('../build/Installer/Javadocs')
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+	exclude "**/extra/**"
+	destinationDirectory = file('../build/Installer/Source jars')
+}
+
+artifacts {
+	archives sourcesJar
+	archives javadocJar
+}
+
+test {
+    include "**/**Test**"
+    exclude "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}
+
+task specialTest (type: Test, dependsOn: test) {
+    include "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}
+
+initializeASFMVNPublish()

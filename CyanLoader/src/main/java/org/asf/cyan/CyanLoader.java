@@ -288,7 +288,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		}
 
 		if (side.equals("SERVER")) {
-			URL url = CyanLoader.class.getResource("/log4j2.xml");
+			URL url = CyanLoader.class.getResource("/log4j2-server.xml");
 			if (MinecraftInstallationToolkit.isIDEModeEnabled()) {
 				url = CyanLoader.class.getResource("/log4j2-server-ide.xml");
 			}
@@ -1871,6 +1871,10 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			return true; // FIXME: Remove
 
 		return Stream.of(coremodTypes).anyMatch(t -> t.equals(name));
+	}
+
+	public static void setCallTraceClassLoader(ClassLoader loader) {
+		CallTrace.setCallTraceClassLoader(loader);
 	}
 
 }

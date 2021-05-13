@@ -12,6 +12,7 @@ import org.asf.cyan.core.CyanInfo;
 public class ModKitController extends CyanComponent {
 	static ModKitController instance;
 	public void begin(ClassLoader loader) {
+		CallTrace.setCallTraceClassLoader(loader);
 		instance = this;
 		Modloader.getModloader().dispatchEvent("mods.prestartgame");
 		Modloader.getModloader().dispatchEvent("mods.prestartgame", loader);

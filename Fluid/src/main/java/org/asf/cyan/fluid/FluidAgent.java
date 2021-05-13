@@ -112,7 +112,7 @@ public class FluidAgent extends CyanComponent {
 
 	static boolean ranHooks = false;
 	private static boolean loadedAgents = false;
-
+	
 	/**
 	 * Main agent startup method
 	 * 

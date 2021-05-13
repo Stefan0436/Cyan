@@ -2008,19 +2008,15 @@ task serverJar (type: Jar, dependsOn: build) {
 
 	exclude "**/extra/**"
 	exclude "**/tests/**"
-	exclude "**/version-launcher.json"
-	exclude "**/version-dbg.json"
-	exclude "**/versions.ccfg"
-	exclude "**/log4j2.xml"
-	exclude "**/log4j2-game.xml"
-	exclude "**/log4j2-ide.xml"
-	rename "log4j2-server.xml", "log4j2.xml"
+	exclude "version-launcher.json"
+	exclude "version-dbg.json"
+	
 	includeEmptyDirs = false
-
 	outputs.upToDateWhen { return false; }
-
+	
 	if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
 	cyanclasspath+="vanilla-server.jar"
+	
 	if (!modloader.isEmpty() && modloader.startsWith("paper-")) {
 		def paperversion = modloader.substring("paper-".length())
 		if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
@@ -2030,14 +2026,12 @@ task serverJar (type: Jar, dependsOn: build) {
 
 	from sourceSets.main.output
 	libnames.add(project.group+"."+project.name)
-	project(":").childProjects.each { proj ->
-		if (!proj.value.name.equals(project.name)) {
-			if (configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.stream().anyMatch({it.moduleName.equals(proj.value.name)})) {
-				from proj.value.sourceSets.main.output
-				libnames.add(proj.value.group+"."+proj.value.name)
-			}
-		}
-	}
+	
+	from project(":Fluid").sourceSets.main.output
+	libnames.add(project(":Fluid").group+"."+project(":Fluid").name)
+	
+	from project(":CyanCore").sourceSets.main.output
+	libnames.add(project(":CyanCore").group+"."+project(":CyanCore").name)
 
 	doFirst {
 		def apiJarTask = tasks.getByPath(":CyanAPI:platformRiftJarServer")

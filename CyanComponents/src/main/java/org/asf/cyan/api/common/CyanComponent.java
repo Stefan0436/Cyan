@@ -39,6 +39,15 @@ public abstract class CyanComponent {
 	 *
 	 */
 	protected static class CallTrace {
+		
+		private static ClassLoader traceLoader = ClassLoader.getPlatformClassLoader();
+		
+		/**
+		 * Sets the class loader used by CallTrace
+		 */
+		public static void setCallTraceClassLoader(ClassLoader loader) {
+			traceLoader = loader;
+		}
 
 		/**
 		 * Retrieves the caller class of the method calling this function.
@@ -64,9 +73,13 @@ public abstract class CyanComponent {
 							&& !element.getClassName().equals(CallTrace.class.getTypeName())) {
 						Class<?> cls;
 						try {
-							cls = Class.forName(element.getClassName());
+							cls = traceLoader.loadClass(element.getClassName());
 						} catch (ClassNotFoundException e) {
-							continue;
+							try {
+								cls = Class.forName(element.getClassName());
+							} catch (ClassNotFoundException e2) {
+								continue;
+							}
 						}
 
 						if (CyanComponent.class.isAssignableFrom(cls) && currentDepth != componentDepth) {
