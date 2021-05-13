@@ -105,7 +105,8 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 						.sendSuccess(new TextComponent("\n" + ClientLanguage.createComponent(player, "cyan.info.data",
 								"§6" + cmd.getSource().getServer().getServerModName(), "§6" + info.getBrand(),
 								"§6" + Modloader.getModloaderVersion(), "§6" + Modloader.getModloaderGameVersion(),
-								"§6" + Modloader.getAllMods().length, "§6" + info.getMods().size()).getString()), true);
+								"§6" + Modloader.getAllMods().length, "§6" + info.getMods().size()).getString().trim()),
+								true);
 			} else {
 				cmd.getSource()
 						.sendSuccess(ClientLanguage.createComponent(player, "cyan.info.data",
@@ -156,9 +157,8 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 
 			if (player == null) {
 				cmd.getSource()
-						.sendSuccess(
-								new TextComponent("\n" + ClientLanguage
-										.createComponent(player, "cyan.info.mods", serverMods, clientMods).getString()),
+						.sendSuccess(new TextComponent("\n" + ClientLanguage
+								.createComponent(player, "cyan.info.mods", serverMods, clientMods).getString().trim()),
 								true);
 			} else {
 				cmd.getSource().sendSuccess(
@@ -180,19 +180,17 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 						.sendSuccess(
 								new TextComponent("\n" + ClientLanguage
 										.createComponent(player, "cyan.info.technical",
-												"§6" + Protocols.MODKIT_PROTOCOL,
-												"§6" + Protocols.LOADER_PROTOCOL,
+												"§6" + Protocols.MODKIT_PROTOCOL, "§6" + Protocols.LOADER_PROTOCOL,
 												"§6" + info.getProtocol(), "§6" + info.getModloaderProtocol(),
 												"§6" + info.getGameVersion(), "§6" + info.getModloaderVersion())
-										.getString()),
+										.getString().trim()),
 								true);
 			} else {
 				cmd.getSource()
 						.sendSuccess(ClientLanguage.createComponent(player, "cyan.info.technical",
-								"§6" + Protocols.MODKIT_PROTOCOL,
-								"§6" + Protocols.LOADER_PROTOCOL, "§6" + info.getProtocol(),
-								"§6" + info.getModloaderProtocol(), "§6" + info.getGameVersion(),
-								"§6" + info.getModloaderVersion()), true);
+								"§6" + Protocols.MODKIT_PROTOCOL, "§6" + Protocols.LOADER_PROTOCOL,
+								"§6" + info.getProtocol(), "§6" + info.getModloaderProtocol(),
+								"§6" + info.getGameVersion(), "§6" + info.getModloaderVersion()), true);
 			}
 			return 0;
 		}));

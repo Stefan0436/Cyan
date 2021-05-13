@@ -2,7 +2,6 @@ package org.asf.cyan.modifications._1_15_2.server;
 
 import javax.swing.JFrame;
 
-import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
