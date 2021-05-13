@@ -3,7 +3,6 @@ package org.asf.cyan.modifications._1_15_2.client;
 import org.asf.cyan.api.fluid.annotations.VersionRegex;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.versioning.VersionStatus;
-
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.LocalVariable;
@@ -45,7 +44,7 @@ public class TitleScreenModification_1_15_2 {
 		@LocalVariable boolean var7,
 		@LocalVariable float var8,
 		@LocalVariable int var9
-	) {
+	) {	
 		String modloaderStr = Modloader.getModloader().toString();
 		if (!Modloader.getModloaderVersionStatus().equals(VersionStatus.UNKNOWN))
 			modloaderStr = modloaderStr + " (" + Modloader.getModloaderVersionStatus().toString() + ")";

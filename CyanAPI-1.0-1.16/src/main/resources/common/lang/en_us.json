@@ -4,10 +4,10 @@
 	"modkit.loader.outdated.remote": "§cOutdated Modloader Version on Client: %s\n§7(The server wants: %s§7, you should update the modloader)",
 	"modkit.loader.outdated.local": "§cOutdated Modloader Version on Server: %s\n§7(The server wants: %s§7, you should downgrade the modloader)",
 	
-	"modkit.missingmodded.server": "§4cannot join non-cyan server because some mods require server mods to be installed.",
+	"modkit.missingmodded.server": "§4Cannot join non-cyan server because some local mods\nrequire server mods to be installed.",
 	
-	"modkit.missingmods.clientonly": "§cMissing Required Mods\n\n§5Missing Client Mods:\n%s",
-	"modkit.missingmods.servertonly": "§cMissing Required Mods\n\n§5Missing Server Mods:\n%s",
+	"modkit.missingmods.clientonly": "§cMissing Client Mods:\n%s",
+	"modkit.missingmods.serveronly": "§cMissing Server Mods:\n%s",
 	"modkit.missingmods.both": "§cMissing Required Mods\n\n§5Missing Client Mods:\n%s\n\n§5Missing Server Mods:\n%s",
 	
 	"cyan.dump.message.error": "§6Cannot dump backtrace as another dump is in progress.",

@@ -36,13 +36,13 @@ public abstract class HandshakeUtils extends CyanComponent {
 	public abstract void disconnect(ClientPacketProcessor processor, HandshakeFailedPacket response,
 			HandshakeLoaderPacket packet);
 
-	public abstract void logInfoModsClientOnly(ServerPacketProcessor processor, HashMap<String, String> mods,
+	public abstract void logWarnModsClientOnly(ServerPacketProcessor processor, HashMap<String, String> mods,
 			String modsPretty);
 
-	public abstract void logInfoModsServerOnly(ServerPacketProcessor processor, HashMap<String, String> mods,
+	public abstract void logWarnModsServerOnly(ServerPacketProcessor processor, HashMap<String, String> mods,
 			String modsPretty);
 
-	public abstract void logInfoModsBothSides(ServerPacketProcessor processor, HashMap<String, String> mods1,
+	public abstract void logWarnModsBothSides(ServerPacketProcessor processor, HashMap<String, String> mods1,
 			HashMap<String, String> mods2, String modsPretty1, String modsPretty2);
 
 	public abstract void disconnectColored1(ServerPacketProcessor processor, HandshakeFailedPacket response,

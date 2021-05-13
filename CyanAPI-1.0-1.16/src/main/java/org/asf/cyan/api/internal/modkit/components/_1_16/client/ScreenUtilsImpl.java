@@ -11,8 +11,13 @@ import net.minecraft.client.gui.screens.Screen;
 public class ScreenUtilsImpl extends ScreenUtil implements IModKitComponent {
 
 	@Override
-	public void setScreenToTitle(ClientConnectionEventObject event) {
+	public void setScreenToReceiveLevel(ClientConnectionEventObject event) {
 		event.getClient().setScreen(new ReceivingLevelScreen());
+	}
+
+	@Override
+	public void setScreenToReceiveLevel(ClientPacketProcessor processor) {
+		processor.getClient().setScreen(new ReceivingLevelScreen());
 	}
 
 	@Override
@@ -22,7 +27,7 @@ public class ScreenUtilsImpl extends ScreenUtil implements IModKitComponent {
 
 	@Override
 	@SuppressWarnings("resource")
-	public void setToReceiveLevelScreenIfNeeded(ClientPacketProcessor processor) {
+	public void setScreenToWorld(ClientPacketProcessor processor) {
 		if (processor.getClient().screen != null && processor.getClient().screen instanceof ReceivingLevelScreen)
 			processor.getClient().setScreen((Screen) null);
 	}

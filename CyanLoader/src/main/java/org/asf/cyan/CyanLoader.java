@@ -49,6 +49,7 @@ import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.core.CyanCore;
 import org.asf.cyan.core.CyanInfo;
 import org.asf.cyan.core.SimpleModloader;
+import org.asf.cyan.core.StartupWindow;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.api.ClassLoadHook;
 import org.asf.cyan.fluid.api.FluidTransformer;
@@ -229,32 +230,82 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		setupModloader(side);
 		loaded = true;
 
-		cyanDir = new File(".cyan-data");
+		int progressMax = 0;
+		progressMax++; // set dir
+		progressMax++; // set dump
+		progressMax++; // del backtrace
+		progressMax++; // reset server connection
+		progressMax++; // load version
 
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(
+				new MinecraftVersionInfo(CyanInfo.getMinecraftVersion(), null, null, null), CyanCore.getSide())) {
+			progressMax++; // resolve
+			progressMax++; // download version
+			progressMax++; // download mappings
+			progressMax++; // save mappings
+		}
+
+		// Base loading
+		progressMax++; // load mappings
+		progressMax++; // load postponed components
+		progressMax++; // load events
+		progressMax++; // load coremods
+		progressMax++; // finish load
+
+		// Mod loading
+		progressMax++;
+		progressMax++;
+		progressMax++;
+		progressMax++;
+		progressMax++;
+		progressMax++;
+		progressMax++;
+
+		cyanDir = new File(".cyan-data");
 		if (!cyanDir.exists())
 			cyanDir.mkdirs();
 
 		String cPath = cyanDir.getCanonicalPath();
 		info("Starting CYAN in: " + cPath);
+
+		if (side.equals("CLIENT"))
+			StartupWindow.WindowAppender.showWindow();
+		StartupWindow.WindowAppender.addMax(progressMax);
+
 		MinecraftInstallationToolkit.setMinecraftDirectory(cyanDir);
+		StartupWindow.WindowAppender.increaseProgress();
+
 		Fluid.setDumpDir(MinecraftInstallationToolkit.getMinecraftDirectory());
+		StartupWindow.WindowAppender.increaseProgress();
 
 		if (new File(cyanDir, "transformer-backtrace").exists())
 			deleteDir(new File(cyanDir, "transformer-backtrace"));
+		StartupWindow.WindowAppender.increaseProgress();
 
 		MinecraftToolkit.resetServerConnectionState();
+		StartupWindow.WindowAppender.increaseProgress();
 
-		// TODO: Mappings loading and caching (with window)
 		MinecraftVersionInfo mcVersion = new MinecraftVersionInfo(CyanInfo.getMinecraftVersion(), null, null, null);
+		StartupWindow.WindowAppender.increaseProgress();
+
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(mcVersion, CyanCore.getSide())) {
 			info("First time loading, downloading " + side.toLowerCase() + " mappings...");
+
 			MinecraftToolkit.resolveVersions();
+			StartupWindow.WindowAppender.increaseProgress();
+
 			MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(CyanInfo.getMinecraftVersion());
+			StartupWindow.WindowAppender.increaseProgress();
+
 			MinecraftMappingsToolkit.downloadVanillaMappings(version, CyanCore.getSide());
+			StartupWindow.WindowAppender.increaseProgress();
+
 			MinecraftMappingsToolkit.saveMappingsToDisk(version, CyanCore.getSide());
+			StartupWindow.WindowAppender.increaseProgress();
 		}
 
 		mappings = MinecraftMappingsToolkit.loadMappings(mcVersion, CyanCore.getSide());
+		StartupWindow.WindowAppender.increaseProgress();
 	}
 
 	private static boolean setup = false;
@@ -396,15 +447,17 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 	private void loadMod(boolean coremod, CyanModfileManifest manifest, ArrayList<String> loadingMods,
 			ClassLoader loader) {
-		IMod[] mods;
-		if (coremod) {
-			mods = this.coremods.stream().map(t -> (IMod) t).toArray(t -> new IMod[t]);
-		} else {
-			mods = this.mods.stream().toArray(t -> new IMod[t]);
-		}
+		IMod[] mods = new IMod[this.mods.size() + coremods.size()];
+
+		int i = 0;
+		for (IMod mod : this.mods)
+			mods[i++] = mod;
+		for (IMod mod : coremods)
+			mods[i++] = mod;
 
 		if (loadingMods.contains(manifest.modGroup + ":" + manifest.modId)) {
 			fatal("Mod dependency cicle detected! Currently loading id: " + manifest.modGroup + ":" + manifest.modId);
+			StartupWindow.WindowAppender.fatalError();
 			System.exit(-1);
 		}
 		loadingMods.add(manifest.modGroup + ":" + manifest.modId);
@@ -428,6 +481,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 					.filter(t -> id.equals(t.modGroup + ":" + t.modId)).findFirst();
 			if (optManifest.isEmpty() && !Stream.of(mods).anyMatch(t -> t.getManifest().id().equals(id))) {
 				fatal("Missing mod dependency for " + manifest.displayName + ": " + id);
+				StartupWindow.WindowAppender.fatalError();
 				System.exit(-1);
 			}
 			String cVersion = (optManifest.isEmpty()
@@ -468,6 +522,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			if (coremod) {
 				fatal("Failed to load coremod " + manifest.modGroup + ":" + manifest.modId
 						+ " as it was not accepted by the modloader!");
+				StartupWindow.WindowAppender.fatalError();
 			}
 			System.exit(-1);
 		}
@@ -584,6 +639,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		String error = validateCheckString(check, version, message, false);
 		if (error != null) {
 			fatal(error);
+			StartupWindow.WindowAppender.fatalError();
 			System.exit(-1);
 		}
 	}
@@ -709,19 +765,19 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 	}
 
 	private void importCoremods(File coremodsDirectory) {
-		// TODO: progress window on callback if needed
 		for (File ccmf : coremodsDirectory.listFiles((t) -> !t.isDirectory() && t.getName().endsWith(".ccmf"))) {
 			try {
 				importCoremod(ccmf);
 			} catch (IOException e) {
-				fatal("Importing coremod failed, mod: " + ccmf.getName(), e);
+				fatal("Importing coremod failed, mod: " + ccmf.getName());
+				StartupWindow.WindowAppender.fatalError();
+				fatal("Exception was thrown in the mod loading process.", e);
 				System.exit(-1);
 			}
 		}
 	}
 
 	private void importCoremod(File ccmf) throws IOException {
-		// TODO: error screens/windowed messages
 		String ccfg = null;
 		ArrayList<String> modClasses = new ArrayList<String>();
 
@@ -748,6 +804,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 				&& !CyanInfo.getMinecraftVersion().matches(manifest.gameVersionRegex)) {
 			fatal("Incompatible game version '" + CyanInfo.getMinecraftVersion() + "', coremod " + manifest.displayName
 					+ " wants " + manifest.gameVersionMessage);
+			StartupWindow.WindowAppender.fatalError();
 			System.exit(-1);
 		}
 
@@ -764,6 +821,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 				}
 				fatal("Incompatible platform '" + CyanInfo.getPlatform() + "', coremod " + manifest.displayName
 						+ " only supports the following platforms: " + platforms);
+				StartupWindow.WindowAppender.fatalError();
 				System.exit(-1);
 			}
 
@@ -1079,6 +1137,8 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 								fatal("Trust container " + name + " for coremod '" + manifest.displayName
 										+ "' has been tampered with!");
 								fatal("Will not start to protect the end user!");
+								StartupWindow.WindowAppender
+										.fatalError("Trust container has been tampered with!\nPlease check the log!");
 								System.exit(-1);
 							}
 						} catch (IOException ex) {
@@ -1103,6 +1163,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 					in.close();
 				} catch (IOException e) {
 					fatal("Unable to download trust container " + name + " for coremod '" + manifest.displayName + "'");
+					StartupWindow.WindowAppender.fatalError();
 					System.exit(-1);
 				}
 			}
@@ -1111,6 +1172,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		if (coreModManifests.containsKey(manifest.modGroup + ":" + manifest.modId)) {
 			fatal("Coremod conflict!");
 			fatal("Coremod path '" + manifest.modGroup + ":" + manifest.modId + "' was imported twice!");
+			StartupWindow.WindowAppender.fatalError();
 			System.exit(-1);
 		}
 
@@ -1123,19 +1185,19 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 	}
 
 	private void importMods(File modsDirectory) {
-		// TODO: progress window on callback if needed
 		for (File cmf : modsDirectory.listFiles((t) -> !t.isDirectory() && t.getName().endsWith(".cmf"))) {
 			try {
 				importMod(cmf);
 			} catch (IOException e) {
-				fatal("Importing mod failed, mod: " + cmf.getName(), e);
+				fatal("Importing mod failed, mod: " + cmf.getName());
+				StartupWindow.WindowAppender.fatalError();
+				fatal("Exception was thrown in the mod loading process.", e);
 				System.exit(-1);
 			}
 		}
 	}
 
 	private void importMod(File ccmf) throws IOException {
-		// TODO: error screens/windowed messages
 		String ccfg = null;
 		try {
 			InputStream strm = new URL("jar:" + ccmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
@@ -1160,6 +1222,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 				&& !CyanInfo.getMinecraftVersion().matches(manifest.gameVersionRegex)) {
 			fatal("Incompatible game version '" + CyanInfo.getMinecraftVersion() + "', mod " + manifest.displayName
 					+ " wants " + manifest.gameVersionMessage);
+			StartupWindow.WindowAppender.fatalError();
 			System.exit(-1);
 		}
 
@@ -1176,6 +1239,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 				}
 				fatal("Incompatible platform '" + CyanInfo.getPlatform() + "', mod " + manifest.displayName
 						+ " only supports the following platforms: " + platforms);
+				StartupWindow.WindowAppender.fatalError();
 				System.exit(-1);
 			}
 
@@ -1362,6 +1426,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		if (coreModManifests.containsKey(manifest.modGroup + ":" + manifest.modId)) {
 			fatal("Mod conflict!");
 			fatal("Mod path '" + manifest.modGroup + ":" + manifest.modId + "' was imported twice!");
+			StartupWindow.WindowAppender.fatalError();
 			System.exit(-1);
 		}
 
@@ -1539,6 +1604,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			} catch (Exception ex) {
 				fatal("Failed to authenticate component: " + component.getTypeName());
 				fatal("Will not continue as it is way too risky.");
+				StartupWindow.WindowAppender.fatalError("Failed to authenticate component: " + component.getTypeName());
 				System.exit(-1);
 				return false;
 			}
@@ -1567,6 +1633,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 						+ component.getTypeName());
 				fatal("");
 				fatal("");
+				StartupWindow.WindowAppender.fatalError("A coremod might havev been tampered with!\nPlease check log!");
 				System.exit(-1);
 			} else if (result == 0) {
 				found = true;
@@ -1593,7 +1660,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			info("You will need to be running development cyan wrappers. If you are, you can use the");
 			info("-DauthorizeDebugPackages=<package> argument to whitelist your component.");
 			info("(use -DauthorizeDebugPackages=<package1>:<package2> for multiple)");
-
+			StartupWindow.WindowAppender.fatalError("Unauthorized component.\nPlease check log.");
 			System.exit(-1);
 		}
 
@@ -2028,15 +2095,19 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 	private void beforeGame(ClassLoader loader) throws ClassNotFoundException {
 		info("Finishing bootstrap... Loading postponed components...");
 		loadPostponedComponents(loader);
+		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Loading final events...");
 		loadEvents();
+		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Loading coremods...");
 		loadCoreMods(loader);
+		StartupWindow.WindowAppender.increaseProgress();
 
 		dispatchEvent("mods.aftermodloader", loader);
 		BaseEventController.work();
+		StartupWindow.WindowAppender.increaseProgress();
 	}
 
 	@Override
@@ -2096,6 +2167,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 				}
 				if (!downloaded) {
 					fatal("Could not download dependency " + group + ":" + name + " from ANY maven repository!");
+					StartupWindow.WindowAppender.fatalError();
 					System.exit(1);
 				}
 			}
@@ -2103,7 +2175,9 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			try {
 				CyanCore.addCoreUrl(libFile.toURI().toURL());
 			} catch (MalformedURLException e) {
-				fatal("Could not load dependency " + group + ":" + name, e);
+				fatal("Could not load dependency " + group + ":" + name);
+				StartupWindow.WindowAppender.fatalError();
+				fatal("Exception was thrown during dependency download.", e);
 				System.exit(1);
 			}
 		});
@@ -2136,23 +2210,32 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 		File mods = new File(cyanDir, "mods");
 		File versionMods = new File(mods, CyanInfo.getMinecraftVersion());
+		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Scanning CMF mod files...");
 		if (!mods.exists())
 			mods.mkdirs();
+		StartupWindow.WindowAppender.increaseProgress();
+
 		if (versionMods.exists()) {
 			importMods(versionMods);
 		}
+		StartupWindow.WindowAppender.increaseProgress();
+
 		importMods(mods);
+		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Downloading maven dependencies...");
 		downloadMavenDependencies(modMavenDependencies);
+		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Loading regular mods...");
 		loadModClasses(loader);
+		StartupWindow.WindowAppender.increaseProgress();
 
 		dispatchEvent("mods.all.loaded");
 		dispatchEvent("mods.all.loaded", loader);
+		StartupWindow.WindowAppender.increaseProgress();
 	}
 
 	private void loadModClasses(ClassLoader loader) {

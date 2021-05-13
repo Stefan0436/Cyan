@@ -31,11 +31,11 @@ class CompatibilityMappings extends VanillaMappings {
 	public void combine(String identifier, Mapping<?> mappings, Mapping<?> combine)
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
-		combine(identifier, mappings, combine, false, true);
+		combine(identifier, mappings, combine, false);
 	}
 
 	@SuppressWarnings("unchecked")
-	public void combine(String identifier, Mapping<?> mappings, Mapping<?> combine, boolean alwaysAllowRemap, boolean warn)
+	public void combine(String identifier, Mapping<?> mappings, Mapping<?> combine, boolean alwaysAllowRemap)
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 		MinecraftToolkit.infoLog("Creating compatibility mappings...");
@@ -123,17 +123,6 @@ class CompatibilityMappings extends VanillaMappings {
 				mapping.mappings[ind++] = m;
 			}
 		}
-		if (!missingMappings.equals(BigInteger.ZERO) && warn) {
-			StringBuilder builder = new StringBuilder();
-			builder.append("Missing mappings for " + identifier + " support:").append(System.lineSeparator());
-			for (String map : missingMappingsLst) {
-				builder.append("Deobfuscated (Mojang): ").append(map).append(System.lineSeparator());
-			}
-			MinecraftToolkit.warnLog(builder.toString());
-			MinecraftToolkit.warnLog("Missing " + missingMappings.toString()
-					+ " mappings, this might be harmless depending on how many are missing, please note that some cyan features MIGHT not work.");
-		}
-
 		this.mappings = mappingsLst.toArray(t -> new Mapping<?>[t]);
 	}
 

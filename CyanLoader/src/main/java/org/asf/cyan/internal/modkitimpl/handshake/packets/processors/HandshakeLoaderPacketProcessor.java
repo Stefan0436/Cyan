@@ -10,6 +10,7 @@ import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket.FailureType;
 import org.asf.cyan.internal.modkitimpl.util.HandshakeUtils;
 import org.asf.cyan.internal.modkitimpl.util.ScreenUtil;
+import org.asf.cyan.mods.dependencies.HandshakeRule;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeLoaderPacket;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeModPacket;
 import org.asf.cyan.internal.modkitimpl.info.Protocols;
@@ -23,7 +24,7 @@ public class HandshakeLoaderPacketProcessor extends ClientPacketProcessor {
 
 	@Override
 	protected void process(PacketReader reader) {
-		ScreenUtil.getImpl().setToReceiveLevelScreenIfNeeded(this);
+		ScreenUtil.getImpl().setScreenToReceiveLevel(this);
 		HandshakeLoaderPacket packet = new HandshakeLoaderPacket().read(reader);
 		Version version = Modloader.getModloader(CyanLoader.class).getVersion();
 
@@ -51,8 +52,10 @@ public class HandshakeLoaderPacketProcessor extends ClientPacketProcessor {
 			response.entries.put("modloader", Modloader.getModloader(CyanLoader.class).getVersion());
 			for (IModManifest mod : Modloader.getAllMods()) {
 				response.entries.putIfAbsent(mod.id(), mod.version());
+			}			
+			for (HandshakeRule rule : HandshakeRule.getAllRules()) {
+				response.remoteRules.add(rule);
 			}
-
 			response.write(getChannel());
 		}
 	}

@@ -43,7 +43,7 @@ public class PaperCompatibilityMappings extends CompatibilityMappings {
 
 			Mapping<?> spigotMappings = MinecraftMappingsToolkit
 					.loadMappings((modloader.isEmpty() ? "" : "-" + modloader), "spigot", info, GameSide.SERVER);
-			combine("SPIGOT", mappings, spigotMappings, true, false);
+			combine("SPIGOT", mappings, spigotMappings, true);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException | IOException e) {
 			throw new RuntimeException(e);

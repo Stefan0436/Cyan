@@ -550,10 +550,13 @@ public class CyanCore extends CyanComponent {
 			IllegalArgumentException, InvocationTargetException, IOException {
 		if (!isInitialized())
 			throw new UnsupportedOperationException("Cyan is not initialized!");
-
+		
+		StartupWindow.WindowAppender.increaseProgress();
 		Thread.currentThread().setContextClassLoader(loader);
+		
 		info("Loading CYAN information container...");
-		CyanInfo.getDevStartDate();
+		CyanInfo.getDevStartDate();		
+		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Cyan launch method: " + entryMethod);
 		info("Cyan launch platform: " + Modloader.getModloaderLaunchPlatform().toString());
@@ -575,16 +578,20 @@ public class CyanCore extends CyanComponent {
 		info("");
 
 		debug("Securing mod classloader...");
-		openloader.secure();
+		openloader.secure();		
+		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Loading class " + game + "...");
-		Class<?> clas = loader.loadClass(game);
+		Class<?> clas = loader.loadClass(game);		
+		StartupWindow.WindowAppender.increaseProgress();
 
 		Method meth = clas.getMethod("main", String[].class);
-		Modloader.getModloader().dispatchEvent("game.beforestart", new Object[] { game, args });
+		Modloader.getModloader().dispatchEvent("game.beforestart", new Object[] { game, args });		
+		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Starting minecraft...");
-		meth.invoke(null, new Object[] { args });
+		StartupWindow.WindowAppender.increaseProgress();
+		meth.invoke(null, new Object[] { args });		
 	}
 
 	private static GameSide side = null;
@@ -677,6 +684,15 @@ public class CyanCore extends CyanComponent {
 	public static void simpleInit() {
 		if (core != null)
 			return;
+		
+		int max = 0;
+		max++; // Set class loader
+		max++; // Load CyanInfo
+		max++; // Secure class loader
+		max++; // Load game class
+		max++; // Dispatch event
+		max++; // Start game
+		StartupWindow.WindowAppender.addMax(max);
 
 		core = new CyanCore();
 		core.assignImplementation();

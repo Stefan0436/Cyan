@@ -2,10 +2,13 @@ package org.asf.cyan.internal.modkitimpl.handshake.packets.processors;
 
 import java.util.HashMap;
 
+import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.api.network.PacketReader;
 import org.asf.cyan.api.network.channels.ServerPacketProcessor;
 import org.asf.cyan.api.util.Colors;
+import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket.FailureType;
 import org.asf.cyan.internal.modkitimpl.util.ClientImpl;
@@ -29,11 +32,16 @@ public class HandshakeModPacketProcessor extends ServerPacketProcessor {
 				packet.remoteRules.add(rule);
 			}
 		});
-
+		
+		HashMap<String, Version> localMods = new HashMap<String, Version>();
+		for (IModManifest mod : Modloader.getAllMods()) {
+			localMods.put(mod.id(), mod.version());
+		}
+		
 		HashMap<String, String> output1 = new HashMap<String, String>();
 		HashMap<String, String> output2 = new HashMap<String, String>();
 		boolean failClient = !HandshakeRule.checkAll(packet.entries, GameSide.CLIENT, output1, packet.remoteRules);
-		boolean failServer = !HandshakeRule.checkAll(packet.entries, GameSide.SERVER, output2, packet.remoteRules);
+		boolean failServer = !HandshakeRule.checkAll(localMods, GameSide.SERVER, output2, packet.remoteRules);
 
 		String missingClient = "";
 		String missingClientNonColor = "";
@@ -79,7 +87,7 @@ public class HandshakeModPacketProcessor extends ServerPacketProcessor {
 		}
 
 		if (failClient && !failServer) {
-			HandshakeUtils.getImpl().logInfoModsClientOnly(this, output1, missingClientNonColor);
+			HandshakeUtils.getImpl().logWarnModsClientOnly(this, output1, missingClientNonColor);
 
 			HandshakeFailedPacket response = new HandshakeFailedPacket();
 			response.failure = FailureType.PROTOCOL_REMOTE;
@@ -90,7 +98,7 @@ public class HandshakeModPacketProcessor extends ServerPacketProcessor {
 
 			HandshakeUtils.getImpl().disconnectSimple(this, response.language, missingClient);
 		} else if (!failClient && failServer) {
-			HandshakeUtils.getImpl().logInfoModsServerOnly(this, output2, missingServerNonColor);
+			HandshakeUtils.getImpl().logWarnModsServerOnly(this, output2, missingServerNonColor);
 
 			HandshakeFailedPacket response = new HandshakeFailedPacket();
 			response.failure = FailureType.PROTOCOL_REMOTE;
@@ -101,7 +109,7 @@ public class HandshakeModPacketProcessor extends ServerPacketProcessor {
 
 			HandshakeUtils.getImpl().disconnectSimple(this, response.language, missingServer);
 		} else if (failClient && failServer) {
-			HandshakeUtils.getImpl().logInfoModsBothSides(this, output1, output2, missingClientNonColor,
+			HandshakeUtils.getImpl().logWarnModsBothSides(this, output1, output2, missingClientNonColor,
 					missingServerNonColor);
 
 			HandshakeFailedPacket response = new HandshakeFailedPacket();

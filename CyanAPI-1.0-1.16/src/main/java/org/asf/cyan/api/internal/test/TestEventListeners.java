@@ -20,8 +20,10 @@ import org.asf.cyan.mods.internal.BaseEventController;
 @CYAN_COMPONENT
 public class TestEventListeners extends CyanComponent implements IEventListenerContainer, IMod {
 
-	protected static void initComponent() throws IOException {		
-		BaseEventController.addEventContainer(new TestEventListeners());
+	protected static void initComponent() throws IOException {
+		TestEventListeners t = new TestEventListeners();
+		CyanLoader.testMod(t);
+		BaseEventController.addEventContainer(t);
 
 		EventUtil.registerContainer(ContainerConditions.COMMON, TestEventListeners::registerServer);
 		EventUtil.registerContainer(ContainerConditions.CLIENT, TestEventListeners::registerClient);
@@ -38,11 +40,6 @@ public class TestEventListeners extends CyanComponent implements IEventListenerC
 
 	public static String registerFixers() {
 		return "org.asf.cyan.api.internal.test.datafixers.FixerEvents";
-	}
-
-	@AttachEvent(value = "mods.preinit", synchronize = true)
-	private void preInit() throws IOException {
-		CyanLoader.testMod(this);
 	}
 
 	@AttachEvent("mods.init")

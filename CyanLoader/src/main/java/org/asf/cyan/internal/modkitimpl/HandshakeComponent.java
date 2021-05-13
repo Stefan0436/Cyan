@@ -25,7 +25,7 @@ public class HandshakeComponent implements IEventListenerContainer, IPostponedCo
 
 	@SimpleEvent(value = EarlyCyanClientHandshakeEvent.class, synchronize = true)
 	public void handshakeStartClient(ClientConnectionEventObject event) throws InterruptedException {
-		ScreenUtil.getImpl().setScreenToTitle(event);
+		ScreenUtil.getImpl().setScreenToReceiveLevel(event);
 		CyanHandshakePacketChannel channel = HandshakeUtils.getImpl().getChannel(CyanHandshakePacketChannel.class,
 				event);
 		HandshakeProtocolPacket packet = new HandshakeProtocolPacket();

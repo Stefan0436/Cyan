@@ -11,8 +11,10 @@ public abstract class ScreenUtil {
 		return impl;
 	}
 
-	public abstract void setScreenToTitle(ClientConnectionEventObject event);
+	public abstract void setScreenToReceiveLevel(ClientConnectionEventObject event);
 
-	public abstract void setToReceiveLevelScreenIfNeeded(ClientPacketProcessor processor);
+	public abstract void setScreenToReceiveLevel(ClientPacketProcessor processor);
+
+	public abstract void setScreenToWorld(ClientPacketProcessor processor);
 
 }

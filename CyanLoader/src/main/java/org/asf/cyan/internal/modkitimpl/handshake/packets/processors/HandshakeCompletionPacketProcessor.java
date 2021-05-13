@@ -15,7 +15,7 @@ public class HandshakeCompletionPacketProcessor extends ClientPacketProcessor {
 
 	@Override
 	protected void process(PacketReader reader) {
-		ScreenUtil.getImpl().setToReceiveLevelScreenIfNeeded(this);
+		ScreenUtil.getImpl().setScreenToWorld(this);
 		ClientLanguage.writeKnownKeys(getChannel());
 		HandshakeUtils.getImpl().dispatchConnectionEvent(this); 
 	}
