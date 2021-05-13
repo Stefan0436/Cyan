@@ -133,10 +133,10 @@ public class CyanInfo extends Configuration<CyanInfo> {
 		}
 
 		if (platform == null) {
-			if (deobf) {
-				platform = LaunchPlatform.DEOBFUSCATED;
-			} else if (modloaderVersion.equals("")) {
+			if (modloaderVersion.equals("") && !deobf) {
 				platform = LaunchPlatform.VANILLA;
+			} else if (modloaderVersion.equals("") && deobf) {
+				platform = LaunchPlatform.DEOBFUSCATED;
 			} else {
 				if (modloaderVersion.toLowerCase().startsWith("forge-")) {
 					platform = LaunchPlatform.MCP;
