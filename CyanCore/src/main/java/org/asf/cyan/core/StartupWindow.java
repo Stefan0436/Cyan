@@ -51,9 +51,11 @@ public class StartupWindow extends JFrame {
 				frame.log(message);
 		}
 
+		private static boolean shown = false;
 		private static StartupWindow frame = new StartupWindow();
 
 		public static void showWindow() {
+			shown = true;
 			final LoggerContext context = LoggerContext.getContext(false);
 			final Configuration config = context.getConfiguration();
 			final PatternLayout layout = PatternLayout.createDefaultLayout();
@@ -64,6 +66,7 @@ public class StartupWindow extends JFrame {
 		}
 
 		public static void closeWindow() {
+			shown = false;
 			if (frame != null) {
 				frame.dispose();
 				frame = null;
@@ -86,7 +89,7 @@ public class StartupWindow extends JFrame {
 		}
 
 		public static void increaseProgress() {
-			if (frame == null)
+			if (!shown)
 				return;
 			if (frame.progressBar.getValue() + 1 > frame.progressBar.getMaximum())
 				return;
@@ -94,14 +97,14 @@ public class StartupWindow extends JFrame {
 		}
 
 		public static void fatalError() {
-			if (frame == null)
+			if (!shown)
 				return;
 			JOptionPane.showMessageDialog(frame, "A fatal error occured:\n" + frame.lastMessageText, "Fatal Error",
 					JOptionPane.ERROR_MESSAGE);
 		}
 
 		public static void fatalError(String msg) {
-			if (frame == null)
+			if (!shown)
 				return;
 			JOptionPane.showMessageDialog(frame, "A fatal error occured:\n" + msg, "Fatal Error",
 					JOptionPane.ERROR_MESSAGE);
