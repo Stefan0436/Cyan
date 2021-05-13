@@ -71,7 +71,7 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 	public void logWarnModsClientOnly(ServerPacketProcessor processor, HashMap<String, String> mods,
 			String modsPretty) {
 		warn("Player " + processor.getPlayer().getName().getString() + " is missing " + mods.size()
-				+ " Cyan mods on the client. (mods: " + modsPretty + ")");
+				+ " CYAN mods on the client. (mods: " + modsPretty + ")");
 	}
 
 	@Override
@@ -84,14 +84,14 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 	public void logWarnModsServerOnly(ServerPacketProcessor processor, HashMap<String, String> mods,
 			String modsPretty) {
 		warn("Player " + processor.getPlayer().getName().getString() + " is missing " + mods.size()
-				+ " Cyan mods for the server. (mods: " + modsPretty + ")");
+				+ " CYAN mods for the server. (mods: " + modsPretty + ")");
 	}
 
 	@Override
 	public void logWarnModsBothSides(ServerPacketProcessor processor, HashMap<String, String> mods1,
 			HashMap<String, String> mods2, String modsPretty1, String modsPretty2) {
 		warn("Player " + processor.getPlayer().getName().getString() + " is missing " + mods2.size()
-				+ " Cyan mods for the server and " + mods1.size() + " Cyan mods on the client. (mods: " + modsPretty1
+				+ " CYAN mods for the server and " + mods1.size() + " CYAN mods on the client. (mods: " + modsPretty1
 				+ ", server mods: " + modsPretty2 + ")");
 	}
 
