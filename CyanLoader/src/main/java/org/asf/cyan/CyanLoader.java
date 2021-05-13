@@ -2307,7 +2307,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 				testManifest.displayName = "Example Mod";
 				testManifest.fallbackDescription = "Test Mod";
 				testManifest.descriptionLanguageKey = "examplemod.description";
-				testManifest.version = "1.0.0.0";
+				testManifest.version = "1.0.0.3";
 				CyanLoader.getModloader(CyanLoader.class).loadMod(
 						(IMod) Class.forName("org.example.ExampleMod").getConstructor().newInstance(), testManifest);
 			}
