@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import org.asf.cyan.api.util.ContainerConditions;
 import org.asf.cyan.api.util.EventUtil;
+import org.asf.cyan.core.CyanCore;
 import org.asf.cyan.mods.events.AttachEvent;
 import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.internal.BaseEventController;
@@ -16,16 +17,26 @@ public class EventUtilImpl extends EventUtil implements IEventListenerContainer 
 
 	public static void init() {
 		implementation = new EventUtilImpl();
-		BaseEventController.addEventContainer((EventUtilImpl)implementation);
+		BaseEventController.addEventContainer((EventUtilImpl) implementation);
 	}
 
 	@SuppressWarnings("unchecked")
 	@AttachEvent(value = "mods.all.loaded", synchronize = true)
 	private void preGameStart(ClassLoader loader)
-			throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException,
-			InvocationTargetException, NoSuchMethodException, SecurityException {
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+			NoSuchMethodException, SecurityException, ClassNotFoundException {
 		for (Supplier<String> type : types) {
-			Class<IEventListenerContainer> cls = (Class<IEventListenerContainer>) loader.loadClass(type.get());
+			Class<IEventListenerContainer> cls;
+			String name = type.get();
+			try {
+				cls = (Class<IEventListenerContainer>) loader.loadClass(name);
+			} catch (ClassNotFoundException e) {
+				try {
+					cls = (Class<IEventListenerContainer>) CyanCore.getClassLoader().loadClass(name);
+				} catch (ClassNotFoundException e2) {
+					cls = (Class<IEventListenerContainer>) CyanCore.getCoreClassLoader().loadClass(name);
+				}
+			}
 			BaseEventController.addEventContainer(cls.getConstructor().newInstance());
 		}
 	}

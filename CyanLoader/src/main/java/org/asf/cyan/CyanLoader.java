@@ -517,7 +517,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			}
 		});
 
-		IMod mod = getMod(manifest.modClassPackage + "." + manifest.modClassName, loader, coremod);
+		IMod mod = getMod(manifest.modClassPackage + "." + manifest.modClassName, coremod);
 		if (mod == null) {
 			if (coremod) {
 				fatal("Failed to load coremod " + manifest.modGroup + ":" + manifest.modId
@@ -736,10 +736,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends IMod> T getMod(String className, ClassLoader loader, boolean coremod) {
-		if (loader == ClassLoader.getSystemClassLoader())
-			loader = CyanCore.getClassLoader();
-
+	private <T extends IMod> T getMod(String className, boolean coremod) {
 		if (coremod) {
 			if (this.loadedComponents.get(className) instanceof IMod)
 				return (T) this.loadedComponents.get(className);
@@ -748,7 +745,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		}
 
 		try {
-			Class<?> cls = loader.loadClass(className);
+			Class<?> cls = CyanCore.getClassLoader().loadClass(className);
 			if (IMod.class.isAssignableFrom(cls)) {
 				return null;
 			}
@@ -1416,7 +1413,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 							continue;
 						}
 					}
-					CyanCore.addCoreUrl(output.toURI().toURL());
+					CyanCore.addUrl(output.toURI().toURL());
 				}
 			}
 
@@ -2072,7 +2069,26 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 		info("Downloading maven dependencies...");
 		downloadMavenDependencies(coremodMavenDependencies);
-	}
+		
+		File mods = new File(cyanDir, "mods");
+		File versionMods = new File(mods, CyanInfo.getMinecraftVersion());
+		StartupWindow.WindowAppender.increaseProgress();
+
+		info("Scanning CMF mod files...");
+		if (!mods.exists())
+			mods.mkdirs();
+		StartupWindow.WindowAppender.increaseProgress();
+
+		if (versionMods.exists()) {
+			info("Importing version-specific mods...");
+			importMods(versionMods);
+		}
+		StartupWindow.WindowAppender.increaseProgress();
+
+		info("Importing regular mods...");
+		importMods(mods);
+		StartupWindow.WindowAppender.increaseProgress();
+	}	
 
 	private static ArrayList<Path> paths = new ArrayList<Path>();
 
@@ -2207,23 +2223,6 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException | ClassNotFoundException e) {
 		}
-
-		File mods = new File(cyanDir, "mods");
-		File versionMods = new File(mods, CyanInfo.getMinecraftVersion());
-		StartupWindow.WindowAppender.increaseProgress();
-
-		info("Scanning CMF mod files...");
-		if (!mods.exists())
-			mods.mkdirs();
-		StartupWindow.WindowAppender.increaseProgress();
-
-		if (versionMods.exists()) {
-			importMods(versionMods);
-		}
-		StartupWindow.WindowAppender.increaseProgress();
-
-		importMods(mods);
-		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Downloading maven dependencies...");
 		downloadMavenDependencies(modMavenDependencies);

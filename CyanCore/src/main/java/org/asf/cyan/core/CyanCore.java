@@ -550,12 +550,12 @@ public class CyanCore extends CyanComponent {
 			IllegalArgumentException, InvocationTargetException, IOException {
 		if (!isInitialized())
 			throw new UnsupportedOperationException("Cyan is not initialized!");
-		
+
 		StartupWindow.WindowAppender.increaseProgress();
 		Thread.currentThread().setContextClassLoader(loader);
-		
+
 		info("Loading CYAN information container...");
-		CyanInfo.getDevStartDate();		
+		CyanInfo.getDevStartDate();
 		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Cyan launch method: " + entryMethod);
@@ -578,20 +578,20 @@ public class CyanCore extends CyanComponent {
 		info("");
 
 		debug("Securing mod classloader...");
-		openloader.secure();		
+		openloader.secure();
 		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Loading class " + game + "...");
-		Class<?> clas = loader.loadClass(game);		
+		Class<?> clas = loader.loadClass(game);
 		StartupWindow.WindowAppender.increaseProgress();
 
 		Method meth = clas.getMethod("main", String[].class);
-		Modloader.getModloader().dispatchEvent("game.beforestart", new Object[] { game, args });		
+		Modloader.getModloader().dispatchEvent("game.beforestart", new Object[] { game, args });
 		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Starting minecraft...");
 		StartupWindow.WindowAppender.increaseProgress();
-		meth.invoke(null, new Object[] { args });		
+		meth.invoke(null, new Object[] { args });
 	}
 
 	private static GameSide side = null;
@@ -655,17 +655,16 @@ public class CyanCore extends CyanComponent {
 	}
 
 	/**
-	 * Add a url to the userland url class loader, can only be done after or during
-	 * PRELOAD and before POSTINIT.
+	 * Add a url to the userland url class loader, can only be done after CyanCore
+	 * has been initialized.
 	 * 
 	 * @param url The url to add
 	 */
 	public static void addUrl(URL url) {
-		if (!loadPhase.ge(LoadPhase.PRELOAD) && loadPhase.lt(LoadPhase.POSTINIT)) {
-			openloader.addUrl(url);
-			addedUrls.add(url);
-		} else
-			throw new IllegalStateException("CyanCore has not yet reached PRELOAD or is past INIT");
+		if (openloader == null)
+			throw new IllegalStateException("Mod class loader not ready!");
+		openloader.addUrl(url);
+		addedUrls.add(url);
 	}
 
 	/**
@@ -684,7 +683,7 @@ public class CyanCore extends CyanComponent {
 	public static void simpleInit() {
 		if (core != null)
 			return;
-		
+
 		int max = 0;
 		max++; // Set class loader
 		max++; // Load CyanInfo
