@@ -23,14 +23,15 @@ public class CommonEvents implements IEventListenerContainer {
 	// Called after login
 	@SimpleEvent(ServerSideConnectedEvent.class)
 	public void join(ServerConnectionEventObject event) {
-		event = event;
+		
 	}
 
 	// Called after cyan verifies that both sides are running it
 	@SimpleEvent(CyanServerHandshakeEvent.class)
 	public void handshake(ServerConnectionEventObject event) {
 		Client cl = Client.getForConnection(event);
-		event = event;
+		// Client instances contain information
+		// about the remote client
 	}
 
 	// Called after resources have been loaded

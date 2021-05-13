@@ -656,11 +656,13 @@ public class CyanCore extends CyanComponent {
 
 	/**
 	 * Add a url to the userland url class loader, can only be done after CyanCore
-	 * has been initialized.
+	 * has been initialized and before the POSTINIT phase has started
 	 * 
 	 * @param url The url to add
 	 */
 	public static void addUrl(URL url) {
+		if (loadPhase.ge(LoadPhase.POSTINIT))
+			throw new IllegalStateException("CyanCore is already past INIT");
 		if (openloader == null)
 			throw new IllegalStateException("Mod class loader not ready!");
 		openloader.addUrl(url);
