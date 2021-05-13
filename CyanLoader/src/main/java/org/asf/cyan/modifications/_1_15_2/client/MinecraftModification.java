@@ -77,7 +77,6 @@ public class MinecraftModification {
 	public static void ctor4(@TargetType(target = "net.minecraft.client.main.GameConfig") Object conf) {
 		CyanCore.setPhase(LoadPhase.PRELOAD);
 		if (firstLoad) {
-			CyanLoader.getModloader(CyanLoader.class).loadMods(MinecraftModification.class.getClassLoader());
 			Modloader.getModloader().dispatchEvent("mods.preinit");
 		}
 	}

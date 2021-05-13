@@ -118,4 +118,9 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 		return processor.getPlayer().getName().getString();
 	}
 
+	@Override
+	public Object getPlayerObject(ServerPacketProcessor processor) {
+		return processor.getPlayer();
+	}
+
 }

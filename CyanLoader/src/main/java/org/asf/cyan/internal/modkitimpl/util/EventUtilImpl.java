@@ -20,7 +20,7 @@ public class EventUtilImpl extends EventUtil implements IEventListenerContainer 
 	}
 
 	@SuppressWarnings("unchecked")
-	@AttachEvent(value = "mods.aftermodloader", synchronize = true)
+	@AttachEvent(value = "mods.all.loaded", synchronize = true)
 	private void preGameStart(ClassLoader loader)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, NoSuchMethodException, SecurityException {

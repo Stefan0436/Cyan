@@ -164,6 +164,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 	private HashMap<String, String> mavenRepositories = new HashMap<String, String>();
 	private HashMap<String, Version> coremodMavenDependencies = new HashMap<String, Version>();
+	private HashMap<String, Version> modMavenDependencies = new HashMap<String, Version>();
 
 	private static String platformVersion = "";
 
@@ -473,7 +474,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		if (coremod) {
 			loadCoremod((ICoremod) mod, manifest, classesMap.get(manifest.modGroup + ":" + manifest.modId));
 		} else {
-			// TODO
+			loadMod(mod, manifest);
 		}
 	}
 
@@ -587,9 +588,48 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 	}
 
 	/**
+	 * Loads mod classes (must be done during CORELOAD)
+	 * 
+	 * @param mod         Mod to load
+	 * @param modManifest Mod manifest
+	 */
+	public void loadMod(IMod mod, CyanModfileManifest modManifest) {
+		if (CyanCore.getCurrentPhase().equals(LoadPhase.CORELOAD)) {
+			mods.add(mod);
+			dispatchEvent("mod.loaded", mod);
+			mod.setup(getModloader(), getGameSide(), modManifest);
+
+			if (mod instanceof AbstractMod) {
+				modManifest.dependencies.forEach((id, ver) -> {
+					Optional<? extends IMod> depmod = coremods.stream().filter(t -> t.getManifest().id().equals(id))
+							.findFirst();
+					if (!depmod.isPresent())
+						depmod = mods.stream().filter(t -> t.getManifest().id().equals(id)).findFirst();
+
+					if (depmod.isPresent() && depmod.get() instanceof AbstractMod) {
+						((AbstractMod) mod).enableModSupport((AbstractMod) depmod.get());
+					}
+				});
+				modManifest.optionalDependencies.forEach((id, ver) -> {
+					Optional<? extends IMod> depmod = coremods.stream().filter(t -> t.getManifest().id().equals(id))
+							.findFirst();
+					if (!depmod.isPresent())
+						depmod = mods.stream().filter(t -> t.getManifest().id().equals(id)).findFirst();
+
+					if (depmod.isPresent() && depmod.get() instanceof AbstractMod) {
+						((AbstractMod) mod).enableModSupport((AbstractMod) depmod.get());
+					}
+				});
+			}
+		} else
+			throw new IllegalStateException("Already past CORELOAD");
+	}
+
+	/**
 	 * Loads coremod classes (must be done during CORELOAD)
 	 * 
-	 * @param mod Coremod to load
+	 * @param mod         Coremod to load
+	 * @param modManifest Mod manifest
 	 */
 	public void loadCoremod(ICoremod mod, CyanModfileManifest modManifest, String[] classes) {
 		if (CyanCore.getCurrentPhase().equals(LoadPhase.NOT_READY)
@@ -1059,20 +1099,270 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 					System.exit(-1);
 				}
 			}
-
-			if (coreModManifests.containsKey(manifest.modGroup + ":" + manifest.modId)) {
-				fatal("Coremod conflict!");
-				fatal("Coremod path '" + manifest.modGroup + ":" + manifest.modId + "' was imported twice!");
-				System.exit(-1);
-			}
-
-			CyanCore.addAllowedPackage(manifest.modClassPackage);
-			coreModManifests.put(manifest.modGroup + ":" + manifest.modId, manifest);
-			coreModManifests.put(manifest.modClassPackage + "." + manifest.modClassName, manifest);
 		});
+
+		if (coreModManifests.containsKey(manifest.modGroup + ":" + manifest.modId)) {
+			fatal("Coremod conflict!");
+			fatal("Coremod path '" + manifest.modGroup + ":" + manifest.modId + "' was imported twice!");
+			System.exit(-1);
+		}
+
+		CyanCore.addAllowedPackage(manifest.modClassPackage);
+		coreModManifests.put(manifest.modGroup + ":" + manifest.modId, manifest);
+		coreModManifests.put(manifest.modClassPackage + "." + manifest.modClassName, manifest);
 
 		strm.close();
 		classesMap.put(manifest.modGroup + ":" + manifest.modId, modClasses.toArray(t -> new String[t]));
+	}
+
+	private void importMods(File modsDirectory) {
+		// TODO: progress window on callback if needed
+		for (File cmf : modsDirectory.listFiles((t) -> !t.isDirectory() && t.getName().endsWith(".cmf"))) {
+			try {
+				importMod(cmf);
+			} catch (IOException e) {
+				fatal("Importing mod failed, mod: " + cmf.getName(), e);
+				System.exit(-1);
+			}
+		}
+	}
+
+	private void importMod(File ccmf) throws IOException {
+		// TODO: error screens/windowed messages
+		String ccfg = null;
+		try {
+			InputStream strm = new URL("jar:" + ccmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
+			ccfg = new String(strm.readAllBytes());
+			strm.close();
+		} catch (IOException e) {
+		}
+
+		if (ccfg == null) {
+			throw new IOException("Invalid mod file, missing manifest.");
+		}
+
+		CyanModfileManifest manifest = new CyanModfileManifest().readAll(ccfg);
+		for (String k : new ArrayList<String>(manifest.jars.keySet())) {
+			if (!k.startsWith("/")) {
+				manifest.jars.put("/" + k, manifest.jars.get(k));
+				manifest.jars.remove(k);
+			}
+		}
+
+		if (manifest.gameVersionRegex != null && manifest.gameVersionMessage != null
+				&& !CyanInfo.getMinecraftVersion().matches(manifest.gameVersionRegex)) {
+			fatal("Incompatible game version '" + CyanInfo.getMinecraftVersion() + "', mod " + manifest.displayName
+					+ " wants " + manifest.gameVersionMessage);
+			System.exit(-1);
+		}
+
+		if (CyanInfo.getPlatform() != LaunchPlatform.DEOBFUSCATED && CyanInfo.getPlatform() != LaunchPlatform.VANILLA
+				&& CyanInfo.getPlatform() != LaunchPlatform.UNKNOWN) {
+			if (!manifest.platforms.containsKey(CyanInfo.getPlatform().toString())) {
+				boolean first = true;
+				StringBuilder platforms = new StringBuilder();
+				for (String platform : manifest.platforms.keySet()) {
+					if (!first)
+						platforms.append(", ");
+					first = false;
+					platforms.append(platform);
+				}
+				fatal("Incompatible platform '" + CyanInfo.getPlatform() + "', mod " + manifest.displayName
+						+ " only supports the following platforms: " + platforms);
+				System.exit(-1);
+			}
+
+			String platformVersion = manifest.platforms.get(CyanInfo.getPlatform().toString());
+			String cVersion = CyanLoader.platformVersion;
+
+			if (cVersion == null)
+				cVersion = CyanInfo.getModloaderVersion();
+
+			this.checkDependencyVersion(platformVersion, Version.fromString(cVersion),
+					"Incompatible platform '" + CyanInfo.getPlatform() + "' for mod '" + manifest.displayName + "'");
+		}
+
+		ZipInputStream strm = new ZipInputStream(new FileInputStream(ccmf));
+		boolean cacheOutOfDate = false;
+		ModInfoCache info = new ModInfoCache();
+		File cache = new File(cyanDir, "caches/mods/" + manifest.modId);
+		File modCache = new File(cyanDir, "caches/mods/" + manifest.modId + "/mod.cache");
+
+		if (!modCache.exists()) {
+			cache.mkdirs();
+			cacheOutOfDate = true;
+		} else {
+			info.readAll(Files.readString(modCache.toPath()));
+			if (!info.modVersion.equals(manifest.version)) {
+				cacheOutOfDate = true;
+			} else if (!CyanInfo.getMinecraftVersion().equals(info.gameVersion)) {
+				cacheOutOfDate = true;
+			} else if (!CyanInfo.getPlatform().toString().equals(info.platform)) {
+				cacheOutOfDate = true;
+			} else if (!(CyanInfo.getModloaderName() + "-" + CyanInfo.getModloaderVersion().toString())
+					.equals(info.platformVersion)) {
+				cacheOutOfDate = true;
+			}
+		}
+
+		if (cacheOutOfDate) {
+			info("(Re)building mod cache...");
+			CyanLoader.deleteDir(cache);
+			cache.mkdirs();
+			info.gameVersion = CyanInfo.getMinecraftVersion();
+			info.platform = CyanInfo.getPlatform().toString();
+			info.platformVersion = CyanInfo.getModloaderName() + "-" + CyanInfo.getModloaderVersion().toString();
+			info.modVersion = manifest.version;
+
+			info("Game version: " + CyanInfo.getMinecraftVersion());
+			info("Mod version: " + manifest.version);
+			info("Platform: " + CyanInfo.getPlatform().toString());
+			if (!CyanInfo.getModloaderName().isEmpty())
+				info("Platform version: " + CyanInfo.getModloaderName() + "-"
+						+ CyanInfo.getModloaderVersion().toString());
+
+			Files.writeString(modCache.toPath(), info.toString());
+		}
+
+		manifest.mavenDependencies.forEach((group, item) -> {
+			item.forEach((name, version) -> {
+				if (!modMavenDependencies.containsKey(group + ":" + name)
+						|| Version.fromString(version).isGreaterThan(modMavenDependencies.get(group + ":" + name))) {
+					modMavenDependencies.put(group + ":" + name, Version.fromString(version));
+				}
+			});
+		});
+
+		info("Loading mod jars...");
+		ZipEntry ent = strm.getNextEntry();
+		while (ent != null) {
+			String path = ent.getName().replace("\\", "/");
+			if (!path.startsWith("/"))
+				path = "/" + path;
+
+			if (!path.endsWith("/")) {
+				if (manifest.jars.containsKey(path)) {
+					File output = new File(cache, path);
+					if (!output.getParentFile().exists())
+						output.getParentFile().mkdirs();
+
+					if (!output.exists()) {
+						boolean allow = false;
+
+						for (String type : manifest.jars.get(path).split(" & ")) {
+							type = type.trim();
+
+							if (type.startsWith("platform:")) {
+								String platform = type.substring("platform:".length());
+								if (CyanInfo.getPlatform().toString().equalsIgnoreCase(platform)) {
+									String extension = path.substring(path.lastIndexOf(".") + 1);
+									if (path.toLowerCase()
+											.endsWith("-" + platform.toLowerCase() + "." + extension.toLowerCase())) {
+										path = path.substring(0,
+												path.toLowerCase().indexOf("-" + platform.toLowerCase())) + "."
+												+ extension;
+
+										output = new File(cache, path);
+									}
+									allow = true;
+								} else {
+									allow = false;
+									break;
+								}
+							} else if (type.startsWith("gameversion:")) {
+								String gameversion = type.substring("gameversion:".length());
+								if (CyanInfo.getMinecraftVersion().toString().equalsIgnoreCase(gameversion)) {
+									String extension = path.substring(path.lastIndexOf(".") + 1);
+									if (path.toLowerCase().endsWith(
+											"-" + gameversion.toLowerCase() + "." + extension.toLowerCase())) {
+										path = path.substring(0,
+												path.toLowerCase().indexOf("-" + gameversion.toLowerCase())) + "."
+												+ extension;
+
+										output = new File(cache, path);
+									}
+									allow = true;
+								} else {
+									allow = false;
+									break;
+								}
+							} else if (type.startsWith("side:")) {
+								String side = type.substring("side:".length());
+								if (CyanInfo.getSide().toString().equalsIgnoreCase(side)) {
+									String extension = path.substring(path.lastIndexOf(".") + 1);
+									if (path.toLowerCase()
+											.endsWith("-" + side.toLowerCase() + "." + extension.toLowerCase())) {
+										path = path.substring(0, path.toLowerCase().indexOf("-" + side.toLowerCase()))
+												+ "." + extension;
+
+										output = new File(cache, path);
+									}
+									allow = true;
+								} else {
+									allow = false;
+									break;
+								}
+							} else if (type.startsWith("loaderversion:")) {
+								String loaderversion = type.substring("loaderversion:".length());
+								if (CyanInfo.getCyanVersion().toString().equalsIgnoreCase(loaderversion)) {
+									String extension = path.substring(path.lastIndexOf(".") + 1);
+									if (path.toLowerCase().endsWith(
+											"-" + loaderversion.toLowerCase() + "." + extension.toLowerCase())) {
+										path = path.substring(0,
+												path.toLowerCase().indexOf("-" + loaderversion.toLowerCase())) + "."
+												+ extension;
+
+										output = new File(cache, path);
+									}
+									allow = true;
+								} else {
+									allow = false;
+									break;
+								}
+							} else if (type.startsWith("mappingsversion:")) {
+								String version = type.substring("mappingsversion:".length());
+								boolean found = false;
+								for (Mapping<?> mapping : Fluid.getMappings()) {
+									if (mapping.mappingsVersion != null && mapping.mappingsVersion.equals(version)) {
+										found = true;
+										break;
+									}
+								}
+								if (found)
+									allow = true;
+							} else if (type.equals("any")) {
+								allow = true;
+							}
+						}
+
+						if (allow) {
+							info("Installing mod jar: " + path + "...");
+							FileOutputStream outputStrm = new FileOutputStream(output);
+							strm.transferTo(outputStrm);
+							outputStrm.close();
+						} else {
+							ent = strm.getNextEntry();
+							continue;
+						}
+					}
+					CyanCore.addCoreUrl(output.toURI().toURL());
+				}
+			}
+
+			ent = strm.getNextEntry();
+		}
+
+		if (coreModManifests.containsKey(manifest.modGroup + ":" + manifest.modId)) {
+			fatal("Mod conflict!");
+			fatal("Mod path '" + manifest.modGroup + ":" + manifest.modId + "' was imported twice!");
+			System.exit(-1);
+		}
+
+		CyanCore.addAllowedPackage(manifest.modClassPackage);
+		modManifests.put(manifest.modGroup + ":" + manifest.modId, manifest);
+		modManifests.put(manifest.modClassPackage + "." + manifest.modClassName, manifest);
+
+		strm.close();
 	}
 
 	private static String sha256HEX(byte[] array) {
@@ -1696,6 +1986,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		createEventChannel("mods.aftermodloader");
 		createEventChannel("mods.prestartgame");
 		createEventChannel("mod.loaded");
+		createEventChannel("mods.all.loaded");
 		createEventChannel("modloader.register.path");
 
 		BaseEventController.work();
@@ -1726,7 +2017,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 	}
 
 	@AttachEvent(value = "mods.prestartgame", synchronize = true)
-	public void beforeGame(ClassLoader loader) throws ClassNotFoundException {
+	private void beforeGame(ClassLoader loader) throws ClassNotFoundException {
 		info("Finishing bootstrap... Loading postponed components...");
 		loadPostponedComponents(loader);
 
@@ -1737,6 +2028,8 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		loadCoreMods(loader);
 
 		dispatchEvent("mods.aftermodloader", loader);
+
+		loadMods(loader);
 		BaseEventController.work();
 	}
 
@@ -1817,8 +2110,49 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		return mods.toArray(t -> new IMod[t]);
 	}
 
-	public void loadMods(ClassLoader loader) {
-		// TODO
+	private void loadMods(ClassLoader loader) {
+		try {
+			if (Modloader.getModloaderGameSide() == GameSide.CLIENT) {
+				CyanModfileManifest testManifest = new CyanModfileManifest();
+				testManifest.modId = "examplemod";
+				testManifest.modGroup = "org.example";
+				testManifest.displayName = "Example Mod";
+				testManifest.fallbackDescription = "Test Mod";
+				testManifest.descriptionLanguageKey = "examplemod.description";
+				testManifest.version = "1.0.0.0";
+				CyanLoader.getModloader(CyanLoader.class).loadMod(
+						(IMod) Class.forName("org.example.ExampleMod").getConstructor().newInstance(), testManifest);
+			}
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException | ClassNotFoundException e) {
+		}
+
+		File mods = new File(cyanDir, "mods");
+		File versionMods = new File(mods, CyanInfo.getMinecraftVersion());
+
+		info("Scanning CMF mod files...");
+		if (!mods.exists())
+			mods.mkdirs();
+		if (versionMods.exists()) {
+			importMods(versionMods);
+		}
+		importMods(mods);
+
+		info("Downloading maven dependencies...");
+		downloadMavenDependencies(modMavenDependencies);
+
+		info("Loading regular mods...");
+		loadModClasses(loader);
+
+		dispatchEvent("mods.all.loaded");
+		dispatchEvent("mods.all.loaded", loader);
+	}
+
+	private void loadModClasses(ClassLoader loader) {
+		modManifests.forEach((k, manifest) -> {
+			if (k.contains(":"))
+				loadMod(false, manifest, new ArrayList<String>(), loader);
+		});
 	}
 
 	/**
@@ -1856,24 +2190,14 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 	}
 
 	static String[] coremodTypes = null;
-	static String[] cyanClasses = new String[] {
-		"org.asf.cyan.CyanLoader",
-		"org.asf.cyan.mods.events.IEventListenerContainer",
-		"org.asf.cyan.mods.internal.BaseEventController",
-		"org.asf.cyan.mods.IMod",
-		"org.asf.cyan.mods.ICoreMod",
-		"org.asf.cyan.mods.AbstractCoremod",
-		"org.asf.cyan.mods.AbstractMod",
-		"org.asf.cyan.mods.IBaseMod",
-		"org.asf.cyan.core.CyanCore",
-		"org.asf.cyan.api.modloader.Modloader",
-		"org.asf.cyan.api.common.CyanComponent",
-		"org.asf.cyan.api.config.Configuration",
-		"org.asf.cyan.api.util.EventUtil",
-		"org.asf.cyan.api.util.ContainerConditions",
-		"org.asf.cyan.api.internal.CyanAPIComponent"
-	};		
-	
+	static String[] cyanClasses = new String[] { "org.asf.cyan.CyanLoader",
+			"org.asf.cyan.mods.events.IEventListenerContainer", "org.asf.cyan.mods.internal.BaseEventController",
+			"org.asf.cyan.mods.IMod", "org.asf.cyan.mods.ICoreMod", "org.asf.cyan.mods.AbstractCoremod",
+			"org.asf.cyan.mods.AbstractMod", "org.asf.cyan.mods.IBaseMod", "org.asf.cyan.core.CyanCore",
+			"org.asf.cyan.api.modloader.Modloader", "org.asf.cyan.api.common.CyanComponent",
+			"org.asf.cyan.api.config.Configuration", "org.asf.cyan.api.util.EventUtil",
+			"org.asf.cyan.api.util.ContainerConditions", "org.asf.cyan.api.internal.CyanAPIComponent" };
+
 	public static boolean doNotTransform(String name) {
 		if (coremodTypes == null) {
 			coremodTypes = CyanLoader.getModloader(CyanLoader.class).coremods.stream()
@@ -1883,7 +2207,8 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		if (name.contains("TestEventListeners"))
 			return true; // FIXME: Remove
 
-		return Stream.of(cyanClasses).anyMatch(t -> t.equals(name)) || Stream.of(coremodTypes).anyMatch(t -> t.equals(name));
+		return Stream.of(cyanClasses).anyMatch(t -> t.equals(name))
+				|| Stream.of(coremodTypes).anyMatch(t -> t.equals(name));
 	}
 
 	public static void setCallTraceClassLoader(ClassLoader loader) {
@@ -1891,10 +2216,11 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 	}
 
 	private static ArrayList<String> locations = null;
+
 	public static InputStream getFabricClassStream(String name) throws MalformedURLException {
 		if (doNotTransform(name))
 			return null;
-		
+
 		if (locations == null) {
 			locations = new ArrayList<String>();
 			for (Path pth : CyanCore.getAddedPaths()) {
@@ -1914,7 +2240,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 				locations.add(path);
 			}
 		}
-		
+
 		for (String loc : locations) {
 			try {
 				URL u = new URL(loc + name.replace(".", "/") + ".class");
@@ -1923,8 +2249,8 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			} catch (IOException e) {
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 }

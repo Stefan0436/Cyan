@@ -67,7 +67,8 @@ public class ModloaderHandler extends CyanComponent {
 				modloaderName = modloaderName.substring(0, modloaderName.indexOf("/"));
 			}
 
-			Class<IModloader>[] loaders = findClasses(getMainImplementation(), IModloader.class);
+			Class<IModloader>[] loaders = findClasses(getMainImplementation(), IModloader.class,
+					ModloaderHandler.class.getClassLoader());
 			for (Class<IModloader> cls : loaders) {
 				if (cls.isInterface() || Modifier.isAbstract(cls.getModifiers()))
 					continue;
@@ -93,7 +94,8 @@ public class ModloaderHandler extends CyanComponent {
 		});
 
 		findDeps(proj, "game", (dep) -> {
-			Class<IGame>[] games = findClasses(getMainImplementation(), IGame.class);
+			Class<IGame>[] games = findClasses(getMainImplementation(), IGame.class,
+					ModloaderHandler.class.getClassLoader());
 			for (Class<IGame> cls : games) {
 				if (cls.isInterface() || Modifier.isAbstract(cls.getModifiers()))
 					continue;
@@ -125,7 +127,8 @@ public class ModloaderHandler extends CyanComponent {
 		});
 
 		findDeps(proj, "api", (dep) -> {
-			Class<IAPIDependency>[] apis = findClasses(getMainImplementation(), IAPIDependency.class);
+			Class<IAPIDependency>[] apis = findClasses(getMainImplementation(), IAPIDependency.class,
+					ModloaderHandler.class.getClassLoader());
 			for (Class<IAPIDependency> cls : apis) {
 				if (cls.isInterface() || Modifier.isAbstract(cls.getModifiers()))
 					continue;

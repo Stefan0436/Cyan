@@ -2,7 +2,6 @@ package org.asf.cyan.modifications._1_15_2.server;
 
 import java.net.Proxy;
 
-import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.fluid.annotations.PlatformOnly;
 import org.asf.cyan.api.fluid.annotations.VersionRegex;
 import org.asf.cyan.api.modloader.Modloader;
@@ -72,7 +71,6 @@ public class SpigotServerModification {
 			@TargetType(target = "net.minecraft.server.level.progress.ChunkProgressListenerFactory") Object var14) {
 		if (firstLoad) {
 			CyanCore.setPhase(LoadPhase.PRELOAD);
-			CyanLoader.getModloader(CyanLoader.class).loadMods(SpigotServerModification.class.getClassLoader());
 			Modloader.getModloader().dispatchEvent("mods.preinit");
 		}
 	}

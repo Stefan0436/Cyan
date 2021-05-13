@@ -78,7 +78,7 @@ dependencies {
 	// 4 = CyanUtil
 	// 8 = Core Modding (includes modding)
 	// 16 = FLUID
-	implementation Modloader.forModloader("cyan", 4 | 8 | 16)
+	implementation Modloader.forModloader("cyan", 4 | 8 )
 
 	// Selects game dependencies
 	implementation Game.forGame("Minecraft", "1.16.5")

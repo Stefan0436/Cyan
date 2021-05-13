@@ -4,12 +4,12 @@ import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.network.PacketReader;
 import org.asf.cyan.api.network.channels.ServerPacketProcessor;
-import org.asf.cyan.internal.modkitimpl.handshake.CyanHandshakePacketChannel;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket.FailureType;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeLoaderPacket;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeProtocolPacket;
 import org.asf.cyan.internal.modkitimpl.info.Protocols;
+import org.asf.cyan.internal.modkitimpl.util.ClientImpl;
 import org.asf.cyan.internal.modkitimpl.util.HandshakeUtils;
 
 public class HandshakeProtocolPacketProcessor extends ServerPacketProcessor {
@@ -40,7 +40,7 @@ public class HandshakeProtocolPacketProcessor extends ServerPacketProcessor {
 
 	@Override
 	protected void process(PacketReader content) {
-		CyanHandshakePacketChannel.startInfoHandler(this);
+		ClientImpl.startInfoHandler(this);
 		HandshakeProtocolPacket packet = new HandshakeProtocolPacket().read(content);
 		if (packet.protocolVersion < Protocols.MIN_MODKIT) {
 			HandshakeFailedPacket response = new HandshakeFailedPacket();
@@ -59,7 +59,7 @@ public class HandshakeProtocolPacketProcessor extends ServerPacketProcessor {
 			response.write(getChannel());
 			HandshakeUtils.getImpl().disconnectColored1(this, response, packet.protocolVersion);
 		} else {
-			CyanHandshakePacketChannel.assignProtocol(this, packet.protocolVersion);
+			ClientImpl.assignProtocol(this, packet.protocolVersion);
 			HandshakeLoaderPacket response = new HandshakeLoaderPacket();
 			response.protocol = Protocols.LOADER_PROTOCOL;
 			response.version = Modloader.getModloader(CyanLoader.class).getVersion();

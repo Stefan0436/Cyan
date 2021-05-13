@@ -20,7 +20,7 @@ import org.asf.cyan.mods.internal.BaseEventController;
 @CYAN_COMPONENT
 public class TestEventListeners extends CyanComponent implements IEventListenerContainer, IMod {
 
-	protected static void initComponent() throws IOException {
+	protected static void initComponent() throws IOException {		
 		BaseEventController.addEventContainer(new TestEventListeners());
 
 		EventUtil.registerContainer(ContainerConditions.COMMON, TestEventListeners::registerServer);

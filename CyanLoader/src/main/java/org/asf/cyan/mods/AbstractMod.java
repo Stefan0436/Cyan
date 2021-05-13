@@ -28,18 +28,6 @@ import org.asf.cyan.mods.internal.CyanModManifest;
 public abstract class AbstractMod extends CyanComponent implements IMod, IEventListenerContainer {
 
 	/**
-	 * Retrieves the instance of this mod
-	 */
-	@SuppressWarnings("unchecked")
-	public static AbstractMod getInstance() {
-		Class<?> caller = CallTrace.traceCall(0);
-		if (AbstractMod.class.isAssignableFrom(caller) && !caller.getTypeName().equals(AbstractMod.class.getTypeName()))
-			return getInstance((Class<AbstractMod>) caller);
-		else
-			return null;
-	}
-
-	/**
 	 * Retrieves the instance of the given mod
 	 * 
 	 * @param <T>      Mod type

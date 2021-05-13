@@ -2,7 +2,6 @@ package org.asf.cyan.modifications._1_15_2.server;
 
 import java.net.Proxy;
 
-import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.fluid.annotations.PlatformOnly;
 import org.asf.cyan.api.fluid.annotations.VersionRegex;
 import org.asf.cyan.api.modloader.Modloader;
@@ -63,7 +62,6 @@ public class SpigotServerModification_1_15_2 {
 			String var11) {
 		if (firstLoad) {
 			CyanCore.setPhase(LoadPhase.PRELOAD);
-			CyanLoader.getModloader(CyanLoader.class).loadMods(SpigotServerModification_1_15_2.class.getClassLoader());
 			Modloader.getModloader().dispatchEvent("mods.preinit");
 		}
 	}

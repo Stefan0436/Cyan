@@ -13,7 +13,7 @@ import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.network.PacketReader;
 import org.asf.cyan.api.network.channels.PacketChannel;
 import org.asf.cyan.api.util.server.language.ClientLanguage;
-import org.asf.cyan.internal.modkitimpl.handshake.CyanHandshakePacketChannel;
+import org.asf.cyan.internal.modkitimpl.util.ClientImpl;
 import org.asf.cyan.mods.dependencies.HandshakeRule;
 
 import io.netty.buffer.Unpooled;
@@ -21,6 +21,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -32,8 +33,16 @@ public class NetworkHooks {
 			FriendlyByteBuf buffer, Minecraft minecraft, Consumer<String> brandOutput, String serverBrand,
 			Connection connection) {
 		if (ClientboundCustomPayloadPacket.BRAND.equals(type)) {
-			minecraft.player.setServerBrand(buffer.readUtf(32767));
-			brandOutput.accept(minecraft.player.getServerBrand());
+			String brand = buffer.readUtf(32767);
+
+			minecraft.player.setServerBrand(brand);
+			brandOutput.accept(brand);
+
+			if (!brand.startsWith("Cyan")
+					&& HandshakeRule.getAllRules().stream().filter(t -> t.getSide() == GameSide.SERVER).count() != 0) {
+				minecraft.getConnection().getConnection()
+						.disconnect(new TranslatableComponent("modkit.missingmodded.server"));
+			}
 			return true;
 		} else {
 			if (type.getNamespace().equals("cyan") && type.getPath().equals("cyan.handshake.start")) {
@@ -77,8 +86,11 @@ public class NetworkHooks {
 		if (ServerboundCustomPayloadPacket.BRAND.equals(id)) {
 			boolean first = clientBrand == null;
 			clientBrand = data.readUtf(32767);
+			
 			brandOutput.accept(clientBrand);
-			CyanHandshakePacketChannel.assignBrand(player.getUUID(), clientBrand);
+			ClientImpl.assignBrand(player.getUUID(), clientBrand);
+			ClientImpl.assignPlayerObjects(player.getName().getString(), player.getUUID(), player);
+			
 			if (first) {
 				connection.send(new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.BRAND,
 						new FriendlyByteBuf(Unpooled.buffer()).writeUtf(server.getServerModName())));
@@ -86,7 +98,7 @@ public class NetworkHooks {
 					connection.send(
 							new ClientboundCustomPayloadPacket(new ResourceLocation("cyan", "cyan.handshake.start"),
 									new FriendlyByteBuf(Unpooled.buffer(0))));
-				} else if (HandshakeRule.getAllRules().stream().filter(t -> t.getSide() == GameSide.SERVER)
+				} else if (HandshakeRule.getAllRules().stream().filter(t -> t.getSide() == GameSide.CLIENT)
 						.count() != 0) {
 					player.connection.tick();
 					player.connection.disconnect(new TextComponent(

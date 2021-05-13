@@ -29,13 +29,12 @@ public class CyanModloader implements IModloader {
 	private int api;
 
 	public static final int BaseModding = 1 << 1;
-	public static final int CyanUtil = 1 << 2;
-	public static final int CoreMods = 1 << 3;
-	public static final int FLUID = 1 << 4;
-	public static final int CyanCore = 1 << 5;
-	public static final int MTK = 1 << 6;
-	public static final int ClassTrust = 1 << 7;
-	public static final int FullCyanLoader = 1 << 8;
+	public static final int CoreMods = 1 << 2;
+	public static final int FLUID = 1 << 3;
+	public static final int CyanCore = 1 << 4;
+	public static final int MTK = 1 << 5;
+	public static final int ClassTrust = 1 << 6;
+	public static final int FullCyanLoader = 1 << 7;
 
 	private boolean hasAPI(int api) {
 		return (api & this.api) == api;
@@ -146,16 +145,17 @@ public class CyanModloader implements IModloader {
 	@Override
 	public String[] addDependencies(ConfigurationContainer configurations) {
 		ArrayList<String> deps = new ArrayList<String>();
+		addDependency("com.google.code.gson", "gson", "2.8.6", deps);
+		
 		addDependency("org.asf.cyan", "CCFG", libraries.get("CCFG"), deps);
 		addDependency("org.asf.cyan", "CyanComponents", libraries.get("CyanComponents"), deps);
+		addDependency("org.asf.cyan", "CyanUtil", libraries.get("CyanUtil"), deps);
 
 		if (hasAPI(FullCyanLoader))
 			addDependency("org.asf.cyan", "CyanLoader", libraries.get("CyanLoader"), deps);
 
 		if (hasAPI(BaseModding) && !hasAPI(FullCyanLoader))
 			addDependency("org.asf.cyan", "CyanModding", libraries.get("CyanLoader"), deps);
-		if (hasAPI(CyanUtil))
-			addDependency("org.asf.cyan", "CyanUtil", libraries.get("CyanUtil"), deps);
 		if (hasAPI(CoreMods) && !hasAPI(FullCyanLoader))
 			addDependency("org.asf.cyan", "CyanCoreModding", libraries.get("CyanLoader"), deps);
 		if (hasAPI(FLUID))

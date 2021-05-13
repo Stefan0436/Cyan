@@ -53,7 +53,6 @@ public class ServerEvents implements IEventListenerContainer {
 		ConfigManager<TestEventListeners> manager = (ConfigManager<TestEventListeners>) ConfigManager
 				.getFor(TestEventListeners.class);
 		ModConfigTest config = manager.getConfiguration(ModConfigTest.class);
-		config = config;
 		this.equals(this); // OK
 	}
 

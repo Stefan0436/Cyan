@@ -3,7 +3,6 @@ package org.asf.cyan.modifications._1_15_2.server;
 import java.io.File;
 import java.net.Proxy;
 
-import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.fluid.annotations.PlatformExclude;
 import org.asf.cyan.api.fluid.annotations.VersionRegex;
 import org.asf.cyan.api.modloader.Modloader;
@@ -61,7 +60,6 @@ public class MinecraftServerModification_1_15_2 {
 			@TargetType(target = "net.minecraft.server.level.progress.ChunkProgressListenerFactory") Object var9,
 			String var10) {
 		if (firstLoad) {
-			CyanLoader.getModloader(CyanLoader.class).loadMods(MinecraftServerModification_1_15_2.class.getClassLoader());
 			Modloader.getModloader().dispatchEvent("mods.preinit");
 		}
 	}

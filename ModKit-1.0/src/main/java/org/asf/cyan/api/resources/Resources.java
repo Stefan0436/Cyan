@@ -2,6 +2,7 @@ package org.asf.cyan.api.resources;
 
 import java.io.InputStream;
 
+import org.asf.cyan.api.modloader.information.mods.IBaseMod;
 import org.asf.cyan.api.modloader.information.mods.IModManifest;
 
 /**
@@ -30,6 +31,18 @@ public abstract class Resources {
 	public static Resources getFor(IModManifest mod) {
 		Resources impl = implementation.newInstance();
 		impl.setDefaultOwner(mod);
+		return impl;
+	}
+
+	/**
+	 * Retrieves a new resources container for a mod
+	 * 
+	 * @param mod Mod instance
+	 * @return Resources instance
+	 */
+	public static Resources getFor(IBaseMod mod) {
+		Resources impl = implementation.newInstance();
+		impl.setDefaultOwner(mod.getManifest());
 		return impl;
 	}
 

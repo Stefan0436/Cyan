@@ -76,10 +76,13 @@ project.afterEvaluate {
 // Dependency configuration
 dependencies {
 	// Selects modloader dependencies:
-	// 2 = Base Moddidng
-	// 4 = CyanUtil
-	// 8 = Core Modding (includes modding)
-	// 16 = FLUID
+	// 2   = Base Moddidng
+	// 4   = Core Modding (includes modding)
+	// 8   = FLUID
+    // 16  = CyanCore
+    // 32  = MTK
+    // 64  = ClassTrust
+    // 128 = Full CyanLoader (unrecommended, use of base/core modding is preferred)
 	implementation Modloader.forModloader("cyan", 4 | 8 | 16)
 
 	// Selects game dependencies

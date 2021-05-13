@@ -54,4 +54,6 @@ public abstract class HandshakeUtils extends CyanComponent {
 
 	public abstract String getPlayerName(ServerPacketProcessor processor);
 
+	public abstract Object getPlayerObject(ServerPacketProcessor processor);
+
 }
