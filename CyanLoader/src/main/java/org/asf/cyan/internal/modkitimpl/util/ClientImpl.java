@@ -42,7 +42,7 @@ public class ClientImpl extends Client implements IPostponedComponent {
 	public static Client getClientInfo(Object player) {
 		if (player == null)
 			return new ClientImpl();
-		return getFor(HandshakeUtils.getImpl().getUUID(player));
+		return getForUUID(HandshakeUtils.getImpl().getUUID(player));
 	}
 
 	public static void startInfoHandler(ServerPacketProcessor processor) {
@@ -115,7 +115,7 @@ public class ClientImpl extends Client implements IPostponedComponent {
 	}
 
 	@Override
-	protected Client getForPlayer(UUID uuid) {
+	protected Client getFor(UUID uuid) {
 		if (uuid == null)
 			return new ClientImpl();
 		return clients.getOrDefault(uuid.toString(), new ClientImpl());

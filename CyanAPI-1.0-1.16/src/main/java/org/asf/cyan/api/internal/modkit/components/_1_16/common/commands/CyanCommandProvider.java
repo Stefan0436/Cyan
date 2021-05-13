@@ -99,7 +99,7 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 		}).executes(cmd -> {
 			ServerPlayer player = header(cmd);
 
-			Client client = Client.getFor(player);
+			Client client = Client.getForPlayer(player);
 			if (player == null) {
 				cmd.getSource()
 						.sendSuccess(new TextComponent("\n" + ClientLanguage.createComponent(player, "cyan.info.data",
@@ -127,7 +127,7 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 
 			String serverMods = "";
 			String clientMods = "";
-			Client client = Client.getFor(player);
+			Client client = Client.getForPlayer(player);
 			for (IModManifest mod : Modloader.getAllMods()) {
 				if (!serverMods.isEmpty())
 					serverMods += "§7, ";
@@ -174,7 +174,7 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 			}
 		}).executes(cmd -> {
 			ServerPlayer player = header(cmd);
-			Client client = Client.getFor(player);
+			Client client = Client.getForPlayer(player);
 			if (player == null) {
 				cmd.getSource().sendSuccess(new TextComponent("\n" + ClientLanguage.createComponent(player,
 						"cyan.info.technical", "§6" + Protocols.MODKIT_PROTOCOL, "§6" + Protocols.LOADER_PROTOCOL,

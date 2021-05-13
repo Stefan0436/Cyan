@@ -90,8 +90,8 @@ public abstract class Client {
 	 * @param uuid Player uuid
 	 * @return ClientInformation instance or null
 	 */
-	public static Client getFor(UUID uuid) {
-		return provider.getForPlayer(uuid);
+	public static Client getForUUID(UUID uuid) {
+		return provider.getFor(uuid);
 	}
 
 	/**
@@ -100,7 +100,7 @@ public abstract class Client {
 	 * @param uuid Player UUID
 	 * @return ClientInformation instance or null
 	 */
-	protected abstract Client getForPlayer(UUID uuid);
+	protected abstract Client getFor(UUID uuid);
 
 	/**
 	 * Retrieves the information for a given player
@@ -108,10 +108,10 @@ public abstract class Client {
 	 * @param player Player instance
 	 * @return ClientInformation instance or null
 	 */
-	public static Client getFor(ServerPlayer player) {
+	public static Client getForPlayer(ServerPlayer player) {
 		if (player == null)
-			return getFor((UUID) null);
-		return getFor(player.getUUID());
+			return getForUUID(null);
+		return getForUUID(player.getUUID());
 	}
 
 	/**
@@ -122,8 +122,8 @@ public abstract class Client {
 	 */
 	public static Client getForConnection(ServerConnectionEventObject event) {
 		if (event.getPlayer() == null)
-			return getFor((UUID) null);
-		return getFor(event.getPlayer());
+			return getForUUID(null);
+		return getForPlayer(event.getPlayer());
 	}
 
 }

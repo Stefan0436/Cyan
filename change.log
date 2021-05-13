@@ -45,7 +45,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - Cyan Modloader Version Support Map -- TODO
  
  // A14
- - World Load Warning on Vanilla and when mods have changed (CyanAPI ModKit 1.1) -- TODO
+ - ModKit World Load Warning if mods have changed (CyanAPI ModKit 1.1) -- TODO
  - ModKit Threads API (CyanAPI ModKit 1.1, count of threads is displayed in crash logs) -- TODO
  - MTK MSA Account Support (MTK A22) -- TODO
   
@@ -60,7 +60,10 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - ModKit Block Events (CyanAPI ModKit 1.2) -- TODO
  - ModKit Item Events (CyanAPI ModKit 1.2) -- TODO
  - ModKit GUI Events (CyanAPI ModKit 1.2) -- TODO
+ - More ModKit Server Packet Events (such as block break, interact, and such, CyanAPI ModKit 1.2) -- TODO
  
+ - ModKit Player Display Name Modification (CyanAPI ModKit 1.2) -- TODO
+ - ModKit Player Nametag Modification Event (allows for the change of player name tags, CyanAPI ModKit 1.2) -- TODO
  
  // B1: LTS:
  - Fix CCFG String Splitter Bug -- TODO
