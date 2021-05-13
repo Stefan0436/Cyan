@@ -701,6 +701,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 					+ ")");
 			
 			mod.setup(getModloader(), getGameSide(), modManifest);
+			
 			modManifest.loaded = true;
 			modManifests.put(mod.getManifest().id(), modManifest);
 			modManifests.put(mod.getClass().getTypeName(), modManifest);
@@ -2354,7 +2355,14 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 	}
 
 	public static void testMod(IMod testEventListeners) { // FIXME: remove
-		CyanLoader.getModloader(CyanLoader.class).mods.add(testEventListeners);
+		CyanModfileManifest testManifest = new CyanModfileManifest();
+		testManifest.modId = "test";
+		testManifest.modGroup = "testmod";
+		testManifest.displayName = "Test Mod";
+		testManifest.fallbackDescription = "Test Mod";
+		testManifest.descriptionLanguageKey = "examplemod.description";
+		testManifest.version = "1.0.0.0";
+		CyanLoader.getModloader(CyanLoader.class).loadMod(testEventListeners, testManifest);
 	}
 
 	public static void addCyanPaths(ArrayList<Path> paths) {
