@@ -23,7 +23,8 @@ class EventFunction extends AsyncFunction<EventObject.EventResult> {
 		bus.dispatch((result) -> {
 			if (obj.getResult() == EventResult.UNDEFINED)
 				obj.setResult(EventResult.CONTINUE);
-			setResult(obj.getResult());
+			if (result.hasCompleted())
+				setResult(obj.getResult());
 		}, new Object[] { obj });
 	}
 

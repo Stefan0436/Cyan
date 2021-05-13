@@ -74,5 +74,8 @@ public class ModKitController extends CyanComponent {
 				throw new RuntimeException(e);
 			}
 		}
+
+		Modloader.getModloader().dispatchEvent("mods.load.regular.start");
+		Modloader.getModloader().dispatchEvent("mods.load.regular.start", loader);
 	}
 }

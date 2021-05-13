@@ -31,7 +31,7 @@ public class MinecraftModification {
 	private final TextureManager textureManager = null;
 
 	@Constructor
-	@InjectAt(location = InjectLocation.HEAD, targetCall = "reload()", targetOwner = "net.minecraft.server.packs.repository.PackRepository")
+	@InjectAt(location = InjectLocation.HEAD, targetCall = "loadSelectedResourcePacks(net.minecraft.server.packs.repository.PackRepository)", targetOwner = "net.minecraft.client.Options")
 	public void init1(@TargetType(target = "net.minecraft.client.main.GameConfig") GameConfig config) {
 		ResourceManagerStartupEvent.getInstance().dispatch(new ResourceManagerEventObject(resourceManager)).getResult();
 	}

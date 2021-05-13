@@ -5,21 +5,18 @@ import java.io.InputStream;
 import java.net.URL;
 
 import org.asf.cyan.api.modloader.Modloader;
-import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.fluid.annotations.PlatformExclude;
 import org.asf.cyan.api.fluid.annotations.PlatformOnly;
 import org.asf.cyan.api.fluid.annotations.SideOnly;
 import org.asf.cyan.api.fluid.annotations.VersionRegex;
 import org.asf.cyan.api.modloader.information.game.GameSide;
-import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.core.CyanInfo;
 import org.asf.cyan.core.FLUID_AUTODETECT;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.api.FluidTransformer;
 
-@CYAN_COMPONENT
 @FLUID_AUTODETECT
 public class CyanAPIComponent extends CyanComponent {
 	
@@ -106,9 +103,6 @@ public class CyanAPIComponent extends CyanComponent {
 		last = Version.fromString("0.0.0");
 	}
 
-	protected static void initComponent() {
-	}
-	
 	public static URL getResource(String path) {
 		try {
 			if ((base.endsWith(".jar") || base.endsWith(".zip")) && !base.startsWith("jar:"))

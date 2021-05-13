@@ -409,7 +409,8 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		}
 		loadingMods.add(manifest.modGroup + ":" + manifest.modId);
 
-		info("Loading mod " + manifest.modGroup + ":" + manifest.modId + "... (" + manifest.displayName + ")");
+		debug("Preparing to load mod " + manifest.modGroup + ":" + manifest.modId + "... (" + manifest.displayName
+				+ ")");
 
 		final Collection<CyanModfileManifest> allManifests;
 		if (coremod) {
@@ -597,6 +598,9 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		if (CyanCore.getCurrentPhase().equals(LoadPhase.CORELOAD)) {
 			mods.add(mod);
 			dispatchEvent("mod.loaded", mod);
+
+			info("Loading mod " + modManifest.modGroup + ":" + modManifest.modId + "... (" + modManifest.displayName
+					+ ")");
 			mod.setup(getModloader(), getGameSide(), modManifest);
 
 			if (mod instanceof AbstractMod) {
@@ -644,6 +648,9 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 			coremods.add(mod);
 			dispatchEvent("mod.loaded", mod);
+
+			info("Loading coremod " + modManifest.modGroup + ":" + modManifest.modId + "... (" + modManifest.displayName
+					+ ")");
 			mod.setup(getModloader(), getGameSide(), modManifest);
 
 			if (mod instanceof AbstractMod) {
@@ -1988,6 +1995,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		createEventChannel("mod.loaded");
 		createEventChannel("mods.all.loaded");
 		createEventChannel("modloader.register.path");
+		createEventChannel("mods.load.regular.start");
 
 		BaseEventController.work();
 
@@ -2028,8 +2036,6 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		loadCoreMods(loader);
 
 		dispatchEvent("mods.aftermodloader", loader);
-
-		loadMods(loader);
 		BaseEventController.work();
 	}
 
@@ -2110,8 +2116,9 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		return mods.toArray(t -> new IMod[t]);
 	}
 
+	@AttachEvent(value = "mods.load.regular.start", synchronize = true)
 	private void loadMods(ClassLoader loader) {
-		try {
+		try { // FIXME: REMOVE
 			if (Modloader.getModloaderGameSide() == GameSide.CLIENT) {
 				CyanModfileManifest testManifest = new CyanModfileManifest();
 				testManifest.modId = "examplemod";

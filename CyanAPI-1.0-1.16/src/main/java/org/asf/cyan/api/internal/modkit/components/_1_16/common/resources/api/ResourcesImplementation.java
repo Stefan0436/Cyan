@@ -42,7 +42,7 @@ public class ResourcesImplementation extends Resources implements IModKitCompone
 		BaseEventController.addEventContainer(this);
 	}
 
-	@SimpleEvent(ResourceManagerStartupEvent.class)
+	@SimpleEvent(value = ResourceManagerStartupEvent.class, synchronize = true)
 	private void startResourceManager(ResourceManagerEventObject event) {
 		manager = event.getResourceManager();
 	}
