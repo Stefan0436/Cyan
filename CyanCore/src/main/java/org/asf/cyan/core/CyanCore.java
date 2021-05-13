@@ -708,6 +708,10 @@ public class CyanCore extends CyanComponent {
 		return paths.toArray(t -> new Path[t]);
 	}
 
+	public static URL[] getAddedUrls() {
+		return addedUrls.toArray(t -> new URL[t]);
+	}
+
 	private static boolean ide = false;
 
 	public static void setIDE() {

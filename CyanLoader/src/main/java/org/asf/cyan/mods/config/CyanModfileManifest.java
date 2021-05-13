@@ -3,6 +3,7 @@ package org.asf.cyan.mods.config;
 import java.util.HashMap;
 
 import org.asf.cyan.api.config.Configuration;
+import org.asf.cyan.api.config.annotations.Exclude;
 
 /**
  * 
@@ -22,6 +23,12 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> {
 	public String folder() {
 		return null;
 	}
+
+	@Exclude
+	public String source = null;
+
+	@Exclude
+	public boolean loaded;
 
 	public String modClassName = null;
 	public String modClassPackage = null;

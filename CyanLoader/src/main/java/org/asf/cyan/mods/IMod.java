@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.mods.IBaseMod;
@@ -18,16 +19,9 @@ import org.asf.cyan.mods.config.CyanModfileManifest;
  */
 public interface IMod extends IBaseMod {
 	public default URL getResource(String path) {
-		String base = getClass().getProtectionDomain().getCodeSource().getLocation().toString();
-		if (base.toString().startsWith("jar:"))
-			base = base.substring(0, base.lastIndexOf("!"));
-		else if (base.endsWith("/" + getClass().getTypeName().replace(".", "/") + ".class")) {
-			base = base.substring(0,
-					base.length() - ("/" + getClass().getTypeName().replace(".", "/") + ".class").length());
-		}
-
+		String base = CyanLoader.getModSourceBase(getClass());
 		try {
-			if ((base.endsWith(".jar") || base.endsWith(".zip")) && !base.startsWith("jar:"))
+			if (base.endsWith(".jar") || base.endsWith(".zip"))
 				base = "jar:" + base + "!";
 			new URL(base + "/" + path).openStream().close();
 			return new URL(base + "/" + path);
@@ -37,14 +31,7 @@ public interface IMod extends IBaseMod {
 	}
 
 	public default InputStream getResourceAsStream(String path) {
-		String base = getClass().getProtectionDomain().getCodeSource().getLocation().toString();
-		if (base.toString().startsWith("jar:"))
-			base = base.substring(0, base.lastIndexOf("!"));
-		else if (base.endsWith("/" + getClass().getTypeName().replace(".", "/") + ".class")) {
-			base = base.substring(0,
-					base.length() - ("/" + getClass().getTypeName().replace(".", "/") + ".class").length());
-		}
-
+		String base = CyanLoader.getModSourceBase(getClass());
 		try {
 			if ((base.endsWith(".jar") || base.endsWith(".zip")) && !base.startsWith("jar:"))
 				base = "jar:" + base + "!";

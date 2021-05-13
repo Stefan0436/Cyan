@@ -23,14 +23,16 @@ import org.asf.cyan.api.versioning.VersionStatus;
  */
 public class CyanInfo extends Configuration<CyanInfo> {
 	static CyanInfo info = null;
-	static CyanInfoProvider provider;	
+	static CyanInfoProvider provider;
 	public static final String infoPath = "/org/asf/cyan/CyanVersionHolder/generic/CyanVersionHolder-generic-versions.ccfg";
 
 	@SuppressWarnings("unchecked")
-	protected static <T extends Configuration<T>> T instanciateFromSerialzer(Class<T> input) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+	protected static <T extends Configuration<T>> T instanciateFromSerialzer(Class<T> input)
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+			NoSuchMethodException, SecurityException {
 		return (T) new CyanInfo();
 	}
-	
+
 	private CyanInfo() {
 		super();
 		readAll(readCCFG());
@@ -131,10 +133,10 @@ public class CyanInfo extends Configuration<CyanInfo> {
 		}
 
 		if (platform == null) {
-			if (modloaderVersion.equals("") && !deobf) {
-				platform = LaunchPlatform.VANILLA;
-			} else if (modloaderVersion.equals("") && deobf) {
+			if (deobf) {
 				platform = LaunchPlatform.DEOBFUSCATED;
+			} else if (modloaderVersion.equals("")) {
+				platform = LaunchPlatform.VANILLA;
 			} else {
 				if (modloaderVersion.toLowerCase().startsWith("forge-")) {
 					platform = LaunchPlatform.MCP;
@@ -246,9 +248,10 @@ public class CyanInfo extends Configuration<CyanInfo> {
 			info = new CyanInfo();
 		return info.modloaderName;
 	}
-	
+
 	/**
 	 * Get the entry method used to start cyan
+	 * 
 	 * @return Name of the Entry Method used to start Cyan.
 	 */
 	public static String getEntryMethod() {
@@ -365,16 +368,16 @@ public class CyanInfo extends Configuration<CyanInfo> {
 	public static VersionStatus getModloaderVersionStatus() {
 		if (info == null)
 			info = new CyanInfo();
-		return info.versionStatus ;
+		return info.versionStatus;
 	}
 
 	public static IModloaderInfoProvider getProvider() {
 		if (info == null)
 			info = new CyanInfo();
-		
+
 		if (provider == null)
 			provider = new CyanInfoProvider();
-		
+
 		return provider;
 	}
 }
