@@ -129,6 +129,15 @@ public class Installer extends CyanComponent {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) throws IOException {
+		if (args.length == 3 && args[0].equals("install")) {
+			Installer window = new Installer();
+			String type = args[1];
+			if (type.equals("client")) {
+				ProjectConfig project = new ProjectConfig();
+				window.installClient(new File(args[2]), MinecraftInstallationToolkit.getMinecraftDirectory(), project);
+			}
+			return;
+		}
 		if (args.length >= 1) {
 			String file = args[0];
 			final File install;
@@ -165,6 +174,47 @@ public class Installer extends CyanComponent {
 				}
 			}
 		});
+	}
+
+	private void installClient(File outputDir, File cache, ProjectConfig project) throws IOException {
+		logger.info("Preparing...");
+		initializeComponents();
+		MinecraftToolkit.resetServerConnectionState();
+		MinecraftToolkit.resolveVersions();
+		logger.info("");
+
+		logger.info("Resolving manifest...");
+		URL manifest = null;
+		for (String repoID : project.repositories.keySet()) {
+			String base = project.repositories.get(repoID);
+			try {
+				String mfUri = project.manifest.replace("%wv", project.wrapper)
+						.replace("%gv", project.game).replace("%pv", project.version);
+				URL u = new URL(base + "/" + mfUri);
+				u.openStream().close();
+				manifest = u;
+				break;
+			} catch (IOException e) {
+			}
+		}
+
+		logger.info("Creating fake version info for modloader...");
+		MinecraftVersionInfo info = new MinecraftVersionInfo(
+				project.inheritsFrom + "-cyan-" + project.version, MinecraftVersionType.UNKNOWN,
+				manifest, OffsetDateTime.now());
+
+		logger.info("Downloading modloader version manifest...");
+		MinecraftInstallationToolkit.saveVersionManifest(info);
+
+		logger.info("Finding vanilla version...");
+		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(project.game);
+
+		logger.info("Downloading vanilla version manifest...");
+		MinecraftInstallationToolkit.saveVersionManifest(version);
+
+		int progressMax = 0;
+		ProgressWindow.WindowAppender.addMax(progressMax);
+		runInstaller(outputDir, version, info, cache, project, GameSide.CLIENT);
 	}
 
 	/**
@@ -264,44 +314,7 @@ public class Installer extends CyanComponent {
 				ProgressWindow.WindowAppender.showWindow();
 				new Thread(() -> {
 					try {
-						logger.info("Preparing...");
-						initializeComponents();
-						MinecraftToolkit.resetServerConnectionState();
-						MinecraftToolkit.resolveVersions();
-						logger.info("");
-
-						logger.info("Resolving manifest...");
-						URL manifest = null;
-						for (String repoID : project.repositories.keySet()) {
-							String base = project.repositories.get(repoID);
-							try {
-								String mfUri = project.manifest.replace("%wv", project.wrapper)
-										.replace("%gv", project.game).replace("%pv", project.version);
-								URL u = new URL(base + "/" + mfUri);
-								u.openStream().close();
-								manifest = u;
-								break;
-							} catch (IOException e) {
-							}
-						}
-
-						logger.info("Creating fake version info for modloader...");
-						MinecraftVersionInfo info = new MinecraftVersionInfo(
-								project.inheritsFrom + "-cyan-" + project.version, MinecraftVersionType.UNKNOWN,
-								manifest, OffsetDateTime.now());
-
-						logger.info("Downloading modloader version manifest...");
-						MinecraftInstallationToolkit.saveVersionManifest(info);
-
-						logger.info("Finding vanilla version...");
-						MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(project.game);
-
-						logger.info("Downloading vanilla version manifest...");
-						MinecraftInstallationToolkit.saveVersionManifest(version);
-
-						int progressMax = 0;
-						ProgressWindow.WindowAppender.addMax(progressMax);
-						runInstaller(outputDir, version, info, cache, project, GameSide.CLIENT);
+						installClient(outputDir, cache, project);
 					} catch (Exception e) {
 						logger.fatal(e);
 						SwingUtilities.invokeLater(() -> {
