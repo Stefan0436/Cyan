@@ -3,13 +3,13 @@ version> '1.0.0.A13'
 
 game> '1.16.5'
 
-mappings> '1.16.5'
-platform> VANILLA
+mappings> ''
+platform> MCP
 
 inheritsFrom> '1.16.5'
 
-loaderVersion> ''
-loader> ''
+loaderVersion> '36.1.16'
+loader> 'forge'
 
 wrapper> '1.0.0.A9'
 manifest> '/org/asf/cyan/CyanWrapper/%wv-cyan-%pv/CyanWrapper-%wv-cyan-%pv-%gv-cyan-%pv.json'

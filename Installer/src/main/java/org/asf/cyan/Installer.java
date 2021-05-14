@@ -2,9 +2,16 @@ package org.asf.cyan;
 
 import java.awt.EventQueue;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.time.OffsetDateTime;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -294,7 +301,7 @@ public class Installer extends CyanComponent {
 
 						int progressMax = 0;
 						ProgressWindow.WindowAppender.addMax(progressMax);
-						runInstaller(version, info, cache, project, GameSide.CLIENT);
+						runInstaller(outputDir, version, info, cache, project, GameSide.CLIENT);
 					} catch (Exception e) {
 						logger.fatal(e);
 						SwingUtilities.invokeLater(() -> {
@@ -340,7 +347,7 @@ public class Installer extends CyanComponent {
 		panel_2.add(chckbxNewCheckBox_1);
 	}
 
-	private void runInstaller(MinecraftVersionInfo version, MinecraftVersionInfo modloader, File cache,
+	private void runInstaller(File dest, MinecraftVersionInfo version, MinecraftVersionInfo modloader, File cache,
 			ProjectConfig project, GameSide side) throws IOException {
 		String suffix = "";
 		if (!project.loader.isEmpty())
@@ -367,9 +374,11 @@ public class Installer extends CyanComponent {
 		progressMax++; // Store rift libraries in memory for remapping // TODO
 		progressMax++; // Download all regular libraries (and rift, but pre-mapped) // TODO
 		progressMax++; // Build rift libraries // TODO
-		progressMax++; // Generate new version manifest // TODO
+		progressMax++; // Generate new version manifest (use urls in old manifest, exclude rift urls
+						// and CyanCore) // TODO
 		progressMax++; // Build libraries folder structure, exclude fat server libs (if called for the
 						// server) // TODO
+		progressMax++; // Modify cyan.release.ccfg in the CyanCore to match the environment // TODO
 
 		progressMax++; // Install libraries // TODO
 		if (side == GameSide.CLIENT) {
@@ -405,7 +414,40 @@ public class Installer extends CyanComponent {
 		}
 
 		logger.info("Resolving platform mappings...");
+		if (!project.platform.equals("VANILLA") && (project.mappings == null || project.mappings.isEmpty())) {
+			logger.info("Determining mappings version by modloader...");
+			if (project.loader.equalsIgnoreCase("forge")) {
+				File forgeInstaller = downloadForgeInstaller(project, cache);
+				logger.info("Searching for MCP version in forge jar...");
+				String mcpVersion = "";
+				ZipFile installerZip = new ZipFile(forgeInstaller);
+				ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + project.game + "-"
+						+ project.loaderVersion + "/forge-" + project.game + "-" + project.loaderVersion + ".jar");
+				ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
+				while (forgeStrm.available() != 0) {
+					ZipEntry entry = forgeStrm.getNextEntry();
+					if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+						Manifest manifest = new Manifest(forgeStrm);
+						Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+						mcpVersion = MCP.getValue("Implementation-Version");
+						break;
+					}
+				}
+				forgeStrm.close();
+				installerZip.close();
+				project.mappings = mcpVersion;
+				logger.info("");
+			} else if (project.loader.equalsIgnoreCase("fabric-loader")) {
+				logger.warn(
+						"Auto-resolving YARN mappings is NOT recommended, please re-build the installer with a specified mappings version.");
+				project.mappings = MinecraftMappingsToolkit.getLatestYarnVersion(version);
+				logger.info("");
+			} else {
+				throw new IOException("Cannot resolve mappings version if not using forge or fabric");
+			}
+		}
 		if (!project.platform.equals("VANILLA")) {
+			logger.info("Preparing " + project.platform + " " + project.mappings + " mappings...");
 			if (!MinecraftMappingsToolkit.areMappingsAvailable(suffix, project.platform.toLowerCase(), version, side)) {
 				if (project.platform.equals("MCP")) {
 					MinecraftMappingsToolkit.downloadMCPMappings(version, side, project.mappings);
@@ -475,7 +517,36 @@ public class Installer extends CyanComponent {
 		ProgressWindow.WindowAppender.increaseProgress();
 		logger.info("");
 
-		logger.info("Resolving modloader libraries..."); 
+		logger.info("Resolving modloader libraries...");
 		// TODO
+	}
+
+	private File downloadForgeInstaller(ProjectConfig project, File cache) throws IOException {
+		String forgeurltemplate = "https://files.minecraftforge.net/maven/net/minecraftforge/forge/%game%-%forgeversion%/forge-%game%-%forgeversion%-installer.jar";
+
+		URL url = new URL(forgeurltemplate.replaceAll("\\%game\\%", project.game).replaceAll("\\%forgeversion\\%",
+				project.loaderVersion));
+		File forgeInstaller = new File(cache,
+				"forge-" + project.game + "-" + project.loaderVersion + "-installer.jar");
+
+		File downloadmarker = new File(cache, forgeInstaller.getName() + ".lck");
+		if (!forgeInstaller.exists() || downloadmarker.exists()) {
+			if (!forgeInstaller.getParentFile().exists())
+				forgeInstaller.getParentFile().mkdirs();
+			if (downloadmarker.exists())
+				downloadmarker.delete();
+			downloadmarker.createNewFile();
+
+			logger.info("Downloading forge installer to cache...");
+			if (forgeInstaller.exists())
+				forgeInstaller.delete();
+			FileOutputStream strm = new FileOutputStream(forgeInstaller);
+			InputStream inp = url.openStream();
+			inp.transferTo(strm);
+			strm.close();
+			inp.close();
+			downloadmarker.delete();
+		}
+		return forgeInstaller;
 	}
 }

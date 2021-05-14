@@ -158,7 +158,6 @@ if (modloader.startsWith("forge-")) {
     def forgeversion = modloader.substring("forge-".length())
     File forgeInstaller = new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-installer.jar")
     File downloadmarker = new File(cyanCache, forgeInstaller.getName()+".lck")
-    File serverFolder = new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server")
     URL url = new URL(forgeurltemplate.replaceAll("\\%game\\%", minecraft).replaceAll("\\%forgeversion\\%", forgeversion))
     if (!forgeInstaller.exists() || downloadmarker.exists()) {
         if (!forgeInstaller.getParentFile().exists())
