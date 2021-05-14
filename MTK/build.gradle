@@ -41,10 +41,10 @@ repositories {
 
 dependencies {
 	implementation project(':CyanComponents')
-	implementation project(':CyanCore')
 	implementation project(':CyanUtil')
 	implementation project(':CCFG')
 	implementation project(':Fluid')
+	implementation project(':CyanCore')
 	
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'

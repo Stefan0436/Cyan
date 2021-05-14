@@ -3,6 +3,8 @@ package org.asf.cyan;
 import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.time.OffsetDateTime;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -13,6 +15,8 @@ import javax.swing.JOptionPane;
 
 import java.awt.Dimension;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+
 import java.awt.Font;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
@@ -22,16 +26,21 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.asf.cyan.api.common.CyanComponent;
+import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.core.CyanCore;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.implementation.CyanBytecodeExporter;
 import org.asf.cyan.fluid.implementation.CyanReportBuilder;
 import org.asf.cyan.fluid.implementation.CyanTransformer;
 import org.asf.cyan.fluid.implementation.CyanTransformerMetadata;
+import org.asf.cyan.fluid.remapping.Mapping;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftMappingsToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftModdingToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit;
+import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
+import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType;
 
 import java.awt.Color;
 import javax.swing.JButton;
@@ -159,17 +168,25 @@ public class Installer extends CyanComponent {
 	}
 
 	public static File APPDATA;
+	private JCheckBox chckbxNewCheckBox;
+	private JCheckBox chckbxNewCheckBox_1;
 
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() throws IOException {
+		logger = LogManager.getLogger("Installer");
 		impl = this;
 		assignImplementation();
+
 		String dir = System.getenv("APPDATA");
 		if (dir == null)
 			dir = System.getProperty("user.home");
 		APPDATA = new File(dir);
+
+		CyanCore.initLoader();
+		File cache = new File(APPDATA, ".kickstart");
+		MinecraftInstallationToolkit.setMinecraftDirectory(cache);
 
 		frmCyanInstaller = new JFrame();
 		frmCyanInstaller.setTitle("Installer");
@@ -237,12 +254,55 @@ public class Installer extends CyanComponent {
 					return;
 				}
 				frmCyanInstaller.setVisible(false);
-				logger = LogManager.getLogger("Installer");
 				ProgressWindow.WindowAppender.showWindow();
 				new Thread(() -> {
-					logger.info("Preparing...");
-					initializeComponents();
-					logger.info("Resolving dependencies...");
+					try {
+						logger.info("Preparing...");
+						initializeComponents();
+						MinecraftToolkit.resetServerConnectionState();
+						MinecraftToolkit.resolveVersions();
+						logger.info("");
+
+						logger.info("Resolving manifest...");
+						URL manifest = null;
+						for (String repoID : project.repositories.keySet()) {
+							String base = project.repositories.get(repoID);
+							try {
+								String mfUri = project.manifest.replace("%wv", project.wrapper)
+										.replace("%gv", project.game).replace("%pv", project.version);
+								URL u = new URL(base + "/" + mfUri);
+								u.openStream().close();
+								manifest = u;
+								break;
+							} catch (IOException e) {
+							}
+						}
+
+						logger.info("Creating fake version info for modloader...");
+						MinecraftVersionInfo info = new MinecraftVersionInfo(
+								project.inheritsFrom + "-cyan-" + project.version, MinecraftVersionType.UNKNOWN,
+								manifest, OffsetDateTime.now());
+
+						logger.info("Downloading modloader version manifest...");
+						MinecraftInstallationToolkit.saveVersionManifest(info);
+
+						logger.info("Finding vanilla version...");
+						MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(project.game);
+
+						logger.info("Downloading vanilla version manifest...");
+						MinecraftInstallationToolkit.saveVersionManifest(version);
+
+						int progressMax = 0;
+						ProgressWindow.WindowAppender.addMax(progressMax);
+						runInstaller(version, info, cache, project, GameSide.CLIENT);
+					} catch (Exception e) {
+						logger.fatal(e);
+						SwingUtilities.invokeLater(() -> {
+							ProgressWindow.WindowAppender.fatalError();
+							ProgressWindow.WindowAppender.closeWindow();
+							frmCyanInstaller.dispose();
+						});
+					}
 				}, "Installer").start();
 			}
 		});
@@ -270,13 +330,152 @@ public class Installer extends CyanComponent {
 		btnNewButton_2.setBounds(445, 130, 117, 25);
 		panel_2.add(btnNewButton_2);
 
-		JCheckBox chckbxNewCheckBox = new JCheckBox("Create launcher profile");
+		chckbxNewCheckBox = new JCheckBox("Create launcher profile");
 		chckbxNewCheckBox.setSelected(true);
 		chckbxNewCheckBox.setBounds(77, 156, 189, 23);
 		panel_2.add(chckbxNewCheckBox);
 
-		JCheckBox chckbxNewCheckBox_1 = new JCheckBox("Associate Mod Installer Extensions");
+		chckbxNewCheckBox_1 = new JCheckBox("Associate Mod Installer Extensions");
 		chckbxNewCheckBox_1.setBounds(270, 156, 292, 23);
 		panel_2.add(chckbxNewCheckBox_1);
+	}
+
+	private void runInstaller(MinecraftVersionInfo version, MinecraftVersionInfo modloader, File cache,
+			ProjectConfig project, GameSide side) throws IOException {
+		String suffix = "";
+		if (!project.loader.isEmpty())
+			suffix += "-" + project.loader;
+		if (!project.loaderVersion.isEmpty())
+			suffix += "-" + project.loaderVersion;
+		logger.info("Determining progress...");
+
+		int progressMax = 0;
+
+		progressMax++; // Download vanilla mappings (if needed)
+		progressMax++;
+
+		progressMax++; // Download platform mappings (if needed)
+		progressMax++;
+
+		progressMax++; // Download vanilla jar (if needed)
+
+		progressMax++; // Deobfuscate vanilla jar (if needed)
+		progressMax++;
+		progressMax++;
+
+		progressMax++; // Resolve modloader libraries // TODO
+		progressMax++; // Store rift libraries in memory for remapping // TODO
+		progressMax++; // Download all regular libraries (and rift, but pre-mapped) // TODO
+		progressMax++; // Build rift libraries // TODO
+		progressMax++; // Generate new version manifest // TODO
+		progressMax++; // Build libraries folder structure, exclude fat server libs (if called for the
+						// server) // TODO
+
+		progressMax++; // Install libraries // TODO
+		if (side == GameSide.CLIENT) {
+			progressMax++; // Build version folder structure (client only) // TODO
+			progressMax++; // Build version log folder (client only) // TODO
+
+			if (chckbxNewCheckBox.isSelected())
+				progressMax++; // Generate launcher profile or replace existing // TODO
+		}
+		if (side == GameSide.SERVER) {
+			progressMax++; // Download platform dependencies and jar if needed // TODO
+			progressMax++; // Build server fat jar // TODO
+			progressMax++; // Build server jar manifest // TODO
+			progressMax++; // Create server jar // TODO
+		}
+		if (chckbxNewCheckBox_1.isSelected())
+			progressMax++; // Install the Mod Installer // TODO
+
+		ProgressWindow.WindowAppender.addMax(progressMax);
+
+		logger.info("Resolving mappings...");
+		Mapping<?> vanillaMappings = null;
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, side)) {
+			vanillaMappings = MinecraftMappingsToolkit.downloadVanillaMappings(version, side);
+			ProgressWindow.WindowAppender.increaseProgress();
+
+			MinecraftMappingsToolkit.saveMappingsToDisk(version, side);
+			ProgressWindow.WindowAppender.increaseProgress();
+			logger.info("");
+		} else {
+			ProgressWindow.WindowAppender.increaseProgress();
+			ProgressWindow.WindowAppender.increaseProgress();
+		}
+
+		logger.info("Resolving platform mappings...");
+		if (!project.platform.equals("VANILLA")) {
+			if (!MinecraftMappingsToolkit.areMappingsAvailable(suffix, project.platform.toLowerCase(), version, side)) {
+				if (project.platform.equals("MCP")) {
+					MinecraftMappingsToolkit.downloadMCPMappings(version, side, project.mappings);
+				} else if (project.platform.equals("YARN")) {
+					MinecraftMappingsToolkit.downloadYarnMappings(version, side, project.mappings);
+				} else if (project.platform.equals("SPIGOT")) {
+					MinecraftMappingsToolkit.downloadSpigotMappings(vanillaMappings, version, project.mappings);
+				}
+				ProgressWindow.WindowAppender.increaseProgress();
+
+				MinecraftMappingsToolkit.saveMappingsToDisk(suffix, project.platform.toLowerCase(), version, side);
+				ProgressWindow.WindowAppender.increaseProgress();
+				logger.info("");
+			} else {
+				ProgressWindow.WindowAppender.increaseProgress();
+				ProgressWindow.WindowAppender.increaseProgress();
+			}
+		} else {
+			ProgressWindow.WindowAppender.increaseProgress();
+			ProgressWindow.WindowAppender.increaseProgress();
+		}
+
+		logger.info("Preparing vanilla jar...");
+		if (MinecraftInstallationToolkit.getVersionJar(version, side) == null) {
+			logger.info("Downloading vanilla jar...");
+			MinecraftInstallationToolkit.downloadVersionJar(version, side);
+			ProgressWindow.WindowAppender.increaseProgress();
+			logger.info("");
+		} else {
+			ProgressWindow.WindowAppender.increaseProgress();
+		}
+
+		logger.info("");
+		logger.info("");
+		logger.info("");
+		logger.info("Quick note:");
+		logger.info("If you are installing for this version of the game (not the modloader) for the first time,");
+		logger.info("the KickStart Installer will need to deobfuscate the game.");
+		logger.info("");
+		logger.info("This process will take A LOT OF TIME, if you have installed " + project.name);
+		logger.info("for the " + project.game + " " + side.toString().toLowerCase() + " "
+				+ " before, the existing jar will be used.");
+		logger.info("");
+		logger.info("");
+		logger.info("");
+		logger.info("Preparing to deobfuscate... (if needed)");
+		MinecraftMappingsToolkit.loadMappings(version, side);
+		logger.info("");
+		ProgressWindow.WindowAppender.increaseProgress();
+		if (side == GameSide.CLIENT && !MinecraftInstallationToolkit.checkVersion(version)) {
+			logger.info("Downloading game libraries...");
+			MinecraftInstallationToolkit.downloadVersionAndLibraries(version);
+			ProgressWindow.WindowAppender.increaseProgress();
+			logger.info("");
+		} else {
+			ProgressWindow.WindowAppender.increaseProgress();
+		}
+		logger.info("Running deobfuscation engine...");
+		File lock = new File(cache, "deobf-" + version + "-" + side + "-" + project.platform + "-" + project.name + "-"
+				+ project.version + ".lck");
+		if (lock.exists())
+			MinecraftModdingToolkit.deobfuscateJar(version, side).delete();
+		if (!lock.exists())
+			lock.createNewFile();
+		MinecraftModdingToolkit.deobfuscateJar(version, side);
+		lock.delete();
+		ProgressWindow.WindowAppender.increaseProgress();
+		logger.info("");
+
+		logger.info("Resolving modloader libraries..."); 
+		// TODO
 	}
 }

@@ -6,21 +6,32 @@ game> '1.16.5'
 mappings> '1.16.5'
 platform> VANILLA
 
+inheritsFrom> '1.16.5'
+
 loaderVersion> ''
 loader> ''
 
+wrapper> '1.0.0.A9'
+manifest> '/org/asf/cyan/CyanWrapper/%wv-cyan-%pv/CyanWrapper-%wv-cyan-%pv-%gv-cyan-%pv.json'
+
 repositories> {
-	local1> 'file:///home/stefan/Cyan/build/Wrapper/maven/'
-	local2> 'file:///home/stefan/Cyan/build/TrustExplorer/maven/'
-	local3> 'file:///home/stefan/Cyan/build/ClassTrust/maven/'
-	local4> 'file:///home/stefan/Cyan/build/MTK/maven/'
-	local5> 'file:///home/stefan/Cyan/build/Fluid/maven/'
-	local6> 'file:///home/stefan/Cyan/build/CyanUtil/maven/'
-	local7> 'file:///home/stefan/Cyan/build/CyanComponents/maven/'
-	local8> 'file:///home/stefan/Cyan/build/CyanCore/maven/'
-	local9> 'file:///home/stefan/Cyan/build/CyanLoader/maven/'
-	local10> 'file:///home/stefan/Cyan/build/Cornflower/maven/'
-	local11> 'file:///home/stefan/Cyan/build/CCFG/maven/'
-	#asf> 'https://aerialworks.ddns.net/maven'
-	central> 'https://repo1.maven.org/maven2'
+    local1> 'file:///home/stefan/Cyan/build/Wrapper/maven/'
+    local2> 'file:///home/stefan/Cyan/build/TrustExplorer/maven/'
+    local3> 'file:///home/stefan/Cyan/build/ClassTrust/maven/'
+    local4> 'file:///home/stefan/Cyan/build/MTK/maven/'
+    local5> 'file:///home/stefan/Cyan/build/Fluid/maven/'
+    local6> 'file:///home/stefan/Cyan/build/CyanUtil/maven/'
+    local7> 'file:///home/stefan/Cyan/build/CyanComponents/maven/'
+    local8> 'file:///home/stefan/Cyan/build/CyanCore/maven/'
+    local9> 'file:///home/stefan/Cyan/build/CyanLoader/maven/'
+    local10> 'file:///home/stefan/Cyan/build/Cornflower/maven/'
+    local11> 'file:///home/stefan/Cyan/build/CCFG/maven/'
+    asf> 'https://aerialworks.ddns.net/maven'
+    central> 'https://repo1.maven.org/maven2'
 }
+
+keyArtifact> 'org.asf.cyan:CyanLoader'
+fatServer> [ 'org.asf.cyan:CyanWrapper' 'org.asf.cyan:Fluid' 'org.asf.cyan:CyanCore' ]
+clientMain> 'org.asf.cyan.CyanClientWrapper'
+serverMain> 'org.asf.cyan.CyanServerWrapper'
+serverOutput> 'minecraft-%i-cyan-%lv-server.jar'

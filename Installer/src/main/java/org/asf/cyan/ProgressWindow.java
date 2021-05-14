@@ -21,6 +21,7 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import javax.swing.JTextArea;
 import javax.swing.JProgressBar;
+import java.awt.Font;
 
 public class ProgressWindow extends JFrame {
 
@@ -138,13 +139,14 @@ public class ProgressWindow extends JFrame {
 	public ProgressWindow() {
 		setTitle("Installation Progress...");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 653, 446);
+		setBounds(100, 100, 874, 446);
 		setResizable(false);
 		setLocationRelativeTo(null);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
+		textArea.setFont(new Font("Liberation Mono", Font.PLAIN, 12));
 
 		textArea.setEditable(false);
 		JScrollPane pane = new JScrollPane(textArea);
@@ -157,6 +159,7 @@ public class ProgressWindow extends JFrame {
 
 		JPanel panel = new JPanel();
 		contentPane.add(panel, BorderLayout.NORTH);
+		lastMessage.setFont(new Font("Liberation Mono", Font.PLAIN, 14));
 
 		panel.add(lastMessage);
 		progressBar.setMaximum(0);
