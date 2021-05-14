@@ -4,7 +4,7 @@ buildscript {
 		maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
 	}
 	dependencies {
-		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A32'
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A35'
 	}
 }
 
@@ -22,6 +22,10 @@ version=cyanversion
 apply from: '../asf.mvn.publish.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'org.asf.cyan.cornflower'
+
+createEclipseLaunches {
+	disable = true
+}
 
 buildDir = '../build/CyanLoader'
 
