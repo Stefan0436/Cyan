@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+  <mime-type type="application/x-kickstart-cmf">
+    <comment>Cyan Modfile</comment>
+    <icon name="application-x-archive"/>
+    <glob pattern="*.cmf"/>
+    <glob pattern="*.ccmf"/>
+  </mime-type>
+</mime-info>

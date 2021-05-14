@@ -55,6 +55,7 @@ import org.asf.cyan.fluid.api.ClassLoadHook;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.information.metadata.TransformerMetadata;
 import org.asf.cyan.fluid.remapping.Mapping;
+import org.asf.cyan.internal.KickStartConfig;
 import org.asf.cyan.internal.modkitimpl.util.EventUtilImpl;
 import org.asf.cyan.loader.configs.SecurityConfiguration;
 import org.asf.cyan.loader.eventbus.CyanEventBridge;
@@ -253,6 +254,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		progressMax++; // finish load
 
 		// Mod loading
+		progressMax++;
 		progressMax++;
 		progressMax++;
 		progressMax++;
@@ -699,9 +701,9 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 			info("Loading mod " + modManifest.modGroup + ":" + modManifest.modId + "... (" + modManifest.displayName
 					+ ")");
-			
+
 			mod.setup(getModloader(), getGameSide(), modManifest);
-			
+
 			modManifest.loaded = true;
 			modManifests.put(mod.getManifest().id(), modManifest);
 			modManifests.put(mod.getClass().getTypeName(), modManifest);
@@ -782,7 +784,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 			info("Loading coremod " + modManifest.modGroup + ":" + modManifest.modId + "... (" + modManifest.displayName
 					+ ")");
-			
+
 			mod.setup(getModloader(), getGameSide(), modManifest);
 			modManifest.loaded = true;
 			coreModManifests.put(mod.getManifest().id(), modManifest);
@@ -2198,8 +2200,13 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		}
 	}
 
+	private boolean gameLoad = false;
+
 	@AttachEvent(value = "mods.prestartgame", synchronize = true)
 	private void beforeGame(ClassLoader loader) throws ClassNotFoundException {
+		if (gameLoad)
+			return;
+		gameLoad = true;
 		info("Finishing bootstrap... Loading postponed components...");
 		loadPostponedComponents(loader);
 		StartupWindow.WindowAppender.increaseProgress();
@@ -2297,8 +2304,13 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		return mods.toArray(t -> new IMod[t]);
 	}
 
+	private boolean loadedMods = false;
+
 	@AttachEvent(value = "mods.load.regular.start", synchronize = true)
-	private void loadMods(ClassLoader loader) {
+	private void loadMods(ClassLoader loader) throws IOException {
+		if (loadedMods)
+			return;
+		loadedMods = true;
 		try { // FIXME: REMOVE
 			if (Modloader.getModloaderGameSide() == GameSide.CLIENT) {
 				CyanModfileManifest testManifest = new CyanModfileManifest();
@@ -2321,6 +2333,33 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 		info("Loading regular mods...");
 		loadModClasses(loader);
+		StartupWindow.WindowAppender.increaseProgress();
+
+		info("Looking for the KickStart CYAN Installer...");
+		String dir = System.getenv("APPDATA");
+		if (dir == null)
+			dir = System.getProperty("user.home");
+		File installs = new File(dir, ".kickstart-installer.ccfg");
+		if (installs.exists()) {
+			info("Adding current installation to manifest...");
+			KickStartConfig conf = new KickStartConfig();
+			conf.readAll(new String(Files.readAllBytes(installs.toPath())));
+			ArrayList<KickStartConfig.KickStartInstallation> configs = new ArrayList<KickStartConfig.KickStartInstallation>();
+			for (KickStartConfig.KickStartInstallation install : conf.installations) {
+				if (new File(install.cyanData).exists() && !install.cyanData.equals(cyanDir.getCanonicalPath()))
+					configs.add(install);
+			}
+			KickStartConfig.KickStartInstallation install = new KickStartConfig.KickStartInstallation();
+			install.side = Modloader.getModloaderGameSide();
+			install.cyanData = cyanDir.getCanonicalPath();
+			install.gameVersion = Modloader.getModloaderGameVersion();
+			install.platformVersion = platformVersion;
+			install.platform = Modloader.getModloaderLaunchPlatform().toString();
+			install.loaderVersion = getVersion().toString();
+			configs.add(install);
+			conf.installations = configs.toArray(t -> new KickStartConfig.KickStartInstallation[t]);
+			Files.write(installs.toPath(), conf.toString().getBytes());
+		}
 		StartupWindow.WindowAppender.increaseProgress();
 
 		dispatchEvent("mods.all.loaded");
@@ -2456,7 +2495,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			return cyanModloader.modManifests.get(name).source;
 		else if (cyanModloader.coreModManifests.containsKey(name))
 			return cyanModloader.coreModManifests.get(name).source;
-		
+
 		return null;
 	}
 

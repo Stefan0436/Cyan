@@ -1,32 +1,144 @@
 package org.asf.cyan;
 
 import java.awt.EventQueue;
+import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
-import java.awt.Color;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Dimension;
 import javax.swing.SwingConstants;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-import javax.swing.JTextArea;
+import java.awt.Font;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.LineBorder;
 
-public class Installer {
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.asf.cyan.api.common.CyanComponent;
+import org.asf.cyan.fluid.Fluid;
+import org.asf.cyan.fluid.implementation.CyanBytecodeExporter;
+import org.asf.cyan.fluid.implementation.CyanReportBuilder;
+import org.asf.cyan.fluid.implementation.CyanTransformer;
+import org.asf.cyan.fluid.implementation.CyanTransformerMetadata;
+import org.asf.cyan.minecraft.toolkits.mtk.MinecraftMappingsToolkit;
+import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
+import org.asf.cyan.minecraft.toolkits.mtk.MinecraftModdingToolkit;
+import org.asf.cyan.minecraft.toolkits.mtk.MinecraftToolkit;
+import org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit;
+
+import java.awt.Color;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JTextField;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.JCheckBox;
+
+public class Installer extends CyanComponent {
+
+	private static Installer impl;
+
+	private static boolean init = false;
+
+	public static boolean isInitialized() {
+		return init;
+	}
+
+	protected static void initComponent() {
+		init = true;
+		try {
+			debug("Closing FLUID API...");
+			Fluid.closeFluidLoader();
+		} catch (IllegalStateException e) {
+			error("Failed to close FLUID!", e);
+		}
+	}
+
+	@Override
+	protected void setupComponents() {
+		if (init)
+			throw new IllegalStateException("Cyan components have already been initialized.");
+		if (LOG == null)
+			initLogger();
+	}
+
+	@Override
+	protected void preInitAllComponents() {
+		trace("OPEN FluidAPI Mappings Loader, caller: " + CallTrace.traceCallName());
+		try {
+			debug("Opening FLUID API...");
+			Fluid.openFluidLoader();
+		} catch (IllegalStateException e) {
+			error("Failed to open FLUID!", e);
+		}
+
+		trace("INITIALIZE all components, caller: " + CallTrace.traceCallName());
+		trace("CREATE ConfigurationBuilder instance, caller: " + CallTrace.traceCallName());
+	}
+
+	@Override
+	protected void finalizeComponents() {
+	}
+
+	@Override
+	protected Class<?>[] getComponentClasses() {
+		return new Class<?>[] { CyanTransformer.class, CyanTransformerMetadata.class, CyanBytecodeExporter.class,
+				Installer.class, CyanReportBuilder.class, MinecraftToolkit.class, MinecraftVersionToolkit.class,
+				MinecraftModdingToolkit.class, MinecraftInstallationToolkit.class, MinecraftMappingsToolkit.class };
+	}
+
+	public static void setDebugLog() {
+		if (LOG == null)
+			initLogger();
+		trace(CallTrace.traceCallName() + " set the log level to DEBUG.");
+		Configurator.setLevel("CYAN", Level.DEBUG);
+	}
+
+	public static void initializeComponents() throws IllegalStateException {
+		impl.initializeComponentClasses();
+	}
 
 	private JFrame frmCyanInstaller;
+	private JTextField textField;
+	private Logger logger;
 
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
+		if (args.length >= 1) {
+			String file = args[0];
+			final File install;
+			if (args.length >= 2)
+				install = new File(args[1]);
+			else
+				install = SelectionWindow.showWindow(new File(file));
+			if (install == null)
+				return;
+
+			if (install.exists() && new File(file).exists())
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							ModInstaller window = new ModInstaller();
+							window.mod = new File(file);
+							window.cyanDataDir = install;
+							window.load();
+							window.setVisible(true);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			return;
+		}
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -46,10 +158,19 @@ public class Installer {
 		initialize();
 	}
 
+	public static File APPDATA;
+
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() throws IOException {
+		impl = this;
+		assignImplementation();
+		String dir = System.getenv("APPDATA");
+		if (dir == null)
+			dir = System.getProperty("user.home");
+		APPDATA = new File(dir);
+
 		frmCyanInstaller = new JFrame();
 		frmCyanInstaller.setTitle("Installer");
 		frmCyanInstaller.setResizable(false);
@@ -61,13 +182,101 @@ public class Installer {
 		frmCyanInstaller.setTitle(project.name + " Installer");
 
 		JPanel panel = new JPanel();
+		panel.setBorder(new LineBorder(new Color(0, 0, 0)));
 		frmCyanInstaller.getContentPane().add(panel, BorderLayout.SOUTH);
 		panel.setLayout(new BorderLayout(0, 0));
 
 		JLabel lblNewLabel = new JLabel(" " + project.name + " " + project.version);
+		panel.add(lblNewLabel, BorderLayout.WEST);
+		lblNewLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
 		lblNewLabel.setVerticalAlignment(SwingConstants.TOP);
 		lblNewLabel.setPreferredSize(new Dimension(200, 18));
-		panel.add(lblNewLabel, BorderLayout.WEST);
-	}
 
+		JLabel lblKickstart = new JLabel("KickStart Installer 1.0 ");
+		panel.add(lblKickstart, BorderLayout.EAST);
+		lblKickstart.setFont(new Font("SansSerif", Font.BOLD, 12));
+		lblKickstart.setHorizontalAlignment(SwingConstants.TRAILING);
+		lblKickstart.setVerticalAlignment(SwingConstants.TOP);
+		lblKickstart.setPreferredSize(new Dimension(200, 18));
+
+		JPanel panel_1 = new JPanel();
+		panel_1.setBorder(new LineBorder(new Color(0, 0, 0)));
+		frmCyanInstaller.getContentPane().add(panel_1, BorderLayout.NORTH);
+		panel_1.setLayout(new BorderLayout(0, 0));
+
+		JLabel lblNewLabel_1 = new JLabel(project.name + " Modloader " + project.version);
+		lblNewLabel_1.setAlignmentY(6.0f);
+		panel_1.add(lblNewLabel_1, BorderLayout.NORTH);
+		lblNewLabel_1.setPreferredSize(new Dimension(70, 55));
+		lblNewLabel_1.setFont(new Font("SansSerif", Font.ITALIC, 35));
+		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
+
+		JLabel lblNewLabel_2 = new JLabel("For " + "Minecraft " + project.game
+				+ (project.loader.isEmpty() ? ""
+						: ", " + project.loader.substring(0, 1).toUpperCase() + project.loader.substring(1)
+								+ (project.loaderVersion.isEmpty() ? "" : " " + project.loaderVersion)));
+		lblNewLabel_2.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel_2.setFont(new Font("SansSerif", Font.PLAIN, 16));
+		panel_1.add(lblNewLabel_2, BorderLayout.SOUTH);
+
+		JPanel panel_2 = new JPanel();
+		panel_2.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		frmCyanInstaller.getContentPane().add(panel_2, BorderLayout.CENTER);
+		panel_2.setLayout(null);
+
+		textField = new JTextField();
+		textField.setBounds(77, 130, 365, 26);
+		textField.setText(new File(dir, ".minecraft").getAbsolutePath());
+		JButton btnNewButton = new JButton("Install Client");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				File outputDir = new File(textField.getText());
+				if (!outputDir.exists()) {
+					JOptionPane.showMessageDialog(frmCyanInstaller, "Game directory does not exist.", "Cannot install",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				frmCyanInstaller.setVisible(false);
+				logger = LogManager.getLogger("Installer");
+				ProgressWindow.WindowAppender.showWindow();
+				new Thread(() -> {
+					logger.info("Preparing...");
+					initializeComponents();
+					logger.info("Resolving dependencies...");
+				}, "Installer").start();
+			}
+		});
+		btnNewButton.setBounds(42, 93, 275, 25);
+		panel_2.add(btnNewButton);
+
+		JButton btnNewButton_1 = new JButton("Create Server");
+		btnNewButton_1.setBounds(322, 93, 275, 25);
+		panel_2.add(btnNewButton_1);
+
+		panel_2.add(textField);
+		textField.setColumns(10);
+
+		JButton btnNewButton_2 = new JButton("Select...");
+		btnNewButton_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				JFileChooser f = new JFileChooser(textField.getText());
+				f.setDialogTitle("Select installation directory...");
+				f.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				f.showSaveDialog(frmCyanInstaller);
+				if (f.getSelectedFile() != null)
+					textField.setText(f.getSelectedFile().getAbsolutePath());
+			}
+		});
+		btnNewButton_2.setBounds(445, 130, 117, 25);
+		panel_2.add(btnNewButton_2);
+
+		JCheckBox chckbxNewCheckBox = new JCheckBox("Create launcher profile");
+		chckbxNewCheckBox.setSelected(true);
+		chckbxNewCheckBox.setBounds(77, 156, 189, 23);
+		panel_2.add(chckbxNewCheckBox);
+
+		JCheckBox chckbxNewCheckBox_1 = new JCheckBox("Associate Mod Installer Extensions");
+		chckbxNewCheckBox_1.setBounds(270, 156, 292, 23);
+		panel_2.add(chckbxNewCheckBox_1);
+	}
 }

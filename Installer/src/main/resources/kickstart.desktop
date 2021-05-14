@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=KickStart Mod Installer
+MimeType=application/x-kickstart-cmf;
+Exec=%java% -classpath "%appdata%/.minecraft/kickstart.jar" org.asf.cyan.Installer %f
+NoDisplay=true
+StartupNotify=true
