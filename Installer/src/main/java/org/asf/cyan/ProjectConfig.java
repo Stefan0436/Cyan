@@ -39,7 +39,6 @@ public class ProjectConfig extends Configuration<ProjectConfig> {
 	public String loaderVersion;
 	public String loader;
 
-	public String keyArtifact;
 	public String serverMain;
 	public String clientMain;
 	public String serverOutput;

@@ -121,7 +121,7 @@ public class StartupWindow extends JFrame {
 		String last = lastMessage.getText();
 		if (!message.isEmpty())
 			lastMessage.setText(message);
-		if (lastMessage.getWidth() >= (getWidth() + 800)) {
+		if (lastMessage.getWidth() >= (getWidth() - 50)) {
 			lastMessage.setText(last);
 		}
 

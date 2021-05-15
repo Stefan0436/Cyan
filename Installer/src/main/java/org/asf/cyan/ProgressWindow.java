@@ -89,6 +89,30 @@ public class ProgressWindow extends JFrame {
 			frame.progressBar.setMaximum(frame.progressBar.getMaximum() + max);
 		}
 
+		public static void setMax(int max) {
+			if (frame == null)
+				return;
+			frame.progressBar.setMaximum(max);
+		}
+
+		public static void setValue(int val) {
+			if (frame == null)
+				return;
+			frame.progressBar.setValue(val);
+		}
+
+		public static int getMax() {
+			if (frame == null)
+				return 0;
+			return frame.progressBar.getMaximum();
+		}
+
+		public static int getValue() {
+			if (frame == null)
+				return 0;
+			return frame.progressBar.getValue();
+		}
+
 		public static void increaseProgress() {
 			if (!shown)
 				return;
@@ -119,12 +143,8 @@ public class ProgressWindow extends JFrame {
 
 	public void log(String message) {
 		lastMessageText = message;
-		String last = lastMessage.getText();
 		if (!message.isEmpty())
 			lastMessage.setText(message);
-		if (lastMessage.getWidth() >= (getWidth() + 800)) {
-			lastMessage.setText(last);
-		}
 
 		textArea.setText(textArea.getText() + message + "\n");
 		textArea.setCaretPosition(textArea.getDocument().getLength());

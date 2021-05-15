@@ -2,11 +2,17 @@ package org.asf.cyan;
 
 import java.awt.EventQueue;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
@@ -34,8 +40,10 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.core.CyanCore;
 import org.asf.cyan.fluid.Fluid;
+import org.asf.cyan.fluid.bytecode.sources.FileClassSourceProvider;
 import org.asf.cyan.fluid.implementation.CyanBytecodeExporter;
 import org.asf.cyan.fluid.implementation.CyanReportBuilder;
 import org.asf.cyan.fluid.implementation.CyanTransformer;
@@ -46,6 +54,8 @@ import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftModdingToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit;
+import org.asf.cyan.minecraft.toolkits.mtk.rift.SimpleRift;
+import org.asf.cyan.minecraft.toolkits.mtk.rift.SimpleRiftBuilder;
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType;
 
@@ -135,7 +145,7 @@ public class Installer extends CyanComponent {
 			if (type.equals("client")) {
 				ProjectConfig project = new ProjectConfig();
 				window.installClient(new File(args[2]), MinecraftInstallationToolkit.getMinecraftDirectory(), project);
-			}
+			} // TODO
 			return;
 		}
 		if (args.length >= 1) {
@@ -188,8 +198,8 @@ public class Installer extends CyanComponent {
 		for (String repoID : project.repositories.keySet()) {
 			String base = project.repositories.get(repoID);
 			try {
-				String mfUri = project.manifest.replace("%wv", project.wrapper)
-						.replace("%gv", project.game).replace("%pv", project.version);
+				String mfUri = project.manifest.replace("%wv", project.wrapper).replace("%gv", project.game)
+						.replace("%pv", project.version);
 				URL u = new URL(base + "/" + mfUri);
 				u.openStream().close();
 				manifest = u;
@@ -197,11 +207,12 @@ public class Installer extends CyanComponent {
 			} catch (IOException e) {
 			}
 		}
+		if (manifest == null)
+			throw new IOException("Missing modloader manifest");
 
 		logger.info("Creating fake version info for modloader...");
-		MinecraftVersionInfo info = new MinecraftVersionInfo(
-				project.inheritsFrom + "-cyan-" + project.version, MinecraftVersionType.UNKNOWN,
-				manifest, OffsetDateTime.now());
+		MinecraftVersionInfo info = new MinecraftVersionInfo(project.inheritsFrom + "-cyan-" + project.version,
+				MinecraftVersionType.UNKNOWN, manifest, OffsetDateTime.now());
 
 		logger.info("Downloading modloader version manifest...");
 		MinecraftInstallationToolkit.saveVersionManifest(info);
@@ -383,18 +394,17 @@ public class Installer extends CyanComponent {
 		progressMax++;
 		progressMax++;
 
-		progressMax++; // Resolve modloader libraries // TODO
-		progressMax++; // Store rift libraries in memory for remapping // TODO
-		progressMax++; // Download all regular libraries (and rift, but pre-mapped) // TODO
-		progressMax++; // Build rift libraries // TODO
-		progressMax++; // Generate new version manifest (use urls in old manifest, exclude rift urls
-						// and CyanCore) // TODO
+		progressMax++; // Resolve modloader libraries
+		progressMax++;
+
 		progressMax++; // Build libraries folder structure, exclude fat server libs (if called for the
 						// server) // TODO
-		progressMax++; // Modify cyan.release.ccfg in the CyanCore to match the environment // TODO
+		progressMax++; // Apply artifactModifications // TODO
 
 		progressMax++; // Install libraries // TODO
 		if (side == GameSide.CLIENT) {
+			progressMax++; // Generate new version manifest (use urls in old manifest, exclude modified
+			// jars) // TODO
 			progressMax++; // Build version folder structure (client only) // TODO
 			progressMax++; // Build version log folder (client only) // TODO
 
@@ -409,6 +419,7 @@ public class Installer extends CyanComponent {
 		}
 		if (chckbxNewCheckBox_1.isSelected())
 			progressMax++; // Install the Mod Installer // TODO
+		progressMax++; // Create .kickstart-installer.ccfg // TODO
 
 		ProgressWindow.WindowAppender.addMax(progressMax);
 
@@ -531,7 +542,209 @@ public class Installer extends CyanComponent {
 		logger.info("");
 
 		logger.info("Resolving modloader libraries...");
+		ArrayList<String> libs = new ArrayList<String>();
+		ArrayList<String> rift = new ArrayList<String>();
+
+		if (MinecraftInstallationToolkit.getVersionManifest(modloader).has("inheritsFrom"))
+			MinecraftInstallationToolkit.getVersionManifest(modloader).remove("inheritsFrom");
+		for (String lib : MinecraftInstallationToolkit.getLibrariesMavenFormat(modloader)) {
+			String[] info = lib.split(":");
+			String group = info[0];
+			String name = info[1];
+			String ver = info[2];
+
+			if (name.contains("-RIFT") | ver.contains("-RIFT")) {
+				if (name.contains("-RIFT")) {
+					name = name.substring(0, name.indexOf("-RIFT"));
+				}
+				if (ver.contains("-RIFT")) {
+					ver = ver.substring(0, ver.indexOf("-RIFT"));
+				}
+				if (!rift.contains(group + ":" + name + ":" + ver))
+					rift.add(group + ":" + name + ":" + ver);
+			} else {
+				if (!libs.contains(lib))
+					libs.add(lib);
+			}
+		}
+
+		ProgressWindow.WindowAppender.increaseProgress();
+		int oldProgressMax = ProgressWindow.WindowAppender.getMax();
+		int oldProgress = ProgressWindow.WindowAppender.getValue();
+		ProgressWindow.WindowAppender.setMax(libs.size() + (rift.size() * 4));
+		ProgressWindow.WindowAppender.setValue(0);
+		logger.info("Downloading regular libraries...");
+
+		HashMap<String, String> libraryPaths = new HashMap<String, String>();
+		HashMap<String, File> libraryFiles = new HashMap<String, File>();
+		for (String lib : libs) {
+			libraryFiles.put(lib, download(lib, cache, project, libraryPaths));
+		}
+		for (String lib : rift) {
+			logger.info("");
+			File riftJar = download(lib, cache, project, libraryPaths);
+
+			String path = libraryPaths.get(lib);
+			logger.info("Remapping RIFT jar...");
+
+			path = path.substring(0, path.lastIndexOf(".jar"));
+			File riftOut = new File(cache,
+					"caches/rift/" + path + "-rift-" + project.platform.toLowerCase() + "-" + project.game + "-"
+							+ project.mappings.replaceAll("[^A-Za-z0-9-.]", "-")
+							+ (project.loader.isEmpty() ? "" : "-" + project.loader)
+							+ (project.loaderVersion.isEmpty() ? "" : "-" + project.loaderVersion) + ".jar");
+			if (!riftOut.getParentFile().exists())
+				riftOut.getParentFile().mkdirs();
+			if (riftOut.exists())
+				riftOut.delete();
+
+			if (project.platform.equals("DEOBFUSCATED")) {
+				ProgressWindow.WindowAppender.increaseProgress();
+				ProgressWindow.WindowAppender.increaseProgress();
+				ProgressWindow.WindowAppender.increaseProgress();
+				Files.copy(riftJar.toPath(), riftOut.toPath());
+				continue;
+			}
+
+			SimpleRiftBuilder builder = new SimpleRiftBuilder();
+			builder.appendRiftProvider(SimpleRiftBuilder.getProviderForPlatform(
+					LaunchPlatform.valueOf(project.platform), version, side, project.loaderVersion, project.mappings));
+			builder.appendSources(new FileClassSourceProvider(riftJar));
+			builder.setIdentifier(project.platform.toLowerCase() + "-" + project.game + "-"
+					+ project.mappings.replaceAll("[^A-Za-z0-9-.]", "-")
+					+ (project.loader.isEmpty() ? "" : "-" + project.loader)
+					+ (project.loaderVersion.isEmpty() ? "" : "-" + project.loaderVersion));
+
+			FileInputStream fin = new FileInputStream(riftJar);
+			ZipInputStream strm = new ZipInputStream(fin);
+			ZipEntry ent = strm.getNextEntry();
+			while (ent != null) {
+				if (ent.getName().endsWith(".class")) {
+					String pth = ent.getName().replace("\\", "/");
+					if (pth.startsWith("/"))
+						pth = pth.substring(1);
+					pth = pth.substring(0, pth.lastIndexOf(".class")).replace("/", ".");
+					builder.addClass(pth);
+				}
+				ent = strm.getNextEntry();
+			}
+			strm.close();
+			fin.close();
+
+			ProgressWindow.WindowAppender.increaseProgress(); // prepare
+
+			SimpleRift riftUtil;
+			try {
+				riftUtil = builder.build();
+			} catch (ClassNotFoundException | IOException e) {
+				builder.close();
+				throw new IOException(e);
+			}
+			fin = new FileInputStream(riftJar);
+			strm = new ZipInputStream(fin);
+			ent = strm.getNextEntry();
+			while (ent != null) {
+				if (!ent.getName().endsWith(".class")) {
+					riftUtil.addFile(ent.getName(), strm);
+				}
+				ent = strm.getNextEntry();
+			}
+			strm.close();
+			fin.close();
+			try {
+				riftUtil.apply();
+			} catch (ClassNotFoundException | IOException e) {
+				builder.close();
+				riftUtil.close();
+				throw new IOException(e);
+			}
+			ProgressWindow.WindowAppender.increaseProgress(); // rift
+
+			riftUtil.export(riftOut);
+			builder.close();
+			riftUtil.close();
+			ProgressWindow.WindowAppender.increaseProgress(); // save
+			libraryFiles.put(lib, riftOut);
+			libraryPaths.remove(lib);
+		}
+
+		logger.info("");
+		ProgressWindow.WindowAppender.setMax(oldProgressMax);
+		ProgressWindow.WindowAppender.setValue(oldProgress);
+		ProgressWindow.WindowAppender.increaseProgress();
+
+		logger.info("Generating new version manifest...");
+		
 		// TODO
+	}
+
+	private File download(String lib, File cache, ProjectConfig project, HashMap<String, String> libraryPaths)
+			throws IOException {
+		String[] info = lib.split(":");
+		String group = info[0];
+		String name = info[1];
+		String ver = info[2];
+		String libPath = group.replace(".", "/") + "/" + name + "/" + ver + "/" + name + "-" + ver + ".jar";
+		for (String repoID : project.repositories.keySet()) {
+			String base = project.repositories.get(repoID);
+			URL loc = null;
+			try {
+				URL u = new URL(base + "/" + libPath);
+				u.openStream().close();
+				libraryPaths.put(lib, base + "/" + libPath);
+				loc = u;
+			} catch (IOException e) {
+			}
+			if (loc != null) {
+				String expectedHash = null;
+				boolean uptodate = false;
+				try {
+					URL u2 = new URL(base + "/" + libPath + ".sha1");
+					InputStream strm = u2.openStream();
+					expectedHash = new String(strm.readAllBytes());
+					strm.close();
+				} catch (IOException e) {
+				}
+				File outputFile = new File(cache, "caches/libraries/" + libPath);
+				if (!outputFile.getParentFile().exists())
+					outputFile.getParentFile().mkdirs();
+
+				if (expectedHash != null && outputFile.exists()) {
+					if (expectedHash.equals(sha1HEX(Files.readAllBytes(outputFile.toPath()))))
+						uptodate = true;
+				}
+
+				if (!uptodate) {
+					logger.info("Downloading " + outputFile.getName() + "...");
+					InputStream strm = loc.openStream();
+					FileOutputStream outp = new FileOutputStream(outputFile);
+					strm.transferTo(outp);
+					strm.close();
+					outp.close();
+				} else {
+					logger.info("Skipping file " + outputFile.getName() + " as it is up to date.");
+				}
+
+				ProgressWindow.WindowAppender.increaseProgress();
+				return outputFile;
+			}
+		}
+		throw new IOException("Could not download library " + lib + " from any repository.");
+	}
+
+	private static String sha1HEX(byte[] array) {
+		MessageDigest digest;
+		try {
+			digest = MessageDigest.getInstance("SHA-1");
+		} catch (NoSuchAlgorithmException e) {
+			return null;
+		}
+		byte[] sha = digest.digest(array);
+		StringBuilder result = new StringBuilder();
+		for (byte aByte : sha) {
+			result.append(String.format("%02x", aByte));
+		}
+		return result.toString();
 	}
 
 	private File downloadForgeInstaller(ProjectConfig project, File cache) throws IOException {
@@ -539,8 +752,7 @@ public class Installer extends CyanComponent {
 
 		URL url = new URL(forgeurltemplate.replaceAll("\\%game\\%", project.game).replaceAll("\\%forgeversion\\%",
 				project.loaderVersion));
-		File forgeInstaller = new File(cache,
-				"forge-" + project.game + "-" + project.loaderVersion + "-installer.jar");
+		File forgeInstaller = new File(cache, "forge-" + project.game + "-" + project.loaderVersion + "-installer.jar");
 
 		File downloadmarker = new File(cache, forgeInstaller.getName() + ".lck");
 		if (!forgeInstaller.exists() || downloadmarker.exists()) {

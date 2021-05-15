@@ -9,7 +9,7 @@ apply from: '../asf.mvn.publish.gradle'
 buildDir = '../build/Installer'
 
 group="org.asf.cyan"
-version="1.0.0.A4"
+version="1.0.0.A1"
 def authorname = "AerialWorks Software Foundation"
 apply plugin: "com.github.johnrengelman.shadow"
 

@@ -1,0 +1,54 @@
+name> 'Cyan'
+version> '1.0.0.A13'
+
+game> '1.16.5'
+
+mappings> ''
+platform> MCP
+
+inheritsFrom> '1.16.5'
+
+loaderVersion> '36.1.16'
+loader> 'forge'
+
+wrapper> '1.0.0.A9'
+manifest> '/org/asf/cyan/CyanWrapper/%wv-cyan-%pv/CyanWrapper-%wv-cyan-%pv-%gv-cyan-%pv.json'
+
+repositories> {
+    local1> 'file:///run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/build/Wrapper/maven/'
+    local2> 'file:///run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/build/TrustExplorer/maven/'
+    local3> 'file:///run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/build/ClassTrust/maven/'
+    local4> 'file:///run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/build/MTK/maven/'
+    local5> 'file:///run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/build/Fluid/maven/'
+    local6> 'file:///run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/build/CyanUtil/maven/'
+    local7> 'file:///run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/build/CyanComponents/maven/'
+    local8> 'file:///run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/build/CyanCore/maven/'
+    local9> 'file:///run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/build/CyanLoader/maven/'
+    local10> 'file:///run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/build/Cornflower/maven/'
+    local11> 'file:///run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/build/CCFG/maven/'
+    local12> 'file:///run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/build/ModKit-1.0/maven/'
+    local13> 'file:///run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/build/CyanAPI-1.16.5-1.0/maven/'
+    asf> 'https://aerialworks.ddns.net/maven'
+    central> 'https://repo1.maven.org/maven2'
+}
+
+fatServer> [ 'org.asf.cyan:CyanWrapper' 'org.asf.cyan:Fluid' 'org.asf.cyan:CyanCore' ]
+
+clientMain> 'org.asf.cyan.CyanClientWrapper'
+serverMain> 'org.asf.cyan.CyanServerWrapper'
+
+serverOutput> 'minecraft-%i-cyan-%pv-server.jar'
+
+artifactModifications> {
+    org.asf.cyan:CyanCore> {
+        cyan.release.ccfg> '
+        minecraftCyanVersion> \'%i-cyan-%pv\'
+        minecraftVersion> \'%gv\'
+        devStartDate> \'%time\'
+        releaseDate> \'%time\'
+        version> \'%pv\'
+        modloaderVersion> \'%ml\'
+        checkSource> \'https://aerialworks.ddns.net/maven\'
+        '
+    }
+}
