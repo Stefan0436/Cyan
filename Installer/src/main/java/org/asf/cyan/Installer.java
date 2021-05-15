@@ -18,6 +18,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
@@ -1163,6 +1164,9 @@ public class Installer extends CyanComponent {
 				vanillaJar.delete();
 			Files.copy(MinecraftInstallationToolkit.getVersionJar(version, side).toPath(), vanillaJar.toPath());
 
+			String loaderArti = "";
+			String intermediaryArti = "";
+
 			logger.info("Processing platform dependencies...");
 			if (project.loader.equals("paper")) {
 
@@ -1419,6 +1423,7 @@ public class Installer extends CyanComponent {
 				}
 
 				String[] information = metadata.get("loader").getAsJsonObject().get("maven").getAsString().split(":");
+				loaderArti = metadata.get("loader").getAsJsonObject().get("maven").getAsString();
 				String url = "https://maven.fabricmc.net/";
 
 				String group = "";
@@ -1446,13 +1451,11 @@ public class Installer extends CyanComponent {
 
 					lib += "/" + name + "/" + versionstr + "/" + name + "-" + versionstr + ".jar";
 					remoteLibs.put(idFull, new URL(url));
-					filePaths.put(idFull, new File(dest, lib));
-					outputPaths.put(group + ":" + name + ":" + versionstr, new File(dest, lib));
-
 					cp += lib;
 				}
 
 				information = metadata.get("intermediary").getAsJsonObject().get("maven").getAsString().split(":");
+				intermediaryArti = metadata.get("intermediary").getAsJsonObject().get("maven").getAsString();
 				url = "https://maven.fabricmc.net/";
 
 				group = "";
@@ -1480,12 +1483,9 @@ public class Installer extends CyanComponent {
 
 					lib += "/" + name + "/" + versionstr + "/" + name + "-" + versionstr + ".jar";
 					remoteLibs.put(idFull2, new URL(url));
-					outputPaths.put(group + ":" + name + ":" + versionstr, new File(dest, lib));
-
 					cp += lib;
 				}
 				logger.info("Done.");
-
 			}
 			logger.info("Processed " + filePaths.size() + " libraries.");
 			logger.info("");
@@ -1536,6 +1536,54 @@ public class Installer extends CyanComponent {
 					out.delete();
 				Files.copy(in.toPath(), out.toPath());
 			}
+
+			if (project.loader.equals("fabric-loader")) {
+				logger.info("Merging fabric loader and intermediary jars...");
+				File loader = outputPaths.get(loaderArti);
+				File intermediary = outputPaths.get(intermediaryArti);
+				File output = new File(loader.getCanonicalPath() + ".intermediary.tmp");
+				if (output.exists())
+					output.delete();
+
+				ZipOutputStream strm = new ZipOutputStream(new FileOutputStream(output));
+				ZipFile loaderJar = new ZipFile(loader);
+				ZipFile intermediaryJar = new ZipFile(intermediary);
+
+				Enumeration<? extends ZipEntry> entries = loaderJar.entries();
+				ArrayList<String> knownentries = new ArrayList<String>();
+				while (entries.hasMoreElements()) {
+					ZipEntry entry = entries.nextElement();
+					String path = entry.getName().replaceAll("\\\\", "/");
+					if (knownentries.contains(path))
+						continue;
+					knownentries.add(path);
+
+					strm.putNextEntry(entry);
+					loaderJar.getInputStream(entry).transferTo(strm);
+					strm.closeEntry();
+				}
+
+				entries = intermediaryJar.entries();
+				while (entries.hasMoreElements()) {
+					ZipEntry entry = entries.nextElement();
+					String path = entry.getName().replaceAll("\\\\", "/");
+					if (knownentries.contains(path))
+						continue;
+					knownentries.add(path);
+
+					strm.putNextEntry(entry);
+					intermediaryJar.getInputStream(entry).transferTo(strm);
+					strm.closeEntry();
+				}
+				strm.close();
+				intermediaryJar.close();
+				loaderJar.close();
+
+				logger.info("Installing output jar...");
+				loader.delete();
+				Files.move(output.toPath(), loader.toPath());
+			}
+
 			logger.info("Done.");
 			ProgressWindow.WindowAppender.increaseProgress();
 			logger.info("");
@@ -1548,7 +1596,8 @@ public class Installer extends CyanComponent {
 						v.replace("%time", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(new Date()))
 								.replace("%gv", project.game).replace("%i", project.inheritsFrom)
 								.replace("%pv", project.version).replace("%ln", project.loader)
-								.replace("%lv", project.loaderVersion)).replace("%pl", project.platform);
+								.replace("%lv", project.loaderVersion))
+						.replace("%pl", project.platform);
 			});
 
 			main.put(Attributes.Name.MANIFEST_VERSION, "1.0");

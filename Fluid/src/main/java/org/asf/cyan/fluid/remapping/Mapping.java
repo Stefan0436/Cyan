@@ -20,7 +20,7 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected static <T extends Configuration<T>> T instanciateFromSerialzer(Class<T> input)
+	protected static <T extends Configuration<T>> T instantiateFromSerialzer(Class<T> input)
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 		if (!Mapping.class.isAssignableFrom(input))
