@@ -1285,6 +1285,11 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		}
 	}
 
+	@Override
+	protected ClassLoader getComponentClassLoader() {
+		return CyanCore.getCoreClassLoader();
+	}
+
 	private void importMod(File cmf) throws IOException {
 		String ccfg = null;
 		try {

@@ -325,8 +325,8 @@ public abstract class Modloader extends CyanComponent {
 			}
 			Class<IModloaderComponent> componentCls;
 			try {
-				componentCls = (Class<IModloaderComponent>) modloader.getClass().getClassLoader().loadClass(typeName);
-			} catch (ClassNotFoundException e) {
+				componentCls = (Class<IModloaderComponent>) modloader.getComponentClassLoader().loadClass(typeName);
+			} catch (ClassNotFoundException e2) {
 				continue;
 			}
 			if (!componentCls.isAnnotationPresent(TargetModloader.class)
@@ -378,6 +378,10 @@ public abstract class Modloader extends CyanComponent {
 		}
 
 		modloader.postRegister();
+	}
+
+	protected ClassLoader getComponentClassLoader() {
+		return getClass().getClassLoader();
 	}
 
 	protected static void appendImplementation(Modloader modloader) {
