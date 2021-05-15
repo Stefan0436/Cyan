@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -158,6 +159,8 @@ public abstract class Configuration<T extends Configuration<T>> {
 			public void run(String key, String txt) {
 				try {
 					Field f = Configuration.this.getClass().getField(key);
+					if (Modifier.isStatic(f.getModifiers()))
+						throw new NoSuchFieldException(f.getName());
 					f.setAccessible(true);
 					setProp(f, txt, true);
 				} catch (NoSuchFieldException | SecurityException e) {

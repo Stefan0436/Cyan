@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.Scanner;
 
 import org.asf.cyan.api.config.Configuration;
+import org.asf.cyan.api.config.annotations.Exclude;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.api.modloader.information.modloader.LoadPhase;
@@ -24,6 +25,8 @@ import org.asf.cyan.api.versioning.VersionStatus;
 public class CyanInfo extends Configuration<CyanInfo> {
 	static CyanInfo info = null;
 	static CyanInfoProvider provider;
+	
+	@Exclude
 	public static final String infoPath = "/org/asf/cyan/CyanVersionHolder/generic/CyanVersionHolder-generic-versions.ccfg";
 
 	@SuppressWarnings("unchecked")
@@ -178,12 +181,19 @@ public class CyanInfo extends Configuration<CyanInfo> {
 	public String releaseDate;
 	public String version;
 	public String modloaderVersion = "";
+	
+	@Exclude
 	public String displayAppend;
 	public String checkSource;
 	public String changelog;
 	public LaunchPlatform platform;
+
+	@Exclude
 	public String modloaderName = "";
+
+	@Exclude
 	public String updateChangelog;
+	
 	private VersionStatus versionStatus = VersionStatus.UNKNOWN;
 
 	/**

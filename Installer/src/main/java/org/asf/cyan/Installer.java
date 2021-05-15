@@ -392,7 +392,7 @@ public class Installer extends CyanComponent {
 		panel_1.setBorder(new LineBorder(new Color(0, 0, 0)));
 
 		if (!cli)
-		frmCyanInstaller.getContentPane().add(panel_1, BorderLayout.NORTH);
+			frmCyanInstaller.getContentPane().add(panel_1, BorderLayout.NORTH);
 		panel_1.setLayout(new BorderLayout(0, 0));
 
 		JLabel lblNewLabel_1 = new JLabel(project.name + " Modloader " + project.version);
@@ -412,7 +412,7 @@ public class Installer extends CyanComponent {
 
 		JPanel panel_2 = new JPanel();
 		panel_2.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		
+
 		if (!cli)
 			frmCyanInstaller.getContentPane().add(panel_2, BorderLayout.CENTER);
 		panel_2.setLayout(null);
@@ -1004,7 +1004,7 @@ public class Installer extends CyanComponent {
 
 			logger.info("Installing new version manifest...");
 			File destManifest = new File(dest,
-					manifest.get("id").getAsString() + "/" + manifest.get("id").getAsString() + ".json");
+					"versions/" + manifest.get("id").getAsString() + "/" + manifest.get("id").getAsString() + ".json");
 			if (destManifest.exists())
 				destManifest.delete();
 			if (!destManifest.getParentFile().exists())
@@ -1634,14 +1634,16 @@ public class Installer extends CyanComponent {
 				File reg = new File(APPDATA, ".minecraft/kickstart.reg");
 				if (!reg.exists()) {
 					InputStream strm = getClass().getClassLoader().getResourceAsStream("kickstart.reg");
-					String cont = new String(strm.readAllBytes()).replace("%java%",
-							ProcessHandle.current().info().command().get());
+					String cont = new String(strm.readAllBytes())
+							.replace("%appdata%", APPDATA.toString().replace("\\", "\\\\"))
+							.replace("%java%", ProcessHandle.current().info().command().get().replace("\\", "\\\\"));
 					Files.writeString(reg.toPath(), cont);
 					strm.close();
 				}
 				InputStream strm = getClass().getClassLoader().getResourceAsStream("winsudo");
 				File winsudo = File.createTempFile("winsudo", ".bat");
-				Files.write(reg.toPath(), strm.readAllBytes());
+				Files.write(winsudo.toPath(),
+						new String(strm.readAllBytes()).replace("\r", "").replace("\n", "\r\n").getBytes());
 				strm.close();
 				logger.info("Installing as admin...");
 				ProcessBuilder builder = new ProcessBuilder();

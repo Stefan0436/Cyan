@@ -1,13 +1,13 @@
 Windows Registry Editor Version 5.00
 
-[HKEY_CLASSES_ROOT\.ccmf]
+[HKEY_CURRENT_USER\Software\Classes\.ccmf]
 @="ccmf"  
 
-[HKEY_CLASSES_ROOT\ccmf\shell\open\command]
-@="%java% -cp \"%appdata%\\.minecraft\\kickstart.jar\" org.asf.cyan.Installer \"%1\""
+[HKEY_CURRENT_USER\Software\Classes\ccmf\shell\open\command]
+@="\"%java%\" -jar \"%appdata%\\.minecraft\\kickstart.jar\" \"%1\""
 
-[HKEY_CLASSES_ROOT\.cmf]
+[HKEY_CURRENT_USER\Software\Classes\.cmf]
 @="cmf"  
 
-[HKEY_CLASSES_ROOT\cmf\shell\open\command]
-@="%java% -cp \"%appdata%\\.minecraft\\kickstart.jar\" org.asf.cyan.Installer \"%1\""
+[HKEY_CURRENT_USER\Software\Classes\cmf\shell\open\command]
+@="\"%java%\" -jar \"%appdata%\\.minecraft\\kickstart.jar\" \"%1\""
