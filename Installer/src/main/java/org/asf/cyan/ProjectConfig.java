@@ -24,9 +24,13 @@ public class ProjectConfig extends Configuration<ProjectConfig> {
 		return null;
 	}
 
+	public String profileName;
+	public String profileIcon;
+	
 	public String wrapper;
 	public String manifest;
 
+	public String id;
 	public String inheritsFrom;
 	public String game;
 
@@ -42,8 +46,13 @@ public class ProjectConfig extends Configuration<ProjectConfig> {
 	public String serverMain;
 	public String clientMain;
 	public String serverOutput;
+	public String[] bootLibs = new String[0];
+	public String[] loadFirst = new String[0];
 	public String[] fatServer = new String[0];
 
+	public HashMap<String, String> jarManifest = new HashMap<String, String>();
+
 	public HashMap<String, String> repositories = new HashMap<String, String>();
+	public HashMap<String, HashMap<String, String>> artifactModifications = new HashMap<String, HashMap<String, String>>();
 
 }

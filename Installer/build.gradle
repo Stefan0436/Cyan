@@ -8,13 +8,13 @@ apply plugin: 'eclipse'
 apply from: '../asf.mvn.publish.gradle'
 buildDir = '../build/Installer'
 
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
 group="org.asf.cyan"
 version="1.0.0.A1"
 def authorname = "AerialWorks Software Foundation"
 apply plugin: "com.github.johnrengelman.shadow"
-
-sourceCompatibility = '1.9'
-targetCompatibility = '1.9'
 
 configurePublish {
 	pretty_name "Installer"
@@ -59,6 +59,8 @@ dependencies {
 	implementation group: 'org.asf.cyan', name: 'CyanCore', version: '1.0.0.A11-1.16.5-1.0.0.A13'
 	implementation group: 'org.asf.cyan', name: 'CyanComponents', version: '1.0.0.A8'
 	implementation group: 'org.asf.aos.util.service', name: 'aosutil-service-SLIB-UTIL', version: '0.0.0.13'
+	
+	implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
 }
 
 jar {
@@ -72,7 +74,7 @@ jar {
 			"Implementation-Version": project.version,
 			"Implementation-Vendor" :"${authorname}",
 			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-			"Main-Class": "org.asf.cyan.Installer"
+			"Main-Class": "org.asf.cyan.InstallerMain"
 		])
 	}
 	exclude "**/extra/**"

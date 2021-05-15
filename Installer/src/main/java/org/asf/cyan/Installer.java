@@ -6,18 +6,26 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -38,9 +46,13 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
+import org.asf.cyan.api.classloading.DynamicClassLoader;
 import org.asf.cyan.api.common.CyanComponent;
+import org.asf.cyan.api.config.Configuration;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
+import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.core.CyanCore;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.bytecode.sources.FileClassSourceProvider;
@@ -51,6 +63,7 @@ import org.asf.cyan.fluid.implementation.CyanTransformerMetadata;
 import org.asf.cyan.fluid.remapping.Mapping;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftMappingsToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
+import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit.OsInfo;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftModdingToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit;
@@ -58,6 +71,12 @@ import org.asf.cyan.minecraft.toolkits.mtk.rift.SimpleRift;
 import org.asf.cyan.minecraft.toolkits.mtk.rift.SimpleRiftBuilder;
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.awt.Color;
 import javax.swing.JButton;
@@ -144,8 +163,13 @@ public class Installer extends CyanComponent {
 			String type = args[1];
 			if (type.equals("client")) {
 				ProjectConfig project = new ProjectConfig();
-				window.installClient(new File(args[2]), MinecraftInstallationToolkit.getMinecraftDirectory(), project);
-			} // TODO
+				window.installClient(new File(args[2]), MinecraftInstallationToolkit.getMinecraftDirectory(), project,
+						false);
+			} else if (type.equals("server")) {
+				ProjectConfig project = new ProjectConfig();
+				window.installServer(new File(args[2]), MinecraftInstallationToolkit.getMinecraftDirectory(), project,
+						false);
+			}
 			return;
 		}
 		if (args.length >= 1) {
@@ -174,6 +198,30 @@ public class Installer extends CyanComponent {
 				});
 			return;
 		}
+		ProjectConfig project = new ProjectConfig();
+		if (project.loader.equalsIgnoreCase("forge")) {
+			Version java = Version.fromString(System.getProperty("java.version"));
+			if (Version.fromString("12").isLessOrEqualTo(java)) {
+				JOptionPane.showMessageDialog(null,
+						"Forge is not compatible with versions above Java 11, please use Java 11 to install.",
+						"Cannot install", JOptionPane.ERROR_MESSAGE);
+				System.exit(-1);
+			}
+		} else if (project.loader.equalsIgnoreCase("paper")) {
+			Version java = Version.fromString(System.getProperty("java.version"));
+			if (Version.fromString("14").isGreaterThan(java)) {
+				JOptionPane.showMessageDialog(null,
+						"Paper is not compatible with versions below Java 14, please use Java 14+ to install.",
+						"Cannot install", JOptionPane.ERROR_MESSAGE);
+				System.exit(-1);
+			} else if (Version.fromString(project.game).isGreaterOrEqualTo(Version.fromString("1.17"))
+					&& Version.fromString("16").isGreaterThan(java)) {
+				JOptionPane.showMessageDialog(null,
+						"Paper 1.17+ is not compatible with versions below Java 16, please use Java 16+ to install.",
+						"Cannot install", JOptionPane.ERROR_MESSAGE);
+				System.exit(-1);
+			}
+		}
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -186,7 +234,8 @@ public class Installer extends CyanComponent {
 		});
 	}
 
-	private void installClient(File outputDir, File cache, ProjectConfig project) throws IOException {
+	private void installClient(File outputDir, File cache, ProjectConfig project, boolean interactive)
+			throws IOException {
 		logger.info("Preparing...");
 		initializeComponents();
 		MinecraftToolkit.resetServerConnectionState();
@@ -225,7 +274,7 @@ public class Installer extends CyanComponent {
 
 		int progressMax = 0;
 		ProgressWindow.WindowAppender.addMax(progressMax);
-		runInstaller(outputDir, version, info, cache, project, GameSide.CLIENT);
+		runInstaller(outputDir, version, info, cache, project, GameSide.CLIENT, interactive);
 	}
 
 	/**
@@ -233,6 +282,49 @@ public class Installer extends CyanComponent {
 	 */
 	public Installer() throws IOException {
 		initialize();
+	}
+
+	private void installServer(File outputDir, File cache, ProjectConfig project, boolean interactive)
+			throws IOException {
+		logger.info("Preparing...");
+		initializeComponents();
+		MinecraftToolkit.resetServerConnectionState();
+		MinecraftToolkit.resolveVersions();
+		logger.info("");
+
+		logger.info("Resolving manifest...");
+		URL manifest = null;
+		for (String repoID : project.repositories.keySet()) {
+			String base = project.repositories.get(repoID);
+			try {
+				String mfUri = project.manifest.replace("%wv", project.wrapper).replace("%gv", project.game)
+						.replace("%pv", project.version);
+				URL u = new URL(base + "/" + mfUri);
+				u.openStream().close();
+				manifest = u;
+				break;
+			} catch (IOException e) {
+			}
+		}
+		if (manifest == null)
+			throw new IOException("Missing modloader manifest");
+
+		logger.info("Creating fake version info for modloader...");
+		MinecraftVersionInfo info = new MinecraftVersionInfo(project.inheritsFrom + "-cyan-" + project.version,
+				MinecraftVersionType.UNKNOWN, manifest, OffsetDateTime.now());
+
+		logger.info("Downloading modloader version manifest...");
+		MinecraftInstallationToolkit.saveVersionManifest(info);
+
+		logger.info("Finding vanilla version...");
+		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(project.game);
+
+		logger.info("Downloading vanilla version manifest...");
+		MinecraftInstallationToolkit.saveVersionManifest(version);
+
+		int progressMax = 0;
+		ProgressWindow.WindowAppender.addMax(progressMax);
+		runInstaller(outputDir, version, info, cache, project, GameSide.SERVER, interactive);
 	}
 
 	public static File APPDATA;
@@ -325,7 +417,10 @@ public class Installer extends CyanComponent {
 				ProgressWindow.WindowAppender.showWindow();
 				new Thread(() -> {
 					try {
-						installClient(outputDir, cache, project);
+						installClient(outputDir, cache, project, true);
+						frmCyanInstaller.dispose();
+						ProgressWindow.WindowAppender.closeWindow();
+						return;
 					} catch (Exception e) {
 						logger.fatal(e);
 						SwingUtilities.invokeLater(() -> {
@@ -341,6 +436,38 @@ public class Installer extends CyanComponent {
 		panel_2.add(btnNewButton);
 
 		JButton btnNewButton_1 = new JButton("Create Server");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				File outputDir = new File(textField.getText());
+				if (outputDir.equals(new File(APPDATA, ".minecraft"))) {
+					if (JOptionPane.showConfirmDialog(frmCyanInstaller,
+							"You have selected the default client (.minecraft) installation directory for installing the server,\nThis is a bit unusual, are you sure you want to continue?",
+							"", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.OK_OPTION) {
+						return;
+					}
+				}
+				if (!outputDir.exists()) {
+					outputDir.mkdirs();
+				}
+				frmCyanInstaller.setVisible(false);
+				ProgressWindow.WindowAppender.showWindow();
+				new Thread(() -> {
+					try {
+						installServer(outputDir, cache, project, true);
+						frmCyanInstaller.dispose();
+						ProgressWindow.WindowAppender.closeWindow();
+						return;
+					} catch (Exception e) {
+						logger.fatal(e);
+						SwingUtilities.invokeLater(() -> {
+							ProgressWindow.WindowAppender.fatalError();
+							ProgressWindow.WindowAppender.closeWindow();
+							frmCyanInstaller.dispose();
+						});
+					}
+				}, "Installer").start();
+			}
+		});
 		btnNewButton_1.setBounds(322, 93, 275, 25);
 		panel_2.add(btnNewButton_1);
 
@@ -368,11 +495,22 @@ public class Installer extends CyanComponent {
 
 		chckbxNewCheckBox_1 = new JCheckBox("Associate Mod Installer Extensions");
 		chckbxNewCheckBox_1.setBounds(270, 156, 292, 23);
+		if (project.platform.equals("SPIGOT")) {
+			btnNewButton.setVisible(false);
+			btnNewButton_1.setSize(275 + 280, 25);
+			btnNewButton_1.setLocation(btnNewButton.getLocation());
+			chckbxNewCheckBox_1.setLocation(chckbxNewCheckBox.getLocation());
+			chckbxNewCheckBox.setVisible(false);
+			textField.setText(new File(new File(dir, ".minecraft"), "server").getAbsolutePath());
+		}
 		panel_2.add(chckbxNewCheckBox_1);
 	}
 
+	private static HashMap<String, Class<?>> loaded = new HashMap<String, Class<?>>();
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void runInstaller(File dest, MinecraftVersionInfo version, MinecraftVersionInfo modloader, File cache,
-			ProjectConfig project, GameSide side) throws IOException {
+			ProjectConfig project, GameSide side, boolean interactive) throws IOException {
 		String suffix = "";
 		if (!project.loader.isEmpty())
 			suffix += "-" + project.loader;
@@ -397,29 +535,25 @@ public class Installer extends CyanComponent {
 		progressMax++; // Resolve modloader libraries
 		progressMax++;
 
-		progressMax++; // Build libraries folder structure, exclude fat server libs (if called for the
-						// server) // TODO
-		progressMax++; // Apply artifactModifications // TODO
-
-		progressMax++; // Install libraries // TODO
+		progressMax++; // Apply artifactModifications
+		progressMax++; // Install libraries
 		if (side == GameSide.CLIENT) {
-			progressMax++; // Generate new version manifest (use urls in old manifest, exclude modified
-			// jars) // TODO
-			progressMax++; // Build version folder structure (client only) // TODO
-			progressMax++; // Build version log folder (client only) // TODO
+			progressMax++; // Generate new version manifest
+			progressMax++; // Install version file
+			progressMax++; // Download version log file
 
 			if (chckbxNewCheckBox.isSelected())
-				progressMax++; // Generate launcher profile or replace existing // TODO
+				progressMax++; // Generate launcher profile or replace existing
 		}
 		if (side == GameSide.SERVER) {
-			progressMax++; // Download platform dependencies and jar if needed // TODO
-			progressMax++; // Build server fat jar // TODO
-			progressMax++; // Build server jar manifest // TODO
-			progressMax++; // Create server jar // TODO
+			progressMax++; // Download platform dependencies and jar if needed
+			progressMax++; // Build server fat jar
+			progressMax++; // Build server jar manifest
+			progressMax++; // Create server jar
 		}
 		if (chckbxNewCheckBox_1.isSelected())
-			progressMax++; // Install the Mod Installer // TODO
-		progressMax++; // Create .kickstart-installer.ccfg // TODO
+			progressMax++; // Install the Mod Installer
+		progressMax++; // Create .kickstart-installer.ccfg
 
 		ProgressWindow.WindowAppender.addMax(progressMax);
 
@@ -584,12 +718,10 @@ public class Installer extends CyanComponent {
 			logger.info("");
 			File riftJar = download(lib, cache, project, libraryPaths);
 
-			String path = libraryPaths.get(lib);
 			logger.info("Remapping RIFT jar...");
-
-			path = path.substring(0, path.lastIndexOf(".jar"));
 			File riftOut = new File(cache,
-					"caches/rift/" + path + "-rift-" + project.platform.toLowerCase() + "-" + project.game + "-"
+					"caches/rift/" + riftJar.getName().substring(0, riftJar.getName().lastIndexOf(".jar")) + "-rift-"
+							+ project.platform.toLowerCase() + "-" + project.game + "-"
 							+ project.mappings.replaceAll("[^A-Za-z0-9-.]", "-")
 							+ (project.loader.isEmpty() ? "" : "-" + project.loader)
 							+ (project.loaderVersion.isEmpty() ? "" : "-" + project.loaderVersion) + ".jar");
@@ -664,8 +796,14 @@ public class Installer extends CyanComponent {
 			builder.close();
 			riftUtil.close();
 			ProgressWindow.WindowAppender.increaseProgress(); // save
-			libraryFiles.put(lib, riftOut);
+			String group = lib.split(":")[0];
+			String name = lib.split(":")[1];
+			String libver = lib.split(":")[2];
+			libraryFiles.put(group + ":" + name + "-RIFT-" + side.toString() + ":" + libver + "-RIFT-" + side.toString()
+					+ "-" + project.platform + "-" + project.mappings.replaceAll("[^A-Za-z0-9.-]", "-"), riftOut);
 			libraryPaths.remove(lib);
+			libs.add(group + ":" + name + "-RIFT-" + side.toString() + ":" + libver + "-RIFT-" + side.toString() + "-"
+					+ project.platform + "-" + project.mappings.replaceAll("[^A-Za-z0-9.-]", "-"));
 		}
 
 		logger.info("");
@@ -673,9 +811,1012 @@ public class Installer extends CyanComponent {
 		ProgressWindow.WindowAppender.setValue(oldProgress);
 		ProgressWindow.WindowAppender.increaseProgress();
 
-		logger.info("Generating new version manifest...");
-		
-		// TODO
+		logger.info("Applying modifications...");
+		for (String artifact : project.artifactModifications.keySet()) {
+			String group = artifact.split(":")[0];
+			String name = artifact.split(":")[1];
+			File output = new File(cache, "modified/" + group + "/" + name + "/" + project.name + "-" + project.version
+					+ "-" + project.platform + "-" + project.mappings.replaceAll("[^A-Za-z0-9-.]", "-") + ".jar");
+			if (!output.getParentFile().exists())
+				output.getParentFile().mkdirs();
+			if (output.exists())
+				output.delete();
+
+			String source = null;
+			for (String lib : libs) {
+				if (lib.startsWith(artifact + ":")) {
+					source = lib;
+					break;
+				}
+			}
+			if (source == null)
+				throw new IOException("Cannot find artifact " + artifact + ", unable to apply modification");
+
+			File input = libraryFiles.get(source);
+			logger.info("Applying modifications to " + artifact + "...");
+			FileInputStream fin = new FileInputStream(input);
+			ZipInputStream inp = new ZipInputStream(fin);
+			ZipEntry ent = inp.getNextEntry();
+			FileOutputStream outf = new FileOutputStream(output);
+			ZipOutputStream outp = new ZipOutputStream(outf);
+			while (ent != null) {
+				String pth = ent.getName().replace("\\", "/");
+				if (pth.startsWith("/"))
+					pth = pth.substring(1);
+
+				outp.putNextEntry(new ZipEntry(ent.getName()));
+				if (project.artifactModifications.get(artifact).containsKey(pth) && !pth.endsWith("/")) {
+					String patch = project.artifactModifications.get(artifact).get(pth);
+					String method = patch.substring(0, patch.indexOf("\n")).replace("\r", "");
+					patch = patch.substring(patch.indexOf("\n") + 1);
+
+					String pos = "";
+					String arg = "";
+					if (method.contains("//")) {
+						arg = method.substring(method.indexOf("//") + 2);
+						method = method.substring(0, method.indexOf("//"));
+					}
+					if (method.contains(":")) {
+						pos = method.substring(method.indexOf(":") + 1);
+						method = method.substring(0, method.indexOf(":"));
+					}
+					if (pos.isEmpty())
+						pos = "0";
+
+					if (method.equals("ccfg-edit")) {
+						String inputFile = new String(inp.readAllBytes());
+						DynamicClassLoader tmpLoader = new DynamicClassLoader();
+						tmpLoader.setOptions(DynamicClassLoader.OPTION_ALLOW_DEFINE);
+						tmpLoader.addUrl(input.toURI().toURL());
+						Class<?> confClass;
+						try {
+							if (loaded.containsKey(arg))
+								confClass = loaded.get(arg);
+							else
+								confClass = tmpLoader.loadClass(arg);
+						} catch (ClassNotFoundException e1) {
+							tmpLoader.close();
+							throw new RuntimeException(e1);
+						}
+						loaded.put(confClass.getTypeName(), confClass);
+						Configuration<?> ccfg;
+						try {
+							Method mth = confClass.getDeclaredMethod("instanciateFromSerialzer", Class.class);
+							mth.setAccessible(true);
+							ccfg = (Configuration<?>) mth.invoke(null, (Class<? extends Configuration>) confClass);
+						} catch (Exception e) {
+							try {
+								Method mth = confClass.getDeclaredMethod("instantiateFromSerialzer", Class.class);
+								mth.setAccessible(true);
+								ccfg = (Configuration<?>) mth.invoke(null, (Class<? extends Configuration>) confClass);
+							} catch (Exception e2) {
+								try {
+									ccfg = (Configuration<?>) confClass.getConstructor().newInstance();
+								} catch (Exception e3) {
+									tmpLoader.close();
+									throw new RuntimeException(e2);
+								}
+							}
+						}
+						ccfg.readAll(inputFile).readAll(patch.replace("%pv", project.version)
+								.replace("%i", project.inheritsFrom).replace("%pv", project.version)
+								.replace("%gv", project.game)
+								.replace("%ml", (project.loader.isEmpty() ? "" : project.loader)
+										+ (project.loaderVersion.isEmpty() ? "" : "-" + project.loaderVersion)));
+						String outputStr = ccfg.toString();
+						tmpLoader.close();
+						outp.write(outputStr.getBytes());
+					} else if (method.equals("replace")) {
+						byte[] newContent = patch.getBytes();
+						if (arg.equals("binary")) {
+							newContent = Base64.getDecoder().decode(newContent);
+						}
+						outp.write(newContent);
+					} else if (method.equals("append")) {
+						inp.transferTo(outp);
+						byte[] newContent = patch.getBytes();
+						if (arg.equals("binary")) {
+							newContent = Base64.getDecoder().decode(newContent);
+						}
+						outp.write(newContent);
+					} else if (method.equals("insert")) {
+						byte[] inputBytes = inp.readAllBytes();
+						byte[] newContent = patch.getBytes();
+						if (arg.equals("binary")) {
+							newContent = Base64.getDecoder().decode(newContent);
+						}
+						outp.write(ArrayUtil.insert(inputBytes, Integer.valueOf(pos), newContent));
+					}
+				} else {
+					if (!pth.endsWith("/"))
+						inp.transferTo(outp);
+				}
+				outp.closeEntry();
+
+				ent = inp.getNextEntry();
+			}
+			inp.close();
+			fin.close();
+			outp.close();
+			outf.close();
+			libraryPaths.remove(source);
+			libraryFiles.put(source, output);
+		}
+		logger.info("");
+		ProgressWindow.WindowAppender.increaseProgress();
+
+		logger.info("Installing libraries...");
+		installLibs(dest, libs, libraryFiles, project, side);
+		logger.info("");
+
+		boolean missingParentVersion = false;
+		ProgressWindow.WindowAppender.increaseProgress();
+
+		if (side == GameSide.CLIENT) {
+			logger.info("Updating version manifest...");
+			JsonObject manifest = MinecraftInstallationToolkit.getVersionManifest(modloader).deepCopy();
+			if (manifest.has("libraries"))
+				manifest.remove("libraries");
+			if (manifest.has("inheritsFrom"))
+				manifest.remove("inheritsFrom");
+			if (manifest.has("id"))
+				manifest.remove("id");
+			if (manifest.has("mainClass"))
+				manifest.remove("mainClass");
+
+			manifest.addProperty("id",
+					project.id.replace("%pv", project.version).replace("%i", project.inheritsFrom)
+							.replace("%pv", project.version).replace("%gv", project.game)
+							.replace("%ml", (project.loader.isEmpty() ? "" : project.loader)
+									+ (project.loaderVersion.isEmpty() ? "" : "-" + project.loaderVersion)));
+			manifest.addProperty("mainClass", project.clientMain);
+			manifest.addProperty("inheritsFrom", project.inheritsFrom);
+			JsonArray libArray = new JsonArray();
+			libs.forEach(lib -> {
+				JsonObject artifact = new JsonObject();
+				artifact.addProperty("name", lib);
+				artifact.addProperty("url", libraryPaths.getOrDefault(lib, ""));
+				libArray.add(artifact);
+			});
+			manifest.add("libraries", libArray);
+
+			File manFile = new File(cache,
+					"new-manifests/" + manifest.get("id").getAsString() + "-" + project.name + "-" + project.version
+							+ "-" + project.platform + "-" + project.mappings.replaceAll("[^A-Za-z0-9-.]", "-")
+							+ ".json");
+			if (!manFile.getParentFile().exists())
+				manFile.getParentFile().mkdirs();
+			if (manFile.exists())
+				manFile.delete();
+			logger.info("Saving manifest...");
+			Files.writeString(manFile.toPath(), new Gson().toJson(manifest));
+			ProgressWindow.WindowAppender.increaseProgress();
+			logger.info("Done");
+			logger.info("");
+
+			logger.info("Installing new version manifest...");
+			File destManifest = new File(dest,
+					manifest.get("id").getAsString() + "/" + manifest.get("id").getAsString() + ".json");
+			if (destManifest.exists())
+				destManifest.delete();
+			if (!destManifest.getParentFile().exists())
+				destManifest.getParentFile().mkdirs();
+			Files.copy(manFile.toPath(), destManifest.toPath());
+			logger.info("Done");
+			logger.info("");
+			ProgressWindow.WindowAppender.increaseProgress();
+
+			logger.info("Downloading log configuration...");
+			if (manifest.has("logging") && manifest.get("logging").getAsJsonObject().has("client")) {
+				JsonObject logClient = manifest.get("logging").getAsJsonObject().get("client").getAsJsonObject()
+						.get("file").getAsJsonObject();
+
+				File logOut = new File(dest, "assets/log_configs/" + logClient.get("id").getAsString());
+				if (!logOut.getParentFile().exists())
+					logOut.getParentFile().mkdirs();
+				if (logOut.exists())
+					logOut.delete();
+
+				FileOutputStream outp = new FileOutputStream(logOut);
+				String url = logClient.get("url").getAsString();
+				try {
+					URL logURL = new URL(url);
+					InputStream strm = logURL.openStream();
+					logger.info("Installing...");
+					strm.transferTo(outp);
+					strm.close();
+				} catch (IOException e) {
+					String pth = null;
+					for (String repoID : project.repositories.keySet()) {
+						String base = project.repositories.get(repoID);
+						if (!base.endsWith("/"))
+							base += "/";
+						if (url.startsWith(base)) {
+							pth = url.substring(base.length());
+							break;
+						}
+					}
+					if (pth == null)
+						throw new IOException("Failed to download log config from any repository.");
+
+					boolean found = false;
+					for (String repoID : project.repositories.keySet()) {
+						String base = project.repositories.get(repoID);
+						if (!base.endsWith("/"))
+							base += "/";
+						try {
+							URL u = new URL(base + pth);
+							InputStream strm = u.openStream();
+							strm.transferTo(outp);
+							logger.info("Installing...");
+							strm.close();
+							found = true;
+							break;
+						} catch (IOException e2) {
+						}
+					}
+					if (!found)
+						throw new IOException("Failed to download log config from any repository.");
+				}
+				outp.close();
+			}
+			logger.info("");
+			ProgressWindow.WindowAppender.increaseProgress();
+
+			if (!new File(dest, "versions/" + project.inheritsFrom).exists())
+				missingParentVersion = true;
+
+			if (chckbxNewCheckBox.isSelected()) {
+				logger.info("Updating minecraft launcher profiles...");
+				JsonObject profiles = new JsonObject();
+				if (new File(dest, "launcher_profiles.json").exists()) {
+					profiles = JsonParser
+							.parseString(Files.readString(new File(dest, "launcher_profiles.json").toPath()))
+							.getAsJsonObject();
+				}
+				JsonObject profileList = profiles.get("profiles").getAsJsonObject();
+				JsonObject profile = new JsonObject();
+				if (profileList
+						.has(project.name + "-" + project.version + "-" + project.game + "-" + project.platform)) {
+					profile = profileList
+							.get(project.name + "-" + project.version + "-" + project.game + "-" + project.platform)
+							.getAsJsonObject();
+					profile.remove("lastVersionId");
+					profile.remove("created");
+					profile.remove("javaDir");
+					profileList
+							.remove(project.name + "-" + project.version + "-" + project.game + "-" + project.platform);
+				} else {
+					profile.addProperty("type", "custom");
+					profile.addProperty("icon", project.profileIcon);
+					profile.addProperty("name",
+							project.profileName.replace("%v", project.version).replace("%gv", project.game));
+				}
+				profile.addProperty("javaDir", ProcessHandle.current().info().command().get());
+				profile.addProperty("created", new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss.ms'Z'").format(new Date()));
+				profile.addProperty("lastVersionId", manifest.get("id").getAsString());
+
+				profileList.add(project.name + "-" + project.version + "-" + project.game + "-" + project.platform,
+						profile);
+				Files.writeString(new File(dest, "launcher_profiles.json").toPath(), new Gson().toJson(profiles));
+
+				logger.info("Done");
+				logger.info("");
+				ProgressWindow.WindowAppender.increaseProgress();
+			}
+		} else if (side == GameSide.SERVER) {
+			logger.info("Resolving server dependencies...");
+
+			String cp = "";
+			String bootcp = "";
+
+			if (project.loader.equals("forge")) {
+				project.loadFirst = ArrayUtil.insert(project.loadFirst, 0, new String[] { "log4j-api", "log4j-core" });
+			}
+			for (String lib : libs) {
+				String group = lib.split(":")[0];
+				String name = lib.split(":")[1];
+				String ver = lib.split(":")[2];
+				if (!Stream.of(project.fatServer).anyMatch(t -> t.equals(group + ":" + name))
+						&& Stream.of(project.loadFirst).anyMatch(t -> t.equals(name))) {
+					if (!cp.isEmpty())
+						cp += " ";
+					cp += "libraries/" + group.replace(".", "/") + "/" + name + "/" + name + "-" + ver + ".jar";
+				} else if (!Stream.of(project.fatServer).anyMatch(t -> t.equals(group + ":" + name))
+						&& Stream.of(project.bootLibs).anyMatch(t -> t.equals(name))) {
+					if (!bootcp.isEmpty())
+						bootcp += " ";
+					bootcp += "libraries/" + group.replace(".", "/") + "/" + name + "/" + name + "-" + ver + ".jar";
+				}
+			}
+			if (!cp.isEmpty())
+				cp += " ";
+			cp += "vanilla-server.jar";
+
+			HashMap<String, File> filePaths = new HashMap<String, File>();
+			HashMap<String, File> outputPaths = new HashMap<String, File>();
+			HashMap<String, URL> remoteLibs = new HashMap<String, URL>();
+			for (String lib : libs) {
+				String group = lib.split(":")[0];
+				String name = lib.split(":")[1];
+				String ver = lib.split(":")[2];
+				if (!Stream.of(project.fatServer).anyMatch(t -> t.equals(group + ":" + name))
+						&& !Stream.of(project.loadFirst).anyMatch(t -> t.equals(name))
+						&& !Stream.of(project.bootLibs).anyMatch(t -> t.equals(name)))
+					cp += " libraries/" + group.replace(".", "/") + "/" + name + "/" + name + "-" + ver + ".jar";
+			}
+
+			logger.info("Installing vanilla server...");
+			File vanillaJar = new File(dest, "vanilla-server.jar");
+			if (vanillaJar.exists())
+				vanillaJar.delete();
+			Files.copy(MinecraftInstallationToolkit.getVersionJar(version, side).toPath(), vanillaJar.toPath());
+
+			logger.info("Processing platform dependencies...");
+			if (project.loader.equals("paper")) {
+
+				logger.info("");
+				logger.info("");
+				logger.info("");
+				logger.info("DISCLAIMER!");
+				logger.info("Spigot/Paper is not owned by the AerialWorks Software Foundation,");
+				logger.info("We only use their files to create compatible servers.");
+				logger.info("");
+				logger.info("");
+				logger.info("");
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+				}
+
+				cp += " paper-server-" + project.loaderVersion + ".jar";
+				cp += " cache/patched_" + project.game + ".jar";
+
+				logger.info("Downloading paper server...");
+				URL u = new URL("https://papermc.io/api/v2/projects/paper/versions/" + project.game + "/builds/"
+						+ project.loaderVersion + "/downloads/paper-" + project.game + "-" + project.loaderVersion
+						+ ".jar");
+
+				File paperJar = new File("paper-server-" + project.loaderVersion + ".jar");
+				InputStream strm = u.openStream();
+				FileOutputStream strmOut = new FileOutputStream(paperJar);
+				strm.transferTo(strmOut);
+				strm.close();
+				strmOut.close();
+
+				logger.info("Patching vanilla server with the paper patches...");
+				ProcessBuilder builder = new ProcessBuilder();
+				builder.directory(cache);
+				builder.command(ProcessHandle.current().info().command().get(), "-Dpaperclip.patchonly=true", "-jar",
+						paperJar.getCanonicalPath());
+				Process proc = builder.start();
+				attachLog(proc);
+				try {
+					proc.waitFor();
+				} catch (InterruptedException e) {
+				}
+				if (proc.exitValue() != 0)
+					throw new IOException("Paper exited with non-zero exit code.");
+
+			} else if (project.loader.equals("forge")) {
+
+				logger.info("");
+				logger.info("");
+				logger.info("");
+				logger.info("DISCLAIMER!");
+				logger.info("Forge is not owned by the AerialWorks Software Foundation,");
+				logger.info("We only use their files to create compatible servers/clienst.");
+				logger.info("");
+				logger.info("");
+				logger.info("");
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+				}
+
+				logger.info("Resolving Forge server libraries...");
+				File forgeInstaller = downloadForgeInstaller(project, cache);
+				File serverFolder = new File(cache, "forge-" + project.game + "-" + project.loaderVersion + "-server");
+				File serverFolderTmp = new File(cache,
+						"forge-" + project.game + "-" + project.loaderVersion + "-server.tmp");
+				if (!serverFolder.exists()) {
+					logger.info("Installing forge server for dependency resolution...");
+					ProcessBuilder builder = new ProcessBuilder();
+					builder.directory(cache);
+					builder.command(ProcessHandle.current().info().command().get(), "-jar",
+							forgeInstaller.getCanonicalPath(), "--installServer", serverFolderTmp.getAbsolutePath());
+					Process proc = builder.start();
+					attachLog(proc);
+					try {
+						proc.waitFor();
+					} catch (InterruptedException e) {
+					}
+					if (proc.exitValue() != 0)
+						throw new IOException("Forge installer exited with non-zero exit code.");
+					moveDir(serverFolderTmp, serverFolder);
+				}
+				logger.info("Processing Forge server files...");
+				HashMap<String, File> files = scanFiles(new File(serverFolder, "libraries"), "libraries/", "jar",
+						"jar.cache");
+
+				for (String str : files.keySet()) {
+					String[] information = str.split("/");
+					String group = "";
+					String name = "";
+					String ver = "";
+
+					for (int i = information.length - 2; i >= 1; i--) {
+						if (ver.isEmpty())
+							ver = information[i];
+						else if (name.isEmpty())
+							name = information[i];
+						else {
+							if (group.isEmpty())
+								group = information[i];
+							else
+								group = information[i] + "." + group;
+						}
+					}
+
+					String groupstr = group.replaceAll("\\.", "/");
+					if (!groupstr.isEmpty())
+						groupstr += "/";
+					final String groupPath = groupstr;
+					boolean newer = false;
+					for (String libfile : files.keySet()) {
+						if (libfile.startsWith("libraries/" + groupstr + name + "/")) {
+							String newversion = libfile.substring(("libraries/" + groupstr + name + "/").length());
+							newversion = newversion.substring(0, newversion.indexOf("/"));
+							if (!ver.equals(newversion)) {
+								newversion = newversion.replaceAll("[^0-9.]", "");
+								String oldver = ver.replaceAll("[^0-9.]", "");
+								int ind = 0;
+								String[] old = oldver.split("\\.");
+								for (String vn : newversion.split("\\.")) {
+									if (ind < old.length) {
+										String vnold = old[ind];
+										if (Integer.valueOf(vn) > Integer.valueOf(vnold)) {
+											newer = true;
+											break;
+										} else if (Integer.valueOf(vn) < Integer.valueOf(vnold)) {
+											break;
+										}
+										ind++;
+									} else
+										break;
+								}
+								if (newer)
+									break;
+							}
+						}
+					}
+
+					if (!newer) {
+						String pth = "libraries/" + groupPath + name + "/" + ver + "/" + name + "-" + ver;
+						String[] srvlibs = files.keySet().stream().filter(t -> t.startsWith(pth))
+								.toArray(t -> new String[t]);
+
+						String artifact = group + ":" + name;
+						if (!filePaths.keySet().stream().anyMatch(t -> t.startsWith(artifact + ":"))) {
+							for (String lib : srvlibs) {
+								if (lib.endsWith(".jar"))
+									cp += " " + lib;
+								filePaths.put(group + ":" + name + ":" + ver, files.get(lib));
+								outputPaths.put(group + ":" + name + ":" + ver, new File(dest, pth));
+							}
+						}
+					}
+				}
+			} else if (project.loader.equals("fabric")) {
+
+				logger.info("");
+				logger.info("");
+				logger.info("");
+				logger.info("DISCLAIMER!");
+				logger.info("Fabric is not owned by the AerialWorks Software Foundation,");
+				logger.info("We only use their files to create compatible servers.");
+				logger.info("");
+				logger.info("");
+				logger.info("");
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+				}
+
+				logger.info("Resolving fabric dependencies...");
+				URL mdataURL = new URL(
+						"https://meta.fabricmc.net/v2/versions/loader/" + project.game + "/" + project.loaderVersion);
+				InputStreamReader rd = new InputStreamReader(mdataURL.openStream());
+				JsonElement ele = JsonParser.parseReader(rd);
+				JsonObject metadata = (ele.isJsonArray() ? ele.getAsJsonArray().get(0).getAsJsonObject()
+						: ele.getAsJsonObject());
+				rd.close();
+
+				for (JsonElement dependency : metadata.get("launcherMeta").getAsJsonObject().get("libraries")
+						.getAsJsonObject().get("common").getAsJsonArray()) {
+					JsonObject obj = dependency.getAsJsonObject();
+					String[] information = obj.get("name").getAsString().split(":");
+					String url = obj.get("url").getAsString();
+
+					String group = "";
+					String name = information[0];
+					String versionstr = "";
+
+					if (information.length == 3) {
+						group = information[0];
+						name = information[1];
+						versionstr = information[2];
+					} else if (information.length >= 2) {
+						name = information[0];
+						versionstr = information[1];
+					}
+
+					url = url + "/" + group.replaceAll("\\.", "/") + "/" + name + "/" + versionstr + "/" + name + "-"
+							+ versionstr + ".jar";
+					String id = group + ":" + name + ":";
+					String idFull = id + versionstr;
+					if (!filePaths.keySet().stream().anyMatch(t -> t.startsWith(id))) {
+						if (!cp.isEmpty())
+							cp += " ";
+
+						String lib = "libraries/" + group.replaceAll("\\.", "/");
+
+						lib += "/" + name + "/" + versionstr + "/" + name + "-" + versionstr + ".jar";
+						remoteLibs.put(idFull, new URL(url));
+						outputPaths.put(group + ":" + name + ":" + versionstr, new File(dest, lib));
+
+						cp += lib;
+					}
+				}
+
+				for (JsonElement dependency : metadata.get("launcherMeta").getAsJsonObject().get("libraries")
+						.getAsJsonObject().get("server").getAsJsonArray()) {
+					JsonObject obj = dependency.getAsJsonObject();
+					String[] information = obj.get("name").getAsString().split(":");
+					String url = obj.get("url").getAsString();
+
+					String group = "";
+					String name = information[0];
+					String versionstr = "";
+
+					if (information.length == 3) {
+						group = information[0];
+						name = information[1];
+						versionstr = information[2];
+					} else if (information.length >= 2) {
+						name = information[0];
+						versionstr = information[1];
+					}
+
+					url = url + "/" + group.replaceAll("\\.", "/") + "/" + name + "/" + versionstr + "/" + name + "-"
+							+ versionstr + ".jar";
+					String id = group + ":" + name + ":";
+					String idFull = id + versionstr;
+					if (!filePaths.keySet().stream().anyMatch(t -> t.startsWith(id))) {
+						if (!cp.isEmpty())
+							cp += " ";
+
+						String lib = "libraries/" + group.replaceAll("\\.", "/");
+
+						lib += "/" + name + "/" + versionstr + "/" + name + "-" + versionstr + ".jar";
+						remoteLibs.put(idFull, new URL(url));
+						filePaths.put(idFull, new File(dest, lib));
+						outputPaths.put(group + ":" + name + ":" + versionstr, new File(dest, lib));
+
+						cp += lib;
+					}
+				}
+
+				String[] information = metadata.get("loader").getAsJsonObject().get("maven").getAsString().split(":");
+				String url = "https://maven.fabricmc.net/";
+
+				String group = "";
+				String name = information[0];
+				String versionstr = "";
+
+				if (information.length == 3) {
+					group = information[0];
+					name = information[1];
+					versionstr = information[2];
+				} else if (information.length >= 2) {
+					name = information[0];
+					versionstr = information[1];
+				}
+
+				url = url + "/" + group.replaceAll("\\.", "/") + "/" + name + "/" + versionstr + "/" + name + "-"
+						+ versionstr + ".jar";
+				String id = group + ":" + name + ":";
+				String idFull = id + versionstr;
+				if (!filePaths.keySet().stream().anyMatch(t -> t.startsWith(id))) {
+					if (!cp.isEmpty())
+						cp += " ";
+
+					String lib = "libraries/" + group.replaceAll("\\.", "/");
+
+					lib += "/" + name + "/" + versionstr + "/" + name + "-" + versionstr + ".jar";
+					remoteLibs.put(idFull, new URL(url));
+					filePaths.put(idFull, new File(dest, lib));
+					outputPaths.put(group + ":" + name + ":" + versionstr, new File(dest, lib));
+
+					cp += lib;
+				}
+
+				information = metadata.get("intermediary").getAsJsonObject().get("maven").getAsString().split(":");
+				url = "https://maven.fabricmc.net/";
+
+				group = "";
+				name = information[0];
+				versionstr = "";
+
+				if (information.length == 3) {
+					group = information[0];
+					name = information[1];
+					versionstr = information[2];
+				} else if (information.length >= 2) {
+					name = information[0];
+					versionstr = information[1];
+				}
+
+				url = url + "/" + group.replaceAll("\\.", "/") + "/" + name + "/" + versionstr + "/" + name + "-"
+						+ versionstr + ".jar";
+				String id2 = group + ":" + name + ":";
+				String idFull2 = id2 + versionstr;
+				if (!filePaths.keySet().stream().anyMatch(t -> t.startsWith(id2))) {
+					if (!cp.isEmpty())
+						cp += " ";
+
+					String lib = "libraries/" + group.replaceAll("\\.", "/");
+
+					lib += "/" + name + "/" + versionstr + "/" + name + "-" + versionstr + ".jar";
+					remoteLibs.put(idFull2, new URL(url));
+					outputPaths.put(group + ":" + name + ":" + versionstr, new File(dest, lib));
+
+					cp += lib;
+				}
+				logger.info("Done.");
+
+			}
+			logger.info("Processed " + filePaths.size() + " libraries.");
+			logger.info("");
+			logger.info("Downloading remote libraries...");
+			for (String id : remoteLibs.keySet()) {
+				URL v = remoteLibs.get(id);
+
+				String group = id.split(":")[0];
+				String name = id.split(":")[1];
+				String versionstr = id.split(":")[2];
+
+				String k = "libraries/" + group.replaceAll("\\.", "/") + "/" + name + "/" + versionstr + "/" + name
+						+ "-" + versionstr + ".jar";
+
+				File inputcache = new File(cache, k);
+				File downloadmarker = new File(cache, k + ".lck");
+				if (!inputcache.exists() || downloadmarker.exists()) {
+					if (!inputcache.getParentFile().exists())
+						inputcache.getParentFile().mkdirs();
+					if (downloadmarker.exists())
+						downloadmarker.delete();
+					downloadmarker.createNewFile();
+					logger.info("Downloading library into cache... file: " + inputcache.getName());
+
+					InputStream strm = v.openStream();
+					if (inputcache.exists())
+						inputcache.delete();
+					FileOutputStream strm2 = new FileOutputStream(inputcache);
+					strm.transferTo(strm2);
+					strm2.close();
+					strm.close();
+					downloadmarker.delete();
+				}
+
+				logger.info("Adding cached libary to install list... file: " + inputcache.getName());
+				filePaths.put(id, new File(cache, k));
+				outputPaths.put(id, new File(dest, k));
+			}
+
+			logger.info("Installing local libraries...");
+			for (String lib : filePaths.keySet()) {
+				File in = filePaths.get(lib);
+				File out = outputPaths.get(lib);
+				if (!out.getParentFile().exists())
+					out.getParentFile().mkdirs();
+				logger.info("Installing " + lib + "...");
+				if (out.exists())
+					out.delete();
+				Files.copy(in.toPath(), out.toPath());
+			}
+			logger.info("Done.");
+			ProgressWindow.WindowAppender.increaseProgress();
+			logger.info("");
+
+			logger.info("Building server jar...");
+			File jarOutputFile = new File(dest, project.serverOutput.replace("%wv", project.wrapper)
+					.replace("%gv", project.game).replace("%pv", project.version).replace("%i", project.inheritsFrom));
+			if (jarOutputFile.exists())
+				jarOutputFile.delete();
+
+			FileOutputStream outputFileStream = new FileOutputStream(jarOutputFile);
+			ZipOutputStream output = new ZipOutputStream(outputFileStream);
+
+			project.jarManifest.forEach((k, v) -> {
+				project.jarManifest.put(k,
+						v.replace("%time", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(new Date()))
+								.replace("%gv", project.game).replace("%i", project.inheritsFrom)
+								.replace("%pv", project.version).replace("%ln", project.loader)
+								.replace("%lv", project.loaderVersion));
+			});
+
+			ArrayList<String> entries = new ArrayList<String>();
+			for (String lib : libs) {
+				if (Stream.of(project.fatServer).anyMatch(t -> lib.startsWith(t + ":"))) {
+					FileInputStream fin = new FileInputStream(libraryFiles.get(lib));
+					ZipInputStream zip = new ZipInputStream(fin);
+					ZipEntry ent = zip.getNextEntry();
+					while (ent != null) {
+						String pth = ent.getName().replace("\\", "");
+						if (pth.startsWith("/"))
+							pth = pth.substring(1);
+
+						if (!entries.contains(pth) && !pth.equalsIgnoreCase("META-INF/MANIFEST.MF")) {
+							output.putNextEntry(new ZipEntry(ent.getName()));
+							if (!pth.endsWith("/"))
+								zip.transferTo(output);
+							output.closeEntry();
+							entries.add(pth);
+						}
+
+						ent = zip.getNextEntry();
+					}
+					zip.close();
+					fin.close();
+				}
+			}
+
+			ProgressWindow.WindowAppender.increaseProgress();
+			logger.info("");
+
+			logger.info("Generating manifest...");
+			StringBuilder mf = new StringBuilder();
+			mf.append("Manifest-Version: 1.0");
+			project.jarManifest.forEach((k, v) -> {
+				project.jarManifest.put(k, v.replace("%time",
+						new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(new Date()).replace("%gv", project.game)
+								.replace("%i", project.inheritsFrom).replace("%pv", project.version)
+								.replace("%ln", project.loader).replace("%lv", project.loaderVersion)));
+			});
+			project.jarManifest.forEach((k, v) -> {
+				mf.append(k + ": " + v).append("\n");
+			});
+			mf.append("Boot-Class-Path: " + bootcp).append("\n");
+			mf.append("Class-Path: " + cp).append("\n");
+			mf.append("Main-Class: " + project.serverMain).append("\n");
+
+			output.putNextEntry(new ZipEntry("META-INF/MANIFEST.MF"));
+			output.write(mf.toString().getBytes("UTF8"));
+			output.closeEntry();
+
+			ProgressWindow.WindowAppender.increaseProgress();
+			logger.info("");
+
+			logger.info("Saving...");
+			output.flush();
+			outputFileStream.flush();
+			output.close();
+			outputFileStream.close();
+			ProgressWindow.WindowAppender.increaseProgress();
+			logger.info("");
+
+		}
+
+		if (chckbxNewCheckBox_1.isSelected()) {
+			logger.info("Installing the KickStart Mod Installer...");
+			File outp = new File(APPDATA, ".minecraft/kickstart.jar");
+
+			if (outp.exists())
+				outp.delete();
+			if (!outp.getParentFile().exists())
+				outp.getParentFile().mkdirs();
+
+			try {
+				Files.copy(new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).toPath(),
+						outp.toPath());
+			} catch (IOException | URISyntaxException e) {
+				throw new IOException(e);
+			}
+			logger.info("Registering installer...");
+			if (MinecraftInstallationToolkit.OsInfo.getCurrent() == OsInfo.windows) {
+				File reg = new File(APPDATA, ".minecraft/kickstart.reg");
+				if (!reg.exists()) {
+					InputStream strm = getClass().getClassLoader().getResourceAsStream("kickstart.reg");
+					String cont = new String(strm.readAllBytes()).replace("%java%",
+							ProcessHandle.current().info().command().get());
+					Files.writeString(reg.toPath(), cont);
+					strm.close();
+				}
+				InputStream strm = getClass().getClassLoader().getResourceAsStream("winsudo");
+				File winsudo = File.createTempFile("winsudo", ".bat");
+				Files.write(reg.toPath(), strm.readAllBytes());
+				strm.close();
+				logger.info("Installing as admin...");
+				ProcessBuilder builder = new ProcessBuilder();
+				builder.command(winsudo.getCanonicalPath(), "reg", "import", reg.getCanonicalPath());
+				Process proc = builder.start();
+				try {
+					proc.waitFor();
+				} catch (InterruptedException e) {
+				}
+				if (proc.exitValue() != 0)
+					throw new IOException("Registry script exited with non-zero exit code");
+			} else {
+				File xml = new File(APPDATA, ".minecraft/cyan-kickstart.xml");
+				if (!xml.exists()) {
+					InputStream strm = getClass().getClassLoader().getResourceAsStream("cyan-kickstart.xml");
+					String cont = new String(strm.readAllBytes()).replace("%java%",
+							ProcessHandle.current().info().command().get());
+					Files.writeString(xml.toPath(), cont);
+					strm.close();
+				}
+				File desktop = new File(APPDATA, ".minecraft/cyan-kickstart.desktop");
+				if (!desktop.exists()) {
+					InputStream strm = getClass().getClassLoader().getResourceAsStream("kickstart.desktop");
+					String cont = new String(strm.readAllBytes()).replace("%java%",
+							ProcessHandle.current().info().command().get());
+					Files.writeString(desktop.toPath(), cont);
+					strm.close();
+				}
+				logger.info("Creating registry script...");
+
+				File bashFile = File.createTempFile("kickstart-install", ".bash");
+				StringBuilder bashScript = new StringBuilder();
+				bashScript.append("#!/bin/bash").append("\n");
+				bashScript.append("xdg-mime install \"" + xml.getCanonicalPath() + "\"").append("\n");
+				bashScript.append("xdg-mime default \"" + desktop.getCanonicalPath() + "\" application/x-kickstart-cmf")
+						.append("\n");
+				bashScript.append("").append("\n");
+				bashScript.append("rm -- \"$0\"").append("\n");
+				Files.writeString(bashFile.toPath(), bashScript.toString());
+
+				logger.info("Starting script...");
+				ProcessBuilder builder = new ProcessBuilder();
+				builder.command("bash", bashFile.getCanonicalPath());
+				Process proc = builder.start();
+				try {
+					proc.waitFor();
+				} catch (InterruptedException e) {
+				}
+				if (proc.exitValue() != 0)
+					throw new IOException("Registry script exited with non-zero exit code");
+			}
+			logger.info("Done.");
+			ProgressWindow.WindowAppender.increaseProgress();
+			logger.info("");
+		}
+
+		logger.info("Finalizing...");
+		if (!new File(APPDATA, ".kickstart-installer.ccfg").exists())
+			new File(APPDATA, ".kickstart-installer.ccfg").createNewFile();
+		ProgressWindow.WindowAppender.increaseProgress();
+		logger.info("Installation completed.\nInstalled in: " + dest.getCanonicalPath());
+
+		if (missingParentVersion && interactive) {
+			JOptionPane.showMessageDialog(frmCyanInstaller, project.name
+					+ " has been installed into the launcher.\nPlease know that it cannot be launched until the '"
+					+ project.inheritsFrom + "' version has been installed.", "Installation completed",
+					JOptionPane.INFORMATION_MESSAGE);
+		} else if (side == GameSide.CLIENT && interactive) {
+			JOptionPane.showMessageDialog(frmCyanInstaller,
+					project.name + " has been installed into the launcher.\nAll requirements are present.",
+					"Installation completed", JOptionPane.INFORMATION_MESSAGE);
+		} else if (side == GameSide.SERVER && interactive) {
+			JOptionPane.showMessageDialog(frmCyanInstaller,
+					project.name + " has been installed.\nAll requirements are present.", "Installation completed",
+					JOptionPane.INFORMATION_MESSAGE);
+		}
+	}
+
+	private HashMap<String, File> scanFiles(File inp, String start, String... extensions) {
+		HashMap<String, File> collection = new HashMap<String, File>();
+		for (File f : inp.listFiles(f2 -> {
+			for (String extension : extensions) {
+				if (f2.getName().endsWith("." + extension))
+					return true;
+			}
+			return false;
+		})) {
+			collection.put(start + f.getName(), f);
+		}
+		for (File f : inp.listFiles(f2 -> {
+			return f2.isDirectory();
+		})) {
+			scanFiles(f, start + f.getName() + "/", extensions).forEach((p, f2) -> {
+				collection.put(p, f2);
+			});
+		}
+		return collection;
+	}
+
+	private void moveDir(File in, File out) throws IOException {
+		out.mkdirs();
+		for (File dir : in.listFiles(t -> t.isDirectory()))
+			moveDir(dir, new File(out, dir.getName()));
+		for (File file : in.listFiles(t -> !t.isDirectory())) {
+			if (new File(out, file.getName()).exists())
+				new File(out, file.getName()).delete();
+			Files.move(file.toPath(), new File(out, file.getName()).toPath());
+		}
+		in.delete();
+	}
+
+	private void attachLog(Process proc) {
+		new Thread(() -> {
+			try {
+				while (proc.isAlive()) {
+					String buffer = "";
+					while (true) {
+						int b = proc.getInputStream().read();
+						if (b == -1)
+							return;
+						char ch = (char) b;
+						if (ch == '\r')
+							continue;
+						else if (ch == '\n')
+							break;
+						buffer += ch;
+					}
+					logger.info(buffer);
+				}
+			} catch (IOException e) {
+
+			}
+		}, "Process Logger").start();
+		new Thread(() -> {
+			try {
+				while (proc.isAlive()) {
+					String buffer = "";
+					while (true) {
+						int b = proc.getErrorStream().read();
+						if (b == -1)
+							return;
+						char ch = (char) b;
+						if (ch == '\r')
+							continue;
+						else if (ch == '\n')
+							break;
+						buffer += ch;
+					}
+					logger.error(buffer);
+				}
+			} catch (IOException e) {
+
+			}
+		}, "Process Logger").start();
+	}
+
+	private void installLibs(File dest, ArrayList<String> libs, HashMap<String, File> libraryFiles,
+			ProjectConfig project, GameSide side) {
+		libs.forEach(lib -> {
+			File file = libraryFiles.get(lib);
+			String group = lib.split(":")[0];
+			String name = lib.split(":")[1];
+			String libver = lib.split(":")[2];
+
+			if (side == GameSide.SERVER && Stream.of(project.fatServer).anyMatch(t -> t.equals(group + ":" + name))) {
+				return;
+			}
+
+			logger.info("Installing library " + lib + "...");
+			File output = new File(dest, "libraries/" + group.replace(".", "/") + "/" + name + "/" + libver + "/" + name
+					+ "-" + libver + ".jar");
+			if (output.exists())
+				output.delete();
+			if (!output.getParentFile().exists())
+				output.getParentFile().mkdirs();
+			try {
+				Files.copy(file.toPath(), output.toPath());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		});
 	}
 
 	private File download(String lib, File cache, ProjectConfig project, HashMap<String, String> libraryPaths)
@@ -691,7 +1832,7 @@ public class Installer extends CyanComponent {
 			try {
 				URL u = new URL(base + "/" + libPath);
 				u.openStream().close();
-				libraryPaths.put(lib, base + "/" + libPath);
+				libraryPaths.put(lib, base);
 				loc = u;
 			} catch (IOException e) {
 			}

@@ -24,7 +24,7 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 		if (!Mapping.class.isAssignableFrom(input))
-			return Configuration.instanciateFromSerialzer(input);
+			return Configuration.instantiateFromSerialzer(input);
 		return (T) new Mapping<T>();
 	}
 

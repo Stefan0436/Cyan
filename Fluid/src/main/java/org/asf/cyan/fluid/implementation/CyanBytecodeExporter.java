@@ -488,7 +488,7 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 
 		if (cls.visibleAnnotations != null) {
 			for (AnnotationNode anode : cls.visibleAnnotations) {
-				if (!result.isEmpty())
+				if (!result.toString().isEmpty())
 					result.append("\n");
 
 				AnnotationInfo i = AnnotationInfo.create(anode);
@@ -499,7 +499,7 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 
 		if (cls.invisibleAnnotations != null) {
 			for (AnnotationNode anode : cls.invisibleAnnotations) {
-				if (!result.isEmpty())
+				if (!result.toString().isEmpty())
 					result.append("\n");
 
 				AnnotationInfo i = AnnotationInfo.create(anode);

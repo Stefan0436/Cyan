@@ -29,9 +29,11 @@ public class CommonEvents implements IEventListenerContainer {
 	// Called after cyan verifies that both sides are running it
 	@SimpleEvent(CyanServerHandshakeEvent.class)
 	public void handshake(ServerConnectionEventObject event) {
+		// Client objects contain information about the remote client
 		Client cl = Client.getForConnection(event);
-		// Client instances contain information
-		// about the remote client
+
+		// They can store modkit-compatible metadata (such as mods)
+		// as long as the modloader provides it (cyan does)
 	}
 
 	// Called after resources have been loaded

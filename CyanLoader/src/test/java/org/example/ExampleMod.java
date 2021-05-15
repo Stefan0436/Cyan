@@ -2,17 +2,11 @@ package org.example;
 
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
-import org.asf.cyan.api.resources.Resource;
-import org.asf.cyan.api.resources.Resources;
 import org.asf.cyan.api.util.ContainerConditions;
 import org.asf.cyan.api.util.EventUtil;
-import org.asf.cyan.api.util.server.language.ClientLanguage;
 import org.asf.cyan.mods.AbstractMod;
 import org.asf.cyan.mods.config.CyanModfileManifest;
 import org.asf.cyan.mods.events.AttachEvent;
-
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 public class ExampleMod extends AbstractMod {
 

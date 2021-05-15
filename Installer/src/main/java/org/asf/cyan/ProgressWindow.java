@@ -20,6 +20,7 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.JProgressBar;
 import java.awt.Font;
 
@@ -146,7 +147,11 @@ public class ProgressWindow extends JFrame {
 		if (!message.isEmpty())
 			lastMessage.setText(message);
 
-		textArea.setText(textArea.getText() + message + "\n");
+		String log = textArea.getText() + message;
+		while (log.split("\n").length >= 200)
+			log = log.substring(log.indexOf("\n") + 1);
+		
+		textArea.setText(log + "\n");
 		textArea.setCaretPosition(textArea.getDocument().getLength());
 	}
 

@@ -140,11 +140,11 @@ public class CqMain {
 
 			Configuration<?> ccfg;
 			try {
-				Method mth = ccfgcls.getDeclaredMethod("instanciateFromSerialzer", Class.class);
+				Method mth = ccfgcls.getDeclaredMethod("instantiateFromSerialzer", Class.class);
 				mth.setAccessible(true);
 				ccfg = (Configuration<?>) mth.invoke(null, (Class<? extends Configuration>) ccfgcls);
 			} catch (Exception e) {
-				ccfg = Configuration.instanciateFromSerialzer((Class<? extends Configuration>) ccfgcls);
+				ccfg = Configuration.instantiateFromSerialzer((Class<? extends Configuration>) ccfgcls);
 			}
 
 			ccfg = ccfg.readAll(input);
