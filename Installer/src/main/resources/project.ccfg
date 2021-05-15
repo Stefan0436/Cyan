@@ -40,7 +40,7 @@ repositories> {
     central> 'https://repo1.maven.org/maven2'
 }
 
-fatServer> [ 'org.asf.cyan:CyanWrapper' 'org.asf.cyan:Fluid' 'org.asf.cyan:CyanCore' ]
+fatServer> [ 'org.asf.cyan:CyanWrapper' 'org.asf.cyan:Fluid' 'org.asf.cyan:CyanCore' 'org.asf.cyan:CyanComponents' ]
 loadFirst> [ 'gson' ]
 bootLibs> [ 'javassist' 'reflections' ]
 serverOutput> 'minecraft-%i-cyan-%pv-server.jar'
@@ -76,7 +76,12 @@ artifactModifications> {
         cyan.release.ccfg> 'ccfg-edit//org.asf.cyan.core.CyanInfo
         minecraftCyanVersion> \'%i-cyan-%pv\'
         minecraftVersion> \'%gv\'
-        modloaderVersion> \'%ml\'
+        modloaderVersion> \'%lv\'
         '
+    }
+    
+    org.asf.cyan:CyanWrapper> {
+        mappings.info> 'replace//plaintext
+        %mv'
     }
 }

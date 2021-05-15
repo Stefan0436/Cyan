@@ -35,7 +35,7 @@ configurePublish {
 	}
 }
 
-version="1.0.0.A13"
+version="1.0.0.A14"
 jar.dependsOn('processResources')
 
 repositories {

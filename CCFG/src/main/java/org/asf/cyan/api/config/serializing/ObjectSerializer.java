@@ -48,7 +48,7 @@ public class ObjectSerializer {
 				mp = (Map<String, Object>) cls.getConstructor().newInstance();
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				throw new IOException("Unable to instanciate map, parameterless constructor unavailable.", e);
+				throw new IOException("Unable to instantiate map, parameterless constructor unavailable.", e);
 			}
 		}
 
@@ -172,10 +172,10 @@ public class ObjectSerializer {
 				try {
 					Method meth = null;
 					try {
-						meth = cls.getDeclaredMethod("instanciateFromSerialzer", Class.class);
+						meth = cls.getDeclaredMethod("instantiateFromSerialzer", Class.class);
 					} catch (NoSuchMethodException e) {
 						try {
-							meth = Configuration.class.getDeclaredMethod("instanciateFromSerialzer", Class.class);
+							meth = Configuration.class.getDeclaredMethod("instantiateFromSerialzer", Class.class);
 						} catch (NoSuchMethodException e1) {
 						}
 					}
@@ -184,7 +184,7 @@ public class ObjectSerializer {
 					return (T) outp.readAll(input);
 				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
 						| SecurityException e) {
-					throw new IOException("Could not instanciate the configuration", e);
+					throw new IOException("Could not instantiate the configuration", e);
 				}
 			} else if (PrimitiveClassUtil.isSupportedWrapper(cls)) {
 				try {

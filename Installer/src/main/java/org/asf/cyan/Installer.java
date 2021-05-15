@@ -20,6 +20,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.jar.Attributes;
+import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -92,6 +93,8 @@ public class Installer extends CyanComponent {
 
 	private static boolean init = false;
 
+	private static boolean cli = false;
+
 	public static boolean isInitialized() {
 		return init;
 	}
@@ -159,6 +162,7 @@ public class Installer extends CyanComponent {
 	 */
 	public static void main(String[] args) throws IOException {
 		if (args.length == 3 && args[0].equals("install")) {
+			cli = true;
 			Installer window = new Installer();
 			String type = args[1];
 			if (type.equals("client")) {
@@ -223,6 +227,7 @@ public class Installer extends CyanComponent {
 			}
 		}
 		EventQueue.invokeLater(new Runnable() {
+
 			public void run() {
 				try {
 					Installer window = new Installer();
@@ -231,6 +236,7 @@ public class Installer extends CyanComponent {
 					e.printStackTrace();
 				}
 			}
+
 		});
 	}
 
@@ -348,19 +354,25 @@ public class Installer extends CyanComponent {
 		File cache = new File(APPDATA, ".kickstart");
 		MinecraftInstallationToolkit.setMinecraftDirectory(cache);
 
-		frmCyanInstaller = new JFrame();
-		frmCyanInstaller.setTitle("Installer");
-		frmCyanInstaller.setResizable(false);
-		frmCyanInstaller.setBounds(100, 100, 640, 428);
-		frmCyanInstaller.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frmCyanInstaller.setLocationRelativeTo(null);
+		if (!cli) {
+			frmCyanInstaller = new JFrame();
+			frmCyanInstaller.setTitle("Installer");
+			frmCyanInstaller.setResizable(false);
+			frmCyanInstaller.setBounds(100, 100, 640, 428);
+			frmCyanInstaller.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frmCyanInstaller.setLocationRelativeTo(null);
+		}
 
 		ProjectConfig project = new ProjectConfig();
-		frmCyanInstaller.setTitle(project.name + " Installer");
+
+		if (!cli)
+			frmCyanInstaller.setTitle(project.name + " Installer");
 
 		JPanel panel = new JPanel();
 		panel.setBorder(new LineBorder(new Color(0, 0, 0)));
-		frmCyanInstaller.getContentPane().add(panel, BorderLayout.SOUTH);
+
+		if (!cli)
+			frmCyanInstaller.getContentPane().add(panel, BorderLayout.SOUTH);
 		panel.setLayout(new BorderLayout(0, 0));
 
 		JLabel lblNewLabel = new JLabel(" " + project.name + " " + project.version);
@@ -378,6 +390,8 @@ public class Installer extends CyanComponent {
 
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new LineBorder(new Color(0, 0, 0)));
+
+		if (!cli)
 		frmCyanInstaller.getContentPane().add(panel_1, BorderLayout.NORTH);
 		panel_1.setLayout(new BorderLayout(0, 0));
 
@@ -398,7 +412,9 @@ public class Installer extends CyanComponent {
 
 		JPanel panel_2 = new JPanel();
 		panel_2.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		frmCyanInstaller.getContentPane().add(panel_2, BorderLayout.CENTER);
+		
+		if (!cli)
+			frmCyanInstaller.getContentPane().add(panel_2, BorderLayout.CENTER);
 		panel_2.setLayout(null);
 
 		textField = new JTextField();
@@ -703,10 +719,6 @@ public class Installer extends CyanComponent {
 		}
 
 		ProgressWindow.WindowAppender.increaseProgress();
-		int oldProgressMax = ProgressWindow.WindowAppender.getMax();
-		int oldProgress = ProgressWindow.WindowAppender.getValue();
-		ProgressWindow.WindowAppender.setMax(libs.size() + (rift.size() * 4));
-		ProgressWindow.WindowAppender.setValue(0);
 		logger.info("Downloading regular libraries...");
 
 		HashMap<String, String> libraryPaths = new HashMap<String, String>();
@@ -763,8 +775,6 @@ public class Installer extends CyanComponent {
 			strm.close();
 			fin.close();
 
-			ProgressWindow.WindowAppender.increaseProgress(); // prepare
-
 			SimpleRift riftUtil;
 			try {
 				riftUtil = builder.build();
@@ -790,12 +800,10 @@ public class Installer extends CyanComponent {
 				riftUtil.close();
 				throw new IOException(e);
 			}
-			ProgressWindow.WindowAppender.increaseProgress(); // rift
 
 			riftUtil.export(riftOut);
 			builder.close();
 			riftUtil.close();
-			ProgressWindow.WindowAppender.increaseProgress(); // save
 			String group = lib.split(":")[0];
 			String name = lib.split(":")[1];
 			String libver = lib.split(":")[2];
@@ -807,8 +815,6 @@ public class Installer extends CyanComponent {
 		}
 
 		logger.info("");
-		ProgressWindow.WindowAppender.setMax(oldProgressMax);
-		ProgressWindow.WindowAppender.setValue(oldProgress);
 		ProgressWindow.WindowAppender.increaseProgress();
 
 		logger.info("Applying modifications...");
@@ -848,7 +854,13 @@ public class Installer extends CyanComponent {
 				if (project.artifactModifications.get(artifact).containsKey(pth) && !pth.endsWith("/")) {
 					String patch = project.artifactModifications.get(artifact).get(pth);
 					String method = patch.substring(0, patch.indexOf("\n")).replace("\r", "");
-					patch = patch.substring(patch.indexOf("\n") + 1);
+					patch = patch.substring(patch.indexOf("\n") + 1).replace("%pv", project.version)
+							.replace("%i", project.inheritsFrom).replace("%pv", project.version)
+							.replace("%gv", project.game)
+							.replace("%lv",
+									(project.loader.isEmpty() ? "" : project.loader)
+											+ (project.loaderVersion.isEmpty() ? "" : "-" + project.loaderVersion))
+							.replace("%mv", project.mappings);
 
 					String pos = "";
 					String arg = "";
@@ -898,11 +910,7 @@ public class Installer extends CyanComponent {
 								}
 							}
 						}
-						ccfg.readAll(inputFile).readAll(patch.replace("%pv", project.version)
-								.replace("%i", project.inheritsFrom).replace("%pv", project.version)
-								.replace("%gv", project.game)
-								.replace("%ml", (project.loader.isEmpty() ? "" : project.loader)
-										+ (project.loaderVersion.isEmpty() ? "" : "-" + project.loaderVersion)));
+						ccfg.readAll(inputFile).readAll(patch);
 						String outputStr = ccfg.toString();
 						tmpLoader.close();
 						outp.write(outputStr.getBytes());
@@ -1121,12 +1129,14 @@ public class Installer extends CyanComponent {
 						&& Stream.of(project.loadFirst).anyMatch(t -> t.equals(name))) {
 					if (!cp.isEmpty())
 						cp += " ";
-					cp += "libraries/" + group.replace(".", "/") + "/" + name + "/" + name + "-" + ver + ".jar";
+					cp += "libraries/" + group.replace(".", "/") + "/" + name + "/" + ver + "/" + name + "-" + ver
+							+ ".jar";
 				} else if (!Stream.of(project.fatServer).anyMatch(t -> t.equals(group + ":" + name))
 						&& Stream.of(project.bootLibs).anyMatch(t -> t.equals(name))) {
 					if (!bootcp.isEmpty())
 						bootcp += " ";
-					bootcp += "libraries/" + group.replace(".", "/") + "/" + name + "/" + name + "-" + ver + ".jar";
+					bootcp += "libraries/" + group.replace(".", "/") + "/" + name + "/" + ver + "/" + name + "-" + ver
+							+ ".jar";
 				}
 			}
 			if (!cp.isEmpty())
@@ -1143,7 +1153,8 @@ public class Installer extends CyanComponent {
 				if (!Stream.of(project.fatServer).anyMatch(t -> t.equals(group + ":" + name))
 						&& !Stream.of(project.loadFirst).anyMatch(t -> t.equals(name))
 						&& !Stream.of(project.bootLibs).anyMatch(t -> t.equals(name)))
-					cp += " libraries/" + group.replace(".", "/") + "/" + name + "/" + name + "-" + ver + ".jar";
+					cp += " libraries/" + group.replace(".", "/") + "/" + name + "/" + ver + "/" + name + "-" + ver
+							+ ".jar";
 			}
 
 			logger.info("Installing vanilla server...");
@@ -1529,15 +1540,9 @@ public class Installer extends CyanComponent {
 			ProgressWindow.WindowAppender.increaseProgress();
 			logger.info("");
 
-			logger.info("Building server jar...");
-			File jarOutputFile = new File(dest, project.serverOutput.replace("%wv", project.wrapper)
-					.replace("%gv", project.game).replace("%pv", project.version).replace("%i", project.inheritsFrom));
-			if (jarOutputFile.exists())
-				jarOutputFile.delete();
-
-			FileOutputStream outputFileStream = new FileOutputStream(jarOutputFile);
-			ZipOutputStream output = new ZipOutputStream(outputFileStream);
-
+			logger.info("Generating manifest...");
+			Manifest manifest = new Manifest();
+			Attributes main = manifest.getMainAttributes();
 			project.jarManifest.forEach((k, v) -> {
 				project.jarManifest.put(k,
 						v.replace("%time", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(new Date()))
@@ -1546,6 +1551,30 @@ public class Installer extends CyanComponent {
 								.replace("%lv", project.loaderVersion));
 			});
 
+			main.put(Attributes.Name.MANIFEST_VERSION, "1.0");
+			project.jarManifest.forEach((k, v) -> {
+				project.jarManifest.put(k, v.replace("%time",
+						new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(new Date()).replace("%gv", project.game)
+								.replace("%i", project.inheritsFrom).replace("%pv", project.version)
+								.replace("%ln", project.loader).replace("%lv", project.loaderVersion)));
+			});
+			project.jarManifest.forEach((k, v) -> {
+				main.put(new Attributes.Name(k), v);
+			});
+			main.put(new Attributes.Name("Boot-Class-Path"), bootcp);
+			main.put(Attributes.Name.CLASS_PATH, cp);
+			main.put(Attributes.Name.MAIN_CLASS, project.serverMain);
+
+			File jarOutputFile = new File(dest, project.serverOutput.replace("%wv", project.wrapper)
+					.replace("%gv", project.game).replace("%pv", project.version).replace("%i", project.inheritsFrom));
+			if (jarOutputFile.exists())
+				jarOutputFile.delete();
+
+			FileOutputStream outputFileStream = new FileOutputStream(jarOutputFile);
+			JarOutputStream output = new JarOutputStream(outputFileStream, manifest);
+
+			ProgressWindow.WindowAppender.increaseProgress();
+			logger.info("Building server jar...");
 			ArrayList<String> entries = new ArrayList<String>();
 			for (String lib : libs) {
 				if (Stream.of(project.fatServer).anyMatch(t -> lib.startsWith(t + ":"))) {
@@ -1571,29 +1600,6 @@ public class Installer extends CyanComponent {
 					fin.close();
 				}
 			}
-
-			ProgressWindow.WindowAppender.increaseProgress();
-			logger.info("");
-
-			logger.info("Generating manifest...");
-			StringBuilder mf = new StringBuilder();
-			mf.append("Manifest-Version: 1.0");
-			project.jarManifest.forEach((k, v) -> {
-				project.jarManifest.put(k, v.replace("%time",
-						new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(new Date()).replace("%gv", project.game)
-								.replace("%i", project.inheritsFrom).replace("%pv", project.version)
-								.replace("%ln", project.loader).replace("%lv", project.loaderVersion)));
-			});
-			project.jarManifest.forEach((k, v) -> {
-				mf.append(k + ": " + v).append("\n");
-			});
-			mf.append("Boot-Class-Path: " + bootcp).append("\n");
-			mf.append("Class-Path: " + cp).append("\n");
-			mf.append("Main-Class: " + project.serverMain).append("\n");
-
-			output.putNextEntry(new ZipEntry("META-INF/MANIFEST.MF"));
-			output.write(mf.toString().getBytes("UTF8"));
-			output.closeEntry();
 
 			ProgressWindow.WindowAppender.increaseProgress();
 			logger.info("");
@@ -1866,7 +1872,6 @@ public class Installer extends CyanComponent {
 					logger.info("Skipping file " + outputFile.getName() + " as it is up to date.");
 				}
 
-				ProgressWindow.WindowAppender.increaseProgress();
 				return outputFile;
 			}
 		}

@@ -83,6 +83,7 @@ jar {
 	}
 	exclude "**/extra/**"
 	exclude "**/tests/**"
+	exclude "**/log4j2.xml"
 	includeEmptyDirs = false
 }
 

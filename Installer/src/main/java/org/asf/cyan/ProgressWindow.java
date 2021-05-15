@@ -20,13 +20,13 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
 import javax.swing.JProgressBar;
 import java.awt.Font;
 
-public class ProgressWindow extends JFrame {
+public class ProgressWindow {
 
-	private static final long serialVersionUID = 1L;
+	private JFrame frm;
+	private static boolean shown = false;
 
 	public static class WindowAppender extends AbstractAppender {
 
@@ -53,24 +53,24 @@ public class ProgressWindow extends JFrame {
 				frame.log(message);
 		}
 
-		private static boolean shown = false;
 		private static ProgressWindow frame = new ProgressWindow();
 
 		public static void showWindow() {
 			shown = true;
+			frame = new ProgressWindow();
 			final LoggerContext context = LoggerContext.getContext(false);
 			final Configuration config = context.getConfiguration();
 			final PatternLayout layout = PatternLayout.createDefaultLayout();
 			final Appender appender = new WindowAppender(layout);
 			config.addAppender(appender);
 			updateLoggers(appender, context.getConfiguration());
-			frame.setVisible(true);
+			frame.frm.setVisible(true);
 		}
 
 		public static void closeWindow() {
 			shown = false;
 			if (frame != null) {
-				frame.dispose();
+				frame.frm.dispose();
 				frame = null;
 			}
 		}
@@ -125,14 +125,14 @@ public class ProgressWindow extends JFrame {
 		public static void fatalError() {
 			if (!shown)
 				return;
-			JOptionPane.showMessageDialog(frame, "A fatal error occured:\n" + frame.lastMessageText, "Fatal Error",
+			JOptionPane.showMessageDialog(frame.frm, "A fatal error occured:\n" + frame.lastMessageText, "Fatal Error",
 					JOptionPane.ERROR_MESSAGE);
 		}
 
 		public static void fatalError(String msg) {
 			if (!shown)
 				return;
-			JOptionPane.showMessageDialog(frame, "A fatal error occured:\n" + msg, "Fatal Error",
+			JOptionPane.showMessageDialog(frame.frm, "A fatal error occured:\n" + msg, "Fatal Error",
 					JOptionPane.ERROR_MESSAGE);
 		}
 
@@ -150,7 +150,7 @@ public class ProgressWindow extends JFrame {
 		String log = textArea.getText() + message;
 		while (log.split("\n").length >= 200)
 			log = log.substring(log.indexOf("\n") + 1);
-		
+
 		textArea.setText(log + "\n");
 		textArea.setCaretPosition(textArea.getDocument().getLength());
 	}
@@ -162,15 +162,20 @@ public class ProgressWindow extends JFrame {
 	 * Create the frame.
 	 */
 	public ProgressWindow() {
-		setTitle("Installation Progress...");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 874, 446);
-		setResizable(false);
-		setLocationRelativeTo(null);
+		if (shown) {
+			frm = new JFrame();
+			frm.setTitle("Installation Progress...");
+			frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frm.setBounds(100, 100, 874, 446);
+			frm.setResizable(false);
+			frm.setLocationRelativeTo(null);
+		}
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
-		setContentPane(contentPane);
+
+		if (shown)
+			frm.setContentPane(contentPane);
 		textArea.setFont(new Font("Liberation Mono", Font.PLAIN, 12));
 
 		textArea.setEditable(false);
