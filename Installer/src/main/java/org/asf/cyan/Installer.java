@@ -697,7 +697,7 @@ public class Installer extends CyanComponent {
 
 		if (MinecraftInstallationToolkit.getVersionManifest(modloader).has("inheritsFrom"))
 			MinecraftInstallationToolkit.getVersionManifest(modloader).remove("inheritsFrom");
-		for (String lib : MinecraftInstallationToolkit.getLibrariesMavenFormat(modloader)) {
+		for (String lib : MinecraftInstallationToolkit.getLibrariesMavenFormat(modloader, false)) {
 			String[] info = lib.split(":");
 			String group = info[0];
 			String name = info[1];
@@ -1548,7 +1548,7 @@ public class Installer extends CyanComponent {
 						v.replace("%time", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(new Date()))
 								.replace("%gv", project.game).replace("%i", project.inheritsFrom)
 								.replace("%pv", project.version).replace("%ln", project.loader)
-								.replace("%lv", project.loaderVersion));
+								.replace("%lv", project.loaderVersion)).replace("%pl", project.platform);
 			});
 
 			main.put(Attributes.Name.MANIFEST_VERSION, "1.0");

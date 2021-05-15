@@ -3,21 +3,21 @@ version> '1.0.0.A13'
 
 game> '1.16.5'
 
-mappings> ''
-platform> MCP
+mappings> '1.16.5+build.9'
+platform> YARN
 
-inheritsFrom> '1.16.5-forge-36.1.16'
+inheritsFrom> 'fabric-loader-0.11.3-1.16.5'
 
-loaderVersion> '36.1.16'
-loader> 'forge'
+loaderVersion> '0.11.3'
+loader> 'fabric-loader'
 
 wrapper> '1.0.0.A9'
 
 clientMain> 'org.asf.cyan.CyanForgeClientWrapper'
 serverMain> 'org.asf.cyan.CyanForgeServerWrapper'
 
-profileName> 'Cyan %gv (Forge 36.1.16)'
-profileIcon> 'Furnace_On'
+profileName> 'Cyan %gv (Fabric 0.11.3)'
+profileIcon> 'Lecturn'
 
 
 manifest> '/org/asf/cyan/CyanWrapper/%wv-cyan-%pv/CyanWrapper-%wv-cyan-%pv-%gv-cyan-%pv.json'
@@ -77,6 +77,7 @@ artifactModifications> {
         minecraftCyanVersion> \'%i-cyan-%pv\'
         minecraftVersion> \'%gv\'
         modloaderVersion> \'%lv\'
+        platform> \'%pl\'
         '
     }
     
