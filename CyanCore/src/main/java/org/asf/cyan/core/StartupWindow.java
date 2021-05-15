@@ -118,12 +118,8 @@ public class StartupWindow extends JFrame {
 
 	public void log(String message) {
 		lastMessageText = message;
-		String last = lastMessage.getText();
 		if (!message.isEmpty())
 			lastMessage.setText(message);
-		if (lastMessage.getWidth() >= (getWidth() - 50)) {
-			lastMessage.setText(last);
-		}
 
 		textArea.setText(textArea.getText() + message + "\n");
 		textArea.setCaretPosition(textArea.getDocument().getLength());
