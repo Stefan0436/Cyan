@@ -270,8 +270,6 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		String cPath = cyanDir.getCanonicalPath();
 		info("Starting CYAN in: " + cPath);
 
-		if (side.equals("CLIENT"))
-			StartupWindow.WindowAppender.showWindow();
 		StartupWindow.WindowAppender.addMax(progressMax);
 
 		MinecraftInstallationToolkit.setMinecraftDirectory(cyanDir);
@@ -358,6 +356,9 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		CyanCore.simpleInit();
 		CyanCore.initLogger();
 
+		if (side.equals("CLIENT"))
+			StartupWindow.WindowAppender.showWindow();
+		
 		if (cyanDir == null) {
 			cyanDir = new File(".cyan-data");
 
