@@ -167,7 +167,7 @@ public abstract class Configuration<T extends Configuration<T>> {
 					if (warnLogger != null && filename() != null)
 						warnLogger.accept("Unrecognized config key '" + key + "', config: " + filename());
 				} catch (IllegalArgumentException | IOException e) {
-					if (errorLogger != null)
+					if (errorLogger != null && filename() != null)
 						errorLogger.accept("Failed to read configuration '" + filename() + "', exception: "
 								+ e.getClass().getTypeName() + ": " + e.getMessage());
 				}

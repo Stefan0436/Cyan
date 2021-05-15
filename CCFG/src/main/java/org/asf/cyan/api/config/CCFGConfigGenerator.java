@@ -114,7 +114,10 @@ public class CCFGConfigGenerator<T extends Configuration<T>> extends CCFGGetProp
 		try {
 			Field f = conf.getClass().getField(key);
 			f.setAccessible(true);
-			return f.get(conf);
+			if (!conf.isExcluded(f))
+				return f.get(conf);
+			else
+				return null;
 		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
 			return null;
 		}

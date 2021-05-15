@@ -358,7 +358,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 		if (side.equals("CLIENT"))
 			StartupWindow.WindowAppender.showWindow();
-		
+
 		if (cyanDir == null) {
 			cyanDir = new File(".cyan-data");
 
@@ -1648,7 +1648,8 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 	@Override
 	public int getAllKnownModsLength() {
-		return modManifests.size() + (int) coreModManifests.keySet().stream().filter(t -> t.contains(":")).count();
+		return (int) modManifests.keySet().stream().filter(t -> t.contains(":")).count()
+				+ (int) coreModManifests.keySet().stream().filter(t -> t.contains(":")).count();
 	}
 
 	/**
