@@ -38,9 +38,11 @@ public class ObjectSerializer {
 		Map<String, Object> mp = null;
 		ArrayList<IOException> exs = new ArrayList<IOException>();
 		ParameterizedType type;
+		ClassLoader classLoader;
 
 		@SuppressWarnings("unchecked")
-		public MapPutPropAction(Class<?> cls, ParameterizedType maptype) throws IOException {
+		public MapPutPropAction(Class<?> cls, ParameterizedType maptype, ClassLoader classLoader) throws IOException {
+			this.classLoader = classLoader;
 			type = maptype;
 			try {
 				mp = (Map<String, Object>) cls.getConstructor().newInstance();
@@ -84,10 +86,10 @@ public class ObjectSerializer {
 			try {
 				if (type.getActualTypeArguments()[1] instanceof ParameterizedType) {
 					ParameterizedType paramtype = (ParameterizedType) type.getActualTypeArguments()[1];
-					Class<?> cls = Class.forName(paramtype.getRawType().getTypeName());
-					
+					Class<?> cls = classLoader.loadClass(paramtype.getRawType().getTypeName());
+
 					if (Map.class.isAssignableFrom(cls)) {
-						MapPutPropAction a = new MapPutPropAction(cls, paramtype);
+						MapPutPropAction a = new MapPutPropAction(cls, paramtype, classLoader);
 						parse(txt, a);
 						for (IOException ex : a.exs) {
 							throw ex;
@@ -100,7 +102,7 @@ public class ObjectSerializer {
 
 					return;
 				}
-				Class cls = Class.forName(type.getActualTypeArguments()[1].getTypeName());
+				Class cls = classLoader.loadClass(type.getActualTypeArguments()[1].getTypeName());
 				Object o = deserialize(txt, cls);
 				mp.put(key, o);
 			} catch (IOException e) {
@@ -334,7 +336,8 @@ public class ObjectSerializer {
 					type = field.get(accessor).getClass();
 				} catch (Exception e) {
 				}
-				MapPutPropAction a = new MapPutPropAction(type, (ParameterizedType) field.getGenericType());
+				MapPutPropAction a = new MapPutPropAction(type, (ParameterizedType) field.getGenericType(),
+						accessor.getClass().getClassLoader());
 				parse(input, a);
 				for (IOException ex : a.exs) {
 					throw ex;
@@ -392,12 +395,12 @@ public class ObjectSerializer {
 					if (i + 1 == lines.length && line.isEmpty()) {
 						break;
 					}
-					
+
 					if (first) {
 						builder.append(indent).append(line);
 						first = false;
 					} else
-						builder.append(System.lineSeparator()).append(indent).append(line);					
+						builder.append(System.lineSeparator()).append(indent).append(line);
 				}
 				return builder.toString();
 			} else if (PrimitiveClassUtil.isSupportedWrapper(cls))
