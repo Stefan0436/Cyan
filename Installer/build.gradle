@@ -8,8 +8,15 @@ apply plugin: 'eclipse'
 apply from: '../asf.mvn.publish.gradle'
 buildDir = '../build/Installer'
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
+
+compileJava {
+	doFirst {
+		sourceCompatibility = '1.8'
+		targetCompatibility = '1.8'
+	}
+}
 
 group="org.asf.cyan"
 version="1.0.0.A1"

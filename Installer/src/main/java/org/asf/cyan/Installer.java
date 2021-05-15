@@ -1318,7 +1318,7 @@ public class Installer extends CyanComponent {
 						}
 					}
 				}
-			} else if (project.loader.equals("fabric")) {
+			} else if (project.loader.equals("fabric-loader")) {
 
 				logger.info("");
 				logger.info("");

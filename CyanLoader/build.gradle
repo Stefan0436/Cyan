@@ -27,8 +27,8 @@ createEclipseLaunches {
 	disable = true
 }
 
-sourceCompatibility = '1.11'
-targetCompatibility = '1.11'	
+sourceCompatibility = '1.9'
+targetCompatibility = '1.9'	
 
 buildDir = '../build/CyanLoader'
 
@@ -66,13 +66,6 @@ dependencies {
 
 	implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
 	testImplementation 'junit:junit:4.12'
-}
-
-compileJava {
-	doFirst {
-		sourceCompatibility = '1.8'
-		targetCompatibility = '1.8'		
-	}	
 }
 
 jar {

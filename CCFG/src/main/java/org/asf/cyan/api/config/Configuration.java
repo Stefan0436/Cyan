@@ -164,7 +164,7 @@ public abstract class Configuration<T extends Configuration<T>> {
 					f.setAccessible(true);
 					setProp(f, txt, true);
 				} catch (NoSuchFieldException | SecurityException e) {
-					if (warnLogger != null)
+					if (warnLogger != null && filename() != null)
 						warnLogger.accept("Unrecognized config key '" + key + "', config: " + filename());
 				} catch (IllegalArgumentException | IOException e) {
 					if (errorLogger != null)

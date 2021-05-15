@@ -14,7 +14,7 @@ class CompatibilityMappings extends VanillaMappings {
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 		@SuppressWarnings("unchecked")
-		Mapping<?> m = (Mapping<?>) Mapping.instanciateFromSerialzer(Mapping.class);
+		Mapping<?> m = (Mapping<?>) Mapping.instantiateFromSerialzer(Mapping.class);
 		m.name = in;
 		m.obfuscated = out;
 		m.mappingType = type;

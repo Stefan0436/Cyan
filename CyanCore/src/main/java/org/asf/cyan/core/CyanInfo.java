@@ -185,7 +185,11 @@ public class CyanInfo extends Configuration<CyanInfo> {
 	@Exclude
 	public String displayAppend;
 	public String checkSource;
+
+	@Exclude
 	public String changelog;
+
+	@Exclude
 	public LaunchPlatform platform;
 
 	@Exclude
