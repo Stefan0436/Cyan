@@ -22,7 +22,7 @@ public class TestEventListeners extends CyanComponent implements IEventListenerC
 
 	protected static void initComponent() throws IOException {
 		TestEventListeners t = new TestEventListeners();
-		CyanLoader.testMod(t);
+//		CyanLoader.testMod(t);
 		BaseEventController.addEventContainer(t);
 
 		EventUtil.registerContainer(ContainerConditions.COMMON, TestEventListeners::registerServer);

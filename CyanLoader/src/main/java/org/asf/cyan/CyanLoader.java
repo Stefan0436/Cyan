@@ -2319,21 +2319,21 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		if (loadedMods)
 			return;
 		loadedMods = true;
-		try { // FIXME: REMOVE
-			if (Modloader.getModloaderGameSide() == GameSide.CLIENT) {
-				CyanModfileManifest testManifest = new CyanModfileManifest();
-				testManifest.modId = "examplemod";
-				testManifest.modGroup = "org.example";
-				testManifest.displayName = "Example Mod";
-				testManifest.fallbackDescription = "Test Mod";
-				testManifest.descriptionLanguageKey = "examplemod.description";
-				testManifest.version = "1.0.0.3";
-				CyanLoader.getModloader(CyanLoader.class).loadMod(
-						(IMod) Class.forName("org.example.ExampleMod").getConstructor().newInstance(), testManifest);
-			}
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException | ClassNotFoundException e) {
-		}
+//		try { // FIXME: REMOVE
+//			if (Modloader.getModloaderGameSide() == GameSide.CLIENT) {
+//				CyanModfileManifest testManifest = new CyanModfileManifest();
+//				testManifest.modId = "examplemod";
+//				testManifest.modGroup = "org.example";
+//				testManifest.displayName = "Example Mod";
+//				testManifest.fallbackDescription = "Test Mod";
+//				testManifest.descriptionLanguageKey = "examplemod.description";
+//				testManifest.version = "1.0.0.3";
+//				CyanLoader.getModloader(CyanLoader.class).loadMod(
+//						(IMod) Class.forName("org.example.ExampleMod").getConstructor().newInstance(), testManifest);
+//			}
+//		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+//				| NoSuchMethodException | SecurityException | ClassNotFoundException e) {
+//		}
 
 		info("Downloading maven dependencies...");
 		downloadMavenDependencies(modMavenDependencies);
@@ -2439,8 +2439,8 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 					.map(t -> t.getClass().getTypeName()).toArray(t -> new String[t]);
 		}
 
-		if (name.contains("TestEventListeners"))
-			return true; // FIXME: Remove
+//		if (name.contains("TestEventListeners"))
+//			return true; // FIXME: Remove
 
 		return Stream.of(cyanClasses).anyMatch(t -> t.equals(name))
 				|| Stream.of(coremodTypes).anyMatch(t -> t.equals(name));
