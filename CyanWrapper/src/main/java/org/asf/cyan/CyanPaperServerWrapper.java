@@ -40,7 +40,7 @@ public class CyanPaperServerWrapper extends CyanComponent {
 		sc.close();
 
 		CyanLoader.setPlatformVersion(mappingsVersion.toString());
-		
+
 		Fluid.addAgent("io.papermc.paperclip.Agent", "premain");
 		CyanCore.setEntryMethod("CyanPaperWrapper Version " + builder.toString().trim());
 
@@ -49,6 +49,7 @@ public class CyanPaperServerWrapper extends CyanComponent {
 		CyanLoader.addCompatibilityMappings(CyanLoader.getPaperCompatibilityMappings(mappingsVersion.toString()));
 		CyanLoader.initializeGame("SERVER");
 		String wrapper = System.getProperty("cyan.launcher.server.wrapper", "io.papermc.paperclip.Paperclip");
+		System.setProperty("net.kyori.adventure.text.warnWhenLegacyFormattingDetected", "false");
 		CyanCore.startGame(wrapper, args);
 	}
 
