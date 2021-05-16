@@ -2,8 +2,8 @@ package org.asf.cyan.api.internal.modkit.transformers._1_16.client.entities;
 
 import java.util.Map;
 
-import org.asf.cyan.api.events.entities.EntityRendererRegistryEvent;
-import org.asf.cyan.api.events.objects.entities.EntityRendererRegistryEventObject;
+import org.asf.cyan.api.events.ingame.entities.EntityRendererRegistryEvent;
+import org.asf.cyan.api.events.objects.ingame.entities.EntityRendererRegistryEventObject;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.TargetClass;

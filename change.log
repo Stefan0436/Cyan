@@ -10,7 +10,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - Cyan Dump Command (Cyan 1.0.0.A13)
   
  - ModKit Resource API (CyanAPI ModKit 1.0)
- - ModKit Language Manager (with server support using custom implementation instead of vanilla language manager, CyanAPI ModKit 1.0) -- TODO
+ - ModKit Client Language Manager (server-side system, CyanAPI ModKit 1.0)
  - ModKit Config Manager (CyanAPI ModKit 1.0)
  
  - ModKit Entity Registry Events (CyanAPI ModKit 1.0)
@@ -45,6 +45,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - Cyan Modloader Version Support Map -- TODO
  
  // A14
+ - ModKit Custom Invenotry Tabs (CyanAPI ModKit 1.1) -- TODO
  - ModKit World Load Warning if mods have changed (CyanAPI ModKit 1.1) -- TODO
  - ModKit Threads API (CyanAPI ModKit 1.1, count of threads is displayed in crash logs) -- TODO
  - MTK MSA Account Support (MTK A22) -- TODO
@@ -60,6 +61,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - ModKit Block Events (CyanAPI ModKit 1.2) -- TODO
  - ModKit Item Events (CyanAPI ModKit 1.2) -- TODO
  - ModKit GUI Events (CyanAPI ModKit 1.2) -- TODO
+ 
  - More ModKit Server Packet Events (such as block break, interact, and such, CyanAPI ModKit 1.2) -- TODO
  
  - ModKit Player Display Name Modification (CyanAPI ModKit 1.2) -- TODO

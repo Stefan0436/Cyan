@@ -1,7 +1,7 @@
 package org.asf.cyan.api.internal.modkit.transformers._1_16.common.world;
 
-import org.asf.cyan.api.events.entities.EntityRegistryEvent;
-import org.asf.cyan.api.events.objects.entities.EntityRegistryEventObject;
+import org.asf.cyan.api.events.ingame.entities.EntityRegistryEvent;
+import org.asf.cyan.api.events.objects.ingame.entities.EntityRegistryEventObject;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.Constructor;
 import org.asf.cyan.fluid.api.transforming.InjectAt;

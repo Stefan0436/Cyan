@@ -1,11 +1,11 @@
-package org.asf.cyan.api.events.entities;
+package org.asf.cyan.api.events.ingame.entities;
 
 import java.util.Iterator;
 import java.util.function.BiFunction;
 
 import org.asf.cyan.api.events.extended.AbstractExtendedEvent;
-import org.asf.cyan.api.events.objects.entities.EntityRegistryEventObject;
-import org.asf.cyan.api.events.objects.entities.EntityRegistryEventObject.EntityInfo;
+import org.asf.cyan.api.events.objects.ingame.entities.EntityRegistryEventObject;
+import org.asf.cyan.api.events.objects.ingame.entities.EntityRegistryEventObject.EntityInfo;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;

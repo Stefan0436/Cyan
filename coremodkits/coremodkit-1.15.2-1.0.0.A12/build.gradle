@@ -10,6 +10,9 @@ buildscript {
 	}
 }
 
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
+
 plugins {
 	id 'java'
 }

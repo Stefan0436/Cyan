@@ -55,8 +55,8 @@ public class StartupWindow {
 		private static StartupWindow frame = new StartupWindow();
 
 		public static void showWindow() {
-			frame = new StartupWindow();
 			shown = true;
+			frame = new StartupWindow();
 			final LoggerContext context = LoggerContext.getContext(false);
 			final Configuration config = context.getConfiguration();
 			final PatternLayout layout = PatternLayout.createDefaultLayout();

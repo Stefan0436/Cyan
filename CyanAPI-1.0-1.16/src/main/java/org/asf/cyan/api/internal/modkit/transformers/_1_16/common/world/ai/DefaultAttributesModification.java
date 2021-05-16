@@ -3,8 +3,8 @@ package org.asf.cyan.api.internal.modkit.transformers._1_16.common.world.ai;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 
-import org.asf.cyan.api.events.entities.EntityAttributesEvent;
-import org.asf.cyan.api.events.objects.entities.EntityAttributesEventObject;
+import org.asf.cyan.api.events.ingame.entities.EntityAttributesEvent;
+import org.asf.cyan.api.events.objects.ingame.entities.EntityAttributesEventObject;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.Constructor;
 import org.asf.cyan.fluid.api.transforming.InjectAt;

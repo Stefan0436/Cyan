@@ -1,8 +1,8 @@
 package org.asf.cyan.api.internal.test.sides;
 
 import org.asf.cyan.api.events.core.ReloadEvent;
-import org.asf.cyan.api.events.entities.EntityRendererRegistryEvent;
 import org.asf.cyan.api.events.ingame.blocks.BlockEntityRendererRegistryEvent;
+import org.asf.cyan.api.events.ingame.entities.EntityRendererRegistryEvent;
 import org.asf.cyan.api.events.network.ClientSideLoginEvent;
 import org.asf.cyan.api.events.network.CyanClientHandshakeEvent;
 import org.asf.cyan.api.events.resources.manager.LanguageManagerStartupEvent;
@@ -10,8 +10,8 @@ import org.asf.cyan.api.events.resources.manager.ResourceManagerStartupEvent;
 import org.asf.cyan.api.events.resources.manager.TextureManagerStartupEvent;
 import org.asf.cyan.api.internal.test.testing.renderers.TestRenderer;
 import org.asf.cyan.api.events.objects.core.ReloadEventObject;
-import org.asf.cyan.api.events.objects.entities.EntityRendererRegistryEventObject;
 import org.asf.cyan.api.events.objects.ingame.blocks.BlockEntityRendererRegistryEventObject;
+import org.asf.cyan.api.events.objects.ingame.entities.EntityRendererRegistryEventObject;
 import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;
 import org.asf.cyan.api.events.objects.resources.LanguageManagerEventObject;
 import org.asf.cyan.api.events.objects.resources.ResourceManagerEventObject;

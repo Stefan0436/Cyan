@@ -1,4 +1,4 @@
-package org.asf.cyan.api.events.objects.entities;
+package org.asf.cyan.api.events.objects.ingame.entities;
 
 import java.util.HashMap;
 import java.util.Map;

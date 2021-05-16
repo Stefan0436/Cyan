@@ -1,7 +1,7 @@
-package org.asf.cyan.api.events.entities;
+package org.asf.cyan.api.events.ingame.entities;
 
 import org.asf.cyan.api.events.extended.AbstractExtendedEvent;
-import org.asf.cyan.api.events.objects.entities.EntityRendererRegistryEventObject;
+import org.asf.cyan.api.events.objects.ingame.entities.EntityRendererRegistryEventObject;
 
 /**
  * 

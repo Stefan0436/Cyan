@@ -1,7 +1,7 @@
 package org.asf.cyan.api.internal.modkit.transformers._1_16.client.network;
 
-import org.asf.cyan.api.events.entities.EntityRegistryEvent;
-import org.asf.cyan.api.events.entities.EntityRegistryEvent.EntityTypeEntry;
+import org.asf.cyan.api.events.ingame.entities.EntityRegistryEvent;
+import org.asf.cyan.api.events.ingame.entities.EntityRegistryEvent.EntityTypeEntry;
 import org.asf.cyan.api.events.network.ClientSideLoginEvent;
 import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;
 import org.asf.cyan.api.internal.ClientPacketListenerExtension;
