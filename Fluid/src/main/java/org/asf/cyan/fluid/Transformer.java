@@ -92,8 +92,8 @@ public abstract class Transformer extends CyanComponent {
 				TransformContext ctx = new TransformContext();
 				ctx.transformerType = typeName;
 				ctx.transformer = transformer;
-				ctx.mappedName = loadingName;
-				ctx.obfuscatedName = clName;
+				ctx.mappedName = clName;
+				ctx.obfuscatedName = loadingName;
 				ctx.targetClass = target;
 				ctx.programPool = programPool;
 				ctx.transformerPool = transformerPool;
