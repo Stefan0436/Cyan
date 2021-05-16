@@ -32,6 +32,8 @@ public class SelectionWindow extends JFrame {
 	private File file;
 	private JComboBox<InstallItem> comboBox;
 
+	private ProjectConfig config = new ProjectConfig();
+
 	private class InstallItem {
 		public String dsp;
 		public File dir;
@@ -49,7 +51,9 @@ public class SelectionWindow extends JFrame {
 
 		File installs = new File(dir, ".kickstart-installer.ccfg");
 		if (!installs.exists()) {
-			JOptionPane.showMessageDialog(this, "No CYAN installations present, please install CYAN first.",
+			JOptionPane.showMessageDialog(this,
+					"No " + config.name.toUpperCase() + " installations present, please install "
+							+ config.name.toUpperCase() + " first.",
 					"Missing installations", JOptionPane.WARNING_MESSAGE);
 			closed = true;
 			dispose();
@@ -62,8 +66,8 @@ public class SelectionWindow extends JFrame {
 			if (checkInstall(mf, install)) {
 				File data = new File(install.cyanData);
 				InstallItem inst = new InstallItem();
-				inst.dsp = "[" + install.platform + "] [" + install.side + "] " + data.getParentFile().getName() + " (" + install.gameVersion
-						+ ", " + install.loaderVersion + ")";
+				inst.dsp = "[" + install.platform + "] [" + install.side + "] " + data.getParentFile().getName() + " ("
+						+ install.gameVersion + ", " + install.loaderVersion + ")";
 				inst.dir = new File(install.cyanData);
 				if (inst.dir.exists())
 					comboBox.addItem(inst);
@@ -71,7 +75,9 @@ public class SelectionWindow extends JFrame {
 		}
 
 		if (comboBox.getItemCount() == 0) {
-			JOptionPane.showMessageDialog(this, "No compatible CYAN installations present, please install CYAN first.",
+			JOptionPane.showMessageDialog(this,
+					"No compatible " + config.name.toUpperCase() + " installations present, please install "
+							+ config.name.toUpperCase() + " first.",
 					"Missing installations", JOptionPane.WARNING_MESSAGE);
 			closed = true;
 			dispose();
@@ -145,7 +151,7 @@ public class SelectionWindow extends JFrame {
 	 * Create the frame.
 	 */
 	public SelectionWindow() throws IOException {
-		setTitle("Select a CYAN installation...");
+		setTitle("Select a " + config.name.toUpperCase() + " installation...");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 627, 173);
 		contentPane = new JPanel();
@@ -169,6 +175,13 @@ public class SelectionWindow extends JFrame {
 		panel.add(btnNewButton, BorderLayout.EAST);
 
 		JButton btnNewButton_1 = new JButton("Select");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				result = ((InstallItem) comboBox.getSelectedItem()).dir;
+				dispose();
+				closed = true;
+			}
+		});
 		panel.add(btnNewButton_1, BorderLayout.CENTER);
 
 		JPanel panel_1 = new JPanel();
@@ -179,7 +192,7 @@ public class SelectionWindow extends JFrame {
 		comboBox.setBounds(86, 46, 455, 24);
 		panel_1.add(comboBox);
 
-		JLabel lblNewLabel = new JLabel("Select destination CYAN installation...");
+		JLabel lblNewLabel = new JLabel("Select destination " + config.name.toUpperCase() + " installation...");
 		lblNewLabel.setBounds(86, 30, 455, 15);
 		panel_1.add(lblNewLabel);
 	}
