@@ -22,9 +22,10 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 import javax.swing.JTextArea;
 import javax.swing.JProgressBar;
 
-public class StartupWindow extends JFrame {
+public class StartupWindow {
 
-	private static final long serialVersionUID = 1L;
+	private JFrame frm;
+	private static boolean shown = false;
 
 	public static class WindowAppender extends AbstractAppender {
 
@@ -51,10 +52,10 @@ public class StartupWindow extends JFrame {
 				frame.log(message);
 		}
 
-		private static boolean shown = false;
 		private static StartupWindow frame = new StartupWindow();
 
 		public static void showWindow() {
+			frame = new StartupWindow();
 			shown = true;
 			final LoggerContext context = LoggerContext.getContext(false);
 			final Configuration config = context.getConfiguration();
@@ -62,13 +63,13 @@ public class StartupWindow extends JFrame {
 			final Appender appender = new WindowAppender(layout);
 			config.addAppender(appender);
 			updateLoggers(appender, context.getConfiguration());
-			frame.setVisible(true);
+			frame.frm.setVisible(true);
 		}
 
 		public static void closeWindow() {
 			shown = false;
 			if (frame != null) {
-				frame.dispose();
+				frame.frm.dispose();
 				frame = null;
 			}
 		}
@@ -99,14 +100,14 @@ public class StartupWindow extends JFrame {
 		public static void fatalError() {
 			if (!shown)
 				return;
-			JOptionPane.showMessageDialog(frame, "A fatal error occured:\n" + frame.lastMessageText, "Fatal Error",
+			JOptionPane.showMessageDialog(frame.frm, "A fatal error occured:\n" + frame.lastMessageText, "Fatal Error",
 					JOptionPane.ERROR_MESSAGE);
 		}
 
 		public static void fatalError(String msg) {
 			if (!shown)
 				return;
-			JOptionPane.showMessageDialog(frame, "A fatal error occured:\n" + msg, "Fatal Error",
+			JOptionPane.showMessageDialog(frame.frm, "A fatal error occured:\n" + msg, "Fatal Error",
 					JOptionPane.ERROR_MESSAGE);
 		}
 
@@ -132,15 +133,20 @@ public class StartupWindow extends JFrame {
 	 * Create the frame.
 	 */
 	public StartupWindow() {
-		setTitle("Cyan Early Startup...");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 653, 300);
-		setResizable(false);
-		setLocationRelativeTo(null);
+		if (shown) {
+			frm = new JFrame();
+			frm.setTitle("Cyan Early Startup...");
+			frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frm.setBounds(100, 100, 653, 300);
+			frm.setResizable(false);
+			frm.setLocationRelativeTo(null);
+		}
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
-		setContentPane(contentPane);
+
+		if (shown)
+			frm.setContentPane(contentPane);
 
 		textArea.setEditable(false);
 		JScrollPane pane = new JScrollPane(textArea);
