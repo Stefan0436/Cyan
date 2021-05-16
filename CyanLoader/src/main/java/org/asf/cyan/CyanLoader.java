@@ -1,5 +1,6 @@
 package org.asf.cyan;
 
+import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -356,7 +357,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		CyanCore.simpleInit();
 		CyanCore.initLogger();
 
-		if (side.equals("CLIENT"))
+		if (side.equals("CLIENT") || !GraphicsEnvironment.isHeadless())
 			StartupWindow.WindowAppender.showWindow();
 
 		if (cyanDir == null) {

@@ -158,7 +158,7 @@ public class Version {
 
 			if (segment.value < otherSegment.value)
 				return false;
-			else
+			else if (segment.value != otherSegment.value)
 				lastWasGreater = true;
 			i++;
 		}
