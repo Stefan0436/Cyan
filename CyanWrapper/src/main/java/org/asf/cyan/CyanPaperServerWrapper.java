@@ -25,6 +25,7 @@ public class CyanPaperServerWrapper extends CyanComponent {
 	 */
 	public static void main(String[] args) throws IOException, ClassNotFoundException, NoSuchMethodException,
 			SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		System.setProperty("net.kyori.adventure.text.warnWhenLegacyFormattingDetected", "false");
 		URL info = CyanClientWrapper.class.getResource("/wrapper.info");
 		StringBuilder builder = new StringBuilder();
 		Scanner sc = new Scanner(info.openStream());
@@ -49,7 +50,6 @@ public class CyanPaperServerWrapper extends CyanComponent {
 		CyanLoader.addCompatibilityMappings(CyanLoader.getPaperCompatibilityMappings(mappingsVersion.toString()));
 		CyanLoader.initializeGame("SERVER");
 		String wrapper = System.getProperty("cyan.launcher.server.wrapper", "io.papermc.paperclip.Paperclip");
-		System.setProperty("net.kyori.adventure.text.warnWhenLegacyFormattingDetected", "false");
 		CyanCore.startGame(wrapper, args);
 	}
 
