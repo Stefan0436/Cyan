@@ -4,7 +4,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - Extended Event Provider (less overhead, CyanUtil 1.0.0.A11)
  - Fluid Supertype Remapping now creates deobfuscation targets (FLUID A24)
  - MTK RIFT Supertype Implementation Remapping (MTK A19)
- - The FLUID transformer system is now an API. (FLUID A25) -- TODO
+ - The FLUID transformer system is now an API. (FLUID A25)
  
  - Cyan Info Command (Cyan 1.0.0.A13)
  - Cyan Dump Command (Cyan 1.0.0.A13)
@@ -30,8 +30,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - ModKit Client Add Entity Packet Handlers (CyanAPI ModKit 1.0)
  - ModKit Block Entity Registry Events (CyanAPI ModKit 1.0)
  - ModKit Block Registry Events (CyanAPI ModKit 1.0)
- - ModKit Item Registry Events (CyanAPI ModKit 1.0) -- TODO
- - ModKit Dimension Registry Events (CyanAPI ModKit 1.0) -- TODO
+ - ModKit Item Registry Events (CyanAPI ModKit 1.0)
  
  // IMPORTANT: FIRST PRIORITY:
  - ModKit CyanAPI selected by specific version or if not present, the major version (CyanAPI AND ModKit 1.0)
@@ -46,6 +45,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  
  // A14
  - ModKit Custom Invenotry Tabs (CyanAPI ModKit 1.1) -- TODO
+ - ModKit Dimension Registry Events (CyanAPI ModKit 1.1) -- TODO
  - ModKit World Load Warning if mods have changed (CyanAPI ModKit 1.1) -- TODO
  - ModKit Threads API (CyanAPI ModKit 1.1, count of threads is displayed in crash logs) -- TODO
  - MTK MSA Account Support (MTK A22) -- TODO

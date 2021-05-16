@@ -12,10 +12,12 @@ public class TestItem extends Item {
 	public TestItem(Properties props) {
 		super(props);
 	}
-	
+
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-		return super.use(level, player, hand);
+		if (player.getServer() != null)
+			player.setLevel(player.getServer().getLevel(Level.END));
+		return InteractionResultHolder.success(new ItemStack(this, player.getItemInHand(hand).getCount() - 1));
 	}
 
 }

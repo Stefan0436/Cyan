@@ -2328,8 +2328,8 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 				testManifest.fallbackDescription = "Test Mod";
 				testManifest.descriptionLanguageKey = "examplemod.description";
 				testManifest.version = "1.0.0.3";
-				CyanLoader.getModloader(CyanLoader.class).loadMod(
-						(IMod) Class.forName("org.example.ExampleMod").getConstructor().newInstance(), testManifest);
+				CyanLoader.getModloader(CyanLoader.class).loadMod((IMod) getClass().getClassLoader()
+						.loadClass("org.example.ExampleMod").getConstructor().newInstance(), testManifest);
 			}
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException | ClassNotFoundException e) {

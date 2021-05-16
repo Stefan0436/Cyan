@@ -1,13 +1,8 @@
 package org.asf.cyan.fluid.implementation;
 
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -39,19 +34,12 @@ import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
 import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.Transformer;
-import org.asf.cyan.fluid.api.transforming.ASM;
 import org.asf.cyan.fluid.api.transforming.Constructor;
-import org.asf.cyan.fluid.api.transforming.Erase;
-import org.asf.cyan.fluid.api.transforming.Exclude;
-import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.LocalVariable;
-import org.asf.cyan.fluid.api.transforming.Modifiers;
-import org.asf.cyan.fluid.api.transforming.Reflect;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.TargetName;
 import org.asf.cyan.fluid.api.transforming.TargetType;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
-import org.asf.cyan.fluid.api.transforming.information.metadata.TransformerMetadata;
 import org.asf.cyan.fluid.bytecode.FluidClassPool;
 import org.asf.cyan.fluid.bytecode.UnrecognizedEnumInfo;
 import org.asf.cyan.fluid.remapping.MAPTYPE;
@@ -102,987 +90,616 @@ public class CyanTransformer extends Transformer {
 	// FLUID implementation
 	//
 
-	protected synchronized void transformInternal(ClassNode cls, HashMap<String, String> transformerOwners,
-			HashMap<String, ArrayList<ClassNode>> transformers, String clName, String loadingName, FluidClassPool pool,
-			FluidClassPool transformerPool) {
+	@Override
+	protected void applyClassModifiers(TransformContext context, int oldModifiers, int newModifiers) {
+		context.targetClass.access = newModifiers;
+	}
 
-		if (!transformers.containsKey(loadingName))
-			return;
+	@Override
+	protected boolean applyMethodInterfaceTransformer(TransformContext context, MethodNode target,
+			MethodNode transformer, int oldMod, int newMod, FluidMethodInfo methodInfo) {
+		if (target.name.equals(transformer.name)
+				|| AnnotationInfo.isAnnotationPresent(Constructor.class, transformer)) {
+			target.access = newMod;
+			oldMod = target.access;
+			return true;
+		} else {
+			MethodNode newmethod = new MethodNode();
+			InsnList instructions = new InsnList();
 
-		ArrayList<ClassNode> arr = transformers.get(loadingName);
-		int transformerIndex = 0;
-		for (ClassNode transformerNode : arr) {
-			String typeName = transformerNode.name.replaceAll("/", ".");
-			try {
-				runTransformer(cls, transformerNode, typeName, loadingName, clName, pool, transformerPool,
-						transformerOwners, transformerIndex, arr, transformers);
-				transformerIndex++;
-			} catch (Exception ex) {
-				fatal("FLUID transformation failed! Transformer: " + typeName, ex);
-				File output = new File(Fluid.getDumpDir(), "transformer-backtrace");
-				try {
-					TransformerMetadata.dumpErrorBacktrace(ex.getClass().getTypeName() + ": " + ex.getMessage(),
-							ex.getStackTrace(), output);
-				} catch (Exception e) {
-					error("Could not dump FLUID transformer metadata, an exception was thrown.", e);
-				}
-				System.exit(1);
+			int i = 0;
+			if (!Modifier.isStatic(newMod))
+				instructions.add(new VarInsnNode(Opcodes.ALOAD, i++));
+			for (int i2 = 0; i2 <= methodInfo.types.length; i2++) {
+				instructions.add(new VarInsnNode(Opcodes.ALOAD, i++));
 			}
+
+			instructions
+					.add(new MethodInsnNode((Modifier.isStatic(newMod) ? Opcodes.INVOKESTATIC : Opcodes.INVOKEVIRTUAL),
+							context.targetClass.name, target.name, target.desc));
+
+			if (!methodInfo.returnType.equals("void")) {
+				if (methodInfo.returnType.equals("int") || methodInfo.returnType.equals("boolean")
+						|| methodInfo.returnType.equals("short"))
+					instructions.add(new InsnNode(Opcodes.IRETURN));
+				else if (methodInfo.returnType.equals("double"))
+					instructions.add(new InsnNode(Opcodes.DRETURN));
+				else if (methodInfo.returnType.equals("float"))
+					instructions.add(new InsnNode(Opcodes.FRETURN));
+				else if (methodInfo.returnType.equals("long"))
+					instructions.add(new InsnNode(Opcodes.LRETURN));
+				else
+					instructions.add(new InsnNode(Opcodes.ARETURN));
+			} else
+				instructions.add(new InsnNode(Opcodes.RETURN));
+
+			newmethod.name = transformer.name;
+			newmethod.maxLocals = methodInfo.types.length + (Modifier.isStatic(newMod) ? 0 : 1);
+			newmethod.instructions = instructions;
+			newmethod.maxStack = target.maxStack;
+			newmethod.access = newMod;
+			newmethod.desc = target.desc;
+			newmethod.exceptions = target.exceptions;
+			context.targetClass.methods.add(newmethod);
+			return true;
 		}
 	}
 
-	private void runTransformer(ClassNode cls, ClassNode transformerNode, String typeName, String loadingName,
-			String clName, FluidClassPool pool, FluidClassPool transformerPool,
-			HashMap<String, String> transformerOwners, int transformerIndex, ArrayList<ClassNode> arr,
-			HashMap<String, ArrayList<ClassNode>> transformers) {
-		debug("Applying transformer " + transformerNode.name.replaceAll("/", ".") + " to class "
-				+ Fluid.mapClass(loadingName.replaceAll("/", ".")));
-
-		boolean asmMethods = false;
-		ArrayList<String> transformedMethods = new ArrayList<String>();
-		ArrayList<String> transformedFields = new ArrayList<String>();
-
-		if (Modifier.isInterface(transformerNode.access)) {
-			if (AnnotationInfo.isAnnotationPresent(Modifiers.class, transformerNode)) {
-				transformerNode.access = Modifier.INTERFACE | AnnotationInfo
-						.getAnnotation(Modifiers.class, transformerNode).<Integer>get("modifiers").intValue();
+	@Override
+	public void applyMethodRewriteTransformer(TransformContext context, MethodNode target, MethodNode transformer,
+			int newModifiers, FluidMethodInfo targetInfo) {
+		int methodStart = -1;
+		for (AbstractInsnNode node : target.instructions) {
+			if (node instanceof LineNumberNode && methodStart == -1) {
+				LineNumberNode lnNode = (LineNumberNode) node;
+				methodStart = lnNode.line;
 			}
-			for (MethodNode method : transformerNode.methods) {
-				if (AnnotationInfo.isAnnotationPresent(Exclude.class, method))
-					continue;
+		}
 
-				boolean found = false;
-				ArrayList<String> types = new ArrayList<String>();
+		target.maxStack = transformer.maxStack;
+		target.maxLocals = transformer.maxLocals
+				+ (!Modifier.isStatic(target.access) ? (Modifier.isStatic(transformer.access) ? 0 : 1) : 0);
 
-				FluidMethodInfo info = FluidMethodInfo.create(method);
+		target.localVariables = transformer.localVariables;
+		target.instructions = transformer.instructions;
+		target.access = newModifiers;
+		for (String except : transformer.exceptions) {
+			if (target.exceptions == null)
+				target.exceptions = new ArrayList<String>();
+			target.exceptions.add(except);
+		}
 
-				String returnType = info.returnType;
-				if (AnnotationInfo.isAnnotationPresent(TargetClass.class, method)) {
-					returnType = AnnotationInfo.getAnnotation(TargetType.class, method).get("target");
-					returnType = Fluid.mapClass(returnType);
+		for (AbstractInsnNode node : target.instructions) {
+			if (node instanceof LineNumberNode) {
+				LineNumberNode lnNode = (LineNumberNode) node;
+				lnNode.line = methodStart++;
+			}
+		}
+
+		FluidMethodInfo mth = FluidMethodInfo.create(transformer);
+		mth.remap(context.mappedName, context.transformer, mth, context.programPool);
+		mth.transform(target.instructions, context.transformer, context.mappedName, context.targetClass,
+				context.programPool);
+		mth.apply(transformer);
+	}
+
+	@Override
+	protected void applyInjectAt(TransformContext context, TargetInfo targetInfo, MethodNode target,
+			MethodNode transformer, int oldModifiers, int newModifiers, FluidMethodInfo methodInfo) {
+		int methodStart = -1;
+		int methodEndIndex = -1;
+
+		LabelNode methodStartLabel = null;
+		LabelNode methodEndLabel = null;
+
+		for (AbstractInsnNode node : target.instructions) {
+			if (node instanceof LineNumberNode && methodStart == -1) {
+				LineNumberNode lnNode = (LineNumberNode) node;
+				methodStart = lnNode.line;
+			} else if (node instanceof LabelNode && methodStartLabel == null) {
+				methodStartLabel = (LabelNode) node;
+			}
+		}
+
+		AbstractInsnNode tnode = target.instructions.getLast();
+		boolean returned = false;
+		int indexTmp = target.instructions.size();
+		while (tnode != null) {
+			if (tnode instanceof LabelNode && returned && methodEndLabel == null) {
+				methodEndLabel = (LabelNode) tnode;
+				methodEndIndex = indexTmp;
+			} else if (!returned) {
+				switch (tnode.getOpcode()) {
+				case Opcodes.ARETURN:
+				case Opcodes.DRETURN:
+				case Opcodes.FRETURN:
+				case Opcodes.IRETURN:
+				case Opcodes.LRETURN:
+				case Opcodes.RETURN:
+					returned = true;
+					break;
+				}
+			}
+
+			indexTmp--;
+			tnode = tnode.getPrevious();
+		}
+		if (methodEndLabel == null) {
+			tnode = target.instructions.getLast();
+			indexTmp = target.instructions.size();
+			while (tnode != null) {
+				if (tnode instanceof LabelNode && methodEndLabel == null) {
+					methodEndLabel = (LabelNode) tnode;
+					methodEndIndex = indexTmp;
+					break;
 				}
 
+				indexTmp--;
+				tnode = tnode.getPrevious();
+			}
+		}
+
+		boolean lineless = false;
+		if (methodStart == -1) {
+			lineless = true;
+		}
+
+		int injectLine = -1;
+		int injectNodeIndex = -1;
+
+		AbstractInsnNode injectNode = null;
+		if (targetInfo.targetMethodName != null) {
+			int offset = targetInfo.offset;
+			if (targetInfo.location == InjectLocation.HEAD) {
 				int index = 0;
-				for (String type : info.types) {
-					String typePath = type;
-					for (AnnotationInfo annotation : FluidMethodInfo.getParameterAnnotations(method, index)) {
-						if (annotation.is(TargetType.class)) {
-							typePath = annotation.get("target");
-							typePath = Fluid.mapClass(typePath);
+				for (AbstractInsnNode node : target.instructions) {
+					if (node instanceof MethodInsnNode) {
+						MethodInsnNode methNode = (MethodInsnNode) node;
+						if (methNode.owner.equals(targetInfo.targetMethodClass)) {
+							String methDesc = methNode.desc;
+							String[] methTypes = Fluid
+									.parseMultipleDescriptors(methDesc.substring(1, methDesc.lastIndexOf(")")));
+							if (methNode.name.equals(targetInfo.targetMethodName)
+									&& Arrays.equals(methTypes, targetInfo.targetMethodTypes)) {
+								if (offset != 0) {
+									offset--;
+								} else {
+									if (lineless) {
+										injectNodeIndex = index;
+										injectNode = methNode;
+										break;
+									} else {
+										AbstractInsnNode pr = methNode.getPrevious();
+										while (pr != null && injectNode == null) {
+											if (pr instanceof LineNumberNode) {
+												injectNode = pr.getPrevious();
+												injectLine = ((LineNumberNode) pr).line;
+												injectNodeIndex = index;
+												break;
+											} else if (pr instanceof LabelNode) {
+												injectNode = pr;
+												injectNodeIndex = index;
+												break;
+											}
+											pr = pr.getPrevious();
+										}
+									}
+								}
+							}
 						}
 					}
-					types.add(typePath);
 					index++;
 				}
-
-				String methName = Fluid.mapMethod(clName, method.name, types.toArray(new String[types.size()]));
-
-				if (AnnotationInfo.isAnnotationPresent(Constructor.class, method)) {
-					methName = AnnotationInfo.getAnnotation(Constructor.class, method).get("clinit", false) ? "<clinit>"
-							: "<init>";
-				}
-
-				int newMod = method.access;
-				newMod = newMod - Modifier.ABSTRACT;
-				if (AnnotationInfo.isAnnotationPresent(Modifiers.class, method)) {
-					newMod = AnnotationInfo.getAnnotation(Modifiers.class, method).get("modifiers");
-				}
-				int oldMod = newMod;
-
-				for (MethodNode methodNode : cls.methods) {
-					String desc = methodNode.desc;
-
-					String mTypesStr = desc.substring(1, desc.lastIndexOf(")"));
-					String mReturnType = Fluid.parseDescriptor(desc.substring(desc.lastIndexOf(")") + 1));
-
-					String[] mTypes = Fluid.parseMultipleDescriptors(mTypesStr);
-
-					if (methodNode.name.equals(methName)
-							&& Arrays.equals(mTypes, types.toArray(new String[types.size()]))) {
-						debug("Transforming method: " + method.name + "...");
-
-						if (methodNode.name.equals(method.name)
-								|| AnnotationInfo.isAnnotationPresent(Constructor.class, method)) {
-							methodNode.access = newMod;
-							oldMod = methodNode.access;
-							found = true;
-							break;
-						} else {
-							MethodNode newmethod = new MethodNode();
-							InsnList instructions = new InsnList();
-							for (int i = 0; i <= mTypes.length; i++) {
-								instructions.add(new VarInsnNode(Opcodes.ALOAD, i));
-							}
-							instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, cls.name, methodNode.name,
-									methodNode.desc));
-							if (!mReturnType.equals("void"))
-								instructions.add(new InsnNode(Opcodes.ARETURN));
-							else
-								instructions.add(new InsnNode(Opcodes.RETURN));
-							newmethod.name = method.name;
-							newmethod.maxLocals = mTypes.length + (Modifier.isStatic(newMod) ? 0 : 1);
-							newmethod.instructions = instructions;
-							newmethod.maxStack = methodNode.maxStack;
-							newmethod.access = newMod;
-							newmethod.desc = methodNode.desc;
-							newmethod.exceptions = methodNode.exceptions;
-							cls.methods.add(newmethod);
-							found = true;
-							break;
-						}
-					}
-				}
-				if (!found)
-					throw new RuntimeException("Unable to apply access transformer (interface): " + typeName
-							+ ", could not apply method: " + method.name + ", its counterpart could not be found.");
-
-				transformedMethods.add(info.name + " " + info.toDescriptor() + " " + clName + " " + method.name + "&"
-						+ method.desc + " " + oldMod + " " + newMod);
-			}
-			cls.interfaces.add(transformerNode.name);
-		} else {
-			for (MethodNode meth : transformerNode.methods) {
-				if (AnnotationInfo.isAnnotationPresent(Exclude.class, meth))
-					continue;
-
-				if (AnnotationInfo.isAnnotationPresent(ASM.class, meth)) {
-					asmMethods = true;
-					continue;
-				}
-				if (Modifier.isAbstract(meth.access) || AnnotationInfo.isAnnotationPresent(Reflect.class, meth))
-					continue;
-
-				String descriptor = meth.desc;
-				FluidMethodInfo info = FluidMethodInfo.create(meth);
-				info.remap(clName, transformerNode, info, pool);
-
-				String methName = info.name;
-				descriptor = info.toDescriptor();
-
-				final String descFinal = descriptor;
-				final String methNameFinal = methName;
-				if (AnnotationInfo.isAnnotationPresent(Erase.class, meth)) {
-					if (!cls.methods.stream().anyMatch(t -> t.name.equals(methNameFinal) && t.desc.equals(descFinal))) {
-						throw new RuntimeException("Unable to transform method " + methNameFinal + " of class " + clName
-								+ " as it could not be found, transformer: " + typeName);
-					}
-
-					MethodNode targetNode = cls.methods.stream()
-							.filter(t -> t.name.equals(methNameFinal) && t.desc.equals(descFinal)).findFirst().get();
-
-					int methodStart = -1;
-					for (AbstractInsnNode node : targetNode.instructions) {
-						if (node instanceof LineNumberNode && methodStart == -1) {
-							LineNumberNode lnNode = (LineNumberNode) node;
-							methodStart = lnNode.line;
-						}
-					}
-
-					int newMod = targetNode.access;
-					if (AnnotationInfo.isAnnotationPresent(Modifiers.class, meth)) {
-						newMod = AnnotationInfo.getAnnotation(Modifiers.class, meth).get("modifiers");
-					}
-
-					debug("Transforming method: " + targetNode.name + "... (using transformer method: " + meth.name
-							+ ")");
-					targetNode.maxStack = meth.maxStack;
-					targetNode.maxLocals = meth.maxLocals
-							+ (!Modifier.isStatic(targetNode.access) ? (Modifier.isStatic(meth.access) ? 0 : 1) : 0);
-
-					targetNode.localVariables = meth.localVariables;
-					targetNode.instructions = meth.instructions;
-					targetNode.access = newMod;
-					for (String except : meth.exceptions) {
-						if (targetNode.exceptions == null)
-							targetNode.exceptions = new ArrayList<String>();
-						targetNode.exceptions.add(except);
-					}
-
-					for (AbstractInsnNode node : targetNode.instructions) {
-						if (node instanceof LineNumberNode) {
-							LineNumberNode lnNode = (LineNumberNode) node;
-							lnNode.line = methodStart++;
-						}
-					}
-
-					FluidMethodInfo mth = FluidMethodInfo.create(meth);
-					mth.remap(clName, transformerNode, mth, pool);
-					mth.transform(targetNode.instructions, transformerNode, clName, cls, pool);
-					mth.apply(meth);
-				} else if (AnnotationInfo.isAnnotationPresent(InjectAt.class, meth)) {
-					if (!cls.methods.stream().anyMatch(t -> t.name.equals(methNameFinal) && t.desc.equals(descFinal))) {
-						throw new RuntimeException("Unable to transform method " + methNameFinal + " of class " + clName
-								+ " as it could not be found, transformer: " + typeName);
-					}
-
-					MethodNode targetNode = cls.methods.stream()
-							.filter(t -> t.name.equals(methNameFinal) && t.desc.equals(descFinal)).findFirst().get();
-
-					debug("Transforming method: " + targetNode.name + "... (using transformer method: " + meth.name
-							+ ")");
-					String targetMethName = null;
-					String targetMethTypes[] = null;
-					String targetMethCls = cls.name;
-					if (AnnotationInfo.getAnnotation(InjectAt.class, meth).get("targetCall") != null) {
-						FluidMethodInfo targetInfo = FluidMethodInfo
-								.create(AnnotationInfo.getAnnotation(InjectAt.class, meth).<String>get("targetCall"));
-						String targetCls = clName;
-
-						if (AnnotationInfo.getAnnotation(InjectAt.class, meth).get("targetOwner") != null) {
-							targetCls = AnnotationInfo.getAnnotation(InjectAt.class, meth).get("targetOwner");
-							targetMethCls = Fluid.mapClass(targetCls).replaceAll("\\.", "/");
-						}
-
-						String superName = targetCls;
-						ClassNode clsT = null;
-						try {
-							clsT = pool.getClassNode(Fluid.mapClass(superName));
-						} catch (ClassNotFoundException e1) {
-							superName = null;
-						}
-						boolean found = false;
-						if (Fluid.getMappings().length == 0)
-							found = true;
-						while (!found && superName != null) {
-							for (Mapping<?> map : Fluid.getMappings()) {
-								for (Mapping<?> mp : map.mappings) {
-									if (mp.name.equals(superName)) {
-										if (Stream.of(mp.mappings)
-												.anyMatch(t -> t.mappingType == MAPTYPE.METHOD
-														&& t.name.equals(targetInfo.name)
-														&& Arrays.equals(t.argumentTypes, targetInfo.types))) {
-											found = true;
-											break;
-										}
-									}
-								}
-								if (found)
-									break;
-							}
-							if (!found) {
-								superName = null;
-								if (clsT.superName != null
-										&& !clsT.superName.equals(Object.class.getTypeName().replaceAll("\\.", "/"))) {
-									superName = getDeobfName(clsT.superName.replaceAll("/", "."));
-									try {
-										clsT = pool.getClassNode(clsT.superName);
-									} catch (ClassNotFoundException e) {
-										break;
-									}
-								}
-							}
-						}
-
-						targetInfo.remap(superName, transformerNode, targetInfo, pool);
-						targetMethName = targetInfo.name;
-						targetMethTypes = targetInfo.types;
-					}
-
-					int newMod = targetNode.access;
-					int oldMod = newMod;
-					if (AnnotationInfo.isAnnotationPresent(Modifiers.class, meth)) {
-						newMod = AnnotationInfo.getAnnotation(Modifiers.class, meth).get("modifiers");
-					}
-
-					int methodStart = -1;
-					int methodEndIndex = -1;
-
-					LabelNode methodStartLabel = null;
-					LabelNode methodEndLabel = null;
-
-					for (AbstractInsnNode node : targetNode.instructions) {
-						if (node instanceof LineNumberNode && methodStart == -1) {
-							LineNumberNode lnNode = (LineNumberNode) node;
-							methodStart = lnNode.line;
-						} else if (node instanceof LabelNode && methodStartLabel == null) {
-							methodStartLabel = (LabelNode) node;
-						}
-					}
-
-					AbstractInsnNode tnode = targetNode.instructions.getLast();
-					boolean returned = false;
-					int indexTmp = targetNode.instructions.size();
-					while (tnode != null) {
-						if (tnode instanceof LabelNode && returned && methodEndLabel == null) {
-							methodEndLabel = (LabelNode) tnode;
-							methodEndIndex = indexTmp;
-						} else if (!returned) {
-							switch (tnode.getOpcode()) {
-							case Opcodes.ARETURN:
-							case Opcodes.DRETURN:
-							case Opcodes.FRETURN:
-							case Opcodes.IRETURN:
-							case Opcodes.LRETURN:
-							case Opcodes.RETURN:
-								returned = true;
-								break;
-							}
-						}
-
-						indexTmp--;
-						tnode = tnode.getPrevious();
-					}
-					if (methodEndLabel == null) {
-						tnode = targetNode.instructions.getLast();
-						indexTmp = targetNode.instructions.size();
-						while (tnode != null) {
-							if (tnode instanceof LabelNode && methodEndLabel == null) {
-								methodEndLabel = (LabelNode) tnode;
-								methodEndIndex = indexTmp;
-								break;
-							}
-
-							indexTmp--;
-							tnode = tnode.getPrevious();
-						}
-					}
-
-					boolean lineless = false;
-					if (methodStart == -1) {
-						lineless = true;
-					}
-
-					int injectLine = -1;
-					int injectNodeIndex = -1;
-					AbstractInsnNode injectNode = null;
-					AnnotationInfo at = AnnotationInfo.getAnnotation(InjectAt.class, meth);
-
-					if (targetMethName != null) {
-						int offset = at.get("offset", 0);
-						if (at.get("location") == InjectLocation.HEAD) {
-							int index = 0;
-							for (AbstractInsnNode node : targetNode.instructions) {
-								if (node instanceof MethodInsnNode) {
-									MethodInsnNode methNode = (MethodInsnNode) node;
-									if (methNode.owner.equals(targetMethCls)) {
-										String methDesc = methNode.desc;
-										String[] methTypes = Fluid.parseMultipleDescriptors(
-												methDesc.substring(1, methDesc.lastIndexOf(")")));
-										if (methNode.name.equals(targetMethName)
-												&& Arrays.equals(methTypes, targetMethTypes)) {
-											if (offset != 0) {
-												offset--;
-											} else {
-												if (lineless) {
-													injectNodeIndex = index;
-													injectNode = methNode;
-													break;
-												} else {
-													AbstractInsnNode pr = methNode.getPrevious();
-													while (pr != null && injectNode == null) {
-														if (pr instanceof LineNumberNode) {
-															injectNode = pr.getPrevious();
-															injectLine = ((LineNumberNode) pr).line;
-															injectNodeIndex = index;
-															break;
-														} else if (pr instanceof LabelNode) {
-															injectNode = pr;
-															injectNodeIndex = index;
-															break;
-														}
-														pr = pr.getPrevious();
-													}
-												}
-											}
-										}
-									}
-								}
-								index++;
-							}
-						} else {
-							AbstractInsnNode node = targetNode.instructions.getLast();
-							while (node != null) {
-								int index = 0;
-								if (node instanceof MethodInsnNode) {
-									MethodInsnNode methNode = (MethodInsnNode) node;
-									if (methNode.owner.equals(targetMethCls)) {
-										String methDesc = methNode.desc;
-										String[] methTypes = Fluid.parseMultipleDescriptors(
-												methDesc.substring(1, methDesc.lastIndexOf(")")));
-										if (methNode.name.equals(targetMethName)
-												&& Arrays.equals(methTypes, targetMethTypes)) {
-											if (offset != 0) {
-												offset--;
-											} else {
-												if (lineless) {
-													injectNode = methNode;
-													injectNodeIndex = index;
-													break;
-												} else {
-													AbstractInsnNode pr = methNode.getPrevious();
-													while (pr != null && injectNode == null) {
-														if (pr instanceof LineNumberNode) {
-															injectNode = pr.getPrevious();
-															injectLine = ((LineNumberNode) pr).line;
-															injectNodeIndex = index;
-															break;
-														} else if (pr instanceof LabelNode) {
-															injectNode = pr;
-															injectNodeIndex = index;
-															break;
-														}
-														pr = pr.getPrevious();
-													}
-												}
-											}
-										}
-									}
-									index++;
-								}
-								node = node.getPrevious();
-							}
-						}
-					}
-
-					if (injectNode == null && targetMethName == null) {
-						if (at.get("location") == InjectLocation.HEAD) {
-							int offset = at.get("offset", 0);
-							tnode = methodStartLabel;
-							int index = 0;
-							while (injectNode == null && tnode != null) {
-								if (tnode instanceof LineNumberNode) {
-									if (offset != 0) {
-										offset--;
-									} else {
-										injectNode = tnode.getPrevious();
-										injectLine = ((LineNumberNode) tnode).line;
-										injectNodeIndex = index;
-										break;
-									}
-								} else if (tnode instanceof LabelNode && tnode.getNext() != null
-										&& !(tnode.getNext() instanceof LineNumberNode)) {
-									if (offset != 0) {
-										offset--;
-									} else {
-										injectNode = tnode;
-										injectNodeIndex = index;
-										break;
-									}
-								}
-								index++;
-								tnode = tnode.getNext();
-							}
-						} else {
-							int offset = at.get("offset", 0);
-							tnode = methodEndLabel;
-							int index = methodEndIndex;
-							if (tnode.getNext() != null && tnode.getNext() instanceof LineNumberNode) {
-								index++;
-								tnode = tnode.getNext();
-							}
-							while (injectNode == null && tnode != null) {
-								if (tnode instanceof LineNumberNode) {
-									if (offset != 0) {
-										offset--;
-									} else {
-										injectNode = tnode.getPrevious();
-										injectLine = ((LineNumberNode) tnode).line;
-										injectNodeIndex = index;
-										break;
-									}
-								} else if (tnode instanceof LabelNode && tnode.getNext() != null
-										&& !(tnode.getNext() instanceof LineNumberNode)) {
-									if (offset != 0) {
-										offset--;
-									} else {
-										injectNode = tnode;
-										injectNodeIndex = index;
-										break;
-									}
-								}
-								index--;
-								tnode = tnode.getPrevious();
-							}
-						}
-					}
-
-					String[] actualParams = Fluid
-							.parseMultipleDescriptors(meth.desc.substring(1, meth.desc.lastIndexOf(")")));
-
-					int min = actualParams.length;
-					if (!Modifier.isStatic(meth.access) && Modifier.isStatic(targetNode.access))
-						min--;
-					else if (Modifier.isStatic(meth.access) && !Modifier.isStatic(targetNode.access))
-						min++;
-
-					int appendVarLength = meth.maxLocals
-							- (actualParams.length + (Modifier.isStatic(meth.access) ? 0 : 1));
-
-					int injectCodeStart = -1;
-					int injectCodeEnd = -1;
-
-					int addVarStart = 0;
-					if (injectNode != null) {
-						int index = 0;
-						for (AbstractInsnNode node : targetNode.instructions) {
-							if (index == injectNodeIndex)
-								break;
-							if (node instanceof VarInsnNode) {
-								addVarStart = ((VarInsnNode) node).var;
-							} else if (node instanceof IincInsnNode) {
-								addVarStart = ((IincInsnNode) node).var;
-							}
-							index++;
-						}
-					}
-
-					if (addVarStart == 0)
-						addVarStart = info.types.length + (Modifier.isStatic(targetNode.access) ? 0 : 1);
-
-					targetNode.maxLocals += appendVarLength;
-					InsnList newNodes = new InsnList();
-
-					for (AbstractInsnNode node : meth.instructions) {
-						if (node instanceof VarInsnNode) {
-							VarInsnNode vnode = (VarInsnNode) node;
-							if (vnode.var > min) {
-								int varIndex = vnode.var - min;
-								vnode.var = addVarStart + varIndex;
-							}
-						} else if (node instanceof IincInsnNode) {
-							IincInsnNode inode = (IincInsnNode) node;
-							if (inode.var > min) {
-								int varIndex = inode.var - min;
-								inode.var = addVarStart + varIndex;
-							}
-						}
-
-						if (!(node instanceof FrameNode))
-							newNodes.add(node);
-					}
-					AbstractInsnNode nd = newNodes.getLast();
-
-					AbstractInsnNode endLabel = injectNode;
-					while (endLabel != null && !(endLabel instanceof LabelNode)) {
-						endLabel = endLabel.getPrevious();
-					}
-
-					while (nd != null) {
-						boolean stop = false;
-						switch (nd.getOpcode()) {
-						case Opcodes.ARETURN:
-						case Opcodes.DRETURN:
-						case Opcodes.FRETURN:
-						case Opcodes.IRETURN:
-						case Opcodes.LRETURN:
-						case Opcodes.RETURN:
-							stop = true;
-							if (nd.getNext() != null && nd.getNext() instanceof LabelNode) {
-								LabelNode label = (LabelNode) nd.getNext();
-								if (injectNode != null && meth.localVariables != null && endLabel != null) {
-									for (LocalVariableNode var : meth.localVariables) {
-										if (meth.instructions.indexOf(label) == meth.instructions.indexOf(var.end)) {
-											var.end = (LabelNode) endLabel;
-										}
-									}
-									for (AbstractInsnNode node : newNodes) {
-										if (node instanceof JumpInsnNode) {
-											JumpInsnNode jump = (JumpInsnNode) node;
-											if (meth.instructions.indexOf(label) == meth.instructions
-													.indexOf(jump.label)) {
-												jump.label = (LabelNode) endLabel;
-											}
-										}
-									}
-								}
-								newNodes.remove(label);
-							}
-							if (nd.getPrevious() != null && nd.getPrevious() instanceof LineNumberNode) {
-								LineNumberNode line = (LineNumberNode) nd.getPrevious();
-								injectCodeEnd = line.line;
-								LabelNode label = line.start;
-								if (injectNode != null && meth.localVariables != null && endLabel != null) {
-									for (LocalVariableNode var : meth.localVariables) {
-										if (meth.instructions.indexOf(label) == meth.instructions.indexOf(var.end)) {
-											var.end = (LabelNode) endLabel;
-										}
-									}
-									for (AbstractInsnNode node : newNodes) {
-										if (node instanceof JumpInsnNode) {
-											JumpInsnNode jump = (JumpInsnNode) node;
-											if (meth.instructions.indexOf(label) == meth.instructions
-													.indexOf(jump.label)) {
-												jump.label = (LabelNode) endLabel;
-											}
-										}
-									}
-								}
-								newNodes.remove(label);
-								newNodes.remove(line);
-							}
-							newNodes.remove(nd);
-							break;
-						}
-						if (stop)
-							break;
-						nd = nd.getPrevious();
-					}
-
-					if (targetNode.localVariables != null && meth.localVariables != null) {
-						if (meth.localVariables.size() > actualParams.length
-								+ (Modifier.isStatic(targetNode.access) ? 0 : 1)) {
-							LocalVariableNode[] mthLocalVars = new LocalVariableNode[meth.localVariables.size()
-									- (actualParams.length + (Modifier.isStatic(meth.access) ? 0 : 1))];
-							int index = 0;
-							for (int i = actualParams.length
-									+ (Modifier.isStatic(meth.access) ? 0 : 1); i < meth.localVariables.size(); i++) {
-								LocalVariableNode lvn = meth.localVariables.get(i);
-								if (Fluid.parseDescriptor(lvn.desc).equals(transformerNode.name.replaceAll("/", "."))) {
-									lvn.desc = Fluid.getDescriptor(cls.name);
-								}
-
-								mthLocalVars[index++] = lvn;
-							}
-							if (mthLocalVars.length != 0) {
-								if (targetNode.localVariables.size() == 0) {
-									for (int i = 0; i < mthLocalVars.length; i++) {
-										mthLocalVars[i].index = i;
-										AbstractInsnNode start = mthLocalVars[i].start;
-										while (start != null) {
-											start = start.getPrevious();
-											if (start instanceof LabelNode) {
-												mthLocalVars[i].start = (LabelNode) start;
-												break;
-											}
-										}
-									}
-									targetNode.localVariables = Arrays.asList(mthLocalVars);
+			} else {
+				AbstractInsnNode node = target.instructions.getLast();
+				while (node != null) {
+					int index = 0;
+					if (node instanceof MethodInsnNode) {
+						MethodInsnNode methNode = (MethodInsnNode) node;
+						if (methNode.owner.equals(targetInfo.targetMethodClass)) {
+							String methDesc = methNode.desc;
+							String[] methTypes = Fluid
+									.parseMultipleDescriptors(methDesc.substring(1, methDesc.lastIndexOf(")")));
+							if (methNode.name.equals(targetInfo.targetMethodName)
+									&& Arrays.equals(methTypes, targetInfo.targetMethodTypes)) {
+								if (offset != 0) {
+									offset--;
 								} else {
-									index = 0;
-									LocalVariableNode[] oldVars = new LocalVariableNode[targetNode.localVariables
-											.size()];
-									for (LocalVariableNode var : targetNode.localVariables) {
-										if (var.index > addVarStart)
-											var.index += appendVarLength;
-										oldVars[index++] = var;
-									}
-
-									for (int i = 0; i < mthLocalVars.length; i++) {
-										mthLocalVars[i].index = addVarStart
-												+ (mthLocalVars[i].index - actualParams.length);
-										AbstractInsnNode start = mthLocalVars[i].start;
-										while (start != null) {
-											start = start.getPrevious();
-											if (start instanceof LabelNode) {
-												mthLocalVars[i].start = (LabelNode) start;
+									if (lineless) {
+										injectNode = methNode;
+										injectNodeIndex = index;
+										break;
+									} else {
+										AbstractInsnNode pr = methNode.getPrevious();
+										while (pr != null && injectNode == null) {
+											if (pr instanceof LineNumberNode) {
+												injectNode = pr.getPrevious();
+												injectLine = ((LineNumberNode) pr).line;
+												injectNodeIndex = index;
+												break;
+											} else if (pr instanceof LabelNode) {
+												injectNode = pr;
+												injectNodeIndex = index;
 												break;
 											}
+											pr = pr.getPrevious();
 										}
 									}
-									LocalVariableNode[] vars = ArrayUtil.append(oldVars, mthLocalVars);
-									targetNode.localVariables = Arrays.asList(vars);
 								}
 							}
 						}
+						index++;
 					}
+					node = node.getPrevious();
+				}
+			}
+		}
 
-					for (AbstractInsnNode node : newNodes) {
-						if (node instanceof LineNumberNode && injectCodeStart == -1) {
-							LineNumberNode lnNode = (LineNumberNode) node;
-							injectCodeStart = lnNode.line;
+		if (injectNode == null && targetInfo.targetMethodName == null) {
+			if (targetInfo.location == InjectLocation.HEAD) {
+				int offset = targetInfo.offset;
+				tnode = methodStartLabel;
+				int index = 0;
+				while (injectNode == null && tnode != null) {
+					if (tnode instanceof LineNumberNode) {
+						if (offset != 0) {
+							offset--;
+						} else {
+							injectNode = tnode.getPrevious();
+							injectLine = ((LineNumberNode) tnode).line;
+							injectNodeIndex = index;
+							break;
+						}
+					} else if (tnode instanceof LabelNode && tnode.getNext() != null
+							&& !(tnode.getNext() instanceof LineNumberNode)) {
+						if (offset != 0) {
+							offset--;
+						} else {
+							injectNode = tnode;
+							injectNodeIndex = index;
+							break;
 						}
 					}
+					index++;
+					tnode = tnode.getNext();
+				}
+			} else {
+				int offset = targetInfo.offset;
+				tnode = methodEndLabel;
+				int index = methodEndIndex;
+				if (tnode.getNext() != null && tnode.getNext() instanceof LineNumberNode) {
+					index++;
+					tnode = tnode.getNext();
+				}
+				while (injectNode == null && tnode != null) {
+					if (tnode instanceof LineNumberNode) {
+						if (offset != 0) {
+							offset--;
+						} else {
+							injectNode = tnode.getPrevious();
+							injectLine = ((LineNumberNode) tnode).line;
+							injectNodeIndex = index;
+							break;
+						}
+					} else if (tnode instanceof LabelNode && tnode.getNext() != null
+							&& !(tnode.getNext() instanceof LineNumberNode)) {
+						if (offset != 0) {
+							offset--;
+						} else {
+							injectNode = tnode;
+							injectNodeIndex = index;
+							break;
+						}
+					}
+					index--;
+					tnode = tnode.getPrevious();
+				}
+			}
+		}
 
-					int ind = 1;
-					int codeLength = injectCodeEnd - injectCodeStart;
-					if (injectCodeEnd == injectCodeStart)
-						codeLength = 1;
+		String[] actualParams = Fluid
+				.parseMultipleDescriptors(transformer.desc.substring(1, transformer.desc.lastIndexOf(")")));
+		int min = actualParams.length;
+		if (!Modifier.isStatic(transformer.access) && Modifier.isStatic(target.access))
+			min--;
+		else if (Modifier.isStatic(transformer.access) && !Modifier.isStatic(target.access))
+			min++;
 
-					for (AbstractInsnNode node : targetNode.instructions) {
-						if (node instanceof LineNumberNode) {
-							LineNumberNode lnNode = (LineNumberNode) node;
-							if (lnNode.line >= injectLine) {
-								lnNode.line += codeLength + 1;
+		int appendVarLength = transformer.maxLocals
+				- (actualParams.length + (Modifier.isStatic(transformer.access) ? 0 : 1));
+
+		int injectCodeStart = -1;
+		int injectCodeEnd = -1;
+
+		int addVarStart = 0;
+		if (injectNode != null) {
+			int index = 0;
+			for (AbstractInsnNode node : target.instructions) {
+				if (index == injectNodeIndex)
+					break;
+				if (node instanceof VarInsnNode) {
+					addVarStart = ((VarInsnNode) node).var;
+				} else if (node instanceof IincInsnNode) {
+					addVarStart = ((IincInsnNode) node).var;
+				}
+				index++;
+			}
+		}
+
+		if (addVarStart == 0)
+			addVarStart = methodInfo.types.length + (Modifier.isStatic(target.access) ? 0 : 1);
+
+		target.maxLocals += appendVarLength;
+		InsnList newNodes = new InsnList();
+
+		for (AbstractInsnNode node : transformer.instructions) {
+			if (node instanceof VarInsnNode) {
+				VarInsnNode vnode = (VarInsnNode) node;
+				if (vnode.var > min) {
+					int varIndex = vnode.var - min;
+					vnode.var = addVarStart + varIndex;
+				}
+			} else if (node instanceof IincInsnNode) {
+				IincInsnNode inode = (IincInsnNode) node;
+				if (inode.var > min) {
+					int varIndex = inode.var - min;
+					inode.var = addVarStart + varIndex;
+				}
+			}
+
+			if (!(node instanceof FrameNode))
+				newNodes.add(node);
+		}
+		AbstractInsnNode nd = newNodes.getLast();
+
+		AbstractInsnNode endLabel = injectNode;
+		while (endLabel != null && !(endLabel instanceof LabelNode)) {
+			endLabel = endLabel.getPrevious();
+		}
+
+		while (nd != null) {
+			boolean stop = false;
+			switch (nd.getOpcode()) {
+			case Opcodes.ARETURN:
+			case Opcodes.DRETURN:
+			case Opcodes.FRETURN:
+			case Opcodes.IRETURN:
+			case Opcodes.LRETURN:
+			case Opcodes.RETURN:
+				stop = true;
+				if (nd.getNext() != null && nd.getNext() instanceof LabelNode) {
+					LabelNode label = (LabelNode) nd.getNext();
+					if (injectNode != null && transformer.localVariables != null && endLabel != null) {
+						for (LocalVariableNode var : transformer.localVariables) {
+							if (transformer.instructions.indexOf(label) == transformer.instructions.indexOf(var.end)) {
+								var.end = (LabelNode) endLabel;
 							}
 						}
-					}
-
-					ind = 1;
-					LabelNode mthStartNode = null;
-					for (AbstractInsnNode node : newNodes) {
-						if (node instanceof LineNumberNode) {
-							LineNumberNode lnNode = (LineNumberNode) node;
-							lnNode.line = injectLine + ind++;
-						} else if (node instanceof LabelNode && mthStartNode == null) {
-							mthStartNode = (LabelNode) node;
-						}
-					}
-
-					info.transform(newNodes, transformerNode, clName, cls, pool);
-
-					int offset = at.get("offset", 0);
-					if (!lineless && injectNode == null && targetMethName == null) {
-						throw new RuntimeException("Unable to find LabelNode offset " + offset + " for class " + clName
-								+ ", transformer cannot be applied, method: " + meth.name + ", transformer: "
-								+ typeName);
-					} else if (!lineless && injectNode == null) {
-						throw new RuntimeException("Unable to find target method '" + targetMethName + "'"
-								+ (offset == 0 ? "" : " with offset " + offset) + " in class " + clName
-								+ ", transformer cannot be applied, method: " + meth.name + ", transformer: "
-								+ typeName);
-					}
-
-					InsnList instrs = targetNode.instructions;
-					if (mthStartNode != null) {
-						for (AbstractInsnNode node : instrs) {
+						for (AbstractInsnNode node : newNodes) {
 							if (node instanceof JumpInsnNode) {
 								JumpInsnNode jump = (JumpInsnNode) node;
-								int jTarget = 0;
-								AbstractInsnNode nodeTmp = jump.label.getPrevious();
-								while (nodeTmp != null) {
-									jTarget++;
-									nodeTmp = nodeTmp.getPrevious();
+								if (transformer.instructions.indexOf(label) == transformer.instructions
+										.indexOf(jump.label)) {
+									jump.label = (LabelNode) endLabel;
 								}
-								int mTarget = 0;
-								nodeTmp = injectNode.getPrevious();
-								while (nodeTmp != null) {
-									mTarget++;
-									nodeTmp = nodeTmp.getPrevious();
-								}
-								if (jTarget == mTarget)
-									jump.label = mthStartNode;
-							} else if (node instanceof FrameNode)
-								instrs.remove(node);
-						}
-					}
-					for (AbstractInsnNode node : instrs) {
-						if (node instanceof VarInsnNode) {
-							VarInsnNode vnode = (VarInsnNode) node;
-							if (vnode.var > addVarStart) {
-								vnode.var += appendVarLength;
-							}
-						} else if (node instanceof IincInsnNode) {
-							IincInsnNode vnode = (IincInsnNode) node;
-							if (vnode.var > addVarStart) {
-								vnode.var += appendVarLength;
 							}
 						}
 					}
-					if (injectNode != null) {
-						instrs.insertBefore(injectNode, newNodes);
+					newNodes.remove(label);
+				}
+				if (nd.getPrevious() != null && nd.getPrevious() instanceof LineNumberNode) {
+					LineNumberNode line = (LineNumberNode) nd.getPrevious();
+					injectCodeEnd = line.line;
+					LabelNode label = line.start;
+					if (injectNode != null && transformer.localVariables != null && endLabel != null) {
+						for (LocalVariableNode var : transformer.localVariables) {
+							if (transformer.instructions.indexOf(label) == transformer.instructions.indexOf(var.end)) {
+								var.end = (LabelNode) endLabel;
+							}
+						}
+						for (AbstractInsnNode node : newNodes) {
+							if (node instanceof JumpInsnNode) {
+								JumpInsnNode jump = (JumpInsnNode) node;
+								if (transformer.instructions.indexOf(label) == transformer.instructions
+										.indexOf(jump.label)) {
+									jump.label = (LabelNode) endLabel;
+								}
+							}
+						}
+					}
+					newNodes.remove(label);
+					newNodes.remove(line);
+				}
+				newNodes.remove(nd);
+				break;
+			}
+			if (stop)
+				break;
+			nd = nd.getPrevious();
+		}
+
+		if (target.localVariables != null && transformer.localVariables != null) {
+			if (transformer.localVariables.size() > actualParams.length + (Modifier.isStatic(target.access) ? 0 : 1)) {
+				LocalVariableNode[] mthLocalVars = new LocalVariableNode[transformer.localVariables.size()
+						- (actualParams.length + (Modifier.isStatic(transformer.access) ? 0 : 1))];
+				int index = 0;
+				for (int i = actualParams.length
+						+ (Modifier.isStatic(transformer.access) ? 0 : 1); i < transformer.localVariables.size(); i++) {
+					LocalVariableNode lvn = transformer.localVariables.get(i);
+					if (Fluid.parseDescriptor(lvn.desc).equals(context.transformer.name.replaceAll("/", "."))) {
+						lvn.desc = Fluid.getDescriptor(context.targetClass.name);
+					}
+
+					mthLocalVars[index++] = lvn;
+				}
+				if (mthLocalVars.length != 0) {
+					if (target.localVariables.size() == 0) {
+						for (int i = 0; i < mthLocalVars.length; i++) {
+							mthLocalVars[i].index = i;
+							AbstractInsnNode start = mthLocalVars[i].start;
+							while (start != null) {
+								start = start.getPrevious();
+								if (start instanceof LabelNode) {
+									mthLocalVars[i].start = (LabelNode) start;
+									break;
+								}
+							}
+						}
+						target.localVariables = Arrays.asList(mthLocalVars);
 					} else {
-						if (at.get("location") != InjectLocation.HEAD || at.get("offset", 0) != 0)
-							warn("Could not apply transformer " + typeName + " to method " + meth.name
-									+ " at its preferred offset, adding the instructions at the top of the method, class: "
-									+ clName);
-						instrs.insert(newNodes);
-					}
-
-					targetNode.instructions = instrs;
-					targetNode.access = newMod;
-					if (meth.maxStack > targetNode.maxStack) {
-						targetNode.maxStack += meth.maxStack - targetNode.maxStack;
-					}
-					if (meth.tryCatchBlocks != null) {
-						if (targetNode.tryCatchBlocks == null)
-							targetNode.tryCatchBlocks = new ArrayList<TryCatchBlockNode>();
-						targetNode.tryCatchBlocks.addAll(meth.tryCatchBlocks);
-					}
-
-					FluidMethodInfo ninfo = FluidMethodInfo.create(meth);
-					ninfo.remap(clName, transformerNode, ninfo, false, pool);
-
-					transformedMethods.add(ninfo.name + " " + ninfo.toDescriptor() + " " + clName + " " + meth.name
-							+ "&" + meth.desc + " " + oldMod + " " + newMod);
-				} else {
-					if (meth.name.equals("<init>"))
-						continue;
-					if (cls.methods.stream().anyMatch(t -> t.name.equals(methNameFinal) && t.desc.equals(descFinal))) {
-
-						if (!meth.name.equals("<clinit>"))
-							throw new RuntimeException("Unable to add method " + methNameFinal + " to class " + clName
-									+ " as a method with the same signature already exists, transformer: " + typeName);
-						else
-							continue;
-					}
-
-					for (int i = 0; i < meth.localVariables.size(); i++) {
-						LocalVariableNode lvn = meth.localVariables.get(i);
-						if (Fluid.parseDescriptor(lvn.desc).equals(transformerNode.name.replaceAll("/", "."))) {
-							lvn.desc = Fluid.getDescriptor(cls.name);
+						index = 0;
+						LocalVariableNode[] oldVars = new LocalVariableNode[target.localVariables.size()];
+						for (LocalVariableNode var : target.localVariables) {
+							if (var.index > addVarStart)
+								var.index += appendVarLength;
+							oldVars[index++] = var;
 						}
 
-						meth.localVariables.set(i, lvn);
-					}
-
-					int newMod = meth.access;
-					if (AnnotationInfo.isAnnotationPresent(Modifiers.class, meth)) {
-						newMod = AnnotationInfo.getAnnotation(Modifiers.class, meth).get("modifiers");
-					}
-					int oldMod = meth.access;
-
-					FluidMethodInfo mth = FluidMethodInfo.create(meth);
-					mth.name = methNameFinal;
-					mth.remap(clName, transformerNode, mth, pool);
-					mth.transform(meth.instructions, transformerNode, clName, cls, pool);
-					mth.apply(meth);
-					meth.access = newMod;
-
-					FluidMethodInfo ninfo = FluidMethodInfo.create(meth);
-					ninfo.remap(clName, transformerNode, ninfo, false, pool);
-
-					InsnList instrs = new InsnList();
-					for (AbstractInsnNode nd : meth.instructions) {
-						if (!(nd instanceof FrameNode))
-							instrs.add(nd);
-					}
-					meth.instructions = instrs;
-					cls.methods.add(meth);
-
-					debug("Created method " + ninfo.name);
-					transformedMethods.add(ninfo.name + " " + ninfo.toDescriptor() + " " + clName + " " + meth.name
-							+ "&" + meth.desc + " " + oldMod + " " + newMod + " true");
-				}
-			}
-
-			for (FieldNode field : transformerNode.fields) {
-				String superName = clName;
-				ClassNode clsT = null;
-				try {
-					clsT = pool.getClassNode(Fluid.mapClass(superName));
-				} catch (ClassNotFoundException e1) {
-					superName = null;
-				}
-				boolean found = false;
-				final String fName = field.name;
-				if (Fluid.getMappings().length == 0)
-					found = true;
-				while (!found && superName != null) {
-					for (Mapping<?> map : Fluid.getMappings()) {
-						for (Mapping<?> mp : map.mappings) {
-							if (mp.name.equals(superName)) {
-								if (Stream.of(mp.mappings)
-										.anyMatch(t -> t.mappingType == MAPTYPE.PROPERTY && t.name.equals(fName))) {
-									found = true;
+						for (int i = 0; i < mthLocalVars.length; i++) {
+							mthLocalVars[i].index = addVarStart + (mthLocalVars[i].index - actualParams.length);
+							AbstractInsnNode start = mthLocalVars[i].start;
+							while (start != null) {
+								start = start.getPrevious();
+								if (start instanceof LabelNode) {
+									mthLocalVars[i].start = (LabelNode) start;
 									break;
 								}
 							}
 						}
-						if (found)
-							break;
-					}
-					if (!found) {
-						superName = null;
-						if (clsT.superName != null
-								&& !clsT.superName.equals(Object.class.getTypeName().replaceAll("\\.", "/"))) {
-							superName = getDeobfName(clsT.superName.replaceAll("/", "."));
-							try {
-								clsT = pool.getClassNode(clsT.superName);
-							} catch (ClassNotFoundException e) {
-								break;
-							}
-						}
+						LocalVariableNode[] vars = ArrayUtil.append(oldVars, mthLocalVars);
+						target.localVariables = Arrays.asList(vars);
 					}
 				}
-
-				if (superName == null)
-					superName = clName;
-
-				String fname = Fluid.mapProperty(superName, field.name);
-				String ftype = Fluid.parseDescriptor(field.desc);
-
-				if (AnnotationInfo.isAnnotationPresent(TargetType.class, field)) {
-					ftype = AnnotationInfo.getAnnotation(TargetType.class, field).get("target");
-				}
-
-				int newMod = -1;
-				if (AnnotationInfo.isAnnotationPresent(Modifiers.class, field)) {
-					newMod = AnnotationInfo.getAnnotation(Modifiers.class, field).get("modifiers");
-				}
-				boolean isNew = false;
-
-				if (!checkField(fname, pool, cls)) {
-					field.desc = Fluid.getDescriptor(Fluid.mapClass(ftype));
-					cls.fields.add(field);
-					isNew = true;
-				} else {
-					field = getField(fname, pool, cls);
-				}
-
-				int oldMod = field.access;
-				if (newMod != -1) {
-					field.access = newMod;
-				}
-
-				transformedFields.add(fName + " " + Fluid.getDescriptor(ftype) + " " + superName + " " + fName + " "
-						+ oldMod + " " + field.access + " " + isNew);
-			}
-
-			for (String _interface : transformerNode.interfaces) {
-				if (!cls.interfaces.contains(_interface))
-					cls.interfaces.add(_interface);
-			}
-
-			if (asmMethods) {
-				debug("Loading transformer " + typeName + " as a class, it contains @ASM methods...");
-				try {
-					Class<?> transformer = ClassLoader.getSystemClassLoader().loadClass(typeName);
-					for (Method meth : transformer.getMethods()) {
-						if (Modifier.isStatic(meth.getModifiers()) && meth.isAnnotationPresent(ASM.class)) {
-							debug("Transforming " + clName + " with ASM-based transformer " + meth.getName()
-									+ "... Transformer class: " + typeName);
-							ArrayList<Object> params = new ArrayList<Object>();
-							boolean clsPoolAdded = false;
-							boolean clsNameAdded = false;
-							boolean error = false;
-							int nodes = 0;
-							for (Parameter param : meth.getParameters()) {
-								if (param.getType().getTypeName().equals(FluidClassPool.class.getTypeName())
-										&& !clsPoolAdded) {
-									params.add(pool);
-									clsPoolAdded = true;
-								} else if (param.getType().getTypeName().equals(ClassNode.class.getTypeName())
-										&& nodes < 2) {
-									if (nodes == 0) {
-										params.add(cls);
-										nodes++;
-									} else if (nodes == 1) {
-										params.add(transformerNode);
-										nodes++;
-									}
-								} else if (param.getType().isAssignableFrom(String.class) && !clsNameAdded) {
-									params.add(loadingName);
-									clsNameAdded = true;
-								} else {
-									error("Unable to run @ASM transformer method: " + meth.getName()
-											+ ", could not recognize parameter: " + param.getName() + " of type "
-											+ param.getType().getTypeName());
-									error("Known parameters:");
-									error(" - second ClassNode   - transformer class");
-									error(" - first ClassNode    - target class");
-									error(" - FluidClassPool     - class pool used to load the transformers and classes");
-									error(" - String             - deobfuscated class name");
-
-									error = true;
-									break;
-								}
-							}
-							if (!error) {
-								try {
-									meth.invoke(null, params.toArray(t -> new Object[t]));
-								} catch (IllegalAccessException | IllegalArgumentException
-										| InvocationTargetException e) {
-									error("Failed to transform with ASM transformer " + meth.getName()
-											+ ", transformer: " + typeName, e);
-								}
-							}
-						}
-					}
-				} catch (ClassNotFoundException e) {
-					error("Failed to load transformer " + typeName + " as a class, needed for @ASM methods.", e);
-				}
-
 			}
 		}
-		TransformerMetadata.createMetadata(transformerNode, transformerOwners.get(transformerNode.name),
-				transformedFields, transformedMethods, pool);
-		try {
-			transformerPool.detachClass(transformerNode.name);
-			transformerNode = transformerPool.getClassNode(transformerNode.name);
-		} catch (ClassNotFoundException e) {
+
+		for (AbstractInsnNode node : newNodes) {
+			if (node instanceof LineNumberNode && injectCodeStart == -1) {
+				LineNumberNode lnNode = (LineNumberNode) node;
+				injectCodeStart = lnNode.line;
+			}
 		}
-		arr.set(transformerIndex, transformerNode);
-		transformers.put(loadingName, arr);
+
+		int ind = 1;
+		int codeLength = injectCodeEnd - injectCodeStart;
+		if (injectCodeEnd == injectCodeStart)
+			codeLength = 1;
+
+		for (AbstractInsnNode node : target.instructions) {
+			if (node instanceof LineNumberNode) {
+				LineNumberNode lnNode = (LineNumberNode) node;
+				if (lnNode.line >= injectLine) {
+					lnNode.line += codeLength + 1;
+				}
+			}
+		}
+
+		ind = 1;
+		LabelNode mthStartNode = null;
+		for (AbstractInsnNode node : newNodes) {
+			if (node instanceof LineNumberNode) {
+				LineNumberNode lnNode = (LineNumberNode) node;
+				lnNode.line = injectLine + ind++;
+			} else if (node instanceof LabelNode && mthStartNode == null) {
+				mthStartNode = (LabelNode) node;
+			}
+		}
+
+		methodInfo.transform(newNodes, context.transformer, context.mappedName, context.targetClass,
+				context.programPool);
+
+		int offset = targetInfo.offset;
+		if (!lineless && injectNode == null && targetInfo.targetMethodName == null) {
+			throw new RuntimeException("Unable to find LabelNode offset " + offset + " for class " + context.mappedName
+					+ ", transformer cannot be applied, method: " + transformer.name + ", transformer: "
+					+ context.transformerType);
+		} else if (!lineless && injectNode == null) {
+			throw new RuntimeException("Unable to find target method '" + targetInfo.targetMethodName + "'"
+					+ (offset == 0 ? "" : " with offset " + offset) + " in class " + context.mappedName
+					+ ", transformer cannot be applied, method: " + transformer.name + ", transformer: "
+					+ context.transformerType);
+		}
+
+		InsnList instrs = target.instructions;
+		if (mthStartNode != null) {
+			for (AbstractInsnNode node : instrs) {
+				if (node instanceof JumpInsnNode) {
+					JumpInsnNode jump = (JumpInsnNode) node;
+					int jTarget = 0;
+					AbstractInsnNode nodeTmp = jump.label.getPrevious();
+					while (nodeTmp != null) {
+						jTarget++;
+						nodeTmp = nodeTmp.getPrevious();
+					}
+					int mTarget = 0;
+					nodeTmp = injectNode.getPrevious();
+					while (nodeTmp != null) {
+						mTarget++;
+						nodeTmp = nodeTmp.getPrevious();
+					}
+					if (jTarget == mTarget)
+						jump.label = mthStartNode;
+				} else if (node instanceof FrameNode)
+					instrs.remove(node);
+			}
+		}
+		for (AbstractInsnNode node : instrs) {
+			if (node instanceof VarInsnNode) {
+				VarInsnNode vnode = (VarInsnNode) node;
+				if (vnode.var > addVarStart) {
+					vnode.var += appendVarLength;
+				}
+			} else if (node instanceof IincInsnNode) {
+				IincInsnNode vnode = (IincInsnNode) node;
+				if (vnode.var > addVarStart) {
+					vnode.var += appendVarLength;
+				}
+			}
+		}
+		if (injectNode != null) {
+			instrs.insertBefore(injectNode, newNodes);
+		} else {
+			if (targetInfo.location != InjectLocation.HEAD || targetInfo.offset != 0)
+				warn("Could not apply transformer " + context.transformerType + " to method " + transformer.name
+						+ " at its preferred offset, adding the instructions at the top of the method, class: "
+						+ context.mappedName);
+			instrs.insert(newNodes);
+		}
+
+		target.instructions = instrs;
+		target.access = newModifiers;
+		if (transformer.maxStack > target.maxStack) {
+			target.maxStack += transformer.maxStack - target.maxStack;
+		}
+		if (transformer.tryCatchBlocks != null) {
+			if (target.tryCatchBlocks == null)
+				target.tryCatchBlocks = new ArrayList<TryCatchBlockNode>();
+			target.tryCatchBlocks.addAll(transformer.tryCatchBlocks);
+		}
+	}
+
+	@Override
+	protected FluidMethodInfo createMethod(TransformContext context, MethodNode transformer, String methodName,
+			int oldModifiers, int newModifiers) {
+		FluidMethodInfo mth = FluidMethodInfo.create(transformer);
+		mth.name = methodName;
+		mth.remap(context.mappedName, context.transformer, mth, context.programPool);
+		mth.transform(transformer.instructions, context.transformer, context.mappedName, context.targetClass,
+				context.programPool);
+		mth.apply(transformer);
+		transformer.access = newModifiers;
+
+		FluidMethodInfo ninfo = FluidMethodInfo.create(transformer);
+		ninfo.remap(context.mappedName, context.transformer, ninfo, false, context.programPool);
+
+		InsnList instrs = new InsnList();
+		for (AbstractInsnNode nd : transformer.instructions) {
+			if (!(nd instanceof FrameNode))
+				instrs.add(nd);
+		}
+		transformer.instructions = instrs;
+		context.targetClass.methods.add(transformer);
+		return ninfo;
 	}
 
 	@Override
