@@ -54,7 +54,6 @@ import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.config.Configuration;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
-import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.core.CyanCore;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.bytecode.sources.FileClassSourceProvider;
@@ -214,12 +213,7 @@ public class Installer extends CyanComponent {
 			}
 		} else if (project.loader.equalsIgnoreCase("paper")) {
 			Version java = Version.fromString(System.getProperty("java.version"));
-			if (Version.fromString("14").isGreaterThan(java)) {
-				JOptionPane.showMessageDialog(null,
-						"Paper is not compatible with versions below Java 14, please use Java 14+ to install.",
-						"Cannot install", JOptionPane.ERROR_MESSAGE);
-				System.exit(-1);
-			} else if (Version.fromString(project.game).isGreaterOrEqualTo(Version.fromString("1.17"))
+			if (Version.fromString(project.game).isGreaterOrEqualTo(Version.fromString("1.17"))
 					&& Version.fromString("16").isGreaterThan(java)) {
 				JOptionPane.showMessageDialog(null,
 						"Paper 1.17+ is not compatible with versions below Java 16, please use Java 16+ to install.",
@@ -584,6 +578,7 @@ public class Installer extends CyanComponent {
 			ProgressWindow.WindowAppender.increaseProgress();
 			logger.info("");
 		} else {
+			vanillaMappings = MinecraftMappingsToolkit.loadMappings(version, side);
 			ProgressWindow.WindowAppender.increaseProgress();
 			ProgressWindow.WindowAppender.increaseProgress();
 		}
@@ -1192,7 +1187,7 @@ public class Installer extends CyanComponent {
 						+ project.loaderVersion + "/downloads/paper-" + project.game + "-" + project.loaderVersion
 						+ ".jar");
 
-				File paperJar = new File("paper-server-" + project.loaderVersion + ".jar");
+				File paperJar = new File(dest, "paper-server-" + project.loaderVersion + ".jar");
 				InputStream strm = u.openStream();
 				FileOutputStream strmOut = new FileOutputStream(paperJar);
 				strm.transferTo(strmOut);
@@ -1201,7 +1196,7 @@ public class Installer extends CyanComponent {
 
 				logger.info("Patching vanilla server with the paper patches...");
 				ProcessBuilder builder = new ProcessBuilder();
-				builder.directory(cache);
+				builder.directory(dest);
 				builder.command(ProcessHandle.current().info().command().get(), "-Dpaperclip.patchonly=true", "-jar",
 						paperJar.getCanonicalPath());
 				Process proc = builder.start();

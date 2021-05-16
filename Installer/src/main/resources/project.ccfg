@@ -3,18 +3,18 @@ version> '1.0.0.A13'
 
 game> '1.16.5'
 
-mappings> '1.16.5+build.9'
-platform> YARN
+mappings> 'f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3'
+platform> SPIGOT
 
-inheritsFrom> 'fabric-loader-0.11.3-1.16.5'
+inheritsFrom> '1.16.5-paper-682'
 
-loaderVersion> '0.11.3'
-loader> 'fabric-loader'
+loaderVersion> '682'
+loader> 'paper'
 
 wrapper> '1.0.0.A9'
 
-clientMain> 'org.asf.cyan.CyanFabricClientWrapper'
-serverMain> 'org.asf.cyan.CyanFabricServerWrapper'
+clientMain> 'org.asf.cyan.CyanClientWrapper'
+serverMain> 'org.asf.cyan.CyanPaperServerWrapper'
 
 profileName> 'Cyan %gv (Fabric 0.11.3)'
 profileIcon> 'Lecturn'
