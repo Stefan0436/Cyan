@@ -145,6 +145,7 @@ public class Version {
 		if (isEqualTo(other))
 			return false;
 		int i = 0;
+		boolean lastWasGreater = false;
 		for (VersionSegment segment : segments) {
 			if (i >= other.segments.size())
 				return true;
@@ -157,9 +158,13 @@ public class Version {
 
 			if (segment.value < otherSegment.value)
 				return false;
+			else
+				lastWasGreater = true;
 			i++;
 		}
 		if (i < other.segments.size()) {
+			if (lastWasGreater)
+				return true;
 			if (isSnapshot(other.segments.get(i)))
 				return true;
 			return false;
@@ -177,13 +182,14 @@ public class Version {
 		if (isEqualTo(other))
 			return false;
 		
+		boolean lastWasLess = false;
 		int i = 0;
 		for (VersionSegment segment : segments) {
 			if (i >= other.segments.size()) {
 				if (isSnapshot(segment) && !other.segments.stream().anyMatch(t -> isSnapshot(t))) {
 					break;
 				}
-				return false;
+				return lastWasLess;
 			}
 
 			VersionSegment otherSegment = other.segments.get(i);
@@ -194,6 +200,8 @@ public class Version {
 
 			if (segment.value > otherSegment.value)
 				return false;
+			lastWasLess = segment.value < otherSegment.value;
+			
 			i++;
 		}
 
