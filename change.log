@@ -1,5 +1,5 @@
 Cyan Update Changelog: 1.0.0 (Alpha 13):
- - Rift Supertype Remapping (using @Override)
+ - Rift Supertype Remapping
  - ResourceManager modification to allow mods to set textures (CyanAPI ModKit 1.0)
  - Extended Event Provider (less overhead, CyanUtil 1.0.0.A11)
  - Fluid Supertype Remapping now creates deobfuscation targets (FLUID A24)
