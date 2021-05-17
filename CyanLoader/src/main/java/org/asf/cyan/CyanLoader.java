@@ -517,7 +517,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			Optional<CyanModfileManifest> optManifest = allManifests.stream()
 					.filter(t -> id.equals(t.modGroup + ":" + t.modId)).findFirst();
 
-			if (!optManifest.isEmpty() || Stream.of(mods)
+			if (!optManifest.isEmpty() && !Stream.of(mods)
 					.anyMatch(t -> t.getManifest().id().equals(manifest.modGroup + ":" + manifest.modId))) {
 
 				String cVersion = (optManifest.isEmpty()
