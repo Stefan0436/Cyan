@@ -14,6 +14,7 @@ import org.asf.cyan.cornflower.gradle.utilities.modding.manifests.CyanModfileMan
 import org.asf.cyan.security.TrustContainer;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.file.RegularFile;
+import org.gradle.api.internal.provider.DefaultProviderFactory;
 import org.gradle.api.provider.Provider;
 
 import groovy.lang.Closure;
@@ -72,11 +73,6 @@ public class CyanModfileManifestGenerator {
 			jar(file);
 	}
 
-	public void jar(RegularFile[] files) {
-		for (RegularFile file : files)
-			jar(file);
-	}
-
 	public void jar(Provider<RegularFile>[] files) {
 		for (Provider<RegularFile> file : files)
 			jar(file);
@@ -87,76 +83,41 @@ public class CyanModfileManifestGenerator {
 			jar(file);
 	}
 
-	public void jar(RegularFile jarfile) {
-		jar(jarfile.getAsFile());
-	}
-
 	public void jar(Provider<RegularFile> jarfile) {
-		jar(jarfile.get());
-	}
-
-	public void jar(RegularFile jarfile, String outputDir) {
-		jar(jarfile.getAsFile(), outputDir);
+		jar(jarfile, "jars");
 	}
 
 	public void jar(Provider<RegularFile> jarfile, String outputDir) {
-		jar(jarfile.get(), outputDir);
-	}
-
-	public void jar(RegularFile jarfile, LaunchPlatform platform) {
-		jar(jarfile.getAsFile(), platform);
+		manifest.addJar(jarfile, null, null, outputDir, null, null, null);
 	}
 
 	public void jar(Provider<RegularFile> jarfile, LaunchPlatform platform) {
-		jar(jarfile.get(), platform);
-	}
-
-	public void jar(RegularFile jarfile, LaunchPlatform platform, String outputDir) {
-		jar(jarfile.getAsFile(), platform, outputDir);
+		jar(jarfile, platform, "jars");
 	}
 
 	public void jar(Provider<RegularFile> jarfile, LaunchPlatform platform, String outputDir) {
-		jar(jarfile.get(), platform, outputDir);
-	}
-
-	public void jar(RegularFile jarfile, LaunchPlatform platform, GameSide side) {
-		jar(jarfile.getAsFile(), platform, side);
+		manifest.addJar(jarfile, (platform == null ? null : platform.toString()), null, outputDir, null, null, null);
 	}
 
 	public void jar(Provider<RegularFile> jarfile, LaunchPlatform platform, GameSide side) {
-		jar(jarfile.get(), platform, side);
-	}
-
-	public void jar(RegularFile jarfile, LaunchPlatform platform, GameSide side, String outputDir) {
-		jar(jarfile.getAsFile(), platform, side, outputDir);
+		jar(jarfile, platform, side, "jars");
 	}
 
 	public void jar(Provider<RegularFile> jarfile, LaunchPlatform platform, GameSide side, String outputDir) {
-		jar(jarfile.get(), platform, side, outputDir);
-	}
-
-	public void jar(RegularFile jarfile, IPlatformConfiguration platform, GameSide side, String outputDir) {
-		jar(jarfile.getAsFile(), platform, side, outputDir);
+		manifest.addJar(jarfile, (platform == null ? null : platform.toString()),
+				(side == null ? null : side.toString()), outputDir, null, null, null);
 	}
 
 	public void jar(Provider<RegularFile> jarfile, IPlatformConfiguration platform, GameSide side, String outputDir) {
-		jar(jarfile.get(), platform, side, outputDir);
-	}
-
-	public void jar(RegularFile jarfile, IPlatformConfiguration platform, GameSide side) {
-		jar(jarfile.getAsFile(), platform, side);
+		jar(jarfile, platform.getPlatform(), side, outputDir);
 	}
 
 	public void jar(Provider<RegularFile> jarfile, IPlatformConfiguration platform, GameSide side) {
-		jar(jarfile.get(), platform, side);
-	}
-
-	public void jar(RegularFile jarfile, IPlatformConfiguration platform) {
-		jar(jarfile.getAsFile(), platform);
+		jar(jarfile, platform.getPlatform(), side);
 	}
 
 	public void jar(Provider<RegularFile> jarfile, IPlatformConfiguration platform) {
-		jar(jarfile.get(), platform);
+		jar(jarfile, platform.getPlatform());
 	}
 
 	public void jar(File jarfile, IPlatformConfiguration platform) {
@@ -167,9 +128,16 @@ public class CyanModfileManifestGenerator {
 		jar(jarfile, platform, side, "jars");
 	}
 
+	private static DefaultProviderFactory factory = new DefaultProviderFactory();
+
 	public void jar(File jarfile, IPlatformConfiguration platform, String outputDir) {
 		if (platform != null) {
-			manifest.addJar(jarfile, platform.getPlatform().toString(), null, outputDir, null, null,
+			manifest.addJar(factory.provider(() -> new RegularFile() {
+				@Override
+				public File getAsFile() {
+					return jarfile;
+				}
+			}), platform.getPlatform().toString(), null, outputDir, null, null,
 					(platform.getModloaderVersion() != null ? platform.getCommonMappingsVersion() : null));
 		} else {
 			jar(jarfile, (LaunchPlatform) null, outputDir);
@@ -178,24 +146,34 @@ public class CyanModfileManifestGenerator {
 
 	public void jar(File jarfile, IPlatformConfiguration platform, GameSide side, String outputDir) {
 		if (platform != null) {
-			manifest.addJar(jarfile, platform.getPlatform().toString(), (side == null ? null : side.toString()),
-					outputDir,
-					null, null, (platform.getModloaderVersion() != null ? platform.getCommonMappingsVersion() : null));
+			manifest.addJar(provider(jarfile), platform.getPlatform().toString(),
+					(side == null ? null : side.toString()), outputDir, null, null,
+					(platform.getModloaderVersion() != null ? platform.getCommonMappingsVersion() : null));
 		} else {
 			jar(jarfile, (LaunchPlatform) null, outputDir);
 		}
 	}
 
+	private Provider<RegularFile> provider(File input) {
+		return factory.provider(() -> new RegularFile() {
+			@Override
+			public File getAsFile() {
+				return input;
+			}
+		});
+	}
+
 	public void jar(File jarfile, String outputDir) {
-		manifest.addJar(jarfile, null, null, outputDir, null, null, null);
+		manifest.addJar(provider(jarfile), null, null, outputDir, null, null, null);
 	}
 
 	public void jar(File jarfile, LaunchPlatform platform, String outputDir) {
-		manifest.addJar(jarfile, (platform == null ? null : platform.toString()), null, outputDir, null, null, null);
+		manifest.addJar(provider(jarfile), (platform == null ? null : platform.toString()), null, outputDir, null, null,
+				null);
 	}
 
 	public void jar(File jarfile, LaunchPlatform platform, GameSide side, String outputDir) {
-		manifest.addJar(jarfile, (platform == null ? null : platform.toString()),
+		manifest.addJar(provider(jarfile), (platform == null ? null : platform.toString()),
 				(side == null ? null : side.toString()), outputDir, null, null, null);
 	}
 

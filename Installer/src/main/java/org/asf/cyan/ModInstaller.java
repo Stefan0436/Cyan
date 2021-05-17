@@ -90,12 +90,12 @@ public class ModInstaller extends JFrame {
 					dest.mkdirs();
 				try {
 					Files.copy(mod.toPath(), modDest.toPath());
-					JOptionPane.showMessageDialog(ModInstaller.this, "Installation completed.",
-							"Install successful", JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(ModInstaller.this, "Installation completed.", "Install successful",
+							JOptionPane.INFORMATION_MESSAGE);
 					dispose();
 				} catch (IOException e) {
-					JOptionPane.showMessageDialog(ModInstaller.this, "Broken mod file, copy failed.",
-							"Broken mod", JOptionPane.WARNING_MESSAGE);
+					JOptionPane.showMessageDialog(ModInstaller.this, "Broken mod file, copy failed.", "Broken mod",
+							JOptionPane.WARNING_MESSAGE);
 					dispose();
 				}
 			}
@@ -110,7 +110,7 @@ public class ModInstaller extends JFrame {
 
 	public void load() throws IOException {
 		mf = SelectionWindow.getModManifest(mod);
-		textArea.setText((mf.fallbackDescription == null ? "No description" : mf.fallbackDescription)
+		textArea.setText((mf.fallbackDescription == null ? "No description" : mf.fallbackDescription.trim())
 				+ "\n\nThis mod will be installed in:\n" + cyanDataDir.getCanonicalPath());
 		lblNewLabel.setText(mf.displayName);
 		lblNewLabel_1.setText(mf.modGroup + ":" + mf.modId + " V" + mf.version);

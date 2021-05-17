@@ -61,6 +61,13 @@ public class CornflowerMainExtension implements IProjectExtension {
 		}
 	}
 
+	public static final int API_BASE_MODDING = 2;
+	public static final int API_CORE_MODDING = 4;
+	public static final int API_FLUID = 8;
+	public static final int API_CYANCORE = 16;
+	public static final int API_MTK = 32;
+	public static final int API_CLASSTRUST = 64;
+
 	public static final Class<org.asf.cyan.cornflower.classpath.util.SourceType> SourceType = org.asf.cyan.cornflower.classpath.util.SourceType.class;
 	public static final Class<org.asf.cyan.cornflower.classpath.util.EntryType> EntryType = org.asf.cyan.cornflower.classpath.util.EntryType.class;
 	public static final Class<org.asf.cyan.cornflower.classpath.util.PathPriority> PathPriority = org.asf.cyan.cornflower.classpath.util.PathPriority.class;
@@ -191,6 +198,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 				verName = verName.toLowerCase();
 				verName = verName.substring(0, 1).toUpperCase() + verName.substring(1);
 				String name = platform.getPlatform().toString().toLowerCase() + "Rift" + verName;
+				name = name.replaceAll("[^A-Za-z0-9]", "_");
 				if (platform.getMappingsVersion(GameSide.CLIENT) != null) {
 					tasks.add((RiftJarTask) project.task(Map.of("type", RiftJar), name,
 							new TaskClosure(project, project, platform, GameSide.CLIENT)));

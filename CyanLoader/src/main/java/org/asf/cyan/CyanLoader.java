@@ -2168,7 +2168,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		CyanCore.addAllowedTransformerAutoDetectClass("org.asf.cyan.api.internal.CyanAPIComponent");
 		CyanCore.initializeComponents();
 
-		info("Downloading maven dependencies...");
+		info("Downloading coremod maven dependencies...");
 		downloadMavenDependencies(coremodMavenDependencies);
 
 		File mods = new File(cyanDir, "mods");
@@ -2184,6 +2184,10 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			info("Importing version-specific mods...");
 			importMods(versionMods);
 		}
+		StartupWindow.WindowAppender.increaseProgress();
+
+		info("Downloading mod maven dependencies...");
+		downloadMavenDependencies(modMavenDependencies);
 		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Importing regular mods...");
@@ -2320,10 +2324,6 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			return;
 		loadedMods = true;
 
-		info("Downloading maven dependencies...");
-		downloadMavenDependencies(modMavenDependencies);
-		StartupWindow.WindowAppender.increaseProgress();
-
 		info("Loading regular mods...");
 		loadModClasses(loader);
 		StartupWindow.WindowAppender.increaseProgress();
@@ -2385,7 +2385,6 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		}
 		return null;
 	}
-
 
 	public static void addCyanPaths(ArrayList<Path> paths) {
 		for (Path pth : CyanCore.getAddedPaths()) {

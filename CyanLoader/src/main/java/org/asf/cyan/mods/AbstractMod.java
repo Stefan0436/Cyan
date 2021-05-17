@@ -199,7 +199,8 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 
 	@Override
 	public void setLanguageBasedDescription(String desc) {
-		this.desc = desc;
+		if (!desc.startsWith("$")) // prevent any processing code
+			this.desc = desc;
 	}
 
 	@Override
@@ -217,7 +218,7 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 		desc = manifest.fallbackDescription;
 		group = manifest.modGroup;
 		descKey = manifest.descriptionLanguageKey;
-		fallbackDesc = manifest.fallbackDescription;
+		fallbackDesc = manifest.fallbackDescription.trim();
 		if (descKey != null && descKey.isEmpty())
 			descKey = null;
 		version = Version.fromString(manifest.version);

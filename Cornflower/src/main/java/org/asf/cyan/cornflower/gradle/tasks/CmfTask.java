@@ -71,8 +71,9 @@ public class CmfTask extends Zip implements ITaskExtender {
 						Configuration<?> manifest = CmfTask.this.manifest.call();
 						if (manifest instanceof IModManifest) {
 							((IModManifest) manifest).getJars().forEach((source, dest) -> {
-								if (dest.endsWith(source.getName()))
-									dest = dest.substring(0, dest.length() - source.getName().length());
+								if (dest.endsWith(source.get().getAsFile().getName()))
+									dest = dest.substring(0,
+											dest.length() - source.get().getAsFile().getName().length());
 
 								CopySpecInternal spec = (CopySpecInternal) getRootSpec().addFirst().into(dest);
 								spec.addChild().from(source);

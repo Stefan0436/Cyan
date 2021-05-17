@@ -1,6 +1,5 @@
 package org.asf.cyan.cornflower.gradle.utilities.modding.manifests;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,10 +8,12 @@ import org.asf.cyan.api.config.Configuration;
 import org.asf.cyan.api.config.annotations.Comment;
 import org.asf.cyan.cornflower.gradle.tasks.CtcTask;
 import org.asf.cyan.security.TrustContainer;
+import org.gradle.api.file.RegularFile;
+import org.gradle.api.provider.Provider;
 
 public class CyanModfileManifest extends Configuration<CyanModfileManifest> implements IModManifest {
 
-	private HashMap<File, String> jarFiles = new HashMap<File, String>();
+	private HashMap<Provider<RegularFile>, String> jarFiles = new HashMap<Provider<RegularFile>, String>();
 	private HashMap<CtcTask, String> ctcTasks;
 
 	public void setCtcTasks(HashMap<CtcTask, String> tasks) {
@@ -30,8 +31,8 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> impl
 	}
 
 	@Override
-	public Map<File, String> getJars() {
-		return new HashMap<File, String>(jarFiles);
+	public Map<Provider<RegularFile>, String> getJars() {
+		return new HashMap<Provider<RegularFile>, String>(jarFiles);
 	}
 
 	@Comment("Main mod class name (simple name)")
@@ -111,7 +112,7 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> impl
 	public HashMap<String, String> platforms = new HashMap<String, String>();
 
 	@Override
-	public void addJar(File jar, String platform, String side, String outDir, String loaderVersion, String gameVersion, String mappingsVersion) {
+	public void addJar(Provider<RegularFile> jar, String platform, String side, String outDir, String loaderVersion, String gameVersion, String mappingsVersion) {
 		String checkString = "any";
 
 		if (platform != null) {
@@ -155,8 +156,8 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> impl
 		if (!checkString.equals("any"))
 			checkString += " ";
 
-		this.jars.put(outDir + "/" + jar.getName(), checkString);
-		this.jarFiles.put(jar, outDir + "/" + jar.getName());
+		this.jars.put(outDir + "/" + jar.get().getAsFile().getName(), checkString);
+		this.jarFiles.put(jar, outDir + "/" + jar.get().getAsFile().getName());
 	}
 
 	@Override
