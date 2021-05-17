@@ -4,7 +4,9 @@ import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.DefaultCaret;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
@@ -104,7 +106,12 @@ public class ModInstaller extends JFrame {
 
 		textArea = new JTextArea();
 		textArea.setEditable(false);
-		contentPane.add(textArea, BorderLayout.CENTER);
+		JScrollPane pane = new JScrollPane(textArea);
+		pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+		DefaultCaret caret = (DefaultCaret) textArea.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		contentPane.add(pane, BorderLayout.CENTER);
 		setLocationRelativeTo(null);
 	}
 
