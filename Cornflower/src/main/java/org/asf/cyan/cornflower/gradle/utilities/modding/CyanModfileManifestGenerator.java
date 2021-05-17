@@ -313,7 +313,7 @@ public class CyanModfileManifestGenerator {
 		manifest.mavenRepositories.put(name, url.toString());
 	}
 
-	public void description(String description) {
+	public void mod_description(String description) {
 		if (!description.startsWith("\n"))
 			description = "\n" + description;
 		if (!description.endsWith("\n"))
@@ -322,7 +322,7 @@ public class CyanModfileManifestGenerator {
 		manifest.fallbackDescription = description;
 	}
 
-	public void description(String key, String fallback) {
+	public void mod_description(String key, String fallback) {
 		if (!fallback.startsWith("\n"))
 			fallback = "\n" + fallback;
 		if (!fallback.endsWith("\n"))
