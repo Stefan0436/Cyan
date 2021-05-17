@@ -22,7 +22,7 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
@@ -112,6 +112,7 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 			inputCache.add(file);
 	}
 
+	@Input
 	public void source(AbstractArchiveTask[] input) {
 		for (AbstractArchiveTask task : input)
 			inputCache.add(task.getArchiveFile().get().getAsFile());
@@ -129,7 +130,6 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 		}
 	}
 
-	@InputFiles
 	private void addInput(File[] input) throws IOException {
 		for (File file : input) {
 			if (!file.exists())
@@ -146,14 +146,17 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 		this.method = method;
 	}
 
+	@InputFile
 	public void source(File input) throws IOException {
 		inputCache.add(input);
 	}
 
+	@InputFile
 	public void source(RegularFile input) throws IOException {
 		inputCache.add(input.getAsFile());
 	}
 
+	@InputFile
 	public void source(Provider<RegularFile> input) throws IOException {
 		inputCache.add(input.get().getAsFile());
 	}
@@ -169,7 +172,6 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 			source(inp);
 	}
 
-	@OutputFile
 	public void destination(File output) throws IOException {
 		destination(output.getCanonicalPath());
 	}

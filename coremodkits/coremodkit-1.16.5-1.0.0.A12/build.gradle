@@ -86,7 +86,7 @@ dependencies {
     // 32  = MTK
     // 64  = ClassTrust
     // 128 = Full CyanLoader (unrecommended, use of base/core modding is preferred)
-	implementation Modloader.forModloader("cyan", 4 | 8)
+	implementation Modloader.forModloader("cyan", "1.0.0.A12", 4 | 8)
 
 	// Selects game dependencies
 	implementation Game.forGame("Minecraft", "1.16.5")

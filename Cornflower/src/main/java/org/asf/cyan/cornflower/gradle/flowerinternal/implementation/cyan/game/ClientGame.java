@@ -80,7 +80,12 @@ public class ClientGame implements IGameExecutionContext, ILaunchProvider {
 	@Override
 	public String[] libraries() {
 		prepare();
-		return MinecraftInstallationToolkit.getLibrariesMavenFormat(gameVersion, true);
+		ArrayList<String> libs = new ArrayList<String>();
+		for (String lib : MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion, true)) {
+			if (!lib.contains(":log4j"))
+				libs.add(lib);
+		}
+		return libs.toArray(new String[0]);
 	}
 
 	@Override
@@ -129,8 +134,8 @@ public class ClientGame implements IGameExecutionContext, ILaunchProvider {
 			if (!MinecraftInstallationToolkit.isVersionManifestSaved(gameVersion))
 				MinecraftInstallationToolkit.saveVersionManifest(gameVersion);
 
-			if (!MinecraftInstallationToolkit.checkVersion(cyanVersion))
-				MinecraftInstallationToolkit.downloadVersionAndLibraries(cyanVersion);
+			if (!MinecraftInstallationToolkit.checkVersion(cyanVersion, false, false, true))
+				MinecraftInstallationToolkit.downloadVersionAndLibraries(cyanVersion, true, true, true);
 
 			if (MinecraftInstallationToolkit.getVersionJar(gameVersion, GameSide.CLIENT) == null)
 				MinecraftInstallationToolkit.downloadVersionJar(gameVersion, GameSide.CLIENT);
@@ -162,13 +167,13 @@ public class ClientGame implements IGameExecutionContext, ILaunchProvider {
 	@Override
 	public String[] runtimeLibraries() {
 		prepare();
-		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion, true);
+		return MinecraftInstallationToolkit.getLibrariesMavenFormat(gameVersion, true);
 	}
 
 	@Override
 	public File[] libraryJars() {
 		prepare();
-		return MinecraftInstallationToolkit.getLibraries(cyanVersion);
+		return MinecraftInstallationToolkit.getLibraries(cyanVersion, true);
 	}
 
 	@Override

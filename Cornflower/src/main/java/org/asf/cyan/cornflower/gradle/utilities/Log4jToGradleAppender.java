@@ -20,6 +20,7 @@ import org.gradle.api.logging.LogLevel;
 public class Log4jToGradleAppender extends AbstractAppender {
 	org.gradle.api.logging.Logger gradleLogger;
 	static boolean logInfo = false;
+	static boolean stdOut = false;
 	static org.gradle.api.logging.Logger mainGradleLogger = null;
 
 	/**
@@ -49,21 +50,40 @@ public class Log4jToGradleAppender extends AbstractAppender {
 	@Override
 	public void append(LogEvent event) {
 		String msg = new String(this.getLayout().toByteArray(event));
-		if (msg.endsWith(System.lineSeparator())) msg = msg.substring(0, msg.lastIndexOf(System.lineSeparator()));
+		if (msg.endsWith(System.lineSeparator()))
+			msg = msg.substring(0, msg.lastIndexOf(System.lineSeparator()));
 
-		if (event.getLevel().equals(Level.DEBUG)) gradleLogger.log(LogLevel.DEBUG, msg);
-		else if (event.getLevel().equals(Level.WARN)) gradleLogger.log(LogLevel.WARN, msg);
-		else if (event.getLevel().equals(Level.INFO) && !logInfo) gradleLogger.log(LogLevel.INFO, msg);
-		else if (event.getLevel().equals(Level.INFO) && logInfo) gradleLogger.log(LogLevel.LIFECYCLE, msg);
-		else if (event.getLevel().equals(Level.FATAL) || event.getLevel().equals(Level.ERROR)) gradleLogger.log(LogLevel.ERROR, msg);
+		if (stdOut) {
+			System.out.println(msg);
+			return;
+		}
+
+		if (event.getLevel().equals(Level.DEBUG))
+			gradleLogger.log(LogLevel.DEBUG, msg);
+		else if (event.getLevel().equals(Level.WARN))
+			gradleLogger.log(LogLevel.WARN, msg);
+		else if (event.getLevel().equals(Level.INFO) && !logInfo)
+			gradleLogger.log(LogLevel.INFO, msg);
+		else if (event.getLevel().equals(Level.INFO) && logInfo)
+			gradleLogger.log(LogLevel.LIFECYCLE, msg);
+		else if (event.getLevel().equals(Level.FATAL) || event.getLevel().equals(Level.ERROR))
+			gradleLogger.log(LogLevel.ERROR, msg);
 	}
 
 	@SuppressWarnings("unchecked")
 	@PluginFactory
 	public static Log4jToGradleAppender createAppender(@PluginAttribute("name") String name,
-            @PluginAttribute("ignoreExceptions") boolean ignoreExceptions,
-            @SuppressWarnings("rawtypes") @PluginElement("Layout") Layout layout,
-            @PluginElement("Filters") Filter filter) {
+			@PluginAttribute("ignoreExceptions") boolean ignoreExceptions,
+			@SuppressWarnings("rawtypes") @PluginElement("Layout") Layout layout,
+			@PluginElement("Filters") Filter filter) {
 		return new Log4jToGradleAppender(name, filter, layout, ignoreExceptions, new Property[0], mainGradleLogger);
+	}
+
+	public static void setToStdOut() {
+		stdOut = true;
+	}
+
+	public static void unsetStdOut() {
+		stdOut = false;
 	}
 }

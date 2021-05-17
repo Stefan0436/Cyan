@@ -11,6 +11,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 import org.asf.cyan.core.CyanCore;
+import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftToolkit;
 import org.asf.cyan.tests.commands.exceptions.InvalidAliasException;
@@ -57,7 +58,7 @@ public class TestingInterface {
 		WriteLine("Loading the MTK...");
 		if (!CyanCore.isInitialized())  {
 			CyanCore.simpleInit();
-			System.clearProperty("log4j2.configurationFile");
+			Log4jToGradleAppender.setToStdOut();
 			MinecraftInstallationToolkit.setMinecraftDirectory(new File(mtkdir));
 			MinecraftToolkit.initializeMTK();
 			CyanCore.initializeComponents();
@@ -72,7 +73,7 @@ public class TestingInterface {
 
 		while (true) {
 			String input = ReadInput("TESTER: "+new File(System.getProperty("user.dir")).getName());
-			System.clearProperty("log4j2.configurationFile");
+			Log4jToGradleAppender.setToStdOut();
 			String response = Execute(input);
 			if (response == null)
 			{

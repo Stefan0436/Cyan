@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender;
 import org.asf.cyan.tests.InteractiveTestCommand;
 import org.gradle.wrapper.GradleWrapperMain;
 
@@ -54,6 +55,7 @@ public class Gradle extends InteractiveTestCommand {
 		try {
 			// Gradle wrapper exit is overridden by the agent, so it won't send the annoying
 			// stack trace to the console
+			Log4jToGradleAppender.unsetStdOut();
 			GradleWrapperMain.main(strs.toArray(new String[0]));
 		} catch (Exception ex) {
 			if (!CheckException(ex)) {

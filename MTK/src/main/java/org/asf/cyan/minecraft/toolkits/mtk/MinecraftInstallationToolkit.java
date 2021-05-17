@@ -742,12 +742,31 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 * @return True if all check out, false otherwise.
 	 */
 	public static boolean checkVersion(MinecraftVersionInfo version, boolean ignore_hash, boolean ignore_nonexistent) {
-		return checkVersionMissingFiles(version, ignore_hash, ignore_nonexistent) == 0;
+		return checkVersion(version, ignore_hash, ignore_nonexistent, false);
+	}
+
+	/**
+	 * Check if a version is available, if ignore_hash is false, the files are
+	 * compared against the stored hashes.
+	 * 
+	 * @param version            The MinecraftVersionInfo object representing the
+	 *                           version.
+	 * @param ignore_hash        Set to true to ignore hashes, only return false if
+	 *                           files are missing.
+	 * @param ignore_nonexistent Set to true ignore missing files, set to false to
+	 *                           make sure all files exist.
+	 * @param removeRift         True to remove rift identifiers (remapped jars, use
+	 *                           this for deobfuscated environments)
+	 * @return True if all check out, false otherwise.
+	 */
+	public static boolean checkVersion(MinecraftVersionInfo version, boolean ignore_hash, boolean ignore_nonexistent,
+			boolean removeRift) {
+		return checkVersionMissingFiles(version, ignore_hash, ignore_nonexistent, removeRift) == 0;
 	}
 
 	@SuppressWarnings("unchecked")
 	private static int checkVersionMissingFiles(MinecraftVersionInfo version, boolean ignore_hash,
-			boolean ignore_nonexistent) {
+			boolean ignore_nonexistent, boolean removeRift) {
 		JsonObject manifest;
 		int incorrect = 0;
 		try {
@@ -881,6 +900,18 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 				String urlRoot = "https://libraries.minecraft.net/"; // someday, it might change
 				String path = "";
 				String[] info = obj.get("name").getAsString().split(":");
+
+				String libname = info[1];
+				String libversion = info[2];
+				if (removeRift) {
+					if (libversion.contains("-RIFT"))
+						libversion = libversion.substring(0, libversion.indexOf("-RIFT"));
+					if (libname.contains("-RIFT"))
+						libname = libname.substring(0, libname.indexOf("-RIFT"));
+					String grp = info[0];
+					info = new String[] { grp, libname, libversion };
+				}
+
 				if (info.length == 3) {
 					path = info[0].replaceAll("\\.", "/") + "/" + info[1] + "/" + info[2] + "/" + info[1] + "-"
 							+ info[2] + ".jar";
@@ -930,8 +961,22 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 *                (might not have all installed, use checkVersion to verify)
 	 * @return Array of library files
 	 */
-	@SuppressWarnings("unchecked")
 	public static File[] getLibraries(MinecraftVersionInfo version) {
+		return getLibraries(version, false);
+	}
+
+	/**
+	 * Get the array of library files needed to run the game, NOTE: does NOT add the
+	 * version jar
+	 * 
+	 * @param version    The MinecraftVersionInfo object representing the version.
+	 *                   (might not have all installed, use checkVersion to verify)
+	 * @param removeRift True to remove rift identifiers (remapped jars, use this
+	 *                   for deobfuscated environments)
+	 * @return Array of library files
+	 */
+	@SuppressWarnings("unchecked")
+	public static File[] getLibraries(MinecraftVersionInfo version, boolean removeRift) {
 		ArrayList<File> libraries = new ArrayList<File>();
 		File f3 = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/libraries");
 
@@ -974,6 +1019,17 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 			} else if (obj.has("name")) {
 				String path = "";
 				String[] info = obj.get("name").getAsString().split(":");
+				String libname = info[1];
+				String libversion = info[2];
+				if (removeRift) {
+					if (libversion.contains("-RIFT"))
+						libversion = libversion.substring(0, libversion.indexOf("-RIFT"));
+					if (libname.contains("-RIFT"))
+						libname = libname.substring(0, libname.indexOf("-RIFT"));
+					String grp = info[0];
+					info = new String[] { grp, libname, libversion };
+				}
+
 				if (info.length == 3) {
 					path = info[0].replaceAll("\\.", "/") + "/" + info[1] + "/" + info[2] + "/" + info[1] + "-"
 							+ info[2] + ".jar";
@@ -982,6 +1038,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 				} else if (info.length == 1) {
 					path = info[0] + "/" + info[0] + ".jar";
 				}
+
 				libraries.add(new File(f3, path));
 			}
 			for (String key : obj.keySet()) {
@@ -1001,9 +1058,10 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 * Get the array of library files needed to run the game in maven format, NOTE:
 	 * does NOT add the version jar
 	 * 
-	 * @param version The MinecraftVersionInfo object representing the version.
-	 *                (might not have all installed, use checkVersion to verify)
-	 * @param removeRift True to remove rift identifiers (remapped jars, use this for deobfuscated environments)
+	 * @param version    The MinecraftVersionInfo object representing the version.
+	 *                   (might not have all installed, use checkVersion to verify)
+	 * @param removeRift True to remove rift identifiers (remapped jars, use this
+	 *                   for deobfuscated environments)
 	 * @return Array of library files
 	 */
 	public static String[] getLibrariesMavenFormat(MinecraftVersionInfo version, boolean removeRift) {
@@ -1048,14 +1106,14 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 				} else if (info.length == 1) {
 					libname = info[0];
 				}
-				
+
 				if (removeRift) {
 					if (libversion.contains("-RIFT"))
 						libversion = libversion.substring(0, libversion.indexOf("-RIFT"));
 					if (libname.contains("-RIFT"))
 						libname = libname.substring(0, libname.indexOf("-RIFT"));
 				}
-				
+
 				libraries.add(group + ":" + libname + ":" + libversion);
 			}
 			for (String key : obj.keySet()) {
@@ -1315,7 +1373,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 * @throws IOException If downloading fails
 	 */
 	public static void downloadVersionAndLibraries(MinecraftVersionInfo version) throws IOException {
-		downloadVersionAndLibraries(version, true, true);
+		downloadVersionAndLibraries(version, true, true, false);
 	}
 
 	/**
@@ -1326,7 +1384,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 * @throws IOException If downloading fails
 	 */
 	public static void downloadVersionAndLibraries(MinecraftVersionInfo version, boolean overwrite) throws IOException {
-		downloadVersionAndLibraries(version, overwrite, true);
+		downloadVersionAndLibraries(version, overwrite, true, false);
 	}
 
 	public static enum OsInfo {
@@ -1514,15 +1572,18 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	/**
 	 * Download a Minecraft version and its libraries. (including assets)
 	 * 
-	 * @param version   MinecraftVersionInfo object representing the version.
-	 * @param overwrite True to overwrite files, false otherwise.
-	 * @param checkHash True to compare the hashes of the local files, false to
-	 *                  download without comparing (requires overwrite set to true)
+	 * @param version    MinecraftVersionInfo object representing the version.
+	 * @param overwrite  True to overwrite files, false otherwise.
+	 * @param checkHash  True to compare the hashes of the local files, false to
+	 *                   download without comparing (requires overwrite set to true)
+	 *                   *
+	 * @param removeRift True to remove rift identifiers (remapped jars, use this
+	 *                   for deobfuscated environments)
 	 * @throws IOException If downloading fails
 	 */
 	@SuppressWarnings("unchecked")
-	public static void downloadVersionAndLibraries(MinecraftVersionInfo version, boolean overwrite, boolean checkHash)
-			throws IOException {
+	public static void downloadVersionAndLibraries(MinecraftVersionInfo version, boolean overwrite, boolean checkHash,
+			boolean removeRift) throws IOException {
 		if (MinecraftToolkit.hasMinecraftDownloadConnection()) {
 			CyanCore.trackLevel(Level.WARN);
 			File f3 = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/libraries");
@@ -1590,6 +1651,19 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 			for (JsonElement o : versionJson.get("libraries").getAsJsonArray()) {
 				JsonObject obj = o.getAsJsonObject();
 				String name = obj.get("name").getAsString();
+
+				if (removeRift) {
+					String[] info = name.split(":");
+					String group = info[0];
+					String libname = info[1];
+					String libversion = info[2];
+					if (libversion.contains("-RIFT"))
+						libversion = libversion.substring(0, libversion.indexOf("-RIFT"));
+					if (libname.contains("-RIFT"))
+						libname = libname.substring(0, libname.indexOf("-RIFT"));
+					name = group + ":" + libname + ":" + libversion;
+				}
+
 				boolean allow = true;
 				if (obj.has("rules")) {
 					for (JsonElement r : obj.get("rules").getAsJsonArray()) {
@@ -1636,6 +1710,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 							String sha1 = object.get("sha1").toString();
 							Long size = ((Double) object.get("size")).longValue();
 							String path = object.get("path").toString();
+
 							File f = new File(f3, path);
 							if (!download.equals("")) {
 								try {
@@ -1717,6 +1792,18 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 					String urlRoot = "https://libraries.minecraft.net/"; // someday, it might change
 					String path = "";
 					String[] info = obj.get("name").getAsString().split(":");
+
+					if (removeRift) {
+						String group = info[0];
+						String libname = info[1];
+						String libversion = info[2];
+						if (libversion.contains("-RIFT"))
+							libversion = libversion.substring(0, libversion.indexOf("-RIFT"));
+						if (libname.contains("-RIFT"))
+							libname = libname.substring(0, libname.indexOf("-RIFT"));
+						info = new String[] { group, libname, libversion };
+					}
+
 					if (info.length == 3) {
 						path = info[0].replaceAll("\\.", "/") + "/" + info[1] + "/" + info[2] + "/" + info[1] + "-"
 								+ info[2] + ".jar";
@@ -1884,7 +1971,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		} else
 
 		{
-			int missing = checkVersionMissingFiles(version, false, false);
+			int missing = checkVersionMissingFiles(version, false, false, removeRift);
 			if (missing == -1)
 				throw new IOException("Could not download the version manifest, device is offline.");
 

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.cyan.CyanModloader;
@@ -144,13 +145,19 @@ public class ServerGame implements IGameExecutionContext, ILaunchProvider {
 
 	@Override
 	public String[] libraries() {
-		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion, true);
+		prepare();
+		ArrayList<String> libs = new ArrayList<String>();
+		for (String lib : MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion, true)) {
+			if (!lib.contains(":log4j"))
+				libs.add(lib);
+		}
+		return libs.toArray(new String[0]);
 	}
 
 	@Override
 	public File[] libraryJars() {
 		prepare();
-		return MinecraftInstallationToolkit.getLibraries(cyanVersion);
+		return MinecraftInstallationToolkit.getLibraries(cyanVersion, true);
 	}
 
 	@Override

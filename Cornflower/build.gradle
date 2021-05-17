@@ -26,7 +26,7 @@ def display="Cornflower Gradle Plugin"
 def authorname="AerialWorks Software Foundation"
 def plugindescription="Cyan Cornflower - Gradle plugin to help with Cyan modding"
 def versiontype="ALPHA"
-version="1.0.0.A36"
+version="1.0.0.A37"
 
 sourceSets {
 	main {
@@ -54,7 +54,10 @@ repositories {
 	}
 }
 
+configurations.implementation.setCanBeResolved(true)
+
 dependencies {
+	implementation group: 'org.gradle', name: 'gradle-logging', version: '6.1.1'	
 	implementation group: 'org.gradle', name: 'gradle-core', version: '6.1.1'
 	implementation group: 'org.gradle', name: 'gradle-wrapper', version: '6.1.1'
 	implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.7'
@@ -446,9 +449,10 @@ task testProj(type: Copy) {
 eclipseClasspath.finalizedBy testProj
 
 task cpLibs {
+	outputs.upToDateWhen { return false; }
 	doLast {
-		configurations.mavendependency.resolvedConfiguration.firstLevelModuleDependencies.each { dep ->
-			if (dep.getModuleArtifacts().size() != 0 && !dep.getModuleArtifacts()[0].file.getCanonicalPath().contains("gradle-")) {
+		configurations.implementation.resolvedConfiguration.firstLevelModuleDependencies.each { dep ->
+			if (dep.getModuleArtifacts().size() != 0) {
 				copy {
 					String version = dep.moduleVersion;
 					from (dep.getModuleArtifacts()[0].file.getParent() )
