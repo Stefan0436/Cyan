@@ -85,7 +85,7 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 		return ctcVersion;
 	}
 
-	@OutputFile
+	@Internal
 	public File getOutput() {
 		return outputFile;
 	}
@@ -144,17 +144,14 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 		this.method = method;
 	}
 
-	@InputFile
 	public void source(File input) throws IOException {
 		inputCache.add(input);
 	}
 
-	@InputFile
 	public void source(RegularFile input) throws IOException {
 		inputCache.add(input.getAsFile());
 	}
 
-	@InputFile
 	public void source(Provider<RegularFile> input) throws IOException {
 		inputCache.add(input.get().getAsFile());
 	}
@@ -168,7 +165,6 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 			source(inp);
 	}
 
-	@OutputFile
 	public void destination(File output) throws IOException {
 		destination(output.getCanonicalPath());
 	}
