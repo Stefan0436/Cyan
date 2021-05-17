@@ -13,6 +13,7 @@ import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.mods.config.CyanModfileManifest;
 import org.asf.cyan.mods.dependencies.HandshakeRule;
+import org.asf.cyan.mods.dependencies.ModProvider;
 import org.asf.cyan.mods.dependencies.ModSupportHandler;
 import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.internal.BaseEventController;
@@ -271,6 +272,19 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 					if (mth.getParameters()[0].getType().isAssignableFrom(mod.getClass())) {
 						try {
 							mth.invoke(this, mod);
+						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+							throw new RuntimeException(e);
+						}
+					} else if (ModProvider.class.isAssignableFrom(mth.getParameters()[0].getType())) {
+						try {
+							mth.invoke(this, new ModProvider<IMod>() {
+
+								@Override
+								public IMod get() {
+									return mod;
+								}
+
+							});
 						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 							throw new RuntimeException(e);
 						}
