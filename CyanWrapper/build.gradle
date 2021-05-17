@@ -88,6 +88,9 @@ public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 	public HashMap<String, String> spigotStableMappings = new HashMap<String, String>();
 	public HashMap<String, String> spigotLatestMappings = new HashMap<String, String>();
 	public HashMap<String, String> spigotTestingMappings = new HashMap<String, String>();
+	
+	public HashMap<String, String> yarnMappings = new HashMap<String, String>();
+	public HashMap<String, String> spigotMappings = new HashMap<String, String>();
 
 	public CyanUpdateInfo(String content) {
 		readAll(content);
@@ -151,8 +154,29 @@ project(":").childProjects.each { proj ->
 	}
 }
 
+def fallback_url="https://aerialworks.ddns.net/maven"
+
 File cyanCache = new File(getCacheRoot(), "cyan-wrapper-project");
 if (!cyanCache.exists()) cyanCache.mkdirs();
+
+def netTestUrl = fallback_url
+def getServerConnection = {
+	->
+	try {
+		URL u = new URL(netTestUrl);
+		URLConnection uc = u.openConnection();
+		uc.connect();
+		return true;
+	} catch (MalformedURLException e) {
+		return false;
+	} catch (IOException e) {
+		return false;
+	}
+}
+
+if (project.hasProperty("overrideCyanLibraryURL")) {
+	fallback_url=project.getProperty("overrideCyanLibraryURL")
+}
 
 if (modloader.startsWith("forge-")) {
     def forgeversion = modloader.substring("forge-".length())
@@ -195,9 +219,35 @@ if (modloader.startsWith("forge-")) {
         mappingsVersion = mcpVersion;
 } else if (modloader.startsWith("fabric-loader-")) {
     if (!project.hasProperty("overrideMappingsVersion")) {
+		def loaderVersion = modloader.substring("fabric-loader-".length())
         println "Resolving latest YARN mappings..."
-        String version = getLatestYarnVersion(minecraft)
-        mappingsVersion = version
+		def mappingsASFSupported = null		
+		
+		def useurl = fallback_url
+		if (fallback_url.equals(""))
+			useurl = netTestUrl
+	
+		try {
+			StringBuilder conf = new StringBuilder();
+			URL u = new URL(useurl + infoPath);
+			Scanner sc = new Scanner(u.openStream());
+			while (sc.hasNext())
+				conf.append(sc.nextLine() + System.lineSeparator());
+			sc.close();
+	
+			CyanUpdateInfo info = new CyanUpdateInfo(conf.toString())
+			if (info.yarnMappings.containsKey(minecraft+"-"+loaderVersion))
+				mappingsASFSupported = info.yarnMappings.get(minecraft+"-"+oaderVersion)
+		} catch (Exception e) {
+			
+		}
+		
+		if (mappingsASFSupported == null) {
+		    String version = getLatestYarnVersion(minecraft)
+		    mappingsVersion = version
+		} else {
+			mappingsVersion = mappingsASFSupported
+		}
     }
 }
 
@@ -241,7 +291,6 @@ public String getLatestSpigotMappings(String version) throws IOException {
 buildDir = '../build/Wrapper'
 
 group="org.asf.cyan"
-def fallback_url="https://aerialworks.ddns.net/maven"
 def cyanloader_logconf_version=cyanversion
 def cyanloader_package="org.asf.cyan.CyanLoader"
 def authorname="AerialWorks Software Foundation"
@@ -262,25 +311,6 @@ if (project.hasProperty("overrideLaunchWrapperServer")) {
 }
 
 version="1.0.0.A9-cyan-"+cyanversion
-
-def netTestUrl = fallback_url
-def getServerConnection = {
-	->
-	try {
-		URL u = new URL(netTestUrl);
-		URLConnection uc = u.openConnection();
-		uc.connect();
-		return true;
-	} catch (MalformedURLException e) {
-		return false;
-	} catch (IOException e) {
-		return false;
-	}
-}
-
-if (project.hasProperty("overrideCyanLibraryURL")) {
-	fallback_url=project.getProperty("overrideCyanLibraryURL")
-}
 
 def timeStartHuman=OffsetDateTime.parse("${timeStartDev}").withNano(0).toLocalDate().toString()+" at "+OffsetDateTime.parse("${timeStartDev}").withNano(0).toLocalTime().toString();
 def timeReleaseHuman=OffsetDateTime.parse("${timeRelease}").withNano(0).toLocalDate().toString()+" at "+OffsetDateTime.parse("${timeRelease}").withNano(0).toLocalTime().toString();
@@ -1156,6 +1186,9 @@ processResources {
 	def spigotStableMappings = ""
 	def spigotLatestMappings = ""
 	def spigotTestingMappings = ""
+	
+	def yarnMappings = ""
+	def spigotMappings = ""
 
 	def lateststable = ""
 	def latestalpha = ""
@@ -1175,6 +1208,9 @@ processResources {
 	HashMap<String, String> stableSpigotMappings = new HashMap<String, String>();
 	HashMap<String, String> latestSpigotMappings = new HashMap<String, String>();
 	HashMap<String, String> testingSpigotMappings = new HashMap<String, String>();
+	
+	HashMap<String, String> yarnMappingVersions = new HashMap<String, String>();
+	HashMap<String, String> spigotMappingVersions = new HashMap<String, String>();
 
 	try {
 		StringBuilder conf = new StringBuilder();
@@ -1259,6 +1295,16 @@ processResources {
 		for (def ver : info.spigotTestingMappings.keySet()) {
 			def val = info.spigotTestingMappings.get(ver)
 			testingSpigotMappings.put(ver, val)
+		}
+		
+		for (def ver : info.yarnMappings.keySet()) {
+			def val = info.yarnMappings.get(ver)
+			yarnMappingVersions.put(ver, val)
+		}
+		
+		for (def ver : info.spigotMappings.keySet()) {
+			def val = info.spigotMappings.get(ver)
+			spigotMappingVersions.put(ver, val)
 		}
 
 		for (def ver : info.libraryVersions.keySet()) {
@@ -1444,14 +1490,17 @@ processResources {
 			if (modloader.startsWith("forge-")) {
 				forgeSupportVersions.put("testing-forge", minecraft + "-" + loaderversion)
 				forgeSupportVersions.put("testing-forge-" + minecraft, loaderversion)
+				forgeSupportVersions.put("testing-cyan-" + minecraft + "-" + cyanversion, loaderversion)
 				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-testing", cyanversion);
 			} else if (modloader.startsWith("fabric-loader-")) {
 				fabricSupportVersions.put("testing-fabric", minecraft + "-" + loaderversion)
 				fabricSupportVersions.put("testing-fabric-" + minecraft, loaderversion)
+				fabricSupportVersions.put("testing-cyan-" + minecraft + "-" + cyanversion, loaderversion)
 				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-testing", cyanversion);
 			} else if (modloader.startsWith("paper-")) {
 				paperSupportVersions.put("testing-paper", minecraft + "-" + loaderversion)
 				paperSupportVersions.put("testing-paper-" + minecraft, loaderversion)
+				paperSupportVersions.put("testing-cyan-" + minecraft + "-" + cyanversion, loaderversion)
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-testing", cyanversion);
 
 				testingSpigotMappings.put(minecraft, mappingsVersion)
@@ -1461,6 +1510,8 @@ processResources {
 
 	if (modloader.startsWith("paper-") && (!project.hasProperty("removePaper") || !project.getProperty("removePaper").equals(loaderversion))) {
 		paperMappingVersions.put(mappingsVersion, loaderversion)
+		spigotMappingVersions.put("paper-" + minecraft + "-" + loaderversion, mappingsVersion)
+		spigotMappingVersions.put("cyan-" + minecraft + "-" + cyanversion, mappingsVersion)
 	}
 
 	if (project.hasProperty("addToLatest")) {
@@ -1470,14 +1521,17 @@ processResources {
 			if (modloader.startsWith("forge-")) {
 				forgeSupportVersions.put("latest-paper", minecraft + "-" + loaderversion)
 				forgeSupportVersions.put("latest-paper-" + minecraft, loaderversion)
+				forgeSupportVersions.put("latest-cyan-" + minecraft + "-" + cyanversion, loaderversion)
 				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 			} else if (modloader.startsWith("fabric-loader-")) {
 				fabricSupportVersions.put("latest-fabric", minecraft + "-" + loaderversion)
 				fabricSupportVersions.put("latest-fabric-" + minecraft, loaderversion)
+				fabricSupportVersions.put("latest-cyan-" + minecraft + "-" + cyanversion, loaderversion)
 				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 			}  else if (modloader.startsWith("paper-")) {
 				paperSupportVersions.put("latest-paper", minecraft + "-" + loaderversion)
 				paperSupportVersions.put("latest-paper-" + minecraft, loaderversion)
+				paperSupportVersions.put("latest-cyan-" + minecraft + "-" + cyanversion, loaderversion)
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 
 				testingSpigotMappings.put(minecraft, mappingsVersion)
@@ -1493,7 +1547,9 @@ processResources {
 				forgeSupportVersions.put("stable-forge", minecraft + "-" + loaderversion)
 				forgeSupportVersions.put("latest-forge", minecraft + "-" + loaderversion)
 				forgeSupportVersions.put("stable-forge-" + minecraft, loaderversion)
+				forgeSupportVersions.put("stable-cyan-" + minecraft + "-" + cyanversion, loaderversion)
 				forgeSupportVersions.put("latest-forge-" + minecraft, loaderversion)
+				forgeSupportVersions.put("latest-cyan-" + minecraft + "-" + cyanversion, loaderversion)
 
 				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 				forgeSupportVersions.put(minecraft + "-" + loaderversion + "-stable", cyanversion);
@@ -1501,7 +1557,9 @@ processResources {
 				fabricSupportVersions.put("stable-fabric", minecraft + "-" + loaderversion)
 				fabricSupportVersions.put("latest-fabric", minecraft + "-" + loaderversion)
 				fabricSupportVersions.put("stable-fabric-" + minecraft, loaderversion)
+				fabricSupportVersions.put("stable-cyan-" + minecraft + "-" + cyanversion, loaderversion)
 				fabricSupportVersions.put("latest-fabric-" + minecraft, loaderversion)
+				fabricSupportVersions.put("latest-cyan-" + minecraft + "-" + cyanversion, loaderversion)
 
 				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 				fabricSupportVersions.put(minecraft + "-" + loaderversion + "-stable", cyanversion);
@@ -1509,7 +1567,9 @@ processResources {
 				paperSupportVersions.put("stable-paper", minecraft + "-" + loaderversion)
 				paperSupportVersions.put("latest-paper", minecraft + "-" + loaderversion)
 				paperSupportVersions.put("stable-paper-" + minecraft, loaderversion)
+				paperSupportVersions.put("stable-cyan-" + minecraft + "-" + cyanversion, loaderversion)
 				paperSupportVersions.put("latest-paper-" + minecraft, loaderversion)
+				paperSupportVersions.put("latest-cyan-" + minecraft + "-" + cyanversion, loaderversion)
 
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-latest", cyanversion);
 				paperSupportVersions.put(minecraft + "-" + loaderversion + "-stable", cyanversion);
@@ -1607,6 +1667,21 @@ processResources {
 	if ((project.hasProperty("LTS") && project.getProperty("LTS").equals("true")) || (wasLTS && (!project.hasProperty("LTS") || project.getProperty("LTS").equals("true")))) {
 		ltscyanversions.add(cyanversion)
 	}
+	
+	if (modloader.startsWith("fabric-loader-")) {
+		yarnMappingVersions.put("fabric-"+minecraft+"-"+modloader.substring("fabric-loader-".length()), mappingsVersion)
+		yarnMappingVersions.put("cyan-"+minecraft+"-"+cyanversion, mappingsVersion)
+	}
+
+	for (String key : yarnMappingVersions.keySet()) {
+		def val = yarnMappingVersions.get(key).replaceAll("\n", "\n    ")
+		yarnMappings += "    $key> '${val}'\n"
+	}
+
+	for (String key : spigotMappingVersions.keySet()) {
+		def val = spigotMappingVersions.get(key).replaceAll("\n", "\n    ")
+		spigotMappings += "    $key> '${val}'\n"
+	}
 
 	if (project.hasProperty("addUnsupportedVersions")) {
 		for (String unsupportedver : project.getProperty("addUnsupportedVersions").split(" ")) {
@@ -1691,6 +1766,8 @@ processResources {
 	inputs.property "cyanforgesupportversions", "${cyanforgesupportversions}"
 	inputs.property "cyanfabricsupportversions", "${cyanfabricsupportversions}"
 	inputs.property "cyanpapersupportversions", "${cyanpapersupportversions}"
+	inputs.property "yarnMappings", "${yarnMappings}"
+	inputs.property "spigotMappings", "${spigotMappings}"
 
 	project(":CyanAPI").afterEvaluate {
         File logShaFile = new File(cyanCache, "logsha.info")
@@ -1837,7 +1914,9 @@ processResources {
 			"paperByMappings": "${paperByMappings}",
 			"spigotStableMappings": "${spigotStableMappings}",
 			"spigotLatestMappings": "${spigotLatestMappings}",
-			"spigotTestingMappings": "${spigotTestingMappings}"
+			"spigotTestingMappings": "${spigotTestingMappings}",
+			"yarnMappings": "${yarnMappings}",
+			"spigotMappings": "${spigotMappings}"
 		]
 
 		for (def proj : project(":").childProjects) {

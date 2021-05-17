@@ -85,6 +85,31 @@ public class SpigotPlatformClosureOwner extends PlatformClosureOwner {
 		return versions.spigotTestingMappings.get(gameVersion);
 	}
 
+	public String getSpigotMappingsByPaperVersion(String gameVersion, String paperVersion) {
+		return versions.spigotMappings.get("paper-" + gameVersion + "-" + paperVersion);
+	}
+
+	public String getSupportedPaperVersion(String gameVersion, String cyanVersion) {
+		String ver = getStableSupportedPaperVersion(gameVersion, cyanVersion);
+		if (ver == null)
+			ver = getLatestSupportedPaperVersion(gameVersion, cyanVersion);
+		if (ver == null)
+			ver = getTestingSupportedPaperVersion(gameVersion, cyanVersion);
+		return ver;
+	}
+
+	public String getStableSupportedPaperVersion(String gameVersion, String cyanVersion) {
+		return versions.paperSupport.get("stable-cyan-" + gameVersion + "-" + cyanVersion);
+	}
+
+	public String getTestingSupportedPaperVersion(String gameVersion, String cyanVersion) {
+		return versions.paperSupport.get("testing-cyan-" + gameVersion + "-" + cyanVersion);
+	}
+
+	public String getLatestSupportedPaperVersion(String gameVersion, String cyanVersion) {
+		return versions.paperSupport.get("latest-cyan-" + gameVersion + "-" + cyanVersion);
+	}
+
 	public String getRemoteSpigotMappingsVersion(String gameVersion) throws IOException {
 		File infoDir = GradleUtil.getSharedCacheFolder(Cornflower.class, "platforms");
 		File spigotData = new File(infoDir, "spigot-" + gameVersion + ".info");
@@ -109,8 +134,8 @@ public class SpigotPlatformClosureOwner extends PlatformClosureOwner {
 		return ver;
 	}
 
-	public String getPaperVersion(String version) {
-		return versions.paperByMappings.get(version);
+	public String getPaperVersion(String mappings) {
+		return versions.paperByMappings.get(mappings);
 	}
 
 	public String getPaperVersionByDate(String version, String gameVersion) throws ParseException, IOException {

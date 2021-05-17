@@ -52,3 +52,11 @@ ${spigotLatestMappings}}
 # Spigot mappings that are being tested
 spigotTestingMappings> {
 ${spigotTestingMappings}}
+
+# Yarn versions
+yarnMappings> {
+${yarnMappings}}
+
+# Spigot mappings by cyan and/or paper versions
+spigotMappings> {
+${spigotMappings}}

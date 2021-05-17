@@ -1,5 +1,5 @@
 # NOTICE
-The github repository mirrors to https://aerialworks.ddns.net/ASF/Cyan.git, please use that repo instead of github if you wish to contribute.
+The github repository mirrors to https://aerialworks.ddns.net/ASF/Cyan.git, you can fork Cyan on github, pull requests will be merged manually.
 
 # Cyan Mod Loader -- The Compatible Modloader
 Cyan is an upcoming modloader geared towards compatibility,<br/>
@@ -10,7 +10,7 @@ Use `gradle createEclipseLaunches` to setup the environment. (gradlew.bat on win
 
 # Compiling
 Use `./buildlocal.sh` on linux to quickly build the project, argument `--version` can be used to specify game version,
-please note that CYAN is 1.15.2+, we cannot support < 1.15 because of mapping issues.  See [BUILDING](BUILDING.md) for more details on how to compile.
+please note that CYAN is 1.16+, we cannot support < 1.15 because of mapping issues. Please note that 1.15 is is not compatbile with alpha 13, alpha 14 will re-implement 1.15 suppor. See [BUILDING](BUILDING.md) for more details on how to compile.
 
 # AerialWorks Maven Server
 Because we are writing a modloader, we have set up a maven server, here is the url:<br />
@@ -33,8 +33,24 @@ AerialWorks Maven Server: https://aerialworks.ddns.net/maven
 | CyanWeb               | GPL v2              | Website for the Cyan mod loader                                                               | Copyright (c) 2021<br/>AerialWorks Software Foundation | Alpha Stage                    |
 | Cyan API (ModKit)     | LGPL v3             | Cyan Modding API - Version-shared api for creating mods.                                      | Copyright (c) 2021<br/>AerialWorks Software Foundation | Alpha Stage                    |
 
+# Version Compatibility
+| Cyan version | 1.12.X | 1.13.X | 1.14.X | 1.15.X | 1.16.X |
+| :----------: | :----: | :----: | :----: | :----: | :----: |
+| 1.0.0.A12    | No     | No     | No     | Yes    | Yes    |
+| 1.0.0.A13    | No     | No     | No     | No     | Yes    |
+| 1.0.0.A14*   | No     | No     | No     | Yes    | Yes    |
+
+If the '*' is present, the version is no ready for release
+
+# Modloader compatibility
+| Cyan version | Forge 1.15  | Fabric 1.15 | Paper 1.15   | Forge 1.16 | Fabric 1.16 | Paper 1.16 |
+| :----------: | :---------: | :---------: | :----------: | :--------: | :---------: | :--------: |
+| 1.0.0.A12    | 31.2.50     | 0.11.3      | Unsupported  | 36.1.13    | 0.11.3      | 634        |
+| 1.0.0.A13    | Unsupported | Unsupported | Unsupported  | 36.1.18    | 0.11.3      | 691        |
+
 # Projects used
 Please note that not a single project is actually distributed, the mappings are being generated (downloaded and re-formatted) by CYAN on launch, only version information is used.
+
 | Project                         | License             | Copyright Notice                                       | License/project page                                                                       |
 | :-----------------------------: | :-----------------: | :----------------------------------------------------: | :----------------------------------------------------------------------------------------: |
 | MinecraftForge                  | LGPL 2.1            | Copyright (c) 2016-2021<br/>MinecraftForge             | https://github.com/MinecraftForge/MinecraftForge/blob/1.16.x/LICENSE.txt                   |
