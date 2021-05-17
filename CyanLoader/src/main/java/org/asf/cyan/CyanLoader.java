@@ -507,8 +507,8 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			Version ver = Version.fromString(cVersion);
 			checkDependencyVersion(version, ver, "Missing mod dependency for " + manifest.displayName + ": " + id);
 
-			if (!optManifest.isEmpty() && !Stream.of(mods)
-					.anyMatch(t -> t.getManifest().id().equals(manifest.modGroup + ":" + manifest.modId))) {
+			if (!optManifest.isEmpty() && !Stream.of(mods).anyMatch(
+					t -> t.getManifest().id().equals(optManifest.get().modGroup + ":" + optManifest.get().modId))) {
 				loadMod(coremod, optManifest.get(), loadingMods, loader);
 			}
 		});
@@ -517,8 +517,8 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			Optional<CyanModfileManifest> optManifest = allManifests.stream()
 					.filter(t -> id.equals(t.modGroup + ":" + t.modId)).findFirst();
 
-			if (!optManifest.isEmpty() && !Stream.of(mods)
-					.anyMatch(t -> t.getManifest().id().equals(manifest.modGroup + ":" + manifest.modId))) {
+			if (!optManifest.isEmpty() && !Stream.of(mods).anyMatch(
+					t -> t.getManifest().id().equals(optManifest.get().modGroup + ":" + optManifest.get().modId))) {
 
 				String cVersion = (optManifest.isEmpty()
 						? Stream.of(mods).filter(t -> t.getManifest().id().equals(id)).findFirst().get().getManifest()
