@@ -90,23 +90,23 @@ public class SpigotPlatformClosureOwner extends PlatformClosureOwner {
 	}
 
 	public String getSupportedPaperVersion(String gameVersion, String cyanVersion) {
-		String ver = getStableSupportedPaperVersion(gameVersion, cyanVersion);
+		String ver = getSupportedStablePaperVersion(gameVersion, cyanVersion);
 		if (ver == null)
-			ver = getLatestSupportedPaperVersion(gameVersion, cyanVersion);
+			ver = getSupportedLatestPaperVersion(gameVersion, cyanVersion);
 		if (ver == null)
-			ver = getTestingSupportedPaperVersion(gameVersion, cyanVersion);
+			ver = getSupportedTestingPaperVersion(gameVersion, cyanVersion);
 		return ver;
 	}
 
-	public String getStableSupportedPaperVersion(String gameVersion, String cyanVersion) {
+	public String getSupportedStablePaperVersion(String gameVersion, String cyanVersion) {
 		return versions.paperSupport.get("stable-cyan-" + gameVersion + "-" + cyanVersion);
 	}
 
-	public String getTestingSupportedPaperVersion(String gameVersion, String cyanVersion) {
+	public String getSupportedTestingPaperVersion(String gameVersion, String cyanVersion) {
 		return versions.paperSupport.get("testing-cyan-" + gameVersion + "-" + cyanVersion);
 	}
 
-	public String getLatestSupportedPaperVersion(String gameVersion, String cyanVersion) {
+	public String getSupportedLatestPaperVersion(String gameVersion, String cyanVersion) {
 		return versions.paperSupport.get("latest-cyan-" + gameVersion + "-" + cyanVersion);
 	}
 

@@ -87,27 +87,26 @@ public class YarnPlatformClosureOwner extends PlatformClosureOwner {
 	}
 
 	public String getSupportedFabricVersion(String gameVersion, String cyanVersion) throws IOException {
-		File loaderData = new File(infoDir, "fabric-" + gameVersion + "-" + cyanVersion + ".info");
-
-		String ver = null;
-		try {
-			ver = versions.fabricSupport.get("stable-fabric-" + gameVersion);
-			if (ver == null)
-				ver = versions.fabricSupport.get("latest-fabric-" + gameVersion);
-			if (ver == null)
-				ver = versions.fabricSupport.get("testing-fabric-" + gameVersion);
-			if (ver == null)
-				return getLatestFabricVersion(gameVersion);
-		} catch (IOException ex) {
-			if (loaderData.exists()) {
-				ver = new String(Files.readAllBytes(loaderData.toPath()));
-			} else {
-				throw ex;
-			}
-		}
-
-		Files.write(loaderData.toPath(), ver.getBytes());
+		String ver = getSupportedStableFabricVersion(gameVersion, cyanVersion);
+		if (ver == null)
+			ver = getSupportedLatestFabricVersion(gameVersion, cyanVersion);
+		if (ver == null)
+			ver = getSupportedTestingFabricVersion(gameVersion, cyanVersion);
+		if (ver == null )
+			return getLatestFabricVersion(gameVersion);
 		return ver;
+	}
+
+	public String getSupportedStableFabricVersion(String gameVersion, String cyanVersion) {
+		return versions.fabricSupport.get("stable-cyan-" + gameVersion + "-" + cyanVersion);
+	}
+
+	public String getSupportedTestingFabricVersion(String gameVersion, String cyanVersion) {
+		return versions.fabricSupport.get("testing-cyan-" + gameVersion + "-" + cyanVersion);
+	}
+
+	public String getSupportedLatestFabricVersion(String gameVersion, String cyanVersion) {
+		return versions.fabricSupport.get("latest-cyan-" + gameVersion + "-" + cyanVersion);
 	}
 
 	public String getYarnVersion(String gameVersion) throws IOException {
