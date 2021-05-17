@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.UUID;
 
+import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.config.Configuration;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftToolkit;
@@ -25,7 +26,7 @@ import com.google.gson.JsonParser;
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public class YggdrasilAuthentication {
+public class YggdrasilAuthentication extends CyanComponent {
 	static Gson gson = new Gson();
 	static File mcdir = null;
 	static File mtkloginsavedir = null;
@@ -166,13 +167,14 @@ public class YggdrasilAuthentication {
 	 */
 	public static AuthenticationInfo authenticate(String username, boolean offline) throws IOException {
 		init();
+		info("Authenticating user " + username + "...");
 		File userfile = new File(mtkloginsavedir, "profile." + username.toLowerCase() + ".ccfg");
 		if (!userfile.exists())
 			throw new IOException("User file not found");
 
 		AuthHolder holder = new AuthHolder().readAll(Files.readString(userfile.toPath()));
-		AuthenticationInfo account = AuthenticationInfo.create(holder.userName, holder.playerName, holder.accessToken, holder.playerUUID,
-				holder.accountType);
+		AuthenticationInfo account = AuthenticationInfo.create(holder.userName, holder.playerName, holder.accessToken,
+				holder.playerUUID, holder.accountType);
 
 		if (!offline) {
 			if (!isValid(account)) {
@@ -184,7 +186,7 @@ public class YggdrasilAuthentication {
 				}
 			}
 		}
-		
+
 		saveUser(account);
 		return account;
 	}
@@ -276,7 +278,7 @@ public class YggdrasilAuthentication {
 					String json = new String(c.getInputStream().readAllBytes());
 					root = JsonParser.parseString(json).getAsJsonObject();
 					JsonObject selectedProfile = root.get("selectedProfile").getAsJsonObject();
-					
+
 					account.playerName = selectedProfile.get("name").getAsString();
 					account.accessToken = root.get("accessToken").getAsString();
 
