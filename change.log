@@ -31,21 +31,24 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - ModKit Block Entity Registry Events (CyanAPI ModKit 1.0)
  - ModKit Block Registry Events (CyanAPI ModKit 1.0)
  - ModKit Item Registry Events (CyanAPI ModKit 1.0)
+ - ModKit Command Manager (CyanAPI ModKit 1.0)
  
  - ModKit CyanAPI selected by specific version or if not present, the major version (CyanAPI ModKit 1.0)
  - ModKit CyanAPI shared implementations in CyanLoader (CyanAPI ModKit 1.0)
  - Cornflower Rift Version Handler (Cornflower A36, selects normal versions with the ModKit and such)
  - ModKit EventUtil Event Manager (CyanAPI 1.0.0.A1)
- - Fixed Forge Support (CyanAPI 1.0.0.A1)
  - ModKit Tested on Fabric and Forge (CyanAPI 1.0.0.A1)
+ 
  - Cyan Version Support Map (Cyan 1.0.0.A13)
  - Cyan Modloader Version Support Map (Cyan 1.0.0.A13)
  
+ - Update CoreModKit (Cyan 1.0.0.A13)
+ - Created a regular ModKit download (Cyan 1.0.0.A13)
+
  // A14
  - ModKit Key Registry Events (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2) -- TODO
  - ModKit ported to 1.15.2 and fully tested (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2) -- TODO
  - ModKit Custom Invenotry Tabs (CyanAPI ModKit 1.1) -- TODO
- - ModKit Dimension Registry Events (CyanAPI ModKit 1.1) -- TODO
  - ModKit World Load Warning if mods have changed (CyanAPI ModKit 1.1) -- TODO
  - ModKit Threads API (CyanAPI ModKit 1.1, count of threads is displayed in crash logs) -- TODO
  - MTK MSA Account Support (MTK A22) -- TODO
@@ -56,7 +59,8 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  
  - ModKit Entity API (CyanAPI ModKit 1.2) -- TODO
  - ModKit Block Entity API (CyanAPI ModKit 1.2) -- TODO
- - ModKit Command API (CyanAPI ModKit 1.2) -- TODO
+ 
+ - ModKit Dimension Registry Events (CyanAPI ModKit 1.2) -- TODOO
  
  - ModKit Block Events (CyanAPI ModKit 1.2) -- TODO
  - ModKit Item Events (CyanAPI ModKit 1.2) -- TODO
@@ -65,6 +69,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  - More ModKit Server Packet Events (such as block break, interact, and such, CyanAPI ModKit 1.2) -- TODO
  
  - ModKit Player Display Name Modification (CyanAPI ModKit 1.2) -- TODO
+ - ModKit Chat Events (CyanAPI ModKit 1.2) -- TODO
  - ModKit Player Nametag Modification Event (allows for the change of player name tags, CyanAPI ModKit 1.2) -- TODO
  
  // B1: LTS:

@@ -46,7 +46,7 @@ If the '*' is present, the version is no ready for release
 | Cyan version | Forge 1.15  | Fabric 1.15 | Paper 1.15   | Forge 1.16 | Fabric 1.16 | Paper 1.16 |
 | :----------: | :---------: | :---------: | :----------: | :--------: | :---------: | :--------: |
 | 1.0.0.A12    | 31.2.50     | 0.11.3      | Unsupported  | 36.1.13    | 0.11.3      | 634        |
-| 1.0.0.A13    | Unsupported | Unsupported | Unsupported  | 36.1.18    | 0.11.3      | 691        |
+| 1.0.0.A13    | Unsupported | Unsupported | Unsupported  | 36.1.23    | 0.11.3      | 703        |
 
 # Projects used
 Please note that not a single project is actually distributed, the mappings are being generated (downloaded and re-formatted) by CYAN on launch, only version information is used.
