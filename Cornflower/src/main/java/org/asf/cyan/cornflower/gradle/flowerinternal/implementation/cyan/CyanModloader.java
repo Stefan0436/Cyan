@@ -145,8 +145,6 @@ public class CyanModloader implements IModloader {
 	@Override
 	public String[] addDependencies(ConfigurationContainer configurations) {
 		ArrayList<String> deps = new ArrayList<String>();
-		addDependency("com.google.code.gson", "gson", "2.8.6", deps);
-		
 		addDependency("org.asf.cyan", "CCFG", libraries.get("CCFG"), deps);
 		addDependency("org.asf.cyan", "CyanComponents", libraries.get("CyanComponents"), deps);
 		addDependency("org.asf.cyan", "CyanUtil", libraries.get("CyanUtil"), deps);
