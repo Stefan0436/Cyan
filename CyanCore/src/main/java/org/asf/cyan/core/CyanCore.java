@@ -334,8 +334,12 @@ public class CyanCore extends CyanComponent {
 		trace("LOOP through found classes, caller: " + CallTrace.traceCallName());
 		return classes.toArray(t -> new Class<?>[t]);
 	}
+	
+	public static void reinitReflections() {
+		core.initReflections();
+	}
 
-	private void initReflections() {
+	public void initReflections() {
 		ClassLoader cl = CyanCore.class.getClassLoader();
 		ConfigurationBuilder conf = ConfigurationBuilder.build(loader);
 		if (cornflowerSupport) {

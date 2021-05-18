@@ -2357,6 +2357,9 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			Files.write(installs.toPath(), conf.toString().getBytes());
 		}
 		StartupWindow.WindowAppender.increaseProgress();
+		
+		info("Reloading reflections...");
+		CyanCore.reinitReflections();
 
 		dispatchEvent("mods.all.loaded");
 		dispatchEvent("mods.all.loaded", loader);

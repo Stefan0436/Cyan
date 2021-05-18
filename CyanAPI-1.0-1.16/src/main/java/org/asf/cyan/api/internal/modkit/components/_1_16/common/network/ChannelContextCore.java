@@ -16,6 +16,7 @@ import org.asf.cyan.api.network.channels.AbstractPacketProcessor;
 import org.asf.cyan.api.network.channels.PacketChannel;
 import org.asf.cyan.api.network.channels.PacketChannelContext;
 import org.asf.cyan.api.network.channels.PacketChannelList;
+import org.asf.cyan.core.CyanCore;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -34,19 +35,13 @@ public class ChannelContextCore extends PacketChannelContext implements IModKitC
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void findChannels() {
 		ClassLoader loader = getClass().getClassLoader();
 		channels = new PacketChannelList();
 		info("Finding mod network channels...");
-		String[] classes = findClassNames(getMainImplementation(), PacketChannel.class);
-		for (String cls : classes) {
-			Class<? extends PacketChannel> channel;
-			try {
-				channel = (Class<? extends PacketChannel>) Class.forName(cls, false, loader);
-			} catch (ClassNotFoundException e1) {
-				continue;
-			}
+		Class<? extends PacketChannel>[] classes = findClasses(getMainImplementation(), PacketChannel.class, loader,
+				CyanCore.getClassLoader(), CyanCore.getCoreClassLoader());
+		for (Class<? extends PacketChannel> channel : classes) {
 			if (!Modifier.isAbstract(channel.getModifiers())) {
 				info("Loading channel " + channel.getTypeName() + "...");
 				try {
