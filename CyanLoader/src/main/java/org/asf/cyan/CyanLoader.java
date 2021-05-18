@@ -412,6 +412,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 							base = "jar:" + base + "!/";
 						mod.source = base;
 						CyanCore.addAdditionalClass(cls);
+						CyanCore.addToPackageScan(mod.modClassPackage);
 					} catch (ClassNotFoundException e) {
 						throw new RuntimeException(e);
 					}
@@ -420,6 +421,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 					mod.readAll(new String(Files.readAllBytes(new File(file.substring(3)).toPath())));
 					ld.modManifests.put(mod.modClassPackage + "." + mod.modClassName, mod);
 					ld.modManifests.put(mod.modGroup + ":" + mod.modId, mod);
+					CyanCore.addToPackageScan(mod.modClassPackage);
 					CyanCore.addAllowedPackage(mod.modClassPackage);
 				}
 			}

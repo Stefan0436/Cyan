@@ -63,7 +63,7 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 	private String group = null;
 
 	private String descKey = null;
-	private String fallbackDesc;
+	private String fallbackDesc = null;
 
 	private AbstractMod[] deps;
 	private String[] optdeps;
@@ -219,7 +219,8 @@ public abstract class AbstractMod extends CyanComponent implements IMod, IEventL
 		desc = manifest.fallbackDescription;
 		group = manifest.modGroup;
 		descKey = manifest.descriptionLanguageKey;
-		fallbackDesc = manifest.fallbackDescription.trim();
+		if (manifest.fallbackDescription != null)
+			fallbackDesc = manifest.fallbackDescription.trim();
 		if (descKey != null && descKey.isEmpty())
 			descKey = null;
 		version = Version.fromString(manifest.version);

@@ -386,6 +386,26 @@ public class CyanCore extends CyanComponent {
 					error("Failed to load the " + rname + " package.", ex);
 				}
 			}
+			for (String p : extraPkgs) {
+				String rname = p.replace(".", "/");
+				try {
+					Enumeration<URL> roots = cl.getResources(rname);
+					for (URL i : Collections.list(roots)) {
+						if (rname.startsWith("org/asf/cyan/") || rname.equals("org/asf/cyan")
+								|| allowedPackages.stream().anyMatch(t -> t.equals(rname.replaceAll("/", "."))
+										|| t.startsWith(rname.replaceAll("/", ".") + "."))) {
+							if (!conf.getUrls().contains(i)) {
+								debug("Added URL for component scan. URL: " + i.toString());
+								conf.addUrls(i);
+							}
+						}
+					}
+				} catch (IOException ex) {
+					error("Failed to load the " + rname + " package.", ex);
+				}
+			}
+			if (openloader != null)
+				conf.addUrls(openloader.getURLs());
 			conf.addUrls(loader.getURLs());
 		}
 
@@ -649,6 +669,10 @@ public class CyanCore extends CyanComponent {
 		if (loadPhase.equals(LoadPhase.NOT_READY) || loadPhase.equals(LoadPhase.CORELOAD)) {
 			if (loader == null)
 				initLoader();
+			if (core != null && core.reflections != null) {
+				ConfigurationBuilder config = (ConfigurationBuilder) core.reflections.getConfiguration();
+				config.addUrls(url);
+			}
 			loader.addUrl(url);
 			addedUrls.add(url);
 		} else
@@ -666,6 +690,10 @@ public class CyanCore extends CyanComponent {
 			throw new IllegalStateException("CyanCore is already past INIT");
 		if (openloader == null)
 			throw new IllegalStateException("Mod class loader not ready!");
+		if (core != null && core.reflections != null) {
+			ConfigurationBuilder config = (ConfigurationBuilder) core.reflections.getConfiguration();
+			config.addUrls(url);
+		}
 		openloader.addUrl(url);
 		addedUrls.add(url);
 	}
@@ -723,5 +751,11 @@ public class CyanCore extends CyanComponent {
 
 	public static boolean isIdeMode() {
 		return ide;
+	}
+
+	private static ArrayList<String> extraPkgs = new ArrayList<String>();
+
+	public static void addToPackageScan(String pkg) {
+		extraPkgs.add(pkg);
 	}
 }
