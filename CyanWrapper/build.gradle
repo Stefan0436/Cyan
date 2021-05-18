@@ -1617,8 +1617,6 @@ processResources {
 		}
 	}
 
-	libraryVersionMap.put("ModKit-" + modkit, project(":CyanAPI").version);
-
 	for (String key : gameVersions.keySet()) {
 		def val = gameVersions.get(key).replaceAll("\n", "\n    ")
 		byGameVersions += "    $key> '${val}'\n"
@@ -1637,11 +1635,6 @@ processResources {
 	for (String key : paperSupportVersions.keySet()) {
 		def val = paperSupportVersions.get(key).replaceAll("\n", "\n    ")
 		cyanpapersupportversions += "    $key> '${val}'\n"
-	}
-
-	for (String key : libraryVersionMap.keySet()) {
-		def val = libraryVersionMap.get(key).replaceAll("\n", "\n    ")
-		libraryVersions += "    $key> '${val}'\n"
 	}
 
 	for (String key : testingSpigotMappings.keySet()) {
@@ -1770,6 +1763,13 @@ processResources {
 	inputs.property "spigotMappings", "${spigotMappings}"
 
 	project(":CyanAPI").afterEvaluate {
+		libraryVersionMap.put("ModKit-" + modkit, project(":CyanAPI").version);
+		
+		for (String key : libraryVersionMap.keySet()) {
+			def val = libraryVersionMap.get(key).replaceAll("\n", "\n    ")
+			libraryVersions += "    $key> '${val}'\n"
+		}
+
         File logShaFile = new File(cyanCache, "logsha.info")
         File logSizeFile = new File(cyanCache, "logsize.info")
         if (!project.hasProperty("noDownload") && !project.hasProperty("currentXML")) {

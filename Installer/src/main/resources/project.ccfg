@@ -37,6 +37,7 @@ repositories> {
     local12> 'file:///run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/build/ModKit-1.0/maven/'
     local13> 'file:///run/media/stefan/Externe HDD/AerialWorks Software Foundation/Development/Cyan Mod Framework/build/CyanAPI-1.16.5-1.0/maven/'
     asf> 'https://aerialworks.ddns.net/maven'
+    minecraft> 'https://libraries.minecraft.net'
     central> 'https://repo1.maven.org/maven2'
 }
 
