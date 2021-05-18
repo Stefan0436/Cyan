@@ -56,7 +56,7 @@ public interface Command {
 		 * @return Value or default
 		 */
 		public <T> T getArgument(String name, Class<T> type) {
-			return getArgument(name, (T) null);
+			return getArgument(name, type, (T) null);
 		}
 
 		/**
@@ -67,7 +67,7 @@ public interface Command {
 		 * @param def  Default value
 		 * @return Value or default
 		 */
-		public abstract <T> T getArgument(String name, T def);
+		public abstract <T> T getArgument(String name, Class<T> type, T def);
 
 		/**
 		 * Retrieves the player that ran the command, returns null if not a player

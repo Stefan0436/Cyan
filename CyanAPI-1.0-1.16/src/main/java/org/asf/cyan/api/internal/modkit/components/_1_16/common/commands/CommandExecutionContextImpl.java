@@ -24,11 +24,10 @@ public class CommandExecutionContextImpl extends CommandExecutionContext impleme
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <T> T getArgument(String name, T def) {
+	public <T> T getArgument(String name, Class<T> type, T def) {
 		T value = def;
 		try {
-			value = (T) context.getArgument(name, def.getClass());
+			value = (T) context.getArgument(name, type);
 		} catch (IllegalArgumentException e) {
 			if (!e.getMessage().startsWith("No such argument "))
 				throw e;
