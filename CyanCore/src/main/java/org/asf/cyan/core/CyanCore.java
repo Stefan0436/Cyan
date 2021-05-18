@@ -298,12 +298,13 @@ public class CyanCore extends CyanComponent {
 		trace("CLOSE FluidAPI Transformer and Mappings loader, caller: " + CallTrace.traceCallName());
 		Fluid.closeFluidLoader();
 
-		info("Starting the FLUID agent...");
+		if (!cornflowerSupport)
+			info("Starting the FLUID agent...");
 		CyanTransformer.initComponent();
 		CyanTransformerMetadata.initComponent();
-		if (!disableAgent)
+		if (!disableAgent && !cornflowerSupport)
 			Fluid.loadAgent();
-		else
+		else if (!cornflowerSupport)
 			FluidAgent.initialize();
 	}
 
