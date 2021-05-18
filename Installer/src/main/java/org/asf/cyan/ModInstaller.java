@@ -121,6 +121,7 @@ public class ModInstaller extends JFrame {
 				+ "\n\nThis mod will be installed in:\n" + cyanDataDir.getCanonicalPath());
 		lblNewLabel.setText(mf.displayName);
 		lblNewLabel_1.setText(mf.modGroup + ":" + mf.modId + " V" + mf.version);
+		textArea.setCaretPosition(0);
 	}
 
 }
