@@ -54,7 +54,7 @@ public class SpigotCommandModification {
 	public void setPermission(String perm) {
 		org.asf.cyan.api.commands.Command command = getCyanCmd(name);
 		if (command != null && !cyanPermAssigned) {
-			permission = command.getPermission().getKey();
+			permission = command.getPermission();
 			cyanPermAssigned = true;
 		}
 	}

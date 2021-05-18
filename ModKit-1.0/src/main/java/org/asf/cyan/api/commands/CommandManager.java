@@ -2,15 +2,18 @@ package org.asf.cyan.api.commands;
 
 import org.asf.cyan.mods.events.IEventListenerContainer;
 
+import com.mojang.brigadier.context.CommandContext;
+
+import net.minecraft.commands.CommandSourceStack;
+
 /**
  * 
- * Command Manager - Mod Command System (<b>NOT FULLY IMPLEMENTED, full
- * implementation coming in ModKit 1.2</b>)
+ * Command Manager - Mod Command System
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public abstract class CommandManager implements IEventListenerContainer { // TODO
+public abstract class CommandManager implements IEventListenerContainer {
 	protected static CommandManager implementation;
 
 	/**
@@ -46,5 +49,5 @@ public abstract class CommandManager implements IEventListenerContainer { // TOD
 	 * @return Array of known commands
 	 */
 	public abstract Command[] getCommands();
-
+	
 }

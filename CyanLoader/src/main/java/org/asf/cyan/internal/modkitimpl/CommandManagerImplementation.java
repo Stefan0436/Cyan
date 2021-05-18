@@ -11,6 +11,18 @@ import org.asf.cyan.api.modloader.TargetModloader;
 @TargetModloader(CyanLoader.class)
 public class CommandManagerImplementation extends CommandManager implements IPostponedComponent {
 
+	public static interface RegisteryListener {
+		public void register(Command command, CommandManager manager);
+	}
+	
+	private static RegisteryListener listener;
+	
+	public static void assignListener(RegisteryListener listener) {
+		if (CommandManagerImplementation.listener != null)
+			return;
+		CommandManagerImplementation.listener = listener;
+	}
+	
 	private ArrayList<Command> commands = new ArrayList<Command>();
 
 	@Override
@@ -21,6 +33,7 @@ public class CommandManagerImplementation extends CommandManager implements IPos
 	@Override
 	public CommandManager registerCommand(Command command) {
 		commands.add(command);
+		listener.register(command, this);
 		return this;
 	}
 

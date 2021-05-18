@@ -187,6 +187,7 @@ public abstract class Transformer extends CyanComponent {
 						String methName = info.name;
 						descriptor = info.toDescriptor();
 
+						final String originalDesc = meth.desc;
 						final String descFinal = descriptor;
 						final String methNameFinal = methName;
 
@@ -215,7 +216,7 @@ public abstract class Transformer extends CyanComponent {
 							ninfo.remap(clName, transformer, ninfo, false, ctx.programPool);
 
 							transformedMethods.add(ninfo.name + " " + ninfo.toDescriptor() + " " + clName + " "
-									+ meth.name + "&" + meth.desc + " " + newMod + " " + newMod);
+									+ meth.name + "&" + originalDesc + " " + newMod + " " + newMod);
 						} else if (AnnotationInfo.isAnnotationPresent(InjectAt.class, meth)) {
 							if (!target.methods.stream()
 									.anyMatch(t -> t.name.equals(methNameFinal) && t.desc.equals(descFinal))) {
