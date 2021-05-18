@@ -203,13 +203,17 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 			});
 			max = 0;
 			try {
-				String version = CtcUtil.pack(input, new File(outputStr.replace("%version%", "__current__")), (num) -> max = num, (num) -> {
-					Cornflower.getPluginInstance(Cornflower.class).logInfo("Added: " + num + " / " + max);
-				});
+				String version = CtcUtil.pack(input, new File(outputStr.replace("%version%", "__current__")),
+						(num) -> max = num, (num) -> {
+							Cornflower.getPluginInstance(Cornflower.class).logInfo("Added: " + num + " / " + max);
+						});
 				File out = new File(outputStr.replace("%version%", version));
 				if (!out.getParentFile().exists())
 					out.getParentFile().mkdirs();
 				Files.move(new File(outputStr.replace("%version%", "__current__")).toPath(), out.toPath());
+				File inp = new File(outputStr.replace("%version%", "__current__"));
+				if (inp.getParentFile().listFiles().length == 0)
+					inp.getParentFile().delete();
 
 				if (createHash) {
 					Files.write(new File(out.getAbsolutePath() + ".sha256").toPath(),
