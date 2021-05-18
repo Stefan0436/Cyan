@@ -418,7 +418,8 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 				} else if (file.startsWith("M//")) {
 					CyanModfileManifest mod = new CyanModfileManifest();
 					mod.readAll(new String(Files.readAllBytes(new File(file.substring(3)).toPath())));
-					ld.modManifests.put(mod.modGroup + "." + mod.modId, mod);
+					ld.modManifests.put(mod.modClassPackage + "." + mod.modClassName, mod);
+					ld.modManifests.put(mod.modGroup + ":" + mod.modId, mod);
 					CyanCore.addAllowedPackage(mod.modClassPackage);
 				}
 			}
