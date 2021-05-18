@@ -77,14 +77,12 @@ public abstract class Transformer extends CyanComponent {
 
 		ArrayList<ClassNode> arr = transformers.get(loadingName);
 		int transformerIndex = 0;
-
-		boolean asmMethods = false;
-		ArrayList<String> transformedMethods = new ArrayList<String>();
-		ArrayList<String> transformedFields = new ArrayList<String>();
-
 		for (ClassNode transformer : arr) {
+			boolean asmMethods = false;
+			ArrayList<String> transformedMethods = new ArrayList<String>();
+			ArrayList<String> transformedFields = new ArrayList<String>();
+			
 			String typeName = transformer.name.replaceAll("/", ".");
-
 			try {
 				debug("Applying transformer " + typeName + " to class "
 						+ Fluid.mapClass(loadingName.replaceAll("/", ".")));
