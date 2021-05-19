@@ -375,7 +375,9 @@ public class MinecraftModdingToolkit extends CyanComponent {
 			try {
 				if (!v.getParentFile().exists())
 					v.getParentFile().mkdirs();
-
+				if (v.exists())
+					v.delete();
+				
 				debug("Copying " + k.getCanonicalPath() + " to " + v.getName());
 				Files.copy(k.toPath(), v.toPath());
 				v = v.getCanonicalFile();

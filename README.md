@@ -40,7 +40,7 @@ AerialWorks Maven Server: https://aerialworks.ddns.net/maven
 | 1.0.0.A13    | No     | No     | No     | No     | Yes    |
 | 1.0.0.A14*   | No     | No     | No     | Yes    | Yes    |
 
-If the '*' is present, the version is no ready for release
+If the '*' is present, the version is not ready for release
 
 # Modloader compatibility
 | Cyan version | Forge 1.15  | Fabric 1.15 | Paper 1.15   | Forge 1.16 | Fabric 1.16 | Paper 1.16 |
