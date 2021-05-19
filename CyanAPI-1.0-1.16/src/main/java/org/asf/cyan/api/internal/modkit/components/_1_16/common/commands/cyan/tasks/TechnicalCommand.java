@@ -51,7 +51,7 @@ public class TechnicalCommand extends CyanComponent implements Command {
 					.getString().trim()));
 		} else {
 			context.successTranslatable("cyan.info.technical", "§6" + Protocols.MODKIT_PROTOCOL,
-					"§6" + Protocols.MODKIT_PROTOCOL, "§6" + Protocols.LOADER_PROTOCOL,
+					"§6" + Protocols.LOADER_PROTOCOL,
 					"§6" + (client.getProtocol() == -1 ? "Not present" : client.getProtocol()),
 					"§6" + (client.getModloaderProtocol() == -1 ? "Not present" : client.getModloaderProtocol()),
 					"§6" + (client.getGameVersion() == null ? "Not present" : client.getGameVersion()),
