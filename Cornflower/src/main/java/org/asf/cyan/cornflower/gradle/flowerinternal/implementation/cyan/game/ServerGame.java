@@ -94,6 +94,7 @@ public class ServerGame implements IGameExecutionContext, ILaunchProvider {
 	@Override
 	public String deobfuscatedJarDependency() {
 		prepare();
+		MinecraftModdingToolkit.deobfuscateJar(gameVersion, GameSide.SERVER);
 		return null;
 	}
 
