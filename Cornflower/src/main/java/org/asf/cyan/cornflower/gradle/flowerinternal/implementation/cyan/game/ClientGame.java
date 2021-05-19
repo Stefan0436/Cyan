@@ -82,7 +82,7 @@ public class ClientGame implements IGameExecutionContext, ILaunchProvider {
 		prepare();
 		ArrayList<String> libs = new ArrayList<String>();
 		for (String lib : MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion, true)) {
-			if (!lib.contains(":log4j"))
+			if (!lib.contains(":log4j") && !lib.contains(":gson"))
 				libs.add(lib);
 		}
 		return libs.toArray(new String[0]);
