@@ -452,6 +452,7 @@ public class CyanCore extends CyanComponent {
 		openloader.apply();
 		openloader.setOptions(DynamicClassLoader.OPTION_DENY_ADD_RUNTIME);
 		agentloader = loader;
+		secured = false;
 		cyancoreInitialized = true;
 	}
 
@@ -601,9 +602,6 @@ public class CyanCore extends CyanComponent {
 		info("Full version: " + CyanInfo.getMinecraftVersion()
 				+ (loaderStr.isEmpty() ? "" : "-" + loaderStr.toLowerCase()) + "-cyan-" + CyanInfo.getCyanVersion());
 		info("");
-
-		debug("Securing mod classloader...");
-		openloader.secure();
 		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Loading class " + game + "...");
@@ -631,7 +629,14 @@ public class CyanCore extends CyanComponent {
 		loadPhase = phase;
 		if (Modloader.getModloader() != null)
 			Modloader.getModloader().dispatchEvent("phase.changed", phase);
+		if (phase == LoadPhase.POSTINIT && !secured) {
+			debug("Securing mod classloader...");
+			openloader.secure();
+			secured = true;
+		}
 	}
+	
+	private static boolean secured = false;
 
 	/**
 	 * Set the current side name (CLIENT/SERVER), can only be set ONCE

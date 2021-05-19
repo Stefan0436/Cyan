@@ -41,10 +41,12 @@ Cyan Update Changelog: 1.0.0 (Alpha 13):
  
  - Cyan Version Support Map (Cyan 1.0.0.A13)
  - Cyan Modloader Version Support Map (Cyan 1.0.0.A13)
- 
+
+ - KickStart Installer (Cyan 1.0.0.A13)
+ - Fixed MTK error on decomp if output already exists (Cornflower A37)
  - Update CoreModKit (Cyan 1.0.0.A13)
  - Created a regular ModKit download (Cyan 1.0.0.A13)
-
+ 
  // A14
  - ModKit Key Registry Events (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2) -- TODO
  - ModKit ported to 1.15.2 and fully tested (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2) -- TODO

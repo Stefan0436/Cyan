@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.cyan.CyanModloader;
@@ -89,18 +88,13 @@ public class ServerGame implements IGameExecutionContext, ILaunchProvider {
 	@Override
 	public String gameJarDependency() {
 		prepare();
-		return ":server:" + gameVersion + "-deobf";
+		return null;
 	}
 
 	@Override
 	public String deobfuscatedJarDependency() {
 		prepare();
-		try {
-			MinecraftModdingToolkit.deobfuscateJar(gameVersion, GameSide.SERVER);
-			return ":server:" + gameVersion + "-deobf";
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		return null;
 	}
 
 	@Override
@@ -146,12 +140,7 @@ public class ServerGame implements IGameExecutionContext, ILaunchProvider {
 	@Override
 	public String[] libraries() {
 		prepare();
-		ArrayList<String> libs = new ArrayList<String>();
-		for (String lib : MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion, true)) {
-			if (!lib.contains(":log4j") && !lib.contains(":gson"))
-				libs.add(lib);
-		}
-		return libs.toArray(new String[0]);
+		return new String[0];
 	}
 
 	@Override

@@ -192,8 +192,11 @@ public class ModloaderHandler extends CyanComponent {
 				if (mainJar == null)
 					mainJar = context.gameJarDependency();
 
-				proj.getDependencies().add("implementation", mainJar);
-				deps.add(mainJar);
+				if (mainJar != null)
+					proj.getDependencies().add("implementation", mainJar);
+
+				if (mainJar != null)
+					deps.add(mainJar);
 				for (String lib : context.libraries()) {
 					proj.getDependencies().add("implementation", lib);
 					deps.add(lib);

@@ -2303,6 +2303,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 			try {
 				CyanCore.addCoreUrl(libFile.toURI().toURL());
+				CyanCore.addUrl(libFile.toURI().toURL());
 			} catch (MalformedURLException e) {
 				fatal("Could not load dependency " + group + ":" + name);
 				StartupWindow.WindowAppender.fatalError();
