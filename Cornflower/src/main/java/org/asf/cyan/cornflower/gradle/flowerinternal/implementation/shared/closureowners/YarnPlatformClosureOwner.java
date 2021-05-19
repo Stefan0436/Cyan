@@ -54,6 +54,13 @@ public class YarnPlatformClosureOwner extends PlatformClosureOwner {
 				throw new RuntimeException(e);
 		}
 		owner.versions = new CyanUpdateInfo(config);
+		try {
+			if (!manifest.getParentFile().exists())
+				manifest.getParentFile().mkdirs();
+			Files.write(manifest.toPath(), config.getBytes());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 
 		closure.setDelegate(owner);
 		closure.call();
@@ -92,7 +99,7 @@ public class YarnPlatformClosureOwner extends PlatformClosureOwner {
 			ver = getSupportedLatestFabricVersion(gameVersion, cyanVersion);
 		if (ver == null)
 			ver = getSupportedTestingFabricVersion(gameVersion, cyanVersion);
-		if (ver == null )
+		if (ver == null)
 			return getLatestFabricVersion(gameVersion);
 		return ver;
 	}

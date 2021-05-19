@@ -63,6 +63,8 @@ public class SpigotPlatformClosureOwner extends PlatformClosureOwner {
 		owner.versions = new CyanUpdateInfo(config);
 
 		try {
+			if (!manifest.getParentFile().exists())
+				manifest.getParentFile().mkdirs();
 			Files.write(manifest.toPath(), config.getBytes());
 		} catch (IOException e1) {
 			throw new RuntimeException(e1);
