@@ -28,6 +28,7 @@ configurePublish {
 	description "Cyan Installer"
 	page "https://aerialworks.ddns.net/maven"
 	address "https://aerialworks.ddns.net/maven"
+        includeShadowJar()
 	
 	author {
 		name "$authorname"
