@@ -28,21 +28,19 @@ public class ForgeCompatibilityMappings extends CompatibilityMappings {
 	public ForgeCompatibilityMappings(Mapping<?> mappings, String modloader, MinecraftVersionInfo info, GameSide side,
 			boolean msg, String mcp) {
 		try {
+			String mappingsId = "-" + mcp.replaceAll("[!?/:\\\\]", "-") + (modloader.isEmpty() ? "" : "-" + modloader);
 			MinecraftToolkit.infoLog("Loading forge support... Preparing MCP mappings for compatibility...");
-			if (!MinecraftMappingsToolkit.areMappingsAvailable((modloader.isEmpty() ? "" : "-" + modloader + "-") + mcp,
-					"mcp", info, side)) {
+			if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "mcp", info, side)) {
 
 				if (msg)
 					MinecraftToolkit.infoLog("First time loading with forge support for version " + modloader
 							+ ", downloading MCP mappings...");
 
 				MinecraftMappingsToolkit.downloadMCPMappings(info, side, mcp);
-				MinecraftMappingsToolkit.saveMappingsToDisk((modloader.isEmpty() ? "" : "-" + modloader + "-") + mcp,
-						"mcp", info, side);
+				MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "mcp", info, side);
 			}
 
-			Mapping<?> MCPMappings = MinecraftMappingsToolkit
-					.loadMappings((modloader.isEmpty() ? "" : "-" + modloader + "-") + mcp, "mcp", info, side);
+			Mapping<?> MCPMappings = MinecraftMappingsToolkit.loadMappings(mappingsId, "mcp", info, side);
 			combine("MCP", mappings, MCPMappings);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException | IOException e) {

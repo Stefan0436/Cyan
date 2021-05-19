@@ -170,11 +170,12 @@ public class MinecraftRifterToolkit extends CyanComponent {
 	 */
 	public static Mapping<?> generateCyanForgeRiftTargets(MinecraftVersionInfo version, GameSide side,
 			String modloaderVersion, String mcpVersion) throws IOException {
+		String mappingsId = "-" + mcpVersion.replaceAll("[!?/:\\\\]", "-") + "-" + modloaderVersion;
+
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, side))
 			throw new IOException("No mappings are present for the " + version + " " + side.toString().toLowerCase());
 
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + modloaderVersion + "-" + mcpVersion, "mcp", version,
-				side))
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "mcp", version, side))
 			throw new IOException(
 					"No MCP mappings are present for the " + version + " " + side.toString().toLowerCase());
 
@@ -218,10 +219,12 @@ public class MinecraftRifterToolkit extends CyanComponent {
 	 */
 	public static Mapping<?> generateCyanFabricRiftTargets(MinecraftVersionInfo version, GameSide side,
 			String modloaderVersion, String mappingsVersion) throws IOException {
+		String mappingsId = "-" + mappingsVersion.replaceAll("[!?/:\\\\]", "-") + "-" + modloaderVersion;
+
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, side))
 			throw new IOException("No mappings are present for the " + version + " " + side.toString().toLowerCase());
 
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + modloaderVersion, "yarn", version, side))
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "yarn", version, side))
 			throw new IOException(
 					"No YARN mappings are present for the " + version + " " + side.toString().toLowerCase());
 
@@ -264,11 +267,12 @@ public class MinecraftRifterToolkit extends CyanComponent {
 	 */
 	public static Mapping<?> generateCyanPaperRiftTargets(MinecraftVersionInfo version, String modloaderVersion,
 			String mappingsVersion) throws IOException {
+		String mappingsId = "-" + mappingsVersion.replaceAll("[!?/:\\\\]", "-") + "-" + modloaderVersion;
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, GameSide.SERVER))
 			throw new IOException(
 					"No mappings are present for the " + version + " " + GameSide.SERVER.toString().toLowerCase());
 
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + modloaderVersion, "spigot", version, GameSide.SERVER))
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "spigot", version, GameSide.SERVER))
 			throw new IOException("No SPIGOT mappings are present for the " + version + " "
 					+ GameSide.SERVER.toString().toLowerCase());
 

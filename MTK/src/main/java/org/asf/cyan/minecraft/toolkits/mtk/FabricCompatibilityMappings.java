@@ -26,9 +26,11 @@ public class FabricCompatibilityMappings extends CompatibilityMappings {
 
 	public FabricCompatibilityMappings(Mapping<?> mappings, String modloader, MinecraftVersionInfo info, GameSide side,
 			boolean msg, String mappingsVersion) {
+		String mappingsId = "-" + mappingsVersion.replaceAll("[!?/:\\\\]", "-")
+				+ (modloader.isEmpty() ? "" : "-" + modloader);
 		try {
 			MinecraftToolkit.infoLog("Loading fabric support... Preparing YARN mappings for compatibility...");
-			if (!MinecraftMappingsToolkit.areMappingsAvailable((modloader.isEmpty() ? "" : "-" + modloader), "yarn",
+			if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "yarn",
 					info, side)) {
 
 				if (msg)
@@ -36,12 +38,12 @@ public class FabricCompatibilityMappings extends CompatibilityMappings {
 							+ ", downloading YARN mappings...");
 
 				MinecraftMappingsToolkit.downloadYarnMappings(info, side, mappingsVersion);
-				MinecraftMappingsToolkit.saveMappingsToDisk((modloader.isEmpty() ? "" : "-" + modloader), "yarn", info,
+				MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "yarn", info,
 						side);
 			}
 
 			Mapping<?> yarnMappings = MinecraftMappingsToolkit
-					.loadMappings((modloader.isEmpty() ? "" : "-" + modloader), "yarn", info, side);
+					.loadMappings(mappingsId, "yarn", info, side);
 			combine("YARN", mappings, yarnMappings);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException | IOException e) {

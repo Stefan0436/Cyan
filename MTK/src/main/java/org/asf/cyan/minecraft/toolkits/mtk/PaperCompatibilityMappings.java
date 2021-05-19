@@ -27,22 +27,23 @@ public class PaperCompatibilityMappings extends CompatibilityMappings {
 
 	public PaperCompatibilityMappings(Mapping<?> mappings, String modloader, MinecraftVersionInfo info, boolean msg,
 			String mappingsVersion) {
+		String mappingsId = "-" + mappingsVersion.replaceAll("[!?/:\\\\]", "-")
+				+ (modloader.isEmpty() ? "" : "-" + modloader);
+
 		try {
 			MinecraftToolkit.infoLog("Loading paper support... Preparing SPIGOT mappings for compatibility...");
-			if (!MinecraftMappingsToolkit.areMappingsAvailable((modloader.isEmpty() ? "" : "-" + modloader), "spigot",
-					info, GameSide.SERVER)) {
+			if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "spigot", info, GameSide.SERVER)) {
 
 				if (msg)
 					MinecraftToolkit.infoLog("First time loading with paper support for version " + modloader
 							+ ", downloading SPIGOT mappings...");
 
 				MinecraftMappingsToolkit.downloadSpigotMappings(mappings, info, mappingsVersion);
-				MinecraftMappingsToolkit.saveMappingsToDisk((modloader.isEmpty() ? "" : "-" + modloader), "spigot",
-						info, GameSide.SERVER);
+				MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "spigot", info, GameSide.SERVER);
 			}
 
-			Mapping<?> spigotMappings = MinecraftMappingsToolkit
-					.loadMappings((modloader.isEmpty() ? "" : "-" + modloader), "spigot", info, GameSide.SERVER);
+			Mapping<?> spigotMappings = MinecraftMappingsToolkit.loadMappings(mappingsId, "spigot", info,
+					GameSide.SERVER);
 			combine("SPIGOT", mappings, spigotMappings, true);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException | IOException e) {
