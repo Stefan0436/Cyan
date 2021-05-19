@@ -231,7 +231,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 				tsk.provider(getPlatformRiftProvider(project, config.getPlatform(), side));
 
 				tsk.mappings_identifier(config.getPlatform().toString().toLowerCase() + "-" + config.getDisplayVersion()
-						+ "-" + config.getPlatform().toString().toLowerCase());
+						+ "-" + config.getPlatform().toString().toLowerCase() + "-" + side.toString().toLowerCase());
 				tsk.getArchiveClassifier()
 						.set("RIFT-" + config.getPlatform().toString().toUpperCase() + "-"
 								+ config.getCommonMappingsVersion().replaceAll("[!?/:\\\\]", "-")
