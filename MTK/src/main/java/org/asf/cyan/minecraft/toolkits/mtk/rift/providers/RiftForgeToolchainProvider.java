@@ -31,11 +31,10 @@ public class RiftForgeToolchainProvider implements IRiftToolchainProvider {
 
 	@Override
 	public Mapping<?> getRiftMappings() throws IOException {
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + modloaderVersion + "-" + mcpVersion, "mcp", version,
-				side)) {
+		String mappingsId = "-" + mcpVersion.replaceAll("[!?/:\\\\]", "-") + "-" + modloaderVersion;
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "mcp", version, side)) {
 			MinecraftMappingsToolkit.downloadMCPMappings(version, side, mcpVersion);
-			MinecraftMappingsToolkit.saveMappingsToDisk("-" + modloaderVersion + "-" + mcpVersion, "mcp", version,
-					side);
+			MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "mcp", version, side);
 		}
 
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, side)) {
@@ -43,8 +42,7 @@ public class RiftForgeToolchainProvider implements IRiftToolchainProvider {
 			MinecraftMappingsToolkit.saveMappingsToDisk(version, side);
 		}
 
-		MinecraftMappingsToolkit.loadMappings("-" + mcpVersion.replaceAll("[!?/:\\\\]", "-") + modloaderVersion, "mcp",
-				version, side);
+		MinecraftMappingsToolkit.loadMappings(mappingsId, "mcp", version, side);
 		MinecraftMappingsToolkit.loadMappings(version, side);
 
 		if (side == GameSide.CLIENT)

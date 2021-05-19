@@ -26,21 +26,19 @@ public class RiftPaperToolchainProvider implements IRiftToolchainProvider {
 
 	@Override
 	public Mapping<?> getRiftMappings() throws IOException {
+		String mappingsId = "-" + mappingsVersion.replaceAll("[!?/:\\\\]", "-") + "-" + modloaderVersion;
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, GameSide.SERVER)) {
 			MinecraftMappingsToolkit.downloadVanillaMappings(version, GameSide.SERVER);
 			MinecraftMappingsToolkit.saveMappingsToDisk(version, GameSide.SERVER);
 		}
 
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + modloaderVersion, "spigot", version,
-				GameSide.SERVER)) {
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "spigot", version, GameSide.SERVER)) {
 			MinecraftMappingsToolkit.downloadSpigotMappings(
 					MinecraftMappingsToolkit.loadMappings(version, GameSide.SERVER), version, mappingsVersion);
-			MinecraftMappingsToolkit.saveMappingsToDisk("-" + modloaderVersion, "spigot", version, GameSide.SERVER);
+			MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "spigot", version, GameSide.SERVER);
 		}
 
-		MinecraftMappingsToolkit.loadMappings(
-				"-" + mappingsVersion.replaceAll("[!?/:\\\\]", "-") + "-" + modloaderVersion, "spigot", version,
-				GameSide.SERVER);
+		MinecraftMappingsToolkit.loadMappings(mappingsId, "spigot", version, GameSide.SERVER);
 		MinecraftMappingsToolkit.loadMappings(version, GameSide.SERVER);
 
 		return MinecraftRifterToolkit.generateCyanPaperRiftTargets(version, modloaderVersion, mappingsVersion);

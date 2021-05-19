@@ -31,9 +31,10 @@ public class RiftFabricToolchainProvider implements IRiftToolchainProvider {
 
 	@Override
 	public Mapping<?> getRiftMappings() throws IOException {
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + modloaderVersion, "yarn", version, side)) {
+		String mappingsId = "-" + mappingsVersion.replaceAll("[!?/:\\\\]", "-") + "-" + modloaderVersion;
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "yarn", version, side)) {
 			MinecraftMappingsToolkit.downloadYarnMappings(version, side, mappingsVersion);
-			MinecraftMappingsToolkit.saveMappingsToDisk("-" + modloaderVersion, "yarn", version, side);
+			MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "yarn", version, side);
 		}
 
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, side)) {
@@ -41,8 +42,7 @@ public class RiftFabricToolchainProvider implements IRiftToolchainProvider {
 			MinecraftMappingsToolkit.saveMappingsToDisk(version, side);
 		}
 
-		MinecraftMappingsToolkit.loadMappings(
-				"-" + mappingsVersion.replaceAll("[!?/:\\\\]", "-") + "-" + modloaderVersion, "yarn", version, side);
+		MinecraftMappingsToolkit.loadMappings(mappingsId, "yarn", version, side);
 		MinecraftMappingsToolkit.loadMappings(version, side);
 
 		if (side == GameSide.CLIENT)
