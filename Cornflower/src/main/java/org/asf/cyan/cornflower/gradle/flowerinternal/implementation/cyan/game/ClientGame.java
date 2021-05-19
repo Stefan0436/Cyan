@@ -104,7 +104,7 @@ public class ClientGame implements IGameExecutionContext, ILaunchProvider {
 			args.add("-Dcyan.side=CLIENT");
 			args.add("-DassetRoot=" + MinecraftInstallationToolkit.getAssetsRoot().getCanonicalPath());
 			args.add("-DassetIndex=" + MinecraftInstallationToolkit.getAssetId(gameVersion));
-			
+
 			MinecraftInstallationToolkit.setIDE();
 			return MinecraftInstallationToolkit.generateJvmArguments(gameVersion, args,
 					MinecraftInstallationToolkit.getLibraries(cyanVersion),
@@ -184,7 +184,7 @@ public class ClientGame implements IGameExecutionContext, ILaunchProvider {
 			MinecraftModdingToolkit.sourcesJar(gameVersion, GameSide.CLIENT);
 			return MinecraftModdingToolkit.deobfuscateJar(gameVersion, GameSide.CLIENT);
 		} catch (IOException e) {
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 
