@@ -104,6 +104,7 @@ public class MinecraftToolkit extends CyanComponent {
 	static boolean _connected = false;
 	static HashMap<String, MinecraftVersionInfo> available_versions = new HashMap<String, MinecraftVersionInfo>();
 	static String version_manifest_url = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
+	static String net_test_url = "https://aerialworks.ddns.net/";
 
 	/**
 	 * Reset the 'offline' state
@@ -113,7 +114,7 @@ public class MinecraftToolkit extends CyanComponent {
 		_connected = getServerConnection();
 		if (!_connected) {
 			trace("STATE of connection is " + _connected + ", sending warning, caller: " + CallTrace.traceCallName());
-			warn("No connection to the manifest server, connection state has to be reset after connecting to the internet.");
+			warn("No connection to the network test server, connection state has to be reset after connecting to the internet.");
 		}
 		debug("Resetted server connection state");
 	}
@@ -145,7 +146,7 @@ public class MinecraftToolkit extends CyanComponent {
 	public static boolean getServerConnection() {
 		try {
 			trace("PARSE server connection test URL, caller: " + CallTrace.traceCallName());
-			URL u = new URL(version_manifest_url);
+			URL u = new URL(net_test_url);
 			trace("OPEN connection to network test URL, caller: " + CallTrace.traceCallName());
 			URLConnection uc = u.openConnection();
 			uc.setConnectTimeout(5000);
@@ -276,7 +277,7 @@ public class MinecraftToolkit extends CyanComponent {
 			loadLocalVersions();
 		} else {
 			trace("NO CONNECTION to server, cancel task, caller: " + CallTrace.traceCallName());
-			warn("No connection to the manifest server, unable to load version manifest, will try to use local files only.");
+			warn("No connection to the network test endpoint, unable to load version manifest, will try to use local files only.");
 			
 			loadLocalVersions();
 			
