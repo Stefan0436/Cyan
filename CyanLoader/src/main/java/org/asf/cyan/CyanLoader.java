@@ -2351,6 +2351,10 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			install.cyanData = cyanDir.getCanonicalPath();
 			install.gameVersion = Modloader.getModloaderGameVersion();
 			install.platformVersion = platformVersion;
+			
+			if (Modloader.getModloaderLaunchPlatform() == LaunchPlatform.VANILLA)
+				install.platformVersion = install.gameVersion;
+			
 			install.platform = Modloader.getModloaderLaunchPlatform().toString();
 			install.loaderVersion = getVersion().toString();
 			configs.add(install);
