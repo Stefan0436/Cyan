@@ -67,6 +67,8 @@ public class StartupWindow {
 		}
 
 		public static void closeWindow() {
+			if (!shown)
+				return;
 			shown = false;
 			if (frame != null) {
 				frame.frm.dispose();
