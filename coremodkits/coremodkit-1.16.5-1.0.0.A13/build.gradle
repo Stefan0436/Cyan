@@ -267,7 +267,7 @@ cmf {
 			platform platforms
 
 			// Sets the code sources
-			jar tasks.jar.getArchiveFile()
+			jar tasks.jar.getArchiveFile(), DEOBFUSCATED
 			jar riftTasks
 
 			// Sets the remote dependencies and trust
