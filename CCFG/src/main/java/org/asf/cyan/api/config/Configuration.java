@@ -306,6 +306,8 @@ public abstract class Configuration<T extends Configuration<T>> {
 	public boolean hasChanges(boolean checkIfPresent) {
 		for (Field f : getClass().getFields()) {
 			f.setAccessible(true);
+			if (!isExcluded(f) && !reqIsPresent(f))
+				return true;
 			if (!isExcluded(f) && hasChanged(f, getProp(f), checkIfPresent))
 				return true;
 		}
