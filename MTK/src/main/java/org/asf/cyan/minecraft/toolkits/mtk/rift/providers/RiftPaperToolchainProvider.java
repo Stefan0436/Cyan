@@ -38,7 +38,9 @@ public class RiftPaperToolchainProvider implements IRiftToolchainProvider {
 			MinecraftMappingsToolkit.saveMappingsToDisk("-" + modloaderVersion, "spigot", version, GameSide.SERVER);
 		}
 
-		MinecraftMappingsToolkit.loadMappings("-" + modloaderVersion, "spigot", version, GameSide.SERVER);
+		MinecraftMappingsToolkit.loadMappings(
+				"-" + mappingsVersion.replaceAll("[!?/:\\\\]", "-") + "-" + modloaderVersion, "spigot", version,
+				GameSide.SERVER);
 		MinecraftMappingsToolkit.loadMappings(version, GameSide.SERVER);
 
 		return MinecraftRifterToolkit.generateCyanPaperRiftTargets(version, modloaderVersion, mappingsVersion);

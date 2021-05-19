@@ -43,7 +43,8 @@ public class RiftForgeToolchainProvider implements IRiftToolchainProvider {
 			MinecraftMappingsToolkit.saveMappingsToDisk(version, side);
 		}
 
-		MinecraftMappingsToolkit.loadMappings("-" + modloaderVersion + "-" + mcpVersion, "mcp", version, side);
+		MinecraftMappingsToolkit.loadMappings("-" + mcpVersion.replaceAll("[!?/:\\\\]", "-") + modloaderVersion, "mcp",
+				version, side);
 		MinecraftMappingsToolkit.loadMappings(version, side);
 
 		if (side == GameSide.CLIENT)
@@ -70,13 +71,13 @@ public class RiftForgeToolchainProvider implements IRiftToolchainProvider {
 	public IClassSourceProvider<?>[] getSources() throws IOException {
 		if (side == GameSide.CLIENT) {
 			verify();
-			ArrayList<IClassSourceProvider<?>> sources = new  ArrayList< IClassSourceProvider<?>>();
+			ArrayList<IClassSourceProvider<?>> sources = new ArrayList<IClassSourceProvider<?>>();
 			for (File lib : MinecraftInstallationToolkit.getLibraries(version)) {
 				sources.add(new FileClassSourceProvider(lib));
 			}
 			return sources.toArray(t -> new IClassSourceProvider<?>[t]);
 		}
-		
+
 		return new IClassSourceProvider<?>[0];
 	}
 

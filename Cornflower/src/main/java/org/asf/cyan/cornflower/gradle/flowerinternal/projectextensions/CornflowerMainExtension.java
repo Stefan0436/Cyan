@@ -230,8 +230,9 @@ public class CornflowerMainExtension implements IProjectExtension {
 				RiftJarTask tsk = (RiftJarTask) getDelegate();
 				tsk.provider(getPlatformRiftProvider(project, config.getPlatform(), side));
 
-				tsk.mappings_identifier(config.getPlatform().toString().toLowerCase() + "-" + config.getDisplayVersion()
-						+ "-" + side.toString().toLowerCase());
+				tsk.mappings_identifier(config.getPlatform().toString().toLowerCase() + "-"
+						+ config.getDisplayVersion().replaceAll("[!?/:\\\\]", "-") + "-"
+						+ side.toString().toLowerCase());
 				tsk.getArchiveClassifier()
 						.set("RIFT-" + config.getPlatform().toString().toUpperCase() + "-"
 								+ config.getCommonMappingsVersion().replaceAll("[!?/:\\\\]", "-")

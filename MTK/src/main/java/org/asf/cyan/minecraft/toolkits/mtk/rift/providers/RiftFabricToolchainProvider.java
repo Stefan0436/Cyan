@@ -41,7 +41,8 @@ public class RiftFabricToolchainProvider implements IRiftToolchainProvider {
 			MinecraftMappingsToolkit.saveMappingsToDisk(version, side);
 		}
 
-		MinecraftMappingsToolkit.loadMappings("-" + modloaderVersion, "yarn", version, side);
+		MinecraftMappingsToolkit.loadMappings(
+				"-" + mappingsVersion.replaceAll("[!?/:\\\\]", "-") + "-" + modloaderVersion, "yarn", version, side);
 		MinecraftMappingsToolkit.loadMappings(version, side);
 
 		if (side == GameSide.CLIENT)
