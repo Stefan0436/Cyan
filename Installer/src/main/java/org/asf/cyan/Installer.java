@@ -1138,6 +1138,7 @@ public class Installer extends CyanComponent {
 			if (chckbxNewCheckBox.isSelected()) {
 				logger.info("Updating minecraft launcher profiles...");
 				JsonObject profiles = new JsonObject();
+				profiles.add("profiles", new JsonObject());
 				if (new File(dest, "launcher_profiles.json").exists()) {
 					profiles = JsonParser
 							.parseString(Files.readString(new File(dest, "launcher_profiles.json").toPath()))
