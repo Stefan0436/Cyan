@@ -1679,7 +1679,7 @@ public class Installer extends CyanComponent {
 				if (!reg.exists()) {
 					InputStream strm = getClass().getClassLoader().getResourceAsStream("kickstart.reg");
 					String cont = new String(strm.readAllBytes())
-							.replace("%appdata%", APPDATA.toString().replace("\\", "\\\\"))
+							.replace("%appdata%", APPDATA.getCanonicalPath().replace("\\", "\\\\"))
 							.replace("%java%", ProcessHandle.current().info().command().get().replace("\\", "\\\\"));
 					Files.writeString(reg.toPath(), cont);
 					strm.close();
@@ -1701,28 +1701,26 @@ public class Installer extends CyanComponent {
 					throw new IOException("Registry script exited with non-zero exit code");
 			} else {
 				File xml = new File(APPDATA, ".minecraft/cyan-kickstart.xml");
-				if (!xml.exists()) {
-					InputStream strm = getClass().getClassLoader().getResourceAsStream("cyan-kickstart.xml");
-					String cont = new String(strm.readAllBytes()).replace("%java%",
-							ProcessHandle.current().info().command().get());
-					Files.writeString(xml.toPath(), cont);
-					strm.close();
-				}
+				InputStream strm = getClass().getClassLoader().getResourceAsStream("cyan-kickstart.xml");
+				String cont = new String(strm.readAllBytes()).replace("%appdata%", APPDATA.getCanonicalPath())
+						.replace("%java%", ProcessHandle.current().info().command().get());
+				Files.writeString(xml.toPath(), cont);
+				strm.close();
 				File desktop = new File(APPDATA, ".minecraft/cyan-kickstart.desktop");
-				if (!desktop.exists()) {
-					InputStream strm = getClass().getClassLoader().getResourceAsStream("kickstart.desktop");
-					String cont = new String(strm.readAllBytes()).replace("%java%",
-							ProcessHandle.current().info().command().get());
-					Files.writeString(desktop.toPath(), cont);
-					strm.close();
-				}
+				strm = getClass().getClassLoader().getResourceAsStream("kickstart.desktop");
+				cont = new String(strm.readAllBytes()).replace("%appdata%", APPDATA.getCanonicalPath())
+						.replace("%java%", ProcessHandle.current().info().command().get());
+				Files.writeString(desktop.toPath(), cont);
+				strm.close();
 				logger.info("Creating registry script...");
 
 				File bashFile = File.createTempFile("kickstart-install", ".bash");
 				StringBuilder bashScript = new StringBuilder();
 				bashScript.append("#!/bin/bash").append("\n");
-				bashScript.append("xdg-mime install \"" + xml.getCanonicalPath() + "\"").append("\n");
-				bashScript.append("xdg-mime default \"" + desktop.getCanonicalPath() + "\" application/x-kickstart-cmf")
+				bashScript.append("xdg-mime install \"" + xml.getCanonicalPath() + "\" || exit 1").append("\n");
+				bashScript.append("update-mime-database ~/.local/share/mime || exit 1").append("\n");
+				bashScript.append(
+						"xdg-mime default \"" + desktop.getCanonicalPath() + "\" application/x-kickstart-cmf || exit 1")
 						.append("\n");
 				bashScript.append("").append("\n");
 				bashScript.append("rm -- \"$0\"").append("\n");
