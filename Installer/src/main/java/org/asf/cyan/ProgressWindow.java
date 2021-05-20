@@ -23,6 +23,8 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 import javax.swing.JTextArea;
 import javax.swing.JProgressBar;
 import java.awt.Font;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class ProgressWindow {
 
@@ -166,7 +168,15 @@ public class ProgressWindow {
 		if (shown) {
 			frm = new JFrame();
 			frm.setTitle("Installation Progress...");
-			frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frm.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			frm.addWindowListener(new WindowAdapter() {
+
+				@Override
+				public void windowClosing(WindowEvent arg0) {
+					System.exit(122);
+				}
+
+			});
 			frm.setBounds(100, 100, 874, 446);
 			frm.setResizable(false);
 			frm.setLocationRelativeTo(null);
