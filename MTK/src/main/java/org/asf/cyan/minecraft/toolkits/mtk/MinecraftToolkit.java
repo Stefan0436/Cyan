@@ -48,7 +48,7 @@ public class MinecraftToolkit extends CyanComponent {
 		}
 		return builder.toString();
 	}
-	
+
 	static void infoLog(String message) {
 		CyanComponent.info(message);
 	}
@@ -180,6 +180,8 @@ public class MinecraftToolkit extends CyanComponent {
 	 * @param noclear true to prevent clearing of the list, false otherwise
 	 */
 	public static void resolveVersions(boolean noclear) {
+		File localManifestJson = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/manifest.json");
+
 		trace("RESOLVE version list, argument noclear set to: " + noclear + ", caller: " + CallTrace.traceCallName());
 		if (hasMinecraftDownloadConnection()) {
 			trace("HAS server connection, resolving list, caller: " + CallTrace.traceCallName());
@@ -196,94 +198,38 @@ public class MinecraftToolkit extends CyanComponent {
 				JsonObject json = JsonParser.parseReader(new JsonReader(reader)).getAsJsonObject();
 				trace("CLOSE server stream, caller: " + CallTrace.traceCallName());
 				reader.close();
-				trace("CREATE Gson object, caller: " + CallTrace.traceCallName());
-				Gson gson = new Gson();
-				info("Reading manifest...");
 
-				trace("CREATE map for latest version information, caller: " + CallTrace.traceCallName());
-				@SuppressWarnings("unchecked")
-				Map<String, String> latest = gson.fromJson(json.get("latest"), Map.class);
-				String latestRelease = "";
-				String latestSnapshot = "";
-				trace("CHECK map for release version, caller: " + CallTrace.traceCallName());
-				if (latest.containsKey("release")) {
-					trace("SET latest release version to " + latest.get("release") + ", caller: "
-							+ CallTrace.traceCallName());
-					latestRelease = latest.get("release");
-				}
-				if (latest.containsKey("snapshot")) {
-					trace("SET latest snapshot version to " + latest.get("snapshot") + ", caller: "
-							+ CallTrace.traceCallName());
-					latestSnapshot = latest.get("snapshot");
-				}
-				trace("CREATE DateFormat object, caller: " + CallTrace.traceCallName());
-				info("Adding versions...");
-				trace("LOOP through entries, caller: " + CallTrace.traceCallName());
-				for (JsonElement entry : json.get("versions").getAsJsonArray()) {
-					trace("CREATE map for version info, caller: " + CallTrace.traceCallName());
-					@SuppressWarnings("unchecked")
-					Map<String, String> ver = gson.fromJson(entry, Map.class);
-
-					trace("SET id of version info to " + ver.get("id") + ", caller: " + CallTrace.traceCallName());
-					String id = ver.get("id");
-
-					trace("SET type string of version info to " + ver.get("type") + ", caller: "
-							+ CallTrace.traceCallName());
-					String type = ver.get("type");
-
-					trace("SET url string of version info to " + ver.get("url") + ", caller: "
-							+ CallTrace.traceCallName());
-					String url = ver.get("url");
-
-					trace("SET releaseTime string of version info to " + ver.get("releaseTime") + ", caller: "
-							+ CallTrace.traceCallName());
-					String releaseTime = ver.get("releaseTime");
-
-					trace("PARSE MinecraftVersionInfo object, caller: " + CallTrace.traceCallName());
-					MinecraftVersionInfo versionInfo = new MinecraftVersionInfo(id, MinecraftVersionType.parse(type),
-							new URL(url), OffsetDateTime.parse(releaseTime));
-
-					trace("CHECK latest release and snapshot version strings if they match " + id + ", caller: "
-							+ CallTrace.traceCallName());
-					if (versionInfo.getVersion().equalsIgnoreCase(latestRelease)) {
-						trace("MATCHED latest release version string, caller: " + CallTrace.traceCallName());
-						available_versions.put("Latest_release", versionInfo);
-
-						info("Received latest release version: " + id);
-					} else if (versionInfo.getVersion().equalsIgnoreCase(latestSnapshot)) {
-						trace("MATCHED latest snapshot version string, caller: " + CallTrace.traceCallName());
-						available_versions.put("Latest_snapshot", versionInfo);
-
-						info("Received latest snapshot version: " + id);
-					}
-
-					trace("ADD MinecraftVersionInfo object to the available_versions map, version: "
-							+ versionInfo.getVersion() + ", caller: " + CallTrace.traceCallName());
-					available_versions.put(id, versionInfo);
-
-					debug("Added version information object. Version: " + versionInfo.getVersion() + ", release type: "
-							+ versionInfo.getVersionType().toString() + ", release date: "
-							+ DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.SHORT)
-									.format(versionInfo.getReleaseDate())
-							+ ". The item has been registered.");
-				}
-				
-				info("Download completed, added/updated " + json.get("versions").getAsJsonArray().size() + " version"
-						+ (json.get("versions").getAsJsonArray().size() == 1 ? "" : "s"));
+				if (!localManifestJson.getParentFile().exists())
+					localManifestJson.getParentFile().mkdirs();
+				if (localManifestJson.exists())
+					localManifestJson.delete();
+				Files.writeString(localManifestJson.toPath(), new Gson().toJson(json));
+				trace("SAVE manifest file to cache, caller: " + CallTrace.traceCallName());
+				loadVersions(json);
 			} catch (Exception ex) {
 				warn("Downloading version list failed. Exception: " + ex.getMessage());
 			}
-			
+
 			loadLocalVersions();
 		} else {
 			trace("NO CONNECTION to server, cancel task, caller: " + CallTrace.traceCallName());
 			warn("No connection to the network test endpoint, unable to load version manifest, will try to use local files only.");
-			
+
+			if (localManifestJson.exists()) {
+				debug("Loading local manifest file...");
+				try {
+					String jsonContent = new String(Files.readAllBytes(localManifestJson.toPath()));
+					JsonObject json = JsonParser.parseString(jsonContent).getAsJsonObject();
+					loadVersions(json);
+				} catch (IOException e) {
+				}
+			}
+
 			loadLocalVersions();
-			
+
 			debug("Fetching latest versions...");
 			MinecraftVersionInfo latestRelease = null;
-			MinecraftVersionInfo latestSnapshot = null;;
+			MinecraftVersionInfo latestSnapshot = null;
 			for (MinecraftVersionInfo version : available_versions.values()) {
 				switch (version.getVersionType()) {
 				case RELEASE:
@@ -309,7 +255,81 @@ public class MinecraftToolkit extends CyanComponent {
 			}
 		}
 	}
-	
+
+	private static void loadVersions(JsonObject json) throws MalformedURLException {
+		trace("CREATE Gson object, caller: " + CallTrace.traceCallName());
+		Gson gson = new Gson();
+		info("Reading manifest...");
+
+		trace("CREATE map for latest version information, caller: " + CallTrace.traceCallName());
+		@SuppressWarnings("unchecked")
+		Map<String, String> latest = gson.fromJson(json.get("latest"), Map.class);
+		String latestRelease = "";
+		String latestSnapshot = "";
+		trace("CHECK map for release version, caller: " + CallTrace.traceCallName());
+		if (latest.containsKey("release")) {
+			trace("SET latest release version to " + latest.get("release") + ", caller: " + CallTrace.traceCallName());
+			latestRelease = latest.get("release");
+		}
+		if (latest.containsKey("snapshot")) {
+			trace("SET latest snapshot version to " + latest.get("snapshot") + ", caller: "
+					+ CallTrace.traceCallName());
+			latestSnapshot = latest.get("snapshot");
+		}
+		trace("CREATE DateFormat object, caller: " + CallTrace.traceCallName());
+		info("Adding versions...");
+		trace("LOOP through entries, caller: " + CallTrace.traceCallName());
+		for (JsonElement entry : json.get("versions").getAsJsonArray()) {
+			trace("CREATE map for version info, caller: " + CallTrace.traceCallName());
+			@SuppressWarnings("unchecked")
+			Map<String, String> ver = gson.fromJson(entry, Map.class);
+
+			trace("SET id of version info to " + ver.get("id") + ", caller: " + CallTrace.traceCallName());
+			String id = ver.get("id");
+
+			trace("SET type string of version info to " + ver.get("type") + ", caller: " + CallTrace.traceCallName());
+			String type = ver.get("type");
+
+			trace("SET url string of version info to " + ver.get("url") + ", caller: " + CallTrace.traceCallName());
+			String url = ver.get("url");
+
+			trace("SET releaseTime string of version info to " + ver.get("releaseTime") + ", caller: "
+					+ CallTrace.traceCallName());
+			String releaseTime = ver.get("releaseTime");
+
+			trace("PARSE MinecraftVersionInfo object, caller: " + CallTrace.traceCallName());
+			MinecraftVersionInfo versionInfo = new MinecraftVersionInfo(id, MinecraftVersionType.parse(type),
+					new URL(url), OffsetDateTime.parse(releaseTime));
+
+			trace("CHECK latest release and snapshot version strings if they match " + id + ", caller: "
+					+ CallTrace.traceCallName());
+			if (versionInfo.getVersion().equalsIgnoreCase(latestRelease)) {
+				trace("MATCHED latest release version string, caller: " + CallTrace.traceCallName());
+				available_versions.put("Latest_release", versionInfo);
+
+				info("Received latest release version: " + id);
+			} else if (versionInfo.getVersion().equalsIgnoreCase(latestSnapshot)) {
+				trace("MATCHED latest snapshot version string, caller: " + CallTrace.traceCallName());
+				available_versions.put("Latest_snapshot", versionInfo);
+
+				info("Received latest snapshot version: " + id);
+			}
+
+			trace("ADD MinecraftVersionInfo object to the available_versions map, version: " + versionInfo.getVersion()
+					+ ", caller: " + CallTrace.traceCallName());
+			available_versions.put(id, versionInfo);
+
+			debug("Added version information object. Version: " + versionInfo.getVersion() + ", release type: "
+					+ versionInfo.getVersionType().toString() + ", release date: "
+					+ DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.SHORT)
+							.format(versionInfo.getReleaseDate())
+					+ ". The item has been registered.");
+		}
+
+		info("Download completed, added/updated " + json.get("versions").getAsJsonArray().size() + " version"
+				+ (json.get("versions").getAsJsonArray().size() == 1 ? "" : "s"));
+	}
+
 	static void loadLocalVersions() {
 		File manifestDir = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/manifests");
 		if (manifestDir.exists()) {
@@ -326,8 +346,7 @@ public class MinecraftToolkit extends CyanComponent {
 					trace("CREATE map for version info, caller: " + CallTrace.traceCallName());
 					JsonObject ver = JsonParser.parseString(Files.readString(manifest.toPath())).getAsJsonObject();
 
-					trace("SET id of version info to " + ver.get("id") + ", caller: "
-							+ CallTrace.traceCallName());
+					trace("SET id of version info to " + ver.get("id") + ", caller: " + CallTrace.traceCallName());
 					String id = ver.get("id").getAsString();
 
 					trace("SET type string of version info to " + ver.get("type") + ", caller: "
@@ -343,8 +362,8 @@ public class MinecraftToolkit extends CyanComponent {
 					String releaseTime = ver.get("releaseTime").getAsString();
 
 					trace("PARSE MinecraftVersionInfo object, caller: " + CallTrace.traceCallName());
-					MinecraftVersionInfo versionInfo = new MinecraftVersionInfo(id,
-							MinecraftVersionType.parse(type), new URL(url), OffsetDateTime.parse(releaseTime));
+					MinecraftVersionInfo versionInfo = new MinecraftVersionInfo(id, MinecraftVersionType.parse(type),
+							new URL(url), OffsetDateTime.parse(releaseTime));
 
 					if (!available_versions.containsKey(id)) {
 						trace("ADD MinecraftVersionInfo object to the available_versions map, version: "
@@ -357,7 +376,7 @@ public class MinecraftToolkit extends CyanComponent {
 										.format(versionInfo.getReleaseDate())
 								+ ". The item has been registered.");
 					}
-				}					
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

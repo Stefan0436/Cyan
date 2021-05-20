@@ -19,10 +19,12 @@ public class MinecraftInstallationToolkitSpecialTest {
 			MinecraftToolkit.resetServerConnectionState();
 			MinecraftToolkit.initializeMTK();
 		}
-		
-		File file1 = MinecraftInstallationToolkit.downloadVersionJar(MinecraftVersionToolkit.getLatestReleaseVersion(), GameSide.CLIENT, true);
-		File file2 = MinecraftInstallationToolkit.downloadVersionJar(MinecraftVersionToolkit.getLatestReleaseVersion(), GameSide.SERVER, true);
-		
+
+		File file1 = MinecraftInstallationToolkit.downloadVersionJar(MinecraftVersionToolkit.getLatestReleaseVersion(),
+				GameSide.CLIENT, true);
+		File file2 = MinecraftInstallationToolkit.downloadVersionJar(MinecraftVersionToolkit.getLatestReleaseVersion(),
+				GameSide.SERVER, true);
+
 		assertTrue(file1.exists());
 		assertTrue(file2.exists());
 	}
@@ -35,10 +37,12 @@ public class MinecraftInstallationToolkitSpecialTest {
 			MinecraftToolkit.resetServerConnectionState();
 			MinecraftToolkit.initializeMTK();
 		}
-		
-		MinecraftInstallationToolkit.downloadVersionAndLibraries(MinecraftVersionToolkit.getLatestReleaseVersion(), true);
+
+		MinecraftInstallationToolkit.downloadVersionFiles(MinecraftVersionToolkit.getLatestReleaseVersion(), true,
+				true);
 		MinecraftInstallationToolkit.extractNatives(MinecraftVersionToolkit.getLatestReleaseVersion());
-		assertTrue(MinecraftInstallationToolkit.checkVersion(MinecraftVersionToolkit.getLatestReleaseVersion()));
+		assertTrue(
+				MinecraftInstallationToolkit.checkIntallation(MinecraftVersionToolkit.getLatestReleaseVersion(), true));
 	}
 
 	@Test
@@ -49,13 +53,16 @@ public class MinecraftInstallationToolkitSpecialTest {
 			MinecraftToolkit.resetServerConnectionState();
 			MinecraftToolkit.initializeMTK();
 		}
-		
-		if (!MinecraftInstallationToolkit.checkVersion(MinecraftVersionToolkit.getLatestReleaseVersion())) {
-			MinecraftInstallationToolkit.downloadVersionAndLibraries(MinecraftVersionToolkit.getLatestReleaseVersion(), true);		
-			assertTrue(MinecraftInstallationToolkit.checkVersion(MinecraftVersionToolkit.getLatestReleaseVersion()));
+
+		if (!MinecraftInstallationToolkit.checkIntallation(MinecraftVersionToolkit.getLatestReleaseVersion(), true)) {
+			MinecraftInstallationToolkit.downloadVersionFiles(MinecraftVersionToolkit.getLatestReleaseVersion(), true,
+					true);
+			assertTrue(MinecraftInstallationToolkit.checkIntallation(MinecraftVersionToolkit.getLatestReleaseVersion(),
+					true));
 		}
 		MinecraftInstallationToolkit.extractNatives(MinecraftVersionToolkit.getLatestReleaseVersion());
-		System.out.println(MinecraftInstallationToolkit.generateJvmArguments(MinecraftVersionToolkit.getLatestReleaseVersion()));
+		System.out.println(
+				MinecraftInstallationToolkit.generateJvmArguments(MinecraftVersionToolkit.getLatestReleaseVersion()));
 	}
 
 	@Test
@@ -66,12 +73,15 @@ public class MinecraftInstallationToolkitSpecialTest {
 			MinecraftToolkit.resetServerConnectionState();
 			MinecraftToolkit.initializeMTK();
 		}
-		
-		if (!MinecraftInstallationToolkit.checkVersion(MinecraftVersionToolkit.getLatestReleaseVersion())) {
-			MinecraftInstallationToolkit.downloadVersionAndLibraries(MinecraftVersionToolkit.getLatestReleaseVersion(), true);		
-			assertTrue(MinecraftInstallationToolkit.checkVersion(MinecraftVersionToolkit.getLatestReleaseVersion()));
+
+		if (!MinecraftInstallationToolkit.checkIntallation(MinecraftVersionToolkit.getLatestReleaseVersion(), true)) {
+			MinecraftInstallationToolkit.downloadVersionFiles(MinecraftVersionToolkit.getLatestReleaseVersion(), true,
+					true);
+			assertTrue(MinecraftInstallationToolkit.checkIntallation(MinecraftVersionToolkit.getLatestReleaseVersion(),
+					true));
 		}
-		System.out.println(MinecraftInstallationToolkit.getMainClass(MinecraftVersionToolkit.getLatestReleaseVersion()));
+		System.out
+				.println(MinecraftInstallationToolkit.getMainClass(MinecraftVersionToolkit.getLatestReleaseVersion()));
 	}
 
 }

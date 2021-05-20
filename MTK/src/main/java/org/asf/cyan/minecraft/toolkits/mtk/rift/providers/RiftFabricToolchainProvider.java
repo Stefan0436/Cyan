@@ -85,8 +85,8 @@ public class RiftFabricToolchainProvider implements IRiftToolchainProvider {
 		if (verified)
 			return;
 
-		if (!MinecraftInstallationToolkit.checkVersion(version) && side == GameSide.CLIENT) {
-			MinecraftInstallationToolkit.downloadVersionAndLibraries(version);
+		if (!MinecraftInstallationToolkit.checkIntallation(version, false) && side == GameSide.CLIENT) {
+			MinecraftInstallationToolkit.downloadVersionFiles(version, false);
 		}
 
 		verified = true;

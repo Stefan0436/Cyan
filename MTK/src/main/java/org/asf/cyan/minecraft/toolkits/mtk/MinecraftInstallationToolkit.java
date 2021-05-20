@@ -196,11 +196,12 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 * Check if a version is available, if ignore_hash is false, the files are
 	 * compared against the stored hashes.
 	 * 
-	 * @param version The MinecraftVersionInfo object representing the version.
+	 * @param version     The MinecraftVersionInfo object representing the version.
+	 * @param checkAssets True to check asset files
 	 * @return True if all check out, false otherwise.
 	 */
-	public static boolean checkVersion(MinecraftVersionInfo version) {
-		return checkVersion(version, false, false);
+	public static boolean checkIntallation(MinecraftVersionInfo version, boolean checkAssets) {
+		return checkIntallation(version, checkAssets, false, false);
 	}
 
 	/**
@@ -208,12 +209,13 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 * compared against the stored hashes.
 	 * 
 	 * @param version     The MinecraftVersionInfo object representing the version.
+	 * @param checkAssets True to check asset files
 	 * @param ignore_hash Set to true to ignore hashes, only return false if files
 	 *                    are missing.
 	 * @return True if all check out, false otherwise.
 	 */
-	public static boolean checkVersion(MinecraftVersionInfo version, boolean ignore_hash) {
-		return checkVersion(version, ignore_hash, false);
+	public static boolean checkIntallation(MinecraftVersionInfo version, boolean checkAssets, boolean ignore_hash) {
+		return checkIntallation(version, checkAssets, ignore_hash, false);
 	}
 
 	/**
@@ -735,14 +737,16 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 * 
 	 * @param version            The MinecraftVersionInfo object representing the
 	 *                           version.
+	 * @param checkAssets        True to check asset files
 	 * @param ignore_hash        Set to true to ignore hashes, only return false if
 	 *                           files are missing.
 	 * @param ignore_nonexistent Set to true ignore missing files, set to false to
 	 *                           make sure all files exist.
 	 * @return True if all check out, false otherwise.
 	 */
-	public static boolean checkVersion(MinecraftVersionInfo version, boolean ignore_hash, boolean ignore_nonexistent) {
-		return checkVersion(version, ignore_hash, ignore_nonexistent, false);
+	public static boolean checkIntallation(MinecraftVersionInfo version, boolean checkAssets, boolean ignore_hash,
+			boolean ignore_nonexistent) {
+		return checkIntallation(version, checkAssets, ignore_hash, ignore_nonexistent, false);
 	}
 
 	/**
@@ -751,6 +755,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 * 
 	 * @param version            The MinecraftVersionInfo object representing the
 	 *                           version.
+	 * @param checkAssets        True to check asset files
 	 * @param ignore_hash        Set to true to ignore hashes, only return false if
 	 *                           files are missing.
 	 * @param ignore_nonexistent Set to true ignore missing files, set to false to
@@ -759,13 +764,13 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 *                           this for deobfuscated environments)
 	 * @return True if all check out, false otherwise.
 	 */
-	public static boolean checkVersion(MinecraftVersionInfo version, boolean ignore_hash, boolean ignore_nonexistent,
-			boolean removeRift) {
-		return checkVersionMissingFiles(version, ignore_hash, ignore_nonexistent, removeRift) == 0;
+	public static boolean checkIntallation(MinecraftVersionInfo version, boolean checkAssets, boolean ignore_hash,
+			boolean ignore_nonexistent, boolean removeRift) {
+		return checkVersionMissingFiles(version, checkAssets, ignore_hash, ignore_nonexistent, removeRift) == 0;
 	}
 
 	@SuppressWarnings("unchecked")
-	private static int checkVersionMissingFiles(MinecraftVersionInfo version, boolean ignore_hash,
+	private static int checkVersionMissingFiles(MinecraftVersionInfo version, boolean checkAssets, boolean ignore_hash,
 			boolean ignore_nonexistent, boolean removeRift) {
 		JsonObject manifest;
 		int incorrect = 0;
@@ -796,30 +801,32 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		Gson gson = new Gson();
 		recurseInheritsFrom(manifest, manifest, gson);
 
-		info("Validating assets...");
-		JsonObject assetIndexObj = manifest.get("assetIndex").getAsJsonObject();
-		String assetId = assetIndexObj.get("id").getAsString();
-		String assetIndexSha = assetIndexObj.get("sha1").getAsString();
-		File assetIndex = new File(f5, assetId + ".json");
-		if (!fileCheck(assetIndex, assetIndexSha, ignore_hash, ignore_nonexistent)) {
-			debug("File " + assetIndex.getName() + " did not pass validation.");
-			incorrect++;
-		} else {
-			try {
-				JsonObject assets = JsonParser.parseString(Files.readString(assetIndex.toPath())).getAsJsonObject();
-				Map<String, Map<String, ?>> assetMap = gson.fromJson(assets.get("objects"), Map.class);
-				for (Map<String, ?> val : assetMap.values()) {
-					String hash = val.get("hash").toString();
-					File output = new File(f6, hash.substring(0, 2) + "/" + hash);
-					if (!fileCheck(output, hash, ignore_hash, ignore_nonexistent)) {
-						debug("File " + output.getName() + " did not pass validation.");
-						incorrect++;
-					}
-				}
-			} catch (JsonSyntaxException | IOException e1) {
-				debug("File " + assetIndex.getName() + " did not pass validation as an error has occurred parsing it: "
-						+ e1.getMessage() + ".");
+		if (checkAssets) {
+			info("Validating assets...");
+			JsonObject assetIndexObj = manifest.get("assetIndex").getAsJsonObject();
+			String assetId = assetIndexObj.get("id").getAsString();
+			String assetIndexSha = assetIndexObj.get("sha1").getAsString();
+			File assetIndex = new File(f5, assetId + ".json");
+			if (!fileCheck(assetIndex, assetIndexSha, ignore_hash, ignore_nonexistent)) {
+				debug("File " + assetIndex.getName() + " did not pass validation.");
 				incorrect++;
+			} else {
+				try {
+					JsonObject assets = JsonParser.parseString(Files.readString(assetIndex.toPath())).getAsJsonObject();
+					Map<String, Map<String, ?>> assetMap = gson.fromJson(assets.get("objects"), Map.class);
+					for (Map<String, ?> val : assetMap.values()) {
+						String hash = val.get("hash").toString();
+						File output = new File(f6, hash.substring(0, 2) + "/" + hash);
+						if (!fileCheck(output, hash, ignore_hash, ignore_nonexistent)) {
+							debug("File " + output.getName() + " did not pass validation.");
+							incorrect++;
+						}
+					}
+				} catch (JsonSyntaxException | IOException e1) {
+					debug("File " + assetIndex.getName()
+							+ " did not pass validation as an error has occurred parsing it: " + e1.getMessage() + ".");
+					incorrect++;
+				}
 			}
 		}
 
@@ -1369,22 +1376,25 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	/**
 	 * Download a Minecraft version and its libraries.
 	 * 
-	 * @param version MinecraftVersionInfo object representing the version.
+	 * @param version        MinecraftVersionInfo object representing the version.
+	 * @param downloadAssets True to download asset files
 	 * @throws IOException If downloading fails
 	 */
-	public static void downloadVersionAndLibraries(MinecraftVersionInfo version) throws IOException {
-		downloadVersionAndLibraries(version, true, true, false);
+	public static void downloadVersionFiles(MinecraftVersionInfo version, boolean downloadAssets) throws IOException {
+		downloadVersionFiles(version, downloadAssets, true, true, false);
 	}
 
 	/**
 	 * Download a Minecraft version and its libraries.
 	 * 
-	 * @param version   MinecraftVersionInfo object representing the version.
-	 * @param overwrite True to overwrite existing files, false otherwise.
+	 * @param version        MinecraftVersionInfo object representing the version.
+	 * @param downloadAssets True to download asset files
+	 * @param overwrite      True to overwrite existing files, false otherwise.
 	 * @throws IOException If downloading fails
 	 */
-	public static void downloadVersionAndLibraries(MinecraftVersionInfo version, boolean overwrite) throws IOException {
-		downloadVersionAndLibraries(version, overwrite, true, false);
+	public static void downloadVersionFiles(MinecraftVersionInfo version, boolean downloadAssets, boolean overwrite)
+			throws IOException {
+		downloadVersionFiles(version, downloadAssets, overwrite, true, false);
 	}
 
 	public static enum OsInfo {
@@ -1572,18 +1582,19 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	/**
 	 * Download a Minecraft version and its libraries. (including assets)
 	 * 
-	 * @param version    MinecraftVersionInfo object representing the version.
-	 * @param overwrite  True to overwrite files, false otherwise.
-	 * @param checkHash  True to compare the hashes of the local files, false to
-	 *                   download without comparing (requires overwrite set to true)
-	 *                   *
-	 * @param removeRift True to remove rift identifiers (remapped jars, use this
-	 *                   for deobfuscated environments)
+	 * @param version        MinecraftVersionInfo object representing the version.
+	 * @param downloadAssets True to download asset files
+	 * @param overwrite      True to overwrite files, false otherwise.
+	 * @param checkHash      True to compare the hashes of the local files, false to
+	 *                       download without comparing (requires overwrite set to
+	 *                       true) *
+	 * @param removeRift     True to remove rift identifiers (remapped jars, use
+	 *                       this for deobfuscated environments)
 	 * @throws IOException If downloading fails
 	 */
 	@SuppressWarnings("unchecked")
-	public static void downloadVersionAndLibraries(MinecraftVersionInfo version, boolean overwrite, boolean checkHash,
-			boolean removeRift) throws IOException {
+	public static void downloadVersionFiles(MinecraftVersionInfo version, boolean downloadAssets, boolean overwrite,
+			boolean checkHash, boolean removeRift) throws IOException {
 		if (MinecraftToolkit.hasMinecraftDownloadConnection()) {
 			CyanCore.trackLevel(Level.WARN);
 			File f3 = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/libraries");
@@ -1612,38 +1623,40 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 
 			recurseInheritsFrom(versionJson, versionJson, gson);
 
-			MinecraftToolkit.info("Downloading assets...");
-			JsonObject assetIndexObj = versionJson.get("assetIndex").getAsJsonObject();
-			String assetId = assetIndexObj.get("id").getAsString();
-			String assetIndexSha = assetIndexObj.get("sha1").getAsString();
-			String assetIndexSize = assetIndexObj.get("size").getAsString();
-			String assetIndexUrl = assetIndexObj.get("url").getAsString();
+			if (downloadAssets) {
+				MinecraftToolkit.info("Downloading assets...");
+				JsonObject assetIndexObj = versionJson.get("assetIndex").getAsJsonObject();
+				String assetId = assetIndexObj.get("id").getAsString();
+				String assetIndexSha = assetIndexObj.get("sha1").getAsString();
+				String assetIndexSize = assetIndexObj.get("size").getAsString();
+				String assetIndexUrl = assetIndexObj.get("url").getAsString();
 
-			File assetIndex = new File(f5, assetId + ".json");
-			if (!assetIndex.getParentFile().exists())
-				assetIndex.getParentFile().mkdirs();
-
-			try {
-				if (checkFile(assetIndex, overwrite, assetIndexSha, checkHash)) {
-					Download(assetIndex, new URL(assetIndexUrl), Double.valueOf(assetIndexSize).longValue(),
-							assetIndexSha, overwrite, checkHash, true, true);
-				}
-			} catch (NoSuchAlgorithmException e) {
-			}
-
-			JsonObject assets = JsonParser.parseString(Files.readString(assetIndex.toPath())).getAsJsonObject();
-			Map<String, Map<String, ?>> assetMap = gson.fromJson(assets.get("objects"), Map.class);
-			for (Map<String, ?> val : assetMap.values()) {
-				String hash = val.get("hash").toString();
-				long size = Double.valueOf(val.get("size").toString()).longValue();
-				File output = new File(f6, hash.substring(0, 2) + "/" + hash);
-				if (!output.getParentFile().exists())
-					output.getParentFile().mkdirs();
+				File assetIndex = new File(f5, assetId + ".json");
+				if (!assetIndex.getParentFile().exists())
+					assetIndex.getParentFile().mkdirs();
 
 				try {
-					Download(output, new URL(resourcesURL.replace("%1", hash.substring(0, 2)).replace("%2", hash)),
-							size, hash, overwrite, checkHash, true, true);
+					if (checkFile(assetIndex, overwrite, assetIndexSha, checkHash)) {
+						Download(assetIndex, new URL(assetIndexUrl), Double.valueOf(assetIndexSize).longValue(),
+								assetIndexSha, overwrite, checkHash, true, true);
+					}
 				} catch (NoSuchAlgorithmException e) {
+				}
+
+				JsonObject assets = JsonParser.parseString(Files.readString(assetIndex.toPath())).getAsJsonObject();
+				Map<String, Map<String, ?>> assetMap = gson.fromJson(assets.get("objects"), Map.class);
+				for (Map<String, ?> val : assetMap.values()) {
+					String hash = val.get("hash").toString();
+					long size = Double.valueOf(val.get("size").toString()).longValue();
+					File output = new File(f6, hash.substring(0, 2) + "/" + hash);
+					if (!output.getParentFile().exists())
+						output.getParentFile().mkdirs();
+
+					try {
+						Download(output, new URL(resourcesURL.replace("%1", hash.substring(0, 2)).replace("%2", hash)),
+								size, hash, overwrite, checkHash, true, true);
+					} catch (NoSuchAlgorithmException e) {
+					}
 				}
 			}
 
@@ -1971,7 +1984,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		} else
 
 		{
-			int missing = checkVersionMissingFiles(version, false, false, removeRift);
+			int missing = checkVersionMissingFiles(version, downloadAssets, false, false, removeRift);
 			if (missing == -1)
 				throw new IOException("Could not download the version manifest, device is offline.");
 

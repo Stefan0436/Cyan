@@ -667,9 +667,9 @@ public class Installer extends CyanComponent {
 		MinecraftMappingsToolkit.loadMappings(version, side);
 		logger.info("");
 		ProgressWindow.WindowAppender.increaseProgress();
-		if (side == GameSide.CLIENT && !MinecraftInstallationToolkit.checkVersion(version)) {
+		if (side == GameSide.CLIENT && !MinecraftInstallationToolkit.checkIntallation(version, false)) {
 			logger.info("Downloading game libraries...");
-			MinecraftInstallationToolkit.downloadVersionAndLibraries(version);
+			MinecraftInstallationToolkit.downloadVersionFiles(version, false);
 			ProgressWindow.WindowAppender.increaseProgress();
 			logger.info("");
 		} else {
@@ -1722,6 +1722,7 @@ public class Installer extends CyanComponent {
 				bashScript.append(
 						"xdg-mime default \"" + desktop.getCanonicalPath() + "\" application/x-kickstart-cmf || exit 1")
 						.append("\n");
+				bashScript.append("cp  \"" + desktop.getCanonicalPath() + "\" ~/.local/share/application").append("\n");
 				bashScript.append("").append("\n");
 				bashScript.append("rm -- \"$0\"").append("\n");
 				Files.writeString(bashFile.toPath(), bashScript.toString());

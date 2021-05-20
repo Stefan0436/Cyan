@@ -40,7 +40,7 @@ public class RiftVanillaToolchainProvider implements IRiftToolchainProvider {
 		}
 
 		verify();
-		
+
 		return MinecraftRifterToolkit.generateCyanRiftTargets(version, side);
 	}
 
@@ -53,7 +53,7 @@ public class RiftVanillaToolchainProvider implements IRiftToolchainProvider {
 			MinecraftModdingToolkit.deobfuscateJar(version, side);
 
 		verify();
-		
+
 		return jarFile;
 	}
 
@@ -61,23 +61,24 @@ public class RiftVanillaToolchainProvider implements IRiftToolchainProvider {
 	public IClassSourceProvider<?>[] getSources() throws IOException {
 		if (side == GameSide.CLIENT) {
 			verify();
-			ArrayList<IClassSourceProvider<?>> sources = new  ArrayList< IClassSourceProvider<?>>();
+			ArrayList<IClassSourceProvider<?>> sources = new ArrayList<IClassSourceProvider<?>>();
 			for (File lib : MinecraftInstallationToolkit.getLibraries(version)) {
 				sources.add(new FileClassSourceProvider(lib));
 			}
 			return sources.toArray(t -> new IClassSourceProvider<?>[t]);
 		}
-		
+
 		return new IClassSourceProvider<?>[0];
 	}
 
 	private boolean verified = false;
+
 	private void verify() throws IOException {
 		if (verified)
 			return;
-		
-		if (!MinecraftInstallationToolkit.checkVersion(version) && side == GameSide.CLIENT) {
-			MinecraftInstallationToolkit.downloadVersionAndLibraries(version);
+
+		if (!MinecraftInstallationToolkit.checkIntallation(version, false) && side == GameSide.CLIENT) {
+			MinecraftInstallationToolkit.downloadVersionFiles(version, false);
 		}
 
 		verified = true;
