@@ -614,6 +614,7 @@ public class CyanCore extends CyanComponent {
 		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Starting minecraft...");
+		StartupWindow.WindowAppender.increaseProgress();
 		if (Modloader.getModloaderLaunchPlatform() == LaunchPlatform.MCP) {
 			try {
 				Thread.sleep(500);
@@ -621,7 +622,6 @@ public class CyanCore extends CyanComponent {
 			}
 			StartupWindow.WindowAppender.closeWindow();
 		}
-		StartupWindow.WindowAppender.increaseProgress();
 		meth.invoke(null, new Object[] { args });
 	}
 
