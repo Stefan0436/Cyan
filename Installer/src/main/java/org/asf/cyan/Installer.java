@@ -1006,7 +1006,9 @@ public class Installer extends CyanComponent {
 			outf.close();
 			libraryPaths.remove(source);
 			libraryFiles.remove(source);
+			libs.remove(source);
 			libraryFiles.put(source + "-" + project.game + "-" + project.loader + "-" + project.loaderVersion, output);
+			libs.add(source + "-" + project.game + "-" + project.loader + "-" + project.loaderVersion);
 		}
 		logger.info("");
 		ProgressWindow.WindowAppender.increaseProgress();
