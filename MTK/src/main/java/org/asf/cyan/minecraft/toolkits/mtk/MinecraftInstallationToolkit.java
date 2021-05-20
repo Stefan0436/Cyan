@@ -1200,7 +1200,8 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 * @throws IOException If the manifest does not exist and cannot be downloaded
 	 */
 	public static String getAssetId(MinecraftVersionInfo version) throws IOException {
-		JsonObject versionJson = getVersionManifest(version);
+		JsonObject versionJson = getVersionManifest(version).deepCopy();
+		recurseInheritsFrom(versionJson, versionJson, new Gson());
 		JsonObject assetIndexObj = versionJson.get("assetIndex").getAsJsonObject();
 		String assetId = assetIndexObj.get("id").getAsString();
 		return assetId;
