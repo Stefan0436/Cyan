@@ -1294,7 +1294,8 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		downloadVersionManifest(version);
 
 		info("Resolving " + side + " jar of minecraft version " + version.getVersion() + "...");
-		JsonObject manifest = versionCache.get(version.getVersion());
+		JsonObject manifest = versionCache.get(version.getVersion()).deepCopy();
+		recurseInheritsFrom(manifest, manifest, new Gson());
 		URL u = new URL(manifest.get("downloads").getAsJsonObject().get(side.toString().toLowerCase()).getAsJsonObject()
 				.get("url").getAsString());
 
