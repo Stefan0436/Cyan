@@ -673,7 +673,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 
 		JsonObject manifest = getVersionManifest(version).deepCopy();
 
-		info("Generating " + version.getVersion() + " JVM arguments...");
+		info("Generating " + version.getVersion() + " program arguments...");
 		Gson gson = new Gson();
 		recurseInheritsFrom(manifest, manifest, gson);
 
