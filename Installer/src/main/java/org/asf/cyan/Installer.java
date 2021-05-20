@@ -167,12 +167,75 @@ public class Installer extends CyanComponent {
 			String type = args[1];
 			if (type.equals("client")) {
 				ProjectConfig project = new ProjectConfig();
-				window.installClient(new File(args[2]), MinecraftInstallationToolkit.getMinecraftDirectory(), project,
-						false);
+				try {
+					window.installClient(new File(args[2]), MinecraftInstallationToolkit.getMinecraftDirectory(),
+							project, false);
+				} catch (Exception e) {
+					fatal("Fatal error during installation", e);
+					System.exit(-1);
+				}
 			} else if (type.equals("server")) {
 				ProjectConfig project = new ProjectConfig();
-				window.installServer(new File(args[2]), MinecraftInstallationToolkit.getMinecraftDirectory(), project,
-						false);
+				try {
+					window.installServer(new File(args[2]), MinecraftInstallationToolkit.getMinecraftDirectory(),
+							project, false);
+				} catch (Exception e) {
+					fatal("Fatal error during installation", e);
+					System.exit(-1);
+				}
+			} else if (type.equals("gui-client")) {
+				ProjectConfig project = new ProjectConfig();
+				File outputDir = new File(args[2]);
+				if (!outputDir.exists()) {
+					JOptionPane.showMessageDialog(null, "Game directory does not exist.", "Cannot install",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				ProgressWindow.WindowAppender.showWindow();
+				new Thread(() -> {
+					try {
+						window.installClient(outputDir, MinecraftInstallationToolkit.getMinecraftDirectory(), project,
+								true);
+						ProgressWindow.WindowAppender.closeWindow();
+						return;
+					} catch (Exception e) {
+						window.logger.fatal(e);
+						SwingUtilities.invokeLater(() -> {
+							ProgressWindow.WindowAppender.fatalError();
+							ProgressWindow.WindowAppender.closeWindow();
+							System.exit(-1);
+						});
+					}
+				}, "Installer").start();
+			} else if (type.equals("gui-server")) {
+				ProjectConfig project = new ProjectConfig();
+				File outputDir = new File(args[2]);
+				if (outputDir.equals(new File(APPDATA, ".minecraft"))) {
+					if (JOptionPane.showConfirmDialog(null,
+							"You have selected the default client (.minecraft) installation directory for installing the server,\nThis is a bit unusual, are you sure you want to continue?",
+							"", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.OK_OPTION) {
+						return;
+					}
+				}
+				if (!outputDir.exists()) {
+					outputDir.mkdirs();
+				}
+				ProgressWindow.WindowAppender.showWindow();
+				new Thread(() -> {
+					try {
+						window.installServer(outputDir, MinecraftInstallationToolkit.getMinecraftDirectory(), project,
+								true);
+						ProgressWindow.WindowAppender.closeWindow();
+						return;
+					} catch (Exception e) {
+						window.logger.fatal(e);
+						SwingUtilities.invokeLater(() -> {
+							ProgressWindow.WindowAppender.fatalError();
+							ProgressWindow.WindowAppender.closeWindow();
+							System.exit(-1);
+						});
+					}
+				}, "Installer").start();
 			}
 			return;
 		}
@@ -438,6 +501,7 @@ public class Installer extends CyanComponent {
 							ProgressWindow.WindowAppender.fatalError();
 							ProgressWindow.WindowAppender.closeWindow();
 							frmCyanInstaller.dispose();
+							System.exit(-1);
 						});
 					}
 				}, "Installer").start();
@@ -474,6 +538,7 @@ public class Installer extends CyanComponent {
 							ProgressWindow.WindowAppender.fatalError();
 							ProgressWindow.WindowAppender.closeWindow();
 							frmCyanInstaller.dispose();
+							System.exit(-1);
 						});
 					}
 				}, "Installer").start();

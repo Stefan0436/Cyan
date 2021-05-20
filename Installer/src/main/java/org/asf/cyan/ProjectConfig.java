@@ -7,11 +7,26 @@ import java.util.HashMap;
 import org.asf.cyan.api.config.Configuration;
 
 public class ProjectConfig extends Configuration<ProjectConfig> {
+	
+	public static class DefaultContentProvider extends ContentProvider {
+
+		@Override
+		public String provide() throws IOException {
+			InputStream strm = getClass().getClassLoader().getResource("project.ccfg").openStream();
+			String content = new String(strm.readAllBytes());
+			strm.close();
+			return content;
+		}
+
+	}
+	public static ContentProvider contentProvider = new DefaultContentProvider();
+	
+	public static abstract class ContentProvider {
+		public abstract String provide() throws IOException;
+	}
 
 	public ProjectConfig() throws IOException {
-		InputStream strm = getClass().getClassLoader().getResource("project.ccfg").openStream();
-		readAll(new String(strm.readAllBytes()));
-		strm.close();
+		
 	}
 
 	@Override
