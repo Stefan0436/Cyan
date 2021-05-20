@@ -1,6 +1,5 @@
 package org.asf.cyan;
 
-
 import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
@@ -173,7 +172,8 @@ public class ProgressWindow {
 
 				@Override
 				public void windowClosing(WindowEvent arg0) {
-					System.exit(122);
+					if (shown)
+						System.exit(122);
 				}
 
 			});
