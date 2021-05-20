@@ -1619,9 +1619,9 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 			JsonObject versionJson = getVersionManifest(version);
 			if (!isVersionManifestSaved(version) || overwrite)
 				saveVersionManifest(version);
-			MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.CLIENT, overwrite);
 
 			recurseInheritsFrom(versionJson, versionJson, gson);
+			MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.CLIENT, overwrite);
 
 			if (downloadAssets) {
 				MinecraftToolkit.info("Downloading assets...");
