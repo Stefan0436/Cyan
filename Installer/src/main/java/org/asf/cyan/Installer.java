@@ -192,21 +192,19 @@ public class Installer extends CyanComponent {
 					return;
 				}
 				ProgressWindow.WindowAppender.showWindow();
-				new Thread(() -> {
-					try {
-						window.installClient(outputDir, MinecraftInstallationToolkit.getMinecraftDirectory(), project,
-								true);
+				try {
+					window.installClient(outputDir, MinecraftInstallationToolkit.getMinecraftDirectory(), project,
+							false);
+					ProgressWindow.WindowAppender.closeWindow();
+					return;
+				} catch (Exception e) {
+					window.logger.fatal(e);
+					SwingUtilities.invokeLater(() -> {
+						ProgressWindow.WindowAppender.fatalError();
 						ProgressWindow.WindowAppender.closeWindow();
-						return;
-					} catch (Exception e) {
-						window.logger.fatal(e);
-						SwingUtilities.invokeLater(() -> {
-							ProgressWindow.WindowAppender.fatalError();
-							ProgressWindow.WindowAppender.closeWindow();
-							System.exit(-1);
-						});
-					}
-				}, "Installer").start();
+						System.exit(-1);
+					});
+				}
 			} else if (type.equals("gui-server")) {
 				ProjectConfig project = new ProjectConfig();
 				File outputDir = new File(args[2]);
@@ -221,21 +219,19 @@ public class Installer extends CyanComponent {
 					outputDir.mkdirs();
 				}
 				ProgressWindow.WindowAppender.showWindow();
-				new Thread(() -> {
-					try {
-						window.installServer(outputDir, MinecraftInstallationToolkit.getMinecraftDirectory(), project,
-								true);
+				try {
+					window.installServer(outputDir, MinecraftInstallationToolkit.getMinecraftDirectory(), project,
+							false);
+					ProgressWindow.WindowAppender.closeWindow();
+					return;
+				} catch (Exception e) {
+					window.logger.fatal(e);
+					SwingUtilities.invokeLater(() -> {
+						ProgressWindow.WindowAppender.fatalError();
 						ProgressWindow.WindowAppender.closeWindow();
-						return;
-					} catch (Exception e) {
-						window.logger.fatal(e);
-						SwingUtilities.invokeLater(() -> {
-							ProgressWindow.WindowAppender.fatalError();
-							ProgressWindow.WindowAppender.closeWindow();
-							System.exit(-1);
-						});
-					}
-				}, "Installer").start();
+						System.exit(-1);
+					});
+				}
 			}
 			return;
 		}
