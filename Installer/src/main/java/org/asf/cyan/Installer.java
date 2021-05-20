@@ -435,7 +435,7 @@ public class Installer extends CyanComponent {
 		lblNewLabel.setVerticalAlignment(SwingConstants.TOP);
 		lblNewLabel.setPreferredSize(new Dimension(200, 18));
 
-		JLabel lblKickstart = new JLabel("KickStart Installer 1.1 ");
+		JLabel lblKickstart = new JLabel("KickStart Installer 1.2 ");
 		panel.add(lblKickstart, BorderLayout.EAST);
 		lblKickstart.setFont(new Font("SansSerif", Font.BOLD, 12));
 		lblKickstart.setHorizontalAlignment(SwingConstants.TRAILING);
@@ -1784,7 +1784,7 @@ public class Installer extends CyanComponent {
 				bashScript.append(
 						"xdg-mime default \"" + desktop.getCanonicalPath() + "\" application/x-kickstart-cmf || exit 1")
 						.append("\n");
-				bashScript.append("cp  \"" + desktop.getCanonicalPath() + "\" ~/.local/share/application").append("\n");
+				bashScript.append("cp  \"" + desktop.getCanonicalPath() + "\" ~/.local/share/applications").append("\n");
 				bashScript.append("").append("\n");
 				bashScript.append("rm -- \"$0\"").append("\n");
 				Files.writeString(bashFile.toPath(), bashScript.toString());
