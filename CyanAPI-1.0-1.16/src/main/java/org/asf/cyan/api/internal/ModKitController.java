@@ -90,6 +90,7 @@ public class ModKitController extends CyanComponent {
 		if (Modloader.getModloaderLaunchPlatform() != LaunchPlatform.MCP) {
 			StartupWindow.WindowAppender.closeWindow();
 		} else {
+			StartupWindow.shown = false;
 			StartupWindow.WindowAppender.frame.frm.setVisible(false);
 		}
 	}
