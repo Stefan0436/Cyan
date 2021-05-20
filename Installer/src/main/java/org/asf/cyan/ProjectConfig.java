@@ -26,7 +26,7 @@ public class ProjectConfig extends Configuration<ProjectConfig> {
 	}
 
 	public ProjectConfig() throws IOException {
-		
+		readAll(contentProvider.provide());
 	}
 
 	@Override
