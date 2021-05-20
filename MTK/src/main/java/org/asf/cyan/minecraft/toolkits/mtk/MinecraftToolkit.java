@@ -360,6 +360,8 @@ public class MinecraftToolkit extends CyanComponent {
 					trace("SET releaseTime string of version info to " + ver.get("releaseTime") + ", caller: "
 							+ CallTrace.traceCallName());
 					String releaseTime = ver.get("releaseTime").getAsString();
+					if (releaseTime.endsWith("+0000"))
+						releaseTime = releaseTime.substring(0, releaseTime.length() - 5) + "+00:00";
 
 					trace("PARSE MinecraftVersionInfo object, caller: " + CallTrace.traceCallName());
 					MinecraftVersionInfo versionInfo = new MinecraftVersionInfo(id, MinecraftVersionType.parse(type),

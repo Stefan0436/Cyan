@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.core.CyanInfo;
 import org.asf.cyan.core.StartupWindow;
@@ -81,10 +82,12 @@ public class ModKitController extends CyanComponent {
 		Modloader.getModloader().dispatchEvent("mods.load.regular.start", loader);
 
 		info("Returning to game code...");
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
+		if (Modloader.getModloaderLaunchPlatform() != LaunchPlatform.MCP) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+			}
+			StartupWindow.WindowAppender.closeWindow();
 		}
-		StartupWindow.WindowAppender.closeWindow();
 	}
 }
