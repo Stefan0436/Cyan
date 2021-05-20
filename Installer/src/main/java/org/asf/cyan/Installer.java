@@ -1005,7 +1005,8 @@ public class Installer extends CyanComponent {
 			outp.close();
 			outf.close();
 			libraryPaths.remove(source);
-			libraryFiles.put(source, output);
+			libraryFiles.remove(source);
+			libraryFiles.put(source + "-" + project.game + "-" + project.loader + "-" + project.loaderVersion, output);
 		}
 		logger.info("");
 		ProgressWindow.WindowAppender.increaseProgress();
@@ -1784,7 +1785,8 @@ public class Installer extends CyanComponent {
 				bashScript.append(
 						"xdg-mime default \"" + desktop.getCanonicalPath() + "\" application/x-kickstart-cmf || exit 1")
 						.append("\n");
-				bashScript.append("cp  \"" + desktop.getCanonicalPath() + "\" ~/.local/share/applications").append("\n");
+				bashScript.append("cp  \"" + desktop.getCanonicalPath() + "\" ~/.local/share/applications")
+						.append("\n");
 				bashScript.append("").append("\n");
 				bashScript.append("rm -- \"$0\"").append("\n");
 				Files.writeString(bashFile.toPath(), bashScript.toString());
