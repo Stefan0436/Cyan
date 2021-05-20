@@ -82,12 +82,15 @@ public class ModKitController extends CyanComponent {
 		Modloader.getModloader().dispatchEvent("mods.load.regular.start", loader);
 
 		info("Returning to game code...");
+
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+		}
 		if (Modloader.getModloaderLaunchPlatform() != LaunchPlatform.MCP) {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-			}
 			StartupWindow.WindowAppender.closeWindow();
+		} else {
+			StartupWindow.WindowAppender.frame.frm.setVisible(false);
 		}
 	}
 }

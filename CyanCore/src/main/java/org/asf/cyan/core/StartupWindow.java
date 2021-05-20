@@ -24,7 +24,7 @@ import javax.swing.JProgressBar;
 
 public class StartupWindow {
 
-	private JFrame frm;
+	public JFrame frm;
 	private static boolean shown = false;
 
 	public static class WindowAppender extends AbstractAppender {
@@ -52,7 +52,7 @@ public class StartupWindow {
 				frame.log(message);
 		}
 
-		private static StartupWindow frame = new StartupWindow();
+		public static StartupWindow frame = new StartupWindow();
 
 		public static void showWindow() {
 			shown = true;

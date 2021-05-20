@@ -21,7 +21,6 @@ import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
-import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.api.modloader.information.modloader.LoadPhase;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.FluidAgent;
@@ -615,13 +614,6 @@ public class CyanCore extends CyanComponent {
 
 		info("Starting minecraft...");
 		StartupWindow.WindowAppender.increaseProgress();
-		if (Modloader.getModloaderLaunchPlatform() == LaunchPlatform.MCP) {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-			}
-			StartupWindow.WindowAppender.closeWindow();
-		}
 		meth.invoke(null, new Object[] { args });
 	}
 
