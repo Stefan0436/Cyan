@@ -409,7 +409,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		}
 		keys.put("natives_directory", nativesDir.getCanonicalPath());
 
-		JsonObject manifest = getVersionManifest(version);
+		JsonObject manifest = getVersionManifest(version).deepCopy();
 
 		info("Generating " + version.getVersion() + " JVM arguments...");
 		Gson gson = new Gson();
@@ -552,7 +552,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	public static String getMainClass(MinecraftVersionInfo version) {
 		JsonObject manifest;
 		try {
-			manifest = getVersionManifest(version);
+			manifest = getVersionManifest(version).deepCopy();
 		} catch (IOException e) {
 			return null;
 		}
@@ -671,7 +671,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		keys.put("assets_root", assetDir.getCanonicalPath());
 		keys.put("assets_index_name", assetsIndex);
 
-		JsonObject manifest = getVersionManifest(version);
+		JsonObject manifest = getVersionManifest(version).deepCopy();
 
 		info("Generating " + version.getVersion() + " JVM arguments...");
 		Gson gson = new Gson();
@@ -775,7 +775,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		JsonObject manifest;
 		int incorrect = 0;
 		try {
-			manifest = getVersionManifest(version);
+			manifest = getVersionManifest(version).deepCopy();
 		} catch (IOException e) {
 			return -1;
 		}
@@ -989,7 +989,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 
 		JsonObject manifest;
 		try {
-			manifest = getVersionManifest(version);
+			manifest = getVersionManifest(version).deepCopy();
 		} catch (IOException e) {
 			return new File[0];
 		}
@@ -1076,7 +1076,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 
 		JsonObject manifest;
 		try {
-			manifest = getVersionManifest(version);
+			manifest = getVersionManifest(version).deepCopy();
 		} catch (IOException e) {
 			return new String[0];
 		}
@@ -1619,6 +1619,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 			JsonObject versionJson = getVersionManifest(version);
 			if (!isVersionManifestSaved(version) || overwrite)
 				saveVersionManifest(version);
+			versionJson = versionJson.deepCopy();
 
 			recurseInheritsFrom(versionJson, versionJson, gson);
 			MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.CLIENT, overwrite);
