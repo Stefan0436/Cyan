@@ -15,9 +15,9 @@ public class Protocols {
 	//
 	// Protocol 2.0 will most likely be different
 	//
-	public final static double MIN_MODKIT = 1.0d; // ModKit 1.0
+	public final static double MIN_MODKIT = 1.1d; // ModKit 1.0
 	public final static double MAX_MODKIT = 2.0d; // ModKit 2.0
 
-	public static final double MODKIT_PROTOCOL = 1.0d; // Current
+	public static final double MODKIT_PROTOCOL = 1.1d; // Current
 
 }
