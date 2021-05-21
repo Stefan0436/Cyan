@@ -13,7 +13,7 @@ import org.asf.cyan.internal.modkitimpl.util.HandshakeUtils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 
-import net.minecraft.network.protocol.status.ServerStatus.Version;
+import net.minecraft.network.protocol.status.ServerStatus;
 
 @FluidTransformer
 @TargetClass(target = "net.minecraft.network.protocol.status.ServerStatus$Serializer")
@@ -22,7 +22,7 @@ public class ServerStatusModification {
 	@InjectAt(location = InjectLocation.TAIL)
 	@TargetType(target = "com.google.gson.JsonElement")
 	public void serialize(
-			@TargetType(target = "net.minecraft.network.protocol.status.ServerStatus$Version") Version var1, Type var2,
+			@TargetType(target = "net.minecraft.network.protocol.status.ServerStatus") ServerStatus var1, Type var2,
 			JsonSerializationContext var3, @LocalVariable JsonObject data) {
 		HandshakeUtils.getImpl().onSerializeJson(data);
 	}
