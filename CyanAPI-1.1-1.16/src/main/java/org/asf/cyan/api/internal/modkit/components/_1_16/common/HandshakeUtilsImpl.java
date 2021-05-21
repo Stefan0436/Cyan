@@ -10,12 +10,18 @@ import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;
 import org.asf.cyan.api.events.objects.network.ServerConnectionEventObject;
 import org.asf.cyan.api.internal.IModKitComponent;
 import org.asf.cyan.api.internal.ServerGamePacketListenerExtension;
+import org.asf.cyan.api.modloader.Modloader;
+import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.api.network.channels.ClientPacketProcessor;
 import org.asf.cyan.api.network.channels.PacketChannel;
 import org.asf.cyan.api.network.channels.ServerPacketProcessor;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeLoaderPacket;
+import org.asf.cyan.internal.modkitimpl.info.Protocols;
 import org.asf.cyan.internal.modkitimpl.util.HandshakeUtils;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
@@ -121,6 +127,56 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 	@Override
 	public Object getPlayerObject(ServerPacketProcessor processor) {
 		return processor.getPlayer();
+	}
+
+	@Override
+	public void onSerializeJson(JsonObject data) {
+		JsonObject modkitData = new JsonObject();
+		modkitData.addProperty("protocol", Protocols.MODKIT_PROTOCOL);
+		modkitData.addProperty("protocol.min", Protocols.MIN_MODKIT);
+		modkitData.addProperty("protocol.max", Protocols.MAX_MODKIT);
+
+		JsonObject modloaderData = new JsonObject();
+		modloaderData.addProperty("protocol", Protocols.LOADER_PROTOCOL);
+		modloaderData.addProperty("protocol.min", Protocols.MIN_LOADER);
+		modloaderData.addProperty("protocol.max", Protocols.MAX_LOADER);
+
+		JsonObject main = new JsonObject();
+		main.addProperty("name", Modloader.getModloader().getName());
+		main.addProperty("version", Modloader.getModloader().getVersion().toString());
+		modloaderData.add("main", main);
+
+		JsonArray loaders = new JsonArray();
+		for (Modloader loader : Modloader.getAllModloaders()) {
+			JsonObject modloader = new JsonObject();
+			modloader.addProperty("name", loader.getName());
+			modloader.addProperty("version", loader.getVersion().toString());
+			modloader.addProperty("type", loader.getClass().getTypeName());
+
+			modloader.addProperty("allmods.known.count", loader.getKnownModsCount());
+			JsonArray mods = new JsonArray();
+			for (IModManifest mod : loader.getLoadedMods()) {
+				JsonObject modinfo = new JsonObject();
+				modinfo.addProperty("id", mod.id());
+				modinfo.addProperty("version", mod.version().toString());
+				mods.add(modinfo);
+			}
+			modloader.add("mods", mods);
+			JsonArray coremods = new JsonArray();
+			for (IModManifest mod : loader.getLoadedCoremods()) {
+				JsonObject modinfo = new JsonObject();
+				modinfo.addProperty("id", mod.id());
+				modinfo.addProperty("version", mod.version().toString());
+				coremods.add(modinfo);
+			}
+			modloader.add("coremods", mods);
+
+			loaders.add(modloader);
+		}
+		modloaderData.add("all", loaders);
+
+		modkitData.add("modloader", modloaderData);
+		data.add("modkit", modkitData);
 	}
 
 }

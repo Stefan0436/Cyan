@@ -1,5 +1,6 @@
 package org.asf.cyan.internal.modkitimpl.util;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -10,6 +11,8 @@ import org.asf.cyan.api.network.channels.PacketChannel;
 import org.asf.cyan.api.network.channels.ServerPacketProcessor;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeLoaderPacket;
+
+import com.google.gson.JsonObject;
 
 public abstract class HandshakeUtils extends CyanComponent {
 
@@ -55,5 +58,7 @@ public abstract class HandshakeUtils extends CyanComponent {
 	public abstract String getPlayerName(ServerPacketProcessor processor);
 
 	public abstract Object getPlayerObject(ServerPacketProcessor processor);
+
+	public abstract void onSerializeJson(JsonObject data);
 
 }
