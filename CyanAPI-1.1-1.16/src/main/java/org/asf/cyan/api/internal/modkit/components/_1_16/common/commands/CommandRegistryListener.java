@@ -24,6 +24,8 @@ public class CommandRegistryListener implements IModKitComponent, RegisteryListe
 	@SimpleEvent(CommandManagerStartupEvent.class)
 	private void commandStartup(CommandManagerEventObject event) {
 		commands = event.getCommandManager();
+		if (manager == null)
+			manager = CommandManager.getMain();
 		for (Command cmd : manager.getCommands()) {
 			commands.getDispatcher().register(cmd.build(manager));
 		}
