@@ -822,10 +822,7 @@ public abstract class Modloader extends CyanComponent {
 			return modProvider.getAllKnownModsLength();
 		}
 
-		if (getNextImplementation() == null)
-			return getLoadedMods().length + getLoadedCoremods().length;
-
-		return getNextImplementation().getKnownModsCount();
+		return getLoadedMods().length + getLoadedCoremods().length;
 	}
 
 	/**

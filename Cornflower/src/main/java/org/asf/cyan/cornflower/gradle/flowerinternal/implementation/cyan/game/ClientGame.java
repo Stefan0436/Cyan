@@ -134,7 +134,7 @@ public class ClientGame implements IGameExecutionContext, ILaunchProvider {
 			if (!MinecraftInstallationToolkit.isVersionManifestSaved(gameVersion))
 				MinecraftInstallationToolkit.saveVersionManifest(gameVersion);
 
-			if (!MinecraftInstallationToolkit.checkIntallation(cyanVersion, true, false, false, true))
+			if (!MinecraftInstallationToolkit.checkInstallation(cyanVersion, true, false, false, true))
 				MinecraftInstallationToolkit.downloadVersionFiles(cyanVersion, true, true, true, true);
 
 			if (MinecraftInstallationToolkit.getVersionJar(gameVersion, GameSide.CLIENT) == null)

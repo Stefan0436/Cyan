@@ -59,8 +59,8 @@ MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER)
 
 if (!MinecraftInstallationToolkit.isVersionManifestSaved(info))
 	MinecraftInstallationToolkit.saveVersionManifest(info)
-if (!project.hasProperty("uncheckedClient") && !MinecraftInstallationToolkit.checkVersion(info))
-	MinecraftInstallationToolkit.downloadVersionAndLibraries(info)
+if (!project.hasProperty("uncheckedClient") && !MinecraftInstallationToolkit.checkInstallation(info, true))
+	MinecraftInstallationToolkit.downloadVersionFiles(info, true)
 	
 MinecraftInstallationToolkit.downloadVersionJar(info, GameSide.CLIENT)
 MinecraftInstallationToolkit.downloadVersionJar(info, GameSide.SERVER)

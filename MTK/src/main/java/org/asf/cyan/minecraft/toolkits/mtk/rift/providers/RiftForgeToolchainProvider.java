@@ -85,7 +85,7 @@ public class RiftForgeToolchainProvider implements IRiftToolchainProvider {
 		if (verified)
 			return;
 
-		if (!MinecraftInstallationToolkit.checkIntallation(version, false) && side == GameSide.CLIENT) {
+		if (!MinecraftInstallationToolkit.checkInstallation(version, false) && side == GameSide.CLIENT) {
 			MinecraftInstallationToolkit.downloadVersionFiles(version, false);
 		}
 

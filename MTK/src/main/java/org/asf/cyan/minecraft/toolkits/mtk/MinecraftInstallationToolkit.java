@@ -200,8 +200,8 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 * @param checkAssets True to check asset files
 	 * @return True if all check out, false otherwise.
 	 */
-	public static boolean checkIntallation(MinecraftVersionInfo version, boolean checkAssets) {
-		return checkIntallation(version, checkAssets, false, false);
+	public static boolean checkInstallation(MinecraftVersionInfo version, boolean checkAssets) {
+		return checkInstallation(version, checkAssets, false, false);
 	}
 
 	/**
@@ -214,8 +214,8 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 *                    are missing.
 	 * @return True if all check out, false otherwise.
 	 */
-	public static boolean checkIntallation(MinecraftVersionInfo version, boolean checkAssets, boolean ignore_hash) {
-		return checkIntallation(version, checkAssets, ignore_hash, false);
+	public static boolean checkInstallation(MinecraftVersionInfo version, boolean checkAssets, boolean ignore_hash) {
+		return checkInstallation(version, checkAssets, ignore_hash, false);
 	}
 
 	/**
@@ -744,9 +744,9 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 *                           make sure all files exist.
 	 * @return True if all check out, false otherwise.
 	 */
-	public static boolean checkIntallation(MinecraftVersionInfo version, boolean checkAssets, boolean ignore_hash,
+	public static boolean checkInstallation(MinecraftVersionInfo version, boolean checkAssets, boolean ignore_hash,
 			boolean ignore_nonexistent) {
-		return checkIntallation(version, checkAssets, ignore_hash, ignore_nonexistent, false);
+		return checkInstallation(version, checkAssets, ignore_hash, ignore_nonexistent, false);
 	}
 
 	/**
@@ -764,7 +764,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 *                           this for deobfuscated environments)
 	 * @return True if all check out, false otherwise.
 	 */
-	public static boolean checkIntallation(MinecraftVersionInfo version, boolean checkAssets, boolean ignore_hash,
+	public static boolean checkInstallation(MinecraftVersionInfo version, boolean checkAssets, boolean ignore_hash,
 			boolean ignore_nonexistent, boolean removeRift) {
 		return checkVersionMissingFiles(version, checkAssets, ignore_hash, ignore_nonexistent, removeRift) == 0;
 	}
