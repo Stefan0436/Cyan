@@ -29,7 +29,9 @@ public class HandshakeComponent implements IEventListenerContainer, IPostponedCo
 		CyanHandshakePacketChannel channel = HandshakeUtils.getImpl().getChannel(CyanHandshakePacketChannel.class,
 				event);
 		HandshakeProtocolPacket packet = new HandshakeProtocolPacket();
-		packet.protocolVersion = Protocols.MODKIT_PROTOCOL;
+		packet.currentProtocolVersion = Protocols.MODKIT_PROTOCOL;
+		packet.minProtocolVersion = Protocols.MIN_MODKIT;
+		packet.maxProtocolVersion = Protocols.MAX_MODKIT;
 		packet.write(channel);
 	}
 

@@ -19,6 +19,7 @@ import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeLoaderPacket;
 import org.asf.cyan.internal.modkitimpl.info.Protocols;
 import org.asf.cyan.internal.modkitimpl.util.HandshakeUtils;
+import org.asf.cyan.mods.dependencies.HandshakeRule;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -82,8 +83,10 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 
 	@Override
 	public void disconnectColored1(ServerPacketProcessor processor, HandshakeFailedPacket response, double protocol) {
-		processor.getPlayer().connection.disconnect(new TranslatableComponent(response.language, "§6" + protocol,
-				"§6" + response.displayVersion, "§6" + response.version));
+		synchronized (processor.getPlayer().connection) {
+			processor.getPlayer().connection.disconnect(new TranslatableComponent(response.language, "§6" + protocol,
+					"§6" + response.displayVersion, "§6" + response.version));
+		}
 	}
 
 	@Override
@@ -103,7 +106,9 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 
 	@Override
 	public void disconnectSimple(ServerPacketProcessor processor, String lang, Object... args) {
-		processor.getPlayer().connection.disconnect(new TranslatableComponent(lang, args));
+		synchronized (processor.getPlayer().connection) {
+			processor.getPlayer().connection.disconnect(new TranslatableComponent(lang, args));
+		}
 	}
 
 	@Override
@@ -176,6 +181,17 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 		modloaderData.add("all", loaders);
 
 		modkitData.add("modloader", modloaderData);
+
+		JsonArray handshakeRules = new JsonArray();
+		for (HandshakeRule rule : HandshakeRule.getAllRules()) {
+			JsonObject ruleObject = new JsonObject();
+			ruleObject.addProperty("key", rule.getKey());
+			ruleObject.addProperty("checkstring", rule.getCheckString());
+			ruleObject.addProperty("side", rule.getSide().toString());
+			handshakeRules.add(ruleObject);
+		}
+		modkitData.add("rules", handshakeRules);
+
 		data.add("modkit", modkitData);
 	}
 

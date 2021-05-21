@@ -13,18 +13,26 @@ public class HandshakeLoaderPacket extends AbstractPacket<HandshakeLoaderPacket>
 	}
 
 	public double protocol;
+	public double protocolMax = -1;
+	public double protocolMin = -1;
 	public Version version;
 
 	@Override
 	protected void readEntries(PacketReader reader) {
 		protocol = reader.readDouble();
 		version = reader.readVersion();
+		if (protocol >= 0.14) {
+			protocolMin = reader.readDouble();
+			protocolMax = reader.readDouble();
+		}
 	}
 
 	@Override
 	protected void writeEntries(PacketWriter writer) {
 		writer.writeDouble(protocol);
 		writer.writeVersion(version);
+		writer.writeDouble(protocolMax);
+		writer.writeDouble(protocolMin);
 	}
 
 }

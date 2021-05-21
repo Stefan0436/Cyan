@@ -28,7 +28,8 @@ public class HandshakeLoaderPacketProcessor extends ClientPacketProcessor {
 		HandshakeLoaderPacket packet = new HandshakeLoaderPacket().read(reader);
 		Version version = Modloader.getModloader(CyanLoader.class).getVersion();
 
-		if (packet.protocol < Protocols.MIN_LOADER) {
+		if (packet.protocol < Protocols.MIN_LOADER
+				|| (packet.protocolMin != -1 && Protocols.MODKIT_PROTOCOL < packet.protocolMin)) {
 			HandshakeFailedPacket response = new HandshakeFailedPacket();
 			response.failure = FailureType.LOADER_LOCAL;
 			response.language = "modkit.loader.outdated.local";
@@ -36,9 +37,9 @@ public class HandshakeLoaderPacketProcessor extends ClientPacketProcessor {
 			response.version = Protocols.MIN_LOADER;
 			response.write(getChannel());
 			HandshakeUtils.getImpl().disconnect(this, response, packet);
-		} else if (packet.protocol > Protocols.MAX_LOADER) {
+		} else if (packet.protocol > Protocols.MAX_LOADER
+				|| (packet.protocolMax != -1 && Protocols.MODKIT_PROTOCOL > packet.protocolMax)) {
 			HandshakeFailedPacket response = new HandshakeFailedPacket();
-			response.failure = FailureType.LOADER_REMOTE;
 			response.language = "modkit.loader.outdated.remote";
 			response.displayVersion = version.toString();
 			response.version = Protocols.MAX_LOADER;
@@ -52,7 +53,7 @@ public class HandshakeLoaderPacketProcessor extends ClientPacketProcessor {
 			response.entries.put("modloader", Modloader.getModloader(CyanLoader.class).getVersion());
 			for (IModManifest mod : Modloader.getAllMods()) {
 				response.entries.putIfAbsent(mod.id(), mod.version());
-			}			
+			}
 			for (HandshakeRule rule : HandshakeRule.getAllRules()) {
 				response.remoteRules.add(rule);
 			}

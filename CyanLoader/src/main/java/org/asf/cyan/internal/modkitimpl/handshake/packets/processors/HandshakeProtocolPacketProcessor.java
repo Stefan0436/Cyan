@@ -42,27 +42,31 @@ public class HandshakeProtocolPacketProcessor extends ServerPacketProcessor {
 	protected void process(PacketReader content) {
 		ClientImpl.startInfoHandler(this);
 		HandshakeProtocolPacket packet = new HandshakeProtocolPacket().read(content);
-		if (packet.protocolVersion < Protocols.MIN_MODKIT) {
+		if (packet.currentProtocolVersion < Protocols.MIN_MODKIT
+				|| (packet.maxProtocolVersion != -1 && Protocols.MODKIT_PROTOCOL > packet.maxProtocolVersion)) {
 			HandshakeFailedPacket response = new HandshakeFailedPacket();
 			response.failure = FailureType.PROTOCOL_REMOTE;
 			response.language = "modkit.protocol.outdated.remote";
 			response.displayVersion = Double.toString(Protocols.MIN_MODKIT);
 			response.version = Protocols.MIN_MODKIT;
 			response.write(getChannel());
-			HandshakeUtils.getImpl().disconnectColored1(this, response, packet.protocolVersion);
-		} else if (packet.protocolVersion > Protocols.MAX_MODKIT) {
+			HandshakeUtils.getImpl().disconnectColored1(this, response, packet.currentProtocolVersion);
+		} else if (packet.currentProtocolVersion > Protocols.MAX_MODKIT
+				|| (packet.minProtocolVersion != -1 && Protocols.MODKIT_PROTOCOL < packet.minProtocolVersion)) {
 			HandshakeFailedPacket response = new HandshakeFailedPacket();
 			response.failure = FailureType.PROTOCOL_LOCAL;
 			response.language = "modkit.protocol.outdated.local";
 			response.displayVersion = Double.toString(Protocols.MAX_MODKIT);
 			response.version = Protocols.MAX_MODKIT;
 			response.write(getChannel());
-			HandshakeUtils.getImpl().disconnectColored1(this, response, packet.protocolVersion);
+			HandshakeUtils.getImpl().disconnectColored1(this, response, packet.currentProtocolVersion);
 		} else {
-			ClientImpl.assignProtocol(this, packet.protocolVersion);
+			ClientImpl.assignProtocol(this, packet.currentProtocolVersion);
 			HandshakeLoaderPacket response = new HandshakeLoaderPacket();
 			response.protocol = Protocols.LOADER_PROTOCOL;
 			response.version = Modloader.getModloader(CyanLoader.class).getVersion();
+			response.protocolMin = Protocols.MIN_LOADER;
+			response.protocolMax = Protocols.MAX_LOADER;
 			response.write(getChannel());
 		}
 	}
