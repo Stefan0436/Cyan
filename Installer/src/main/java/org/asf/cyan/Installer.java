@@ -435,7 +435,7 @@ public class Installer extends CyanComponent {
 		lblNewLabel.setVerticalAlignment(SwingConstants.TOP);
 		lblNewLabel.setPreferredSize(new Dimension(200, 18));
 
-		JLabel lblKickstart = new JLabel("KickStart Installer 1.3 ");
+		JLabel lblKickstart = new JLabel("KickStart Installer 1.4 ");
 		panel.add(lblKickstart, BorderLayout.EAST);
 		lblKickstart.setFont(new Font("SansSerif", Font.BOLD, 12));
 		lblKickstart.setHorizontalAlignment(SwingConstants.TRAILING);
@@ -728,7 +728,7 @@ public class Installer extends CyanComponent {
 		MinecraftMappingsToolkit.loadMappings(version, side);
 		logger.info("");
 		ProgressWindow.WindowAppender.increaseProgress();
-		if (side == GameSide.CLIENT && !MinecraftInstallationToolkit.checkIntallation(version, false)) {
+		if (side == GameSide.CLIENT && !MinecraftInstallationToolkit.checkInstallation(version, false)) {
 			logger.info("Downloading game libraries...");
 			MinecraftInstallationToolkit.downloadVersionFiles(version, false);
 			ProgressWindow.WindowAppender.increaseProgress();
