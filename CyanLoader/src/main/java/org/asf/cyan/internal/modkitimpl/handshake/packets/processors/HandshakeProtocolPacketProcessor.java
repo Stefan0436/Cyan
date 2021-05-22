@@ -42,8 +42,10 @@ public class HandshakeProtocolPacketProcessor extends ServerPacketProcessor {
 	protected void process(PacketReader content) {
 		ClientImpl.startInfoHandler(this);
 		HandshakeProtocolPacket packet = new HandshakeProtocolPacket().read(content);
-		if (packet.currentProtocolVersion < Protocols.MIN_MODKIT
-				|| (packet.maxProtocolVersion != -1 && Protocols.MODKIT_PROTOCOL > packet.maxProtocolVersion)) {
+		int status = HandshakeUtils.getImpl().validateModKitProtocol(Protocols.MODKIT_PROTOCOL, Protocols.MIN_MODKIT,
+				Protocols.MAX_MODKIT, packet.currentProtocolVersion, packet.minProtocolVersion,
+				packet.maxProtocolVersion);
+		if (status == 1) {
 			HandshakeFailedPacket response = new HandshakeFailedPacket();
 			response.failure = FailureType.PROTOCOL_REMOTE;
 			response.language = "modkit.protocol.outdated.remote";
@@ -51,8 +53,7 @@ public class HandshakeProtocolPacketProcessor extends ServerPacketProcessor {
 			response.version = Protocols.MIN_MODKIT;
 			response.write(getChannel());
 			HandshakeUtils.getImpl().disconnectColored1(this, response, packet.currentProtocolVersion);
-		} else if (packet.currentProtocolVersion > Protocols.MAX_MODKIT
-				|| (packet.minProtocolVersion != -1 && Protocols.MODKIT_PROTOCOL < packet.minProtocolVersion)) {
+		} else if (status == 2) {
 			HandshakeFailedPacket response = new HandshakeFailedPacket();
 			response.failure = FailureType.PROTOCOL_LOCAL;
 			response.language = "modkit.protocol.outdated.local";

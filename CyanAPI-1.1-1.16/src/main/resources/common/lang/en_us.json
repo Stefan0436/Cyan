@@ -1,8 +1,8 @@
 {
-	"modkit.protocol.outdated.remote": "§4Outdated ModKit Protocol on Client: %s\n§7(The server wants: %s§7, you should update the modloader)",
-	"modkit.protocol.outdated.local": "§4Outdated ModKit Protocol on Server: %s\n§7(The server wants: %s§7, you should downgrade the modloader)",
-	"modkit.loader.outdated.remote": "§cOutdated Modloader Version on Client: %s\n§7(The server wants: %s§7, you should update the modloader)",
-	"modkit.loader.outdated.local": "§cOutdated Modloader Version on Server: %s\n§7(The server wants: %s§7, you should downgrade the modloader)",
+	"modkit.protocol.outdated.remote": "§4Outdated ModKit Protocol on Client: %s\n§7(The server wants: %s§7, you should update your modloader)",
+	"modkit.protocol.outdated.local": "§4Outdated ModKit Protocol on Server: %s\n§7(The client wants: %s§7, you should downgrade your client)",
+	"modkit.loader.outdated.remote": "§cOutdated Modloader Version on Client: %s\n§7(The server wants: %s§7, you should update your modloader)",
+	"modkit.loader.outdated.local": "§cOutdated Modloader Version on Server: %s\n§7(The client wants: %s§7, you should downgrade your client)",
 	
 	"modkit.missingmodded.server": "§4Cannot join non-cyan server because some local mods\nrequire server mods to be installed.",
 	

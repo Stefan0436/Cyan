@@ -68,8 +68,8 @@ public class ClientImpl extends Client implements IPostponedComponent {
 				} catch (InterruptedException e) {
 					break;
 				}
-				runningHandler = false;
 			}
+			runningHandler = false;
 		}, "ModKit Protocol Information Server Thread").start();
 	}
 

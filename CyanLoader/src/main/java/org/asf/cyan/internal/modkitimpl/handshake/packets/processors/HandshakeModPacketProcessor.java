@@ -32,12 +32,14 @@ public class HandshakeModPacketProcessor extends ServerPacketProcessor {
 				packet.remoteRules.add(rule);
 			}
 		});
-		
+
 		HashMap<String, Version> localMods = new HashMap<String, Version>();
+		localMods.put("game", Version.fromString(Modloader.getModloaderGameVersion()));
+		localMods.put("modloader", Modloader.getModloaderVersion());
 		for (IModManifest mod : Modloader.getAllMods()) {
-			localMods.put(mod.id(), mod.version());
+			localMods.putIfAbsent(mod.id(), mod.version());
 		}
-		
+
 		HashMap<String, String> output1 = new HashMap<String, String>();
 		HashMap<String, String> output2 = new HashMap<String, String>();
 		boolean failClient = !HandshakeRule.checkAll(packet.entries, GameSide.CLIENT, output1, packet.remoteRules);
@@ -119,7 +121,7 @@ public class HandshakeModPacketProcessor extends ServerPacketProcessor {
 			response.version = 0d;
 			response.write(getChannel());
 
-			HandshakeUtils.getImpl().disconnectSimple(this, response.language, missingServer, missingServer);
+			HandshakeUtils.getImpl().disconnectSimple(this, response.language, missingClient, missingServer);
 		} else {
 			ClientImpl.assignModloader(this, packet.entries.get("game"), packet.clientProtocol,
 					packet.entries.get("modloader"));
@@ -133,7 +135,8 @@ public class HandshakeModPacketProcessor extends ServerPacketProcessor {
 			}
 
 			ClientImpl.assignPlayer(this);
-			info(Colors.GOLD + "Player " + HandshakeUtils.getImpl().getPlayerName(this) + " logged in with a CYAN client, " + mods + " mods installed.");
+			info(Colors.GOLD + "Player " + HandshakeUtils.getImpl().getPlayerName(this)
+					+ " logged in with a CYAN client, " + mods + " mods installed.");
 			HandshakeUtils.getImpl().switchStateConnected(this, true);
 			getChannel().sendPacket("handshake.finish");
 			HandshakeUtils.getImpl().dispatchFinishEvent(this);

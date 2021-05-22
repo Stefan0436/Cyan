@@ -60,4 +60,12 @@ public abstract class HandshakeUtils extends CyanComponent {
 
 	public abstract void onSerializeJson(JsonObject data);
 
+	public abstract boolean beginHandshake(String ip, int port, Object minecraft, Object parent);
+
+	public abstract int validateModKitProtocol(double serverProtocol, double serverMinProtocol,
+			double serverMaxProtocol, double clientProtocol, double clientMinProtocol, double clientMaxProtocol);
+
+	public abstract int validateLoaderProtocol(double loaderProtocol, double loaderMinProtocol,
+			double loaderMaxProtocol, double clientProtocol, double clientMinProtocol, double clientMaxProtocol);
+
 }

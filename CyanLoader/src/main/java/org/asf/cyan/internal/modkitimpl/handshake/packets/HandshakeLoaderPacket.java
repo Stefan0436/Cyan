@@ -31,8 +31,8 @@ public class HandshakeLoaderPacket extends AbstractPacket<HandshakeLoaderPacket>
 	protected void writeEntries(PacketWriter writer) {
 		writer.writeDouble(protocol);
 		writer.writeVersion(version);
-		writer.writeDouble(protocolMax);
 		writer.writeDouble(protocolMin);
+		writer.writeDouble(protocolMax);
 	}
 
 }
