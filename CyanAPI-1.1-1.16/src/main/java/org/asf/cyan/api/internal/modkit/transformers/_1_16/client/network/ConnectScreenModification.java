@@ -12,13 +12,15 @@ import net.minecraft.client.gui.screens.Screen;
 @FluidTransformer
 @TargetClass(target = "net.minecraft.client.gui.screens.ConnectScreen")
 public class ConnectScreenModification {
+
 	private Minecraft minecraft;
 	private Screen parent;
 
 	@InjectAt(location = InjectLocation.HEAD)
-	public void connect(final String var1, final int var2) {
-		if (!HandshakeUtils.getImpl().beginHandshake(var1, var2, minecraft, parent))
+	public void connect(String ip, int port) {
+		if (!HandshakeUtils.getImpl().beginHandshake(minecraft, parent, ip, port))
 			return;
 		return;
 	}
+
 }

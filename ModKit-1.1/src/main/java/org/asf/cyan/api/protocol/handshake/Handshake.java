@@ -77,7 +77,7 @@ public class Handshake extends CyanComponent {
 			JsonObject modloaderData = modkitData.get("modloader").getAsJsonObject();
 			HashMap<String, Version> remoteEntries = new HashMap<String, Version>();
 			remoteEntries.put("game",
-					Version.fromString(modloaderData.get("main").getAsJsonObject().get("game.version").getAsString()));
+					Version.fromString(modloaderData.get("root").getAsJsonObject().get("game.version").getAsString()));
 
 			JsonArray loaders = modloaderData.get("all").getAsJsonArray();
 			for (JsonElement element : loaders) {
@@ -125,7 +125,7 @@ public class Handshake extends CyanComponent {
 					}
 				}
 
-				remoteEntries.put(name, Version.fromString(version));
+				remoteEntries.put(name.toLowerCase(), Version.fromString(version));
 				JsonArray mods = modloader.get("mods").getAsJsonArray();
 				JsonArray coremods = modloader.get("coremods").getAsJsonArray();
 
@@ -151,7 +151,7 @@ public class Handshake extends CyanComponent {
 			}
 
 			ArrayList<HandshakeRule> rules = new ArrayList<HandshakeRule>();
-			JsonArray remoteRules = modkitData.get("rules").getAsJsonArray();
+			JsonArray remoteRules = modkitData.get("handshake").getAsJsonArray();
 			for (JsonElement ele : remoteRules) {
 				JsonObject ruleObject = ele.getAsJsonObject();
 				rules.add(new HandshakeRule(GameSide.valueOf(ruleObject.get("side").getAsString()),

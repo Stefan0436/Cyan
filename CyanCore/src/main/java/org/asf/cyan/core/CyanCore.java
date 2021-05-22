@@ -613,7 +613,6 @@ public class CyanCore extends CyanComponent {
 		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Starting minecraft...");
-		StartupWindow.WindowAppender.increaseProgress();
 		meth.invoke(null, new Object[] { args });
 	}
 

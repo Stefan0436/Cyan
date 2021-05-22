@@ -66,7 +66,6 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 
 			@Override
 			public void handlePongResponse(ClientboundPongResponsePacket arg0) {
-				conn.handleDisconnection();
 				stop = true;
 			}
 
@@ -92,6 +91,7 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 					try {
 						Thread.sleep(10);
 						mili++;
+						conn.tick();
 					} catch (InterruptedException e) {
 						break;
 					}
@@ -101,7 +101,7 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 
 		}
 
-		public static boolean begin(String ip, int port, Minecraft minecraft, Screen parent) {
+		public static boolean begin(Minecraft minecraft, Screen parent, String ip, int port) {
 			try {
 				Connection conn = Connection.connectToServer(InetAddress.getByName(ip), port, false);
 				StatusResponseHandler handler = new StatusResponseHandler(conn);
@@ -109,21 +109,10 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 				conn.send(new ClientIntentionPacket(ip, port, ConnectionProtocol.STATUS));
 				conn.send(new ServerboundStatusRequestPacket());
 				JsonObject response = handler.getResponse();
-				while (response == null) {
-					conn.handleDisconnection();
-					conn = Connection.connectToServer(InetAddress.getByName(ip), port, false);
-					handler = new StatusResponseHandler(conn);
-					conn.setListener(handler);
-					conn.send(new ClientIntentionPacket(ip, port, ConnectionProtocol.STATUS));
-					conn.send(new ServerboundStatusRequestPacket());
-					response = handler.getResponse();
-				}
-				conn.handleDisconnection();
 				return Handshake.earlyClientHandshake(response, minecraft, c -> {
 					new Thread(() -> {
 						minecraft.execute(() -> {
-							minecraft.setScreen(
-									new DisconnectedScreen((Screen) parent, CommonComponents.CONNECT_FAILED, c));
+							minecraft.setScreen(new DisconnectedScreen(parent, CommonComponents.CONNECT_FAILED, c));
 						});
 					}).start();
 				});
@@ -241,8 +230,8 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 	}
 
 	@Override
-	public boolean beginHandshake(String ip, int port, Object minecraft, Object parent) {
-		return ClientHandshakeUtils.begin(ip, port, (Minecraft) minecraft, (Screen) parent);
+	public boolean beginHandshake(Object client, Object parent, String ip, int port) {
+		return ClientHandshakeUtils.begin((Minecraft) client, (Screen) parent, ip, port);
 	}
 
 	@Override

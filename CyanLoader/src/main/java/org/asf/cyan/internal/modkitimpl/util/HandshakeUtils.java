@@ -56,7 +56,7 @@ public abstract class HandshakeUtils extends CyanComponent {
 
 	public abstract Object getPlayerObject(ServerPacketProcessor processor);
 
-	public abstract boolean beginHandshake(String ip, int port, Object minecraft, Object parent);
+	public abstract boolean beginHandshake(Object client, Object parent, String ip, int port);
 
 	public abstract int validateModKitProtocol(double serverProtocol, double serverMinProtocol,
 			double serverMaxProtocol, double clientProtocol, double clientMinProtocol, double clientMaxProtocol);
