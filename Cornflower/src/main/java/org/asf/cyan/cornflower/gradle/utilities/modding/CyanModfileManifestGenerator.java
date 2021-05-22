@@ -239,6 +239,14 @@ public class CyanModfileManifestGenerator {
 		manifest.optionalDependencies.put(mod, versionCheckString);
 	}
 
+	public void incompatibility(String mod) {
+		manifest.incompatibilities.put(mod, "*");
+	}
+
+	public void incompatibility(String mod, String versionCheckString) {
+		manifest.incompatibilities.put(mod, versionCheckString);
+	}
+
 	public void maven_dependency(String group, String name, String version) {
 		HashMap<String, String> deps = manifest.mavenDependencies.get(group);
 		if (deps == null) {

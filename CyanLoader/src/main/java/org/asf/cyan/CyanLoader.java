@@ -561,7 +561,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 	public static String validateCheckString(String check, Version version, String message, boolean brief) {
 		String error = "";
-		for (String checkVersion : check.split(" | ")) {
+		for (String checkVersion : check.split(" \\| ")) {
 			error = null;
 			for (String checkStr : checkVersion.split(" & ")) {
 				checkStr = checkStr.trim();
@@ -640,6 +640,8 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 							error = message + " (" + checkStr.substring(2).trim() + ")";
 						break;
 					}
+				} else if (checkStr.equals("*")) {
+
 				} else {
 					if (!version.isEqualTo(Version.fromString(checkStr.trim()))) {
 						if (!brief)
@@ -652,6 +654,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			}
 			if (error == null)
 				break;
+
 		}
 		return error;
 	}
@@ -2351,10 +2354,10 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			install.cyanData = cyanDir.getCanonicalPath();
 			install.gameVersion = Modloader.getModloaderGameVersion();
 			install.platformVersion = platformVersion;
-			
+
 			if (Modloader.getModloaderLaunchPlatform() == LaunchPlatform.VANILLA)
 				install.platformVersion = install.gameVersion;
-			
+
 			install.platform = Modloader.getModloaderLaunchPlatform().toString();
 			install.loaderVersion = getVersion().toString();
 			configs.add(install);
@@ -2362,7 +2365,7 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			Files.write(installs.toPath(), conf.toString().getBytes());
 		}
 		StartupWindow.WindowAppender.increaseProgress();
-		
+
 		info("Reloading reflections...");
 		CyanCore.reinitReflections();
 

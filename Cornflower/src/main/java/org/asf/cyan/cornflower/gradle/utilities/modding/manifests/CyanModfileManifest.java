@@ -90,6 +90,9 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> impl
 	@Comment("but does not require the mods to be installed.")
 	public HashMap<String, String> optionalDependencies = new HashMap<String, String>();
 
+	@Comment("Mods and versions incompatible with this mod's version")
+	public HashMap<String, String> incompatibilities = new HashMap<String, String>();
+
 	@Comment("Maven repositories, format: name> url")
 	public HashMap<String, String> mavenRepositories = new HashMap<String, String>();
 
@@ -112,7 +115,8 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> impl
 	public HashMap<String, String> platforms = new HashMap<String, String>();
 
 	@Override
-	public void addJar(Provider<RegularFile> jar, String platform, String side, String outDir, String loaderVersion, String gameVersion, String mappingsVersion) {
+	public void addJar(Provider<RegularFile> jar, String platform, String side, String outDir, String loaderVersion,
+			String gameVersion, String mappingsVersion) {
 		String checkString = "any";
 
 		if (platform != null) {
@@ -178,5 +182,5 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> impl
 
 		return super.toString();
 	}
-	
+
 }
