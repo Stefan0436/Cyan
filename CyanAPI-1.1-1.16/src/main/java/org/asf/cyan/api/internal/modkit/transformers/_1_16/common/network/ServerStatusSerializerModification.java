@@ -2,13 +2,13 @@ package org.asf.cyan.api.internal.modkit.transformers._1_16.common.network;
 
 import java.lang.reflect.Type;
 
+import org.asf.cyan.api.protocol.transformers.handshake.VersionStatusTransformer;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.LocalVariable;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.TargetType;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
-import org.asf.cyan.internal.modkitimpl.util.HandshakeUtils;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
@@ -25,7 +25,7 @@ public class ServerStatusSerializerModification {
 	@TargetType(target = "com.google.gson.JsonElement")
 	public void serialize(@TargetType(target = "net.minecraft.network.protocol.status.ServerStatus") ServerStatus var1,
 			Type var2, JsonSerializationContext var3, @LocalVariable JsonObject data) {
-		HandshakeUtils.getImpl().onSerializeJson(data);
+		VersionStatusTransformer.applySerializeMethodTransformer(data);
 	}
 
 	@InjectAt(location = InjectLocation.TAIL)

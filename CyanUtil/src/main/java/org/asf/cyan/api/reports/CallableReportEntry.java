@@ -1,14 +1,14 @@
 package org.asf.cyan.api.reports;
 
-import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
-public class CallableReportEntry extends ReportEntry<Callable<?>> {
+public class CallableReportEntry extends ReportEntry<Supplier<?>> {
 
-	public CallableReportEntry(Callable<?> value) {
+	public CallableReportEntry(Supplier<?> value) {
 		super(value);
 	}
 	
-	public CallableReportEntry(String key, Callable<?> value) {
+	public CallableReportEntry(String key, Supplier<?> value) {
 		super(key, value);
 	}
 

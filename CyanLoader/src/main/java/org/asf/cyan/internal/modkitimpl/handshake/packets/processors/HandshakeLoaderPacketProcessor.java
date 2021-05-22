@@ -10,7 +10,7 @@ import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket.FailureType;
 import org.asf.cyan.internal.modkitimpl.util.HandshakeUtils;
 import org.asf.cyan.internal.modkitimpl.util.ScreenUtil;
-import org.asf.cyan.mods.dependencies.HandshakeRule;
+import org.asf.cyan.api.protocol.handshake.HandshakeRule;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeLoaderPacket;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeModPacket;
 import org.asf.cyan.internal.modkitimpl.info.Protocols;

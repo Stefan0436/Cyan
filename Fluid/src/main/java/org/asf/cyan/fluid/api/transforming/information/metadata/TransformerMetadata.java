@@ -40,7 +40,7 @@ import org.objectweb.asm.tree.MethodNode;
 public abstract class TransformerMetadata extends CyanComponent {
 	private static TransformerMetadata selectedImplementation;
 
-	static TransformerMetadata getImplmentationInstance() {
+	public static TransformerMetadata getImplementationInstance() {
 		return selectedImplementation;
 	}
 

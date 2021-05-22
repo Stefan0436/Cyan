@@ -145,10 +145,14 @@ public class CrashReportModification {
 		systemDetails.setDetail("Running Modloader(s)", modloaders);
 		systemDetails.setDetail("Modloader Version(s)", loaderversions);
 		systemDetails.setDetail("Modloader Phase", Modloader.getModloader().getPhase());
-		systemDetails.setDetail("Loaded " + Modloader.getModloader().getSimpleName().toUpperCase() + " Mods",
-				Modloader.getModloader().getLoadedMods().length);
-		systemDetails.setDetail("Loaded " + Modloader.getModloader().getSimpleName().toUpperCase() + " Coremods",
-				Modloader.getModloader().getLoadedCoremods().length);
+		for (Modloader modloader : Modloader.getAllModloaders()) {
+			if (modloader.supportsMods())
+				systemDetails.setDetail("Loaded " + modloader.getSimpleName().toUpperCase() + " Mods",
+						modloader.getLoadedMods().length);
+			if (modloader.supportsCoreMods())
+				systemDetails.setDetail("Loaded " + modloader.getSimpleName().toUpperCase() + " Coremods",
+						modloader.getLoadedCoremods().length);
+		}
 		systemDetails.setDetail("Applied transformers", TransformerMetadata.getLoadedTransformers().length);
 	}
 

@@ -1,7 +1,7 @@
 package org.asf.cyan.fluid.implementation;
 
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.cyan.api.config.serializing.internal.Splitter;
@@ -22,7 +22,7 @@ import org.asf.cyan.api.reports.ReportNode;
 @CYAN_COMPONENT
 public class CyanReportBuilder extends ReportBuilder {
 
-	protected static void initComponent() {
+	public static void initComponent() {
 		setImplementation(new CyanReportBuilder());
 	}
 
@@ -100,10 +100,10 @@ public class CyanReportBuilder extends ReportBuilder {
 	protected void buildEntry(StringBuilder builder, ReportEntry<?> node, int longestNameLength) {
 		String key = node.key;
 		Object val = node.value;
-		if (val instanceof Callable) {
-			Callable<?> callable = (Callable<?>) val;
+		if (val instanceof Supplier) {
+			Supplier<?> callable = (Supplier<?>) val;
 			try {
-				val = callable.call();
+				val = callable.get();
 			} catch (Exception e) {
 				val = "*** ERROR: " + e.getClass().getTypeName() + ": " + e.getMessage() + " ***";
 			}
@@ -116,7 +116,9 @@ public class CyanReportBuilder extends ReportBuilder {
 			}
 			builder.append(" : ");
 		}
-		builder.append(val.toString());
+		if (val == null)
+			val = "*** null ***";
+		builder.append(val.toString().replace("\r", "").replace("\n", "\n\t"));
 		builder.append("\n");
 	}
 
@@ -195,7 +197,7 @@ public class CyanReportBuilder extends ReportBuilder {
 	}
 
 	@Override
-	public ReportEntry<?> newEntry(String name, Callable<?> value) {
+	public ReportEntry<?> newEntry(String name, Supplier<?> value) {
 		return new CallableReportEntry(value);
 	}
 }

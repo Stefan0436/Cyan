@@ -10,14 +10,10 @@ public class Protocols {
 	public static final double LOADER_PROTOCOL = 0.14d; // Current
 
 	//
-	// ModKit Protocol 1.0, support until 2.0
-	// ModKit 1.0 LTS Version
+	// We support:
 	//
-	// Protocol 2.0 will most likely be different
-	//
-	public final static double MIN_MODKIT = 1.1d; // ModKit 1.0
-	public final static double MAX_MODKIT = 2.0d; // ModKit 2.0
-
-	public static final double MODKIT_PROTOCOL = 1.1d; // Current
+	public static final double MODKIT_PROTOCOL = 1.1;
+	public static final double MIN_MODKIT = 1.1;
+	public static final double MAX_MODKIT = 2.0;
 
 }

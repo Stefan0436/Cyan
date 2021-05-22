@@ -233,11 +233,6 @@ jar {
 task javaDocs(type: Javadoc) {
 	classpath = sourceSets.main.runtimeClasspath
 	source = sourceSets.main.allJava
-	exclude "**/internal/**"
-}
-
-javadoc {	
-	exclude "**/internal/**"
 }
 
 task javadocJar(type: Jar, dependsOn: 'javaDocs') {

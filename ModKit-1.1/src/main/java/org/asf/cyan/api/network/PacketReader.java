@@ -1,5 +1,6 @@
 package org.asf.cyan.api.network;
 
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -80,6 +81,87 @@ public abstract class PacketReader {
 
 		public PacketReader getReader() {
 			return reader;
+		}
+
+		public String readVarString() {
+			return new String(readNBytes(readVarInt()));
+		}
+
+		public int readVarInt() {
+			return readVarInt(reader);
+		}
+
+		public long readVarLong() {
+			return readVarLong(reader);
+		}
+
+		@SuppressWarnings("unchecked")
+		public <T> T[] readArray(Class<T> type) {
+			int length = readInt();
+			Object[] array = (Object[]) Array.newInstance(type, length);
+
+			for (int i = 0; i < length; i++) {
+				if (type.isArray()) {
+					array[i] = (T) readArray(type.getComponentType());
+				} else {
+					if (Byte.class.isAssignableFrom(type)) {
+						array[i] = (byte) readByte();
+					} else if (Integer.class.isAssignableFrom(type)) {
+						array[i] = readInt();
+					} else if (String.class.isAssignableFrom(type)) {
+						array[i] = readString();
+					} else if (Short.class.isAssignableFrom(type)) {
+						array[i] = readShort();
+					} else if (Long.class.isAssignableFrom(type)) {
+						array[i] = readLong();
+					} else if (Float.class.isAssignableFrom(type)) {
+						array[i] = readFloat();
+					} else if (Double.class.isAssignableFrom(type)) {
+						array[i] = readDouble();
+					} else if (Boolean.class.isAssignableFrom(type)) {
+						array[i] = readBoolean();
+					}
+				}
+			}
+
+			return (T[]) array;
+		}
+
+		// Source: https://wiki.vg/Protocol
+		private static int readVarInt(PacketReader reader) {
+			int numRead = 0;
+			int result = 0;
+			byte read;
+			do {
+				read = (byte) reader.readRawByte();
+				int value = (read & 0b01111111);
+				result |= (value << (7 * numRead));
+
+				numRead++;
+				if (numRead > 5) {
+					throw new RuntimeException("VarInt is too big");
+				}
+			} while ((read & 0b10000000) != 0);
+
+			return result;
+		}
+
+		private static long readVarLong(PacketReader reader) {
+			long numRead = 0;
+			long result = 0;
+			byte read;
+			do {
+				read = (byte) reader.readRawByte();
+				long value = (read & 0b01111111);
+				result |= (value << (7 * numRead));
+
+				numRead++;
+				if (numRead > 10) {
+					throw new RuntimeException("VarLong is too big");
+				}
+			} while ((read & 0b10000000) != 0);
+
+			return result;
 		}
 	}
 
@@ -308,6 +390,47 @@ public abstract class PacketReader {
 		if (str == null)
 			return null;
 		return Version.fromString(str);
+	}
+
+	/**
+	 * Reads the next array value
+	 * 
+	 * @param <T>  Component type
+	 * @param type Component type class
+	 * @return Array instance
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T[] readArray(Class<T> type) {
+		int length = readInt();
+		Object[] array = (Object[]) Array.newInstance(type, length);
+
+		for (int i = 0; i < length; i++) {
+			if (type.isArray()) {
+				array[i] = (T) readArray(type.getComponentType());
+			} else {
+				if (Byte.class.isAssignableFrom(type)) {
+					array[i] = (byte) readRawByte();
+				} else if (Integer.class.isAssignableFrom(type)) {
+					array[i] = readInt();
+				} else if (String.class.isAssignableFrom(type)) {
+					array[i] = readString();
+				} else if (Short.class.isAssignableFrom(type)) {
+					array[i] = (short) readInt();
+				} else if (Long.class.isAssignableFrom(type)) {
+					array[i] = readLong();
+				} else if (Float.class.isAssignableFrom(type)) {
+					array[i] = readFloat();
+				} else if (Double.class.isAssignableFrom(type)) {
+					array[i] = readDouble();
+				} else if (Boolean.class.isAssignableFrom(type)) {
+					array[i] = readBoolean();
+				} else {
+					array[i] = readObject(type);
+				}
+			}
+		}
+
+		return (T[]) array;
 	}
 
 }

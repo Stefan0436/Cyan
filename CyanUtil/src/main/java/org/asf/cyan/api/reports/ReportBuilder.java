@@ -1,7 +1,7 @@
 package org.asf.cyan.api.reports;
 
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import org.asf.cyan.api.common.CyanComponent;
 
@@ -16,7 +16,7 @@ import org.asf.cyan.api.common.CyanComponent;
 public abstract class ReportBuilder extends CyanComponent {
 	private static ReportBuilder selectedImplementation;
 
-	static ReportBuilder getImplmentationInstance() {
+	public static ReportBuilder getImplementationInstance() {
 		return selectedImplementation;
 	}
 
@@ -28,43 +28,60 @@ public abstract class ReportBuilder extends CyanComponent {
 				+ " Implementation...");
 		selectedImplementation = implementation;
 	}
-	
+
 	public static ReportBuilder create(String head) {
 		return selectedImplementation.getNewInstance(head);
 	}
 
 	protected abstract String getImplementationName();
+
 	protected abstract ReportBuilder getNewInstance(String head);
 
 	protected abstract void buildHeadString(StringBuilder builder);
+
 	protected abstract void buildNodeHead(StringBuilder builder, ReportNode node);
+
 	protected abstract void buildCategoryHead(StringBuilder builder, String name, int longestNameLength);
+
 	protected abstract void buildEntry(StringBuilder builder, ReportEntry<?> name, int longestNameLength);
 
 	public abstract String getHead();
+
 	public abstract void setHead(String head);
 
 	public abstract ReportCategory[] getCategories();
+
 	public abstract void append(ReportCategory category);
+
 	public abstract void remove(ReportCategory category);
 
 	public abstract ReportCategory newCategory(String name);
+
 	public abstract ReportCategory newCategory(String name, ArrayList<ReportNode> nodes);
 
 	public abstract ReportNode newNode(ReportCategory category, String name);
+
 	public abstract ReportNode newNode(ReportCategory category, String name, ReportEntryList entries);
-	
+
 	public abstract ReportNode appendNode(ReportCategory category, ReportNode node);
 
 	public abstract ReportEntry<Integer> newEntry(String name, int value);
+
 	public abstract ReportEntry<Boolean> newEntry(String name, boolean value);
+
 	public abstract ReportEntry<Float> newEntry(String name, float value);
+
 	public abstract ReportEntry<Double> newEntry(String name, double value);
+
 	public abstract ReportEntry<Byte> newEntry(String name, byte value);
+
 	public abstract ReportEntry<Character> newEntry(String name, char value);
+
 	public abstract ReportEntry<String> newEntry(String name, String value);
+
 	public abstract ReportEntry<Object> newEntry(String name, Object value);
-	public abstract ReportEntry<?> newEntry(String name, Callable<?> value);
+
+	public abstract ReportEntry<?> newEntry(String name, Supplier<?> value);
 
 	public ReportNode[] appendNode(ReportCategory category, ReportNode... nodes) {
 		for (ReportNode n : nodes) {
@@ -80,7 +97,7 @@ public abstract class ReportBuilder extends CyanComponent {
 		for (int value : values) {
 			nodes.add(newEntry(node, null, value));
 		}
-		
+
 		return (ReportEntry<Integer>[]) nodes.toArray(t -> new ReportEntry<?>[t]);
 	}
 
@@ -216,7 +233,6 @@ public abstract class ReportBuilder extends CyanComponent {
 			String name = category.name;
 			if (!first) {
 				builder.append("\n");
-				builder.append("\n");
 			} else
 				first = false;
 
@@ -224,13 +240,13 @@ public abstract class ReportBuilder extends CyanComponent {
 				buildCategoryHead(builder, name, longest);
 				builder.append("\n");
 			}
-			
+
 			int longestName = 0;
 
 			for (ReportNode node : category.nodes) {
 				if (node.name != null) {
 					for (ReportEntry<?> ent : node.entries) {
-						if (ent.key.length() > longestName)
+						if (ent.key != null && ent.key.length() > longestName)
 							longestName = ent.key.length();
 					}
 				}

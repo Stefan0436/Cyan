@@ -8,7 +8,7 @@ import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.network.PacketReader;
 import org.asf.cyan.api.network.PacketWriter;
 import org.asf.cyan.api.versioning.Version;
-import org.asf.cyan.mods.dependencies.HandshakeRule;
+import org.asf.cyan.api.protocol.handshake.HandshakeRule;
 
 public class HandshakeModPacket extends AbstractPacket<HandshakeModPacket> {
 

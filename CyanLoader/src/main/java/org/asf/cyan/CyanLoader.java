@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -17,8 +18,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Optional;
@@ -45,6 +48,11 @@ import org.asf.cyan.api.modloader.information.modloader.LoadPhase;
 import org.asf.cyan.api.modloader.information.mods.IBaseMod;
 import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.api.modloader.information.providers.IModProvider;
+import org.asf.cyan.api.protocol.ModkitModloader;
+import org.asf.cyan.api.reports.ReportBuilder;
+import org.asf.cyan.api.reports.ReportCategory;
+import org.asf.cyan.api.reports.ReportNode;
+import org.asf.cyan.api.util.CheckString;
 import org.asf.cyan.api.versioning.StringVersionProvider;
 import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.core.CyanCore;
@@ -55,8 +63,11 @@ import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.api.ClassLoadHook;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.information.metadata.TransformerMetadata;
+import org.asf.cyan.fluid.implementation.CyanReportBuilder;
+import org.asf.cyan.fluid.implementation.CyanTransformerMetadata;
 import org.asf.cyan.fluid.remapping.Mapping;
 import org.asf.cyan.internal.KickStartConfig;
+import org.asf.cyan.internal.modkitimpl.info.Protocols;
 import org.asf.cyan.internal.modkitimpl.util.EventUtilImpl;
 import org.asf.cyan.loader.configs.SecurityConfiguration;
 import org.asf.cyan.loader.eventbus.CyanEventBridge;
@@ -87,11 +98,13 @@ import org.asf.cyan.security.TrustContainer;
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public class CyanLoader extends Modloader implements IModProvider, IEventListenerContainer {
+public class CyanLoader extends ModkitModloader
+		implements IModProvider, ModkitModloader.ModkitProtocolRules, IEventListenerContainer {
 
 	private CyanLoader() {
 		mavenRepositories.put("AerialWorks", "https://aerialworks.ddns.net/maven");
 		mavenRepositories.put("Maven Central", "https://repo1.maven.org/maven2");
+		RootModloader.participate(this, RootRules.defaultRules().level(5));
 	}
 
 	protected static String getMarker() {
@@ -101,19 +114,19 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 	// TODO: Mod thread manager
 
 	public static void appendCyanInfo(BiConsumer<String, Object> setDetail1, BiConsumer<String, Object> setDetail2) {
-		int mods = Modloader.getModloader().getLoadedCoremods().length;
+		int mods = Modloader.getModloader(CyanLoader.class).getLoadedCoremods().length;
 		if (mods != 0) {
 			setDetail1.accept("Coremods", mods);
-			for (IModManifest coremod : Modloader.getModloader().getLoadedCoremods()) {
+			for (IModManifest coremod : Modloader.getModloader(CyanLoader.class).getLoadedCoremods()) {
 				setDetail1.accept(coremod.id(), displayMod(coremod, true));
 			}
 		} else
 			setDetail1.accept("Mods", "No mods loaded");
 
-		mods = Modloader.getModloader().getLoadedMods().length;
+		mods = Modloader.getModloader(CyanLoader.class).getLoadedMods().length;
 		if (mods != 0) {
 			setDetail2.accept("Mods", mods);
-			for (IModManifest mod : Modloader.getModloader().getLoadedMods()) {
+			for (IModManifest mod : Modloader.getModloader(CyanLoader.class).getLoadedMods()) {
 				setDetail2.accept(mod.id(), displayMod(mod, false));
 			}
 		} else
@@ -376,6 +389,37 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		File coremods = new File(cyanDir, "coremods");
 		File versionCoremods = new File(coremods, CyanInfo.getMinecraftVersion());
 
+		Thread.currentThread().setUncaughtExceptionHandler((t, ex) -> {
+			StringBuilder buffer = new StringBuilder();
+			ex.printStackTrace(new PrintStream(new OutputStream() {
+
+				@Override
+				public void write(int arg0) throws IOException {
+					buffer.append((char) arg0);
+				}
+
+			}));
+			LOG.fatal(buffer.toString().trim());
+			StartupWindow.WindowAppender.fatalError(ex.getClass().getSimpleName() + ": " + ex.getLocalizedMessage());
+			buildCrashReport(t, ex);
+			System.exit(1);
+		});
+		Thread.setDefaultUncaughtExceptionHandler((t, ex) -> {
+			StringBuilder buffer = new StringBuilder();
+			ex.printStackTrace(new PrintStream(new OutputStream() {
+
+				@Override
+				public void write(int arg0) throws IOException {
+					buffer.append((char) arg0);
+				}
+
+			}));
+			LOG.fatal(buffer.toString().trim());
+			StartupWindow.WindowAppender.fatalError(ex.getClass().getSimpleName() + ": " + ex.getLocalizedMessage());
+			buildCrashReport(t, ex);
+			System.exit(1);
+		});
+
 		CyanLoader ld = new CyanLoader();
 		ld.addInformationProvider(CyanInfo.getProvider());
 		ld.addInformationProvider(ld);
@@ -454,6 +498,141 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		}
 
 		setup = true;
+	}
+
+	private static void buildCrashReport(Thread thread, Throwable ex) {
+		warn("Game is crashing before it started! Building pre-start Cyan crash report...");
+		if (ReportBuilder.getImplementationInstance() == null)
+			CyanReportBuilder.initComponent();
+		if (TransformerMetadata.getImplementationInstance() == null)
+			CyanTransformerMetadata.initComponent();
+
+		ReportBuilder builder = ReportBuilder.create("Cyan Early Crash Report");
+
+		ReportCategory head = builder.newCategory("Head");
+
+		ReportNode generalDetails = builder.newNode(head, "General Details");
+		generalDetails.add("Time", new Date());
+		generalDetails.add("Thread Name", thread.getName());
+
+		ReportNode exceptionDetails = builder.newNode(head, "Exception Details");
+		exceptionDetails.add("Exception Type", () -> {
+			return ex.getClass().getTypeName();
+		});
+		exceptionDetails.add("Message", () -> {
+			return ex.getMessage();
+		});
+		builder.newNode(head, "Stacktrace").add(() -> {
+			StringBuilder stacktrace = new StringBuilder();
+			boolean first = true;
+			for (StackTraceElement e : ex.getStackTrace()) {
+				if (!first) {
+					stacktrace.append("\n");
+				}
+				first = false;
+				stacktrace.append("at ").append(e);
+			}
+			return stacktrace;
+		});
+
+		ReportCategory details = builder.newCategory("Installation Details");
+
+		ReportNode node = builder.newNode(details, "Version Information");
+		node.add("Game Version", CyanInfo.getMinecraftVersion());
+		node.add("Full Version", CyanInfo.getMinecraftCyanVersion());
+
+		String modloaders = "";
+		String loaderversions = "";
+		ReportNode loaderInfo = builder.newNode(details, "Modloader(s)");
+		for (Modloader modloader : Modloader.getAllModloaders()) {
+			if (!modloaders.isEmpty()) {
+				modloaders += ", ";
+				loaderversions += ", ";
+			}
+
+			modloaders += modloader.getSimpleName();
+			loaderversions += modloader.getName() + "; "
+					+ (modloader.getVersion() == null ? "Generic" : modloader.getVersion());
+		}
+		if (modloaders.isEmpty())
+			modloaders = "None loaded";
+		if (loaderversions.isEmpty())
+			loaderversions = "None loaded";
+
+		loaderInfo.add("Running Modloader(s)", modloaders);
+		loaderInfo.add("Modloader Version(s)", loaderversions);
+		loaderInfo.add("Modloader Phase", CyanCore.getCurrentPhase());
+		for (Modloader modloader : Modloader.getAllModloaders()) {
+			if (modloader.supportsMods())
+				loaderInfo.add("Loaded " + modloader.getSimpleName().toUpperCase() + " Mods",
+						modloader.getLoadedMods().length);
+			if (modloader.supportsCoreMods())
+				loaderInfo.add("Loaded " + modloader.getSimpleName().toUpperCase() + " Coremods",
+						modloader.getLoadedCoremods().length);
+		}
+
+		if (Modloader.getModloader(CyanLoader.class) != null) {
+			ReportCategory cyanMods = builder.newCategory("Installed CYAN Mods");
+			ReportNode coremodsCategoryCyanLoader = builder.newNode(cyanMods, "Loaded CYAN Coremods");
+			ReportNode modsCategoryCyanLoader = builder.newNode(cyanMods, "Loaded CYAN Mods");
+			CyanLoader.appendCyanInfo((str, obj) -> coremodsCategoryCyanLoader.add(str, obj),
+					(str, obj) -> modsCategoryCyanLoader.add(str, obj));
+		}
+
+		ReportCategory systemDetails = builder.newCategory("System Details");
+
+		ReportNode system = builder.newNode(systemDetails, "Operating System");
+		system.add("Name", System.getProperty("os.name"));
+		system.add("Version", System.getProperty("os.version"));
+		system.add("Architecture", System.getProperty("os.arch"));
+
+		ReportNode runtime = builder.newNode(systemDetails, "Runtime Details");
+		runtime.add("CPUs", Runtime.getRuntime().availableProcessors());
+		runtime.add("RAM", Runtime.getRuntime().totalMemory() + " / " + Runtime.getRuntime().maxMemory() + " ("
+				+ Runtime.getRuntime().freeMemory() + " free)");
+
+		ReportCategory javaDetails = builder.newCategory("Java Installation Details");
+
+		ReportNode java = builder.newNode(javaDetails, "Java Details");
+		java.add("Java Version", System.getProperty("java.version"));
+		java.add("Java Vendor", System.getProperty("java.vendor"));
+
+		ReportNode javaSpec = builder.newNode(javaDetails, "Java Specification");
+		javaSpec.add("Java Specification Name", System.getProperty("java.specification.name"));
+		javaSpec.add("Java Specification Version", System.getProperty("java.specification.version"));
+
+		ReportNode javaRuntime = builder.newNode(javaDetails, "Java Runtime");
+		javaRuntime.add("Java Runtime Name", System.getProperty("java.runtime.name"));
+		javaRuntime.add("Java Runtime Version", System.getProperty("java.runtime.version"));
+
+		ReportNode javaVM = builder.newNode(javaDetails, "Java VM Details");
+		javaVM.add("Java VM Vendor", System.getProperty("java.vm.vendor"));
+		javaVM.add("Java VM Name", System.getProperty("java.vm.name"));
+		javaVM.add("Java VM Version", System.getProperty("java.vm.version"));
+		javaVM.add("Java VM Specification", System.getProperty("java.vm.specification.name"));
+
+		StringBuilder report = new StringBuilder();
+		builder.build(report);
+
+		LOG.info("Saving crash report...");
+
+		CyanLoader.getSystemOutputStream().println(report.toString());
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
+		File file = new File(MinecraftInstallationToolkit.getMinecraftDirectory(),
+				"crash-reports/crash-" + dateFormat.format(new Date()) + "-client.txt");
+		if (!file.getParentFile().exists())
+			file.getParentFile().mkdirs();
+		try {
+			Files.write(file.toPath(), report.toString().getBytes());
+			try {
+				LOG.fatal("!ALERT! Game has crashed! Crash report has been saved to: " + file.getCanonicalPath());
+			} catch (IOException e) {
+				LOG.fatal("!ALERT! Game has crashed! Crash report has been saved to: " + file.getAbsolutePath());
+			}
+		} catch (IOException e) {
+			LOG.fatal("!ALERT! Game has crashed! ERROR: Could not save crash report, unknown error.");
+		}
 	}
 
 	private void loadCoreMods(ClassLoader loader) {
@@ -555,112 +734,8 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 		}
 	}
 
-	public static boolean validateCheckString(String checkString, Version version) {
-		return validateCheckString(checkString, version, "", true) == null;
-	}
-
-	public static String validateCheckString(String check, Version version, String message, boolean brief) {
-		String error = "";
-		for (String checkVersion : check.split(" \\| ")) {
-			error = null;
-			for (String checkStr : checkVersion.split(" & ")) {
-				checkStr = checkStr.trim();
-				if (checkStr.startsWith("~=")) {
-					String regex = checkStr.substring(2);
-					if (regex.startsWith(" "))
-						regex = regex.substring(1);
-					if (!version.toString().matches(regex)) {
-						if (!brief)
-							error = message + " (incompatible version installed)";
-						else
-							error = message + " (incompatible)";
-						break;
-					}
-				} else if (checkStr.startsWith(">=")) {
-					String str = checkStr.substring(2);
-					if (str.startsWith(" "))
-						str = str.substring(1);
-
-					Version min = Version.fromString(str);
-
-					if (!version.isGreaterOrEqualTo(min)) {
-						if (!brief)
-							error = message + " (outdated version installed)";
-						else
-							error = message + " (>= " + str + ")";
-						break;
-					}
-				} else if (checkStr.startsWith("<=")) {
-					String str = checkStr.substring(2);
-					if (str.startsWith(" "))
-						str = str.substring(1);
-
-					Version min = Version.fromString(str);
-
-					if (!version.isLessOrEqualTo(min)) {
-						if (!brief)
-							error = message + " (incompatible newer version installed)";
-						else
-							error = message + " (<= " + str + ")";
-						break;
-					}
-				} else if (checkStr.startsWith(">")) {
-					String str = checkStr.substring(1);
-					if (str.startsWith(" "))
-						str = str.substring(1);
-
-					Version min = Version.fromString(str);
-
-					if (!version.isGreaterThan(min)) {
-						if (!brief)
-							error = message + " (outdated version installed)";
-						else
-							error = message + " (" + str + "+)";
-						break;
-					}
-				} else if (checkStr.startsWith("<")) {
-					String str = checkStr.substring(1);
-					if (str.startsWith(" "))
-						str = str.substring(1);
-
-					Version min = Version.fromString(str);
-
-					if (!version.isLessThan(min)) {
-						if (!brief)
-							error = message + " (incompatible newer version installed)";
-						else
-							error = message + " (Pre-" + str + ")";
-						break;
-					}
-				} else if (checkStr.startsWith("!=")) {
-					if (version.isEqualTo(Version.fromString(checkStr.substring(2).trim()))) {
-						if (!brief)
-							error = message + " (incompatible version installed)";
-						else
-							error = message + " (" + checkStr.substring(2).trim() + ")";
-						break;
-					}
-				} else if (checkStr.equals("*")) {
-
-				} else {
-					if (!version.isEqualTo(Version.fromString(checkStr.trim()))) {
-						if (!brief)
-							error = message + " (incompatible version installed)";
-						else
-							error = message + " (" + checkStr.trim() + ")";
-						break;
-					}
-				}
-			}
-			if (error == null)
-				break;
-
-		}
-		return error;
-	}
-
 	private void checkDependencyVersion(String check, Version version, String message) {
-		String error = validateCheckString(check, version, message, false);
+		String error = CheckString.validateCheckString(check, version, message, false);
 		if (error != null) {
 			fatal(error);
 			StartupWindow.WindowAppender.fatalError();
@@ -710,6 +785,26 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			info("Loading mod " + modManifest.modGroup + ":" + modManifest.modId + "... (" + modManifest.displayName
 					+ ")");
 
+			modManifest.incompatibilities.forEach((id, ver) -> {
+				if (coreModManifests.containsKey(id)) {
+					if (CheckString.validateCheckString(ver, Version.fromString(coreModManifests.get(id).version))) {
+						if (!ver.equals("*"))
+							ver = "";
+
+						throw new RuntimeException("Mod " + mod.getManifest().id() + " is not compatible with " + id
+								+ (ver.isEmpty() ? "" : " (" + ver + ")"));
+					}
+				}
+				if (modManifests.containsKey(id)) {
+					if (CheckString.validateCheckString(ver, Version.fromString(modManifests.get(id).version))) {
+						if (!ver.equals("*"))
+							ver = "";
+
+						throw new RuntimeException("Mod " + mod.getManifest().id() + " is not compatible with " + id
+								+ (ver.isEmpty() ? "" : " (" + ver + ")"));
+					}
+				}
+			});
 			mod.setup(getModloader(), getGameSide(), modManifest);
 
 			modManifest.loaded = true;
@@ -792,6 +887,27 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 
 			info("Loading coremod " + modManifest.modGroup + ":" + modManifest.modId + "... (" + modManifest.displayName
 					+ ")");
+
+			modManifest.incompatibilities.forEach((id, ver) -> {
+				if (coreModManifests.containsKey(id)) {
+					if (CheckString.validateCheckString(ver, Version.fromString(coreModManifests.get(id).version))) {
+						if (!ver.equals("*"))
+							ver = "";
+
+						throw new RuntimeException("Mod " + mod.getManifest().id() + " is not compatible with " + id
+								+ (ver.isEmpty() ? "" : " (" + ver + ")"));
+					}
+				}
+				if (modManifests.containsKey(id)) {
+					if (CheckString.validateCheckString(ver, Version.fromString(modManifests.get(id).version))) {
+						if (!ver.equals("*"))
+							ver = "";
+
+						throw new RuntimeException("Mod " + mod.getManifest().id() + " is not compatible with " + id
+								+ (ver.isEmpty() ? "" : " (" + ver + ")"));
+					}
+				}
+			});
 
 			mod.setup(getModloader(), getGameSide(), modManifest);
 			modManifest.loaded = true;
@@ -2490,6 +2606,29 @@ public class CyanLoader extends Modloader implements IModProvider, IEventListene
 			return cyanModloader.coreModManifests.get(name).source;
 
 		return null;
+	}
+
+	//
+	// ModKit Protocol Versions
+
+	@Override
+	public double modloaderProtocol() {
+		return Protocols.LOADER_PROTOCOL;
+	}
+
+	@Override
+	public double modloaderMinProtocol() {
+		return Protocols.MIN_LOADER;
+	}
+
+	@Override
+	public double modloaderMaxProtocol() {
+		return Protocols.MAX_LOADER;
+	}
+
+	@Override
+	public double modkitProtocolVersion() {
+		return Protocols.MODKIT_PROTOCOL;
 	}
 
 }

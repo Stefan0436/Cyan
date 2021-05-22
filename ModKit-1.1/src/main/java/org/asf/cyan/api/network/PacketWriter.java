@@ -72,7 +72,7 @@ public abstract class PacketWriter implements Closeable {
 			return this;
 		}
 
-		public RawWriter writeFloat(long data) {
+		public RawWriter writeFloat(float data) {
 			writer.writeRawArray(ByteBuffer.allocate(4).putFloat(data).array());
 			return this;
 		}
@@ -82,8 +82,75 @@ public abstract class PacketWriter implements Closeable {
 			return this;
 		}
 
+		public RawWriter writeVarInt(int data) {
+			writeVarInt(data, writer);
+			return this;
+		}
+
+		public RawWriter writeVarLong(long data) {
+			writeVarLong(data, writer);
+			return this;
+		}
+
+		public RawWriter writeVarString(String data) {
+			byte[] buff = data.getBytes();
+			writeVarInt(buff.length, writer);
+			writeBytes(buff);
+			return this;
+		}
+
+		public <T> RawWriter writeArray(T[] data) {
+			writeInt(data.length);
+			for (T d : data) {
+				if (d instanceof String)
+					writeString(d.toString());
+				else if (d.getClass().isArray())
+					writeArray((Object[]) d);
+				else if (d instanceof Byte)
+					writeByte((byte) d);
+				else if (d instanceof Character)
+					writeChar((char) d);
+				else if (d instanceof Integer)
+					writeInt((int) d);
+				else if (d instanceof Boolean)
+					writeBoolean((boolean) d);
+				else if (d instanceof Long)
+					writeLong((long) d);
+				else if (d instanceof Short)
+					writeShort((short) d);
+				else if (d instanceof Double)
+					writeDouble((double) d);
+				else if (d instanceof Float)
+					writeFloat((float) d);
+			}
+			return this;
+		}
+
 		public PacketWriter getWriter() {
 			return writer;
+		}
+
+		// Source: https://wiki.vg/Protocol
+		private static void writeVarInt(int value, PacketWriter writer) {
+			do {
+				byte temp = (byte) (value & 0b01111111);
+				value >>>= 7;
+				if (value != 0) {
+					temp |= 0b10000000;
+				}
+				writer.writeRawByte(temp);
+			} while (value != 0);
+		}
+
+		private static void writeVarLong(long value, PacketWriter writer) {
+			do {
+				byte temp = (byte) (value & 0b01111111);
+				value >>>= 7;
+				if (value != 0) {
+					temp |= 0b10000000;
+				}
+				writer.writeRawByte(temp);
+			} while (value != 0);
 		}
 	}
 
@@ -238,6 +305,42 @@ public abstract class PacketWriter implements Closeable {
 	 */
 	public <T> PacketWriter writeObject(T data) {
 		return writeEntry(new SerializingEntry<T>(data));
+	}
+
+	/**
+	 * Writes an array
+	 * 
+	 * @param <T>  Array type
+	 * @param data Array
+	 * @return Self
+	 */
+	public <T> PacketWriter writeArray(T[] data) {
+		writeInt(data.length);
+		for (T d : data) {
+			if (d instanceof String)
+				writeString(d.toString());
+			else if (d.getClass().isArray())
+				writeArray((Object[]) d);
+			else if (d instanceof Byte)
+				writeRawByte((byte) d);
+			else if (d instanceof Character)
+				writeChar((char) d);
+			else if (d instanceof Integer)
+				writeInt((int) d);
+			else if (d instanceof Short)
+				writeInt((short) d);
+			else if (d instanceof Boolean)
+				writeBoolean((boolean) d);
+			else if (d instanceof Long)
+				writeLong((long) d);
+			else if (d instanceof Double)
+				writeDouble((double) d);
+			else if (d instanceof Float)
+				writeFloat((float) d);
+			else
+				writeObject(d);
+		}
+		return this;
 	}
 
 }

@@ -36,16 +36,16 @@ public class MemberMetadata {
 		this.desc = desc;
 		
 		if (memType == MemberType.METHOD) {
-			obfusName = TransformerMetadata.getImplmentationInstance().mapMethod(ownerDeobf, name, types);
+			obfusName = TransformerMetadata.getImplementationInstance().mapMethod(ownerDeobf, name, types);
 			obfusTypes = new String[types.length];
 			int index = 0;
 			for (String mType : types) {
-				obfusTypes[index++] = TransformerMetadata.getImplmentationInstance().mapClass(mType);
+				obfusTypes[index++] = TransformerMetadata.getImplementationInstance().mapClass(mType);
 			}
 		} else {
-			obfusName = TransformerMetadata.getImplmentationInstance().mapField(ownerDeobf, name, type);
+			obfusName = TransformerMetadata.getImplementationInstance().mapField(ownerDeobf, name, type);
 		}
-		obfusType = TransformerMetadata.getImplmentationInstance().mapClass(type);
+		obfusType = TransformerMetadata.getImplementationInstance().mapClass(type);
 	}
 
 	public MemberType getMemberType() {

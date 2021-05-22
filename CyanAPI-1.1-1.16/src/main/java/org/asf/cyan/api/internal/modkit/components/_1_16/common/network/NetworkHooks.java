@@ -14,7 +14,7 @@ import org.asf.cyan.api.network.PacketReader;
 import org.asf.cyan.api.network.channels.PacketChannel;
 import org.asf.cyan.api.util.server.language.ClientLanguage;
 import org.asf.cyan.internal.modkitimpl.util.ClientImpl;
-import org.asf.cyan.mods.dependencies.HandshakeRule;
+import org.asf.cyan.api.protocol.handshake.HandshakeRule;
 
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;

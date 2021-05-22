@@ -14,7 +14,7 @@ import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket.
 import org.asf.cyan.internal.modkitimpl.util.ClientImpl;
 import org.asf.cyan.internal.modkitimpl.util.HandshakeUtils;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeModPacket;
-import org.asf.cyan.mods.dependencies.HandshakeRule;
+import org.asf.cyan.api.protocol.handshake.HandshakeRule;
 
 public class HandshakeModPacketProcessor extends ServerPacketProcessor {
 

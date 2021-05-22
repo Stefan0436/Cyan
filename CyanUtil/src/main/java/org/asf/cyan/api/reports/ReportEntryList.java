@@ -1,7 +1,7 @@
 package org.asf.cyan.api.reports;
 
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 /**
  * 
@@ -51,19 +51,19 @@ public class ReportEntryList extends ArrayList<ReportEntry<?>> {
 		add((ReportEntry<?>)entry);
 	}
 
-	public <T> void add(int index, String key, Callable<?> value) {
+	public <T> void add(int index, String key, Supplier<?> value) {
 		add(index, key, (Object)value);
 	}
 
-	public <T> void add(String key, Callable<?> value) {
+	public <T> void add(String key, Supplier<?> value) {
 		add(key, (Object)value);
 	}
 
-	public <T> void add(int index, Callable<?> value) {
+	public <T> void add(int index, Supplier<?> value) {
 		add(index, null, (Object)value);
 	}
 
-	public <T> void add(Callable<?> value) {
+	public <T> void add(Supplier<?> value) {
 		add(null, value);
 	}
 

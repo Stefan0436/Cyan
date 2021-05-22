@@ -3,7 +3,7 @@ package org.asf.cyan.api.reports;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 /**
  * 
@@ -112,22 +112,22 @@ public class ReportNode {
 		return this;
 	}
 
-	public <T> ReportNode add(int index, String key, Callable<?> value) {
+	public <T> ReportNode add(int index, String key, Supplier<?> value) {
 		entries.add(index, key, value);
 		return this;
 	}
 
-	public <T> ReportNode add(String key, Callable<?> value) {
+	public <T> ReportNode add(String key, Supplier<?> value) {
 		entries.add(key, value);
 		return this;
 	}
 
-	public <T> ReportNode add(int index, Callable<?> value) {
+	public <T> ReportNode add(int index, Supplier<?> value) {
 		entries.add(index, value);
 		return this;
 	}
 
-	public <T> ReportNode add(Callable<?> value) {
+	public <T> ReportNode add(Supplier<?> value) {
 		entries.add(value);
 		return this;
 	}

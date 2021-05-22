@@ -268,6 +268,8 @@ public abstract class Modloader extends CyanComponent {
 	 */
 	public static Modloader[] getAllModloaders() {
 		ArrayList<Modloader> loaders = new ArrayList<Modloader>();
+		if (getModloader() == null)
+			return new Modloader[0];
 		loaders.add(getModloader());
 		for (Modloader l : getModloader().getChildren()) {
 			loaders.add(l);
@@ -705,6 +707,19 @@ public abstract class Modloader extends CyanComponent {
 		return "";
 	}
 
+	private boolean noModSupport = false;
+	private boolean noCoreModSupport = false;
+
+	public boolean supportsMods() {
+		getLoadedMods();
+		return !noModSupport;
+	}
+
+	public boolean supportsCoreMods() {
+		getLoadedCoremods();
+		return !noCoreModSupport;
+	}
+
 	/**
 	 * Get the mods loaded by this modloader.
 	 */
@@ -721,6 +736,7 @@ public abstract class Modloader extends CyanComponent {
 			return modProvider.getLoadedNormalMods();
 		}
 
+		noModSupport = true;
 		return new IModManifest[0];
 	}
 
@@ -740,6 +756,7 @@ public abstract class Modloader extends CyanComponent {
 			return modProvider.getLoadedCoreMods();
 		}
 
+		noCoreModSupport = true;
 		return new IModManifest[0];
 	}
 

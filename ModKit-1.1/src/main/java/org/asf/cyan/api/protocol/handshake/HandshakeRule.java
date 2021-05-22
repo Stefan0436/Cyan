@@ -1,11 +1,11 @@
-package org.asf.cyan.mods.dependencies;
+package org.asf.cyan.api.protocol.handshake;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.api.util.CheckString;
 import org.asf.cyan.api.versioning.Version;
 
 /**
@@ -13,6 +13,7 @@ import org.asf.cyan.api.versioning.Version;
  * Handshake Rules -- Rules for checking mod server and client dependencies
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
+ * @since 1.1
  *
  */
 public class HandshakeRule {
@@ -61,7 +62,7 @@ public class HandshakeRule {
 				continue;
 
 			if (!entries.containsKey(rule.key)) {
-				String msg = CyanLoader.validateCheckString(rule.checkString, Version.fromString(""), "", true);
+				String msg = CheckString.validateCheckString(rule.checkString, Version.fromString(""), "", true);
 				if (msg == null)
 					msg = "";
 				if (msg.equals(" (incompatible)"))
@@ -71,7 +72,7 @@ public class HandshakeRule {
 				continue;
 			}
 
-			String msg = CyanLoader.validateCheckString(rule.checkString, entries.get(rule.key), "", true);
+			String msg = CheckString.validateCheckString(rule.checkString, entries.get(rule.key), "", true);
 			if (msg != null) {
 				output.put(rule.key, msg.substring(2, msg.length() - 1));
 				fail = true;
