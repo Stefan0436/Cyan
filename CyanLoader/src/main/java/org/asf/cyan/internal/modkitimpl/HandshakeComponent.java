@@ -6,6 +6,8 @@ import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeProtocolPacke
 import org.asf.cyan.internal.modkitimpl.info.Protocols;
 import org.asf.cyan.internal.modkitimpl.util.HandshakeUtils;
 
+import modkit.protocol.ModKitProtocol;
+
 public class HandshakeComponent {
 
 	public static void handshakeStartClient(Object client) {
@@ -14,6 +16,8 @@ public class HandshakeComponent {
 					client);
 			HandshakeProtocolPacket packet = new HandshakeProtocolPacket();
 			packet.currentProtocolVersion = Protocols.MODKIT_PROTOCOL;
+			packet.maxProtocolVersion = ModKitProtocol.MAX_PROTOCOL;
+			packet.minProtocolVersion = ModKitProtocol.MIN_PROTOCOL;
 			packet.write(channel);
 		}
 	}

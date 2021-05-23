@@ -255,7 +255,7 @@ public class Handshake extends CyanComponent {
 
 	public static int validateModKitProtocol(double serverProtocol, double serverMinProtocol, double serverMaxProtocol,
 			double clientProtocol, double clientMinProtocol, double clientMaxProtocol) {
-		if (clientProtocol < serverMinProtocol || (serverMaxProtocol != -1 && serverProtocol > clientMaxProtocol)) {
+		if (clientProtocol < serverMinProtocol || (clientMaxProtocol != -1.0d && serverProtocol > clientMaxProtocol)) {
 			return 1;
 		} else if (clientProtocol > serverMaxProtocol
 				|| (clientMinProtocol != -1 && serverProtocol < clientMinProtocol)) {
