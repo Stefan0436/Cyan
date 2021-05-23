@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 
-import org.asf.cyan.api.config.ConfigManager;
-import org.asf.cyan.api.config.ModConfiguration;
 import org.asf.cyan.api.internal.IModKitComponent;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.mods.IBaseMod;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
+
+import modkit.config.ConfigManager;
+import modkit.config.ModConfiguration;
 
 public class ModConfigManagerImplementation<T2 extends IBaseMod> extends ConfigManager<T2> implements IModKitComponent {
 

@@ -3,20 +3,19 @@ package org.asf.cyan.api.internal.modkit.components._1_16.common.network;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-import org.asf.cyan.api.events.network.EarlyCyanClientHandshakeEvent;
-import org.asf.cyan.api.events.network.ServerSideConnectedEvent;
-import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;
-import org.asf.cyan.api.events.objects.network.ServerConnectionEventObject;
 import org.asf.cyan.api.internal.modkit.components._1_16.common.network.buffer.FriendlyByteBufInputFlow;
 import org.asf.cyan.api.internal.modkit.transformers._1_16.common.network.ServerboundCustomPayloadPacketExtension;
 import org.asf.cyan.api.modloader.information.game.GameSide;
-import org.asf.cyan.api.network.PacketReader;
-import org.asf.cyan.api.network.channels.PacketChannel;
-import org.asf.cyan.api.util.server.language.ClientLanguage;
+import org.asf.cyan.internal.modkitimpl.HandshakeComponent;
 import org.asf.cyan.internal.modkitimpl.util.ClientImpl;
-import org.asf.cyan.api.protocol.handshake.HandshakeRule;
 
 import io.netty.buffer.Unpooled;
+import modkit.events.network.ServerSideConnectedEvent;
+import modkit.events.objects.network.ServerConnectionEventObject;
+import modkit.network.PacketReader;
+import modkit.network.channels.PacketChannel;
+import modkit.protocol.handshake.HandshakeRule;
+import modkit.util.server.language.ClientLanguage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
@@ -46,12 +45,10 @@ public class NetworkHooks {
 			return true;
 		} else {
 			if (type.getNamespace().equals("cyan") && type.getPath().equals("cyan.handshake.start")) {
-				EarlyCyanClientHandshakeEvent.getInstance()
-						.dispatch(new ClientConnectionEventObject(connection, minecraft, serverBrand)).getResult();
+				HandshakeComponent.handshakeStartClient(minecraft);
 				return true;
 			}
-			PacketChannel ch = PacketChannel.getChannel(type.getNamespace(), () -> minecraft);
-			if (ch != null) {
+			for (PacketChannel ch : PacketChannel.getChannels(type.getNamespace(), () -> minecraft)) {
 				if (serverBrand == null)
 					brandOutput.accept("Cyan");
 
@@ -86,11 +83,11 @@ public class NetworkHooks {
 		if (ServerboundCustomPayloadPacket.BRAND.equals(id)) {
 			boolean first = clientBrand == null;
 			clientBrand = data.readUtf(32767);
-			
+
 			brandOutput.accept(clientBrand);
 			ClientImpl.assignBrand(player.getUUID(), clientBrand);
 			ClientImpl.assignPlayerObjects(player.getName().getString(), player.getUUID(), player);
-			
+
 			if (first) {
 				connection.send(new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.BRAND,
 						new FriendlyByteBuf(Unpooled.buffer()).writeUtf(server.getServerModName())));
@@ -114,8 +111,7 @@ public class NetworkHooks {
 
 			return true;
 		} else {
-			PacketChannel ch = PacketChannel.getChannel(id.getNamespace(), player);
-			if (ch != null) {
+			for (PacketChannel ch : PacketChannel.getChannels(id.getNamespace(), player)) {
 				if (ch.process(id.getPath(), new FriendlyByteBufInputFlow(data)))
 					return true;
 			}

@@ -6,6 +6,7 @@
 	
 	"modkit.missingmodded.server": "§4Cannot join non-cyan server because some local mods\nrequire server mods to be installed.",
 	"modkit.missingmodded.client.loader": "§4Cannot join server because it requires an\nadditional modloader that is not present, name of the missing modloader: %s",
+	"modkit.missingmodded.server.loader": "§4Cannot join server because the client modloader requires an\nadditional modloader that is not present, name of the missing modloader: %s",
 	
 	"modkit.missingmods.clientonly": "§cMissing Client Mods:\n%s",
 	"modkit.missingmods.serveronly": "§cMissing Server Mods:\n%s",

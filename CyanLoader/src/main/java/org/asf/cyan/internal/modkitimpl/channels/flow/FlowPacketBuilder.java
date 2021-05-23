@@ -4,9 +4,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-import org.asf.cyan.api.network.OutputFlow;
 import org.asf.cyan.api.packet.PacketBuilder;
 import org.asf.cyan.api.packet.PacketEntry;
+
+import modkit.network.OutputFlow;
 
 public class FlowPacketBuilder extends PacketBuilder {
 

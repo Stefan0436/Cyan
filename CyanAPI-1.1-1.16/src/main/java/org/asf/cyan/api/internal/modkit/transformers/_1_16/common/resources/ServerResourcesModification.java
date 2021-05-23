@@ -1,11 +1,5 @@
 package org.asf.cyan.api.internal.modkit.transformers._1_16.common.resources;
 
-import org.asf.cyan.api.events.ingame.commands.CommandManagerStartupEvent;
-import org.asf.cyan.api.events.ingame.crafting.RecipeManagerStartupEvent;
-import org.asf.cyan.api.events.ingame.tags.TagManagerStartupEvent;
-import org.asf.cyan.api.events.objects.ingame.commands.CommandManagerEventObject;
-import org.asf.cyan.api.events.objects.ingame.crafting.RecipeManagerEventObject;
-import org.asf.cyan.api.events.objects.ingame.tags.TagManagerEventObject;
 import org.asf.cyan.api.internal.modkit.components._1_16.common.CyanReloadListener;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.Constructor;
@@ -14,6 +8,12 @@ import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.TargetType;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
+import modkit.events.ingame.commands.CommandManagerStartupEvent;
+import modkit.events.ingame.crafting.RecipeManagerStartupEvent;
+import modkit.events.ingame.tags.TagManagerStartupEvent;
+import modkit.events.objects.ingame.commands.CommandManagerEventObject;
+import modkit.events.objects.ingame.crafting.RecipeManagerEventObject;
+import modkit.events.objects.ingame.tags.TagManagerEventObject;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.Commands.CommandSelection;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;

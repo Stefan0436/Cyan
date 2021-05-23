@@ -3,9 +3,10 @@ package org.asf.cyan.internal.modkitimpl.threading;
 import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.modloader.IPostponedComponent;
 import org.asf.cyan.api.modloader.TargetModloader;
-import org.asf.cyan.api.threading.ModThread;
-import org.asf.cyan.api.threading.ThreadManager;
-import org.asf.cyan.api.threading.ThreadMemory;
+
+import modkit.threading.ModThread;
+import modkit.threading.ThreadManager;
+import modkit.threading.ThreadMemory;
 
 @TargetModloader(CyanLoader.class)
 public class ThreadManagerImplementation extends ThreadManager implements IPostponedComponent {

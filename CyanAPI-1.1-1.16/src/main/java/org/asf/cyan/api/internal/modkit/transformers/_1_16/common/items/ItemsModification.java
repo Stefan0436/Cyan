@@ -1,12 +1,13 @@
 package org.asf.cyan.api.internal.modkit.transformers._1_16.common.items;
 
-import org.asf.cyan.api.events.ingame.items.ItemRegistryEvent;
-import org.asf.cyan.api.events.objects.ingame.items.ItemRegistryEventObject;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.Constructor;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
+
+import modkit.events.ingame.items.ItemRegistryEvent;
+import modkit.events.objects.ingame.items.ItemRegistryEventObject;
 
 @FluidTransformer
 @TargetClass(target = "net.minecraft.world.item.Items")

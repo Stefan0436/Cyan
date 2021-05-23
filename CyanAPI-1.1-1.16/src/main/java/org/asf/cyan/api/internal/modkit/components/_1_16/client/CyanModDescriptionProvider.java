@@ -1,8 +1,6 @@
 package org.asf.cyan.api.internal.modkit.components._1_16.client;
 
 import org.asf.cyan.CyanLoader;
-import org.asf.cyan.api.events.core.ReloadEvent;
-import org.asf.cyan.api.events.objects.core.ReloadEventObject;
 import org.asf.cyan.api.internal.IModKitComponent;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
@@ -11,6 +9,8 @@ import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.events.SimpleEvent;
 import org.asf.cyan.mods.internal.BaseEventController;
 
+import modkit.events.core.ReloadEvent;
+import modkit.events.objects.core.ReloadEventObject;
 import net.minecraft.locale.Language;
 
 public class CyanModDescriptionProvider implements IModKitComponent, IEventListenerContainer {

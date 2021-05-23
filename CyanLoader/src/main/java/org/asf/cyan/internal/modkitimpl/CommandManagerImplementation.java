@@ -3,10 +3,11 @@ package org.asf.cyan.internal.modkitimpl;
 import java.util.ArrayList;
 
 import org.asf.cyan.CyanLoader;
-import org.asf.cyan.api.commands.Command;
-import org.asf.cyan.api.commands.CommandManager;
 import org.asf.cyan.api.modloader.IPostponedComponent;
 import org.asf.cyan.api.modloader.TargetModloader;
+
+import modkit.commands.Command;
+import modkit.commands.CommandManager;
 
 @TargetModloader(CyanLoader.class)
 public class CommandManagerImplementation extends CommandManager implements IPostponedComponent {

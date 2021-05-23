@@ -2,7 +2,6 @@ package org.asf.cyan.api.internal.modkit.transformers._1_16.common.network;
 
 import java.lang.reflect.Type;
 
-import org.asf.cyan.api.protocol.transformers.handshake.VersionStatusTransformer;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.LocalVariable;
@@ -15,6 +14,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 
+import modkit.protocol.transformers.handshake.VersionStatusTransformer;
 import net.minecraft.network.protocol.status.ServerStatus;
 
 @FluidTransformer

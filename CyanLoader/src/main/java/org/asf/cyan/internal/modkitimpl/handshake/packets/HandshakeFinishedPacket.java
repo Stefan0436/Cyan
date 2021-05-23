@@ -1,8 +1,8 @@
 package org.asf.cyan.internal.modkitimpl.handshake.packets;
 
-import org.asf.cyan.api.events.network.AbstractPacket;
-import org.asf.cyan.api.network.PacketReader;
-import org.asf.cyan.api.network.PacketWriter;
+import modkit.events.network.AbstractPacket;
+import modkit.network.PacketReader;
+import modkit.network.PacketWriter;
 
 public class HandshakeFinishedPacket extends AbstractPacket<HandshakeFinishedPacket> {
 

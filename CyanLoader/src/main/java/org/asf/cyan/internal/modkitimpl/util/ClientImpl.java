@@ -6,11 +6,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.asf.cyan.CyanLoader;
-import org.asf.cyan.api.advanced.Client;
 import org.asf.cyan.api.modloader.IPostponedComponent;
 import org.asf.cyan.api.modloader.TargetModloader;
-import org.asf.cyan.api.network.channels.ServerPacketProcessor;
 import org.asf.cyan.api.versioning.Version;
+
+import modkit.advanced.Client;
+import modkit.network.channels.ServerPacketProcessor;
 
 @TargetModloader(CyanLoader.class)
 public class ClientImpl extends Client implements IPostponedComponent {

@@ -7,14 +7,15 @@ import java.util.UUID;
 import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.modloader.IPostponedComponent;
 import org.asf.cyan.api.modloader.TargetModloader;
-import org.asf.cyan.api.permissions.Permission;
-import org.asf.cyan.api.permissions.PermissionManager;
-import org.asf.cyan.api.permissions.PermissionProvider;
-import org.asf.cyan.api.permissions.Permission.Mode;
 import org.asf.cyan.internal.modkitimpl.util.PermissionProviderUtils;
 import org.asf.cyan.mods.events.AttachEvent;
 import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.internal.BaseEventController;
+
+import modkit.permissions.Permission;
+import modkit.permissions.PermissionManager;
+import modkit.permissions.PermissionProvider;
+import modkit.permissions.Permission.Mode;
 
 @TargetModloader(CyanLoader.class)
 public class PermissionManagerImplementation extends PermissionManager

@@ -1,11 +1,5 @@
 package org.asf.cyan.api.internal.modkit.transformers._1_16.client;
 
-import org.asf.cyan.api.events.objects.resources.LanguageManagerEventObject;
-import org.asf.cyan.api.events.objects.resources.ResourceManagerEventObject;
-import org.asf.cyan.api.events.objects.resources.TextureManagerEventObject;
-import org.asf.cyan.api.events.resources.manager.LanguageManagerStartupEvent;
-import org.asf.cyan.api.events.resources.manager.ResourceManagerStartupEvent;
-import org.asf.cyan.api.events.resources.manager.TextureManagerStartupEvent;
 import org.asf.cyan.api.fluid.annotations.PlatformExclude;
 import org.asf.cyan.api.internal.modkit.components._1_16.common.CyanReloadListener;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
@@ -16,6 +10,12 @@ import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.TargetType;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
+import modkit.events.objects.resources.LanguageManagerEventObject;
+import modkit.events.objects.resources.ResourceManagerEventObject;
+import modkit.events.objects.resources.TextureManagerEventObject;
+import modkit.events.resources.manager.LanguageManagerStartupEvent;
+import modkit.events.resources.manager.ResourceManagerStartupEvent;
+import modkit.events.resources.manager.TextureManagerStartupEvent;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.language.LanguageManager;

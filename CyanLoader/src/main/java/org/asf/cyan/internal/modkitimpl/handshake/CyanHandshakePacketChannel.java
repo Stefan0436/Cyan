@@ -1,10 +1,11 @@
 package org.asf.cyan.internal.modkitimpl.handshake;
 
-import org.asf.cyan.api.network.channels.PacketChannel;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.processors.HandshakeCompletionPacketProcessor;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.processors.HandshakeLoaderPacketProcessor;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.processors.HandshakeModPacketProcessor;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.processors.HandshakeProtocolPacketProcessor;
+
+import modkit.network.channels.PacketChannel;
 
 public class CyanHandshakePacketChannel extends PacketChannel {
 

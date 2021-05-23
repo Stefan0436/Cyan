@@ -1,9 +1,5 @@
 package org.asf.cyan.api.internal.modkit.components._1_16.common.commands;
 
-import org.asf.cyan.api.commands.Command;
-import org.asf.cyan.api.commands.CommandManager;
-import org.asf.cyan.api.events.ingame.commands.CommandManagerStartupEvent;
-import org.asf.cyan.api.events.objects.ingame.commands.CommandManagerEventObject;
 import org.asf.cyan.api.internal.IModKitComponent;
 import org.asf.cyan.internal.modkitimpl.CommandManagerImplementation;
 import org.asf.cyan.internal.modkitimpl.CommandManagerImplementation.RegisteryListener;
@@ -11,6 +7,10 @@ import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.events.SimpleEvent;
 import org.asf.cyan.mods.internal.BaseEventController;
 
+import modkit.commands.Command;
+import modkit.commands.CommandManager;
+import modkit.events.ingame.commands.CommandManagerStartupEvent;
+import modkit.events.objects.ingame.commands.CommandManagerEventObject;
 import net.minecraft.commands.Commands;
 
 public class CommandRegistryListener implements IModKitComponent, RegisteryListener, IEventListenerContainer {

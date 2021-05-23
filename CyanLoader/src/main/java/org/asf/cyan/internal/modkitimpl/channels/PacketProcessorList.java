@@ -4,7 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
-import org.asf.cyan.api.network.channels.AbstractPacketProcessor;
+import modkit.network.channels.AbstractPacketProcessor;
 
 public class PacketProcessorList implements Iterable<AbstractPacketProcessor> {
 	public class PacketProcessorEntry {

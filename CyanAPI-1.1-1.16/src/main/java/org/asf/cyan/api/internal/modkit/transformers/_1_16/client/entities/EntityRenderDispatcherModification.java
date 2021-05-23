@@ -2,14 +2,14 @@ package org.asf.cyan.api.internal.modkit.transformers._1_16.client.entities;
 
 import java.util.Map;
 
-import org.asf.cyan.api.events.ingame.entities.EntityRendererRegistryEvent;
-import org.asf.cyan.api.events.objects.ingame.entities.EntityRendererRegistryEventObject;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.TargetType;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
+import modkit.events.ingame.entities.EntityRendererRegistryEvent;
+import modkit.events.objects.ingame.entities.EntityRendererRegistryEventObject;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.entity.EntityRenderer;

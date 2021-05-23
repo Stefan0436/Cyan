@@ -8,11 +8,11 @@ import org.asf.cyan.api.internal.modkit.components._1_16.common.permissions.OpPe
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
-import org.asf.cyan.api.permissions.Permission;
-import org.asf.cyan.api.permissions.PermissionManager;
-import org.asf.cyan.api.permissions.PermissionProvider;
 import org.asf.cyan.internal.modkitimpl.util.PermissionProviderUtils;
 
+import modkit.permissions.Permission;
+import modkit.permissions.PermissionManager;
+import modkit.permissions.PermissionProvider;
 import net.minecraft.server.MinecraftServer;
 
 public class PermissionProviderUtilsImpl extends PermissionProviderUtils implements IModKitComponent {

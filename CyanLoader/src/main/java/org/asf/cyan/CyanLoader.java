@@ -48,11 +48,9 @@ import org.asf.cyan.api.modloader.information.modloader.LoadPhase;
 import org.asf.cyan.api.modloader.information.mods.IBaseMod;
 import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.api.modloader.information.providers.IModProvider;
-import org.asf.cyan.api.protocol.ModkitModloader;
 import org.asf.cyan.api.reports.ReportBuilder;
 import org.asf.cyan.api.reports.ReportCategory;
 import org.asf.cyan.api.reports.ReportNode;
-import org.asf.cyan.api.util.CheckString;
 import org.asf.cyan.api.versioning.StringVersionProvider;
 import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.core.CyanCore;
@@ -90,6 +88,9 @@ import org.asf.cyan.mods.internal.BaseEventController;
 import org.asf.cyan.mods.internal.IAcceptableComponent;
 import org.asf.cyan.mods.internal.ModInfoCache;
 import org.asf.cyan.security.TrustContainer;
+
+import modkit.protocol.ModkitModloader;
+import modkit.util.CheckString;
 
 /**
  * 
@@ -241,6 +242,8 @@ public class CyanLoader extends ModkitModloader
 	}
 
 	private static void prepare(String side) throws IOException {
+		CyanCore.addAllowedPackage("modkit");
+		ModkitModloader.RootRules.defaultRules();
 		Configuration.setLoggers(str -> warn(str), str -> error(str));
 		setupModloader(side);
 		loaded = true;
@@ -524,13 +527,20 @@ public class CyanLoader extends ModkitModloader
 		});
 		builder.newNode(head, "Stacktrace").add(() -> {
 			StringBuilder stacktrace = new StringBuilder();
+			Throwable exception = ex;
 			boolean first = true;
-			for (StackTraceElement e : ex.getStackTrace()) {
+			while (exception != null) {
 				if (!first) {
 					stacktrace.append("\n");
 				}
 				first = false;
-				stacktrace.append("at ").append(e);
+				stacktrace.append("Caused by: " + exception.getClass().getTypeName() + ": " + exception.getMessage());
+				for (StackTraceElement e : exception.getStackTrace()) {
+					stacktrace.append("\n");
+					first = false;
+					stacktrace.append("\tat ").append(e);
+				}
+				exception = exception.getCause();
 			}
 			return stacktrace;
 		});
@@ -575,8 +585,8 @@ public class CyanLoader extends ModkitModloader
 			ReportCategory cyanMods = builder.newCategory("Installed CYAN Mods");
 			ReportNode coremodsCategoryCyanLoader = builder.newNode(cyanMods, "Loaded CYAN Coremods");
 			ReportNode modsCategoryCyanLoader = builder.newNode(cyanMods, "Loaded CYAN Mods");
-			CyanLoader.appendCyanInfo((str, obj) -> coremodsCategoryCyanLoader.add(str, obj),
-					(str, obj) -> modsCategoryCyanLoader.add(str, obj));
+			CyanLoader.appendCyanInfo((str, obj) -> coremodsCategoryCyanLoader.add(str, obj).toString().replace("\n\t", "\n"),
+					(str, obj) -> modsCategoryCyanLoader.add(str, obj.toString().replace("\n\t", "\n")));
 		}
 
 		ReportCategory systemDetails = builder.newCategory("System Details");

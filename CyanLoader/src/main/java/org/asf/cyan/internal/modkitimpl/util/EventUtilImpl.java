@@ -4,12 +4,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
-import org.asf.cyan.api.util.ContainerConditions;
-import org.asf.cyan.api.util.EventUtil;
 import org.asf.cyan.core.CyanCore;
 import org.asf.cyan.mods.events.AttachEvent;
 import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.internal.BaseEventController;
+
+import modkit.util.ContainerConditions;
+import modkit.util.EventUtil;
 
 public class EventUtilImpl extends EventUtil implements IEventListenerContainer {
 

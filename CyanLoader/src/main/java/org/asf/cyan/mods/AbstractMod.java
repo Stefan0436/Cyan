@@ -12,12 +12,13 @@ import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.mods.IModManifest;
 import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.mods.config.CyanModfileManifest;
-import org.asf.cyan.api.protocol.handshake.HandshakeRule;
 import org.asf.cyan.mods.dependencies.ModProvider;
 import org.asf.cyan.mods.dependencies.ModSupportHandler;
 import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.internal.BaseEventController;
 import org.asf.cyan.mods.internal.CyanModManifest;
+
+import modkit.protocol.handshake.HandshakeRule;
 
 /**
  * 

@@ -1,9 +1,5 @@
 package org.asf.cyan.api.internal.modkit.transformers._1_16.client.network;
 
-import org.asf.cyan.api.events.ingame.entities.EntityRegistryEvent;
-import org.asf.cyan.api.events.ingame.entities.EntityRegistryEvent.EntityTypeEntry;
-import org.asf.cyan.api.events.network.ClientSideLoginEvent;
-import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;
 import org.asf.cyan.api.internal.ClientPacketListenerExtension;
 import org.asf.cyan.api.internal.modkit.components._1_16.common.network.NetworkHooks;
 import org.asf.cyan.fluid.api.FluidTransformer;
@@ -13,6 +9,10 @@ import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.TargetType;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
+import modkit.events.ingame.entities.EntityRegistryEvent;
+import modkit.events.ingame.entities.EntityRegistryEvent.EntityTypeEntry;
+import modkit.events.network.ClientSideLoginEvent;
+import modkit.events.objects.network.ClientConnectionEventObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.Connection;

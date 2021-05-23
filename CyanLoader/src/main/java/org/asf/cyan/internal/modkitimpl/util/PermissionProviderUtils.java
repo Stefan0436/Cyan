@@ -2,9 +2,9 @@ package org.asf.cyan.internal.modkitimpl.util;
 
 import java.util.UUID;
 
-import org.asf.cyan.api.permissions.Permission;
-import org.asf.cyan.api.permissions.PermissionManager;
-import org.asf.cyan.api.permissions.PermissionProvider;
+import modkit.permissions.Permission;
+import modkit.permissions.PermissionManager;
+import modkit.permissions.PermissionProvider;
 
 public abstract class PermissionProviderUtils {
 

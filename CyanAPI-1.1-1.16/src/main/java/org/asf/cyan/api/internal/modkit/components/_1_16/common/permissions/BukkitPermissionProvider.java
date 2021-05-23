@@ -3,12 +3,12 @@ package org.asf.cyan.api.internal.modkit.components._1_16.common.permissions;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import org.asf.cyan.api.permissions.Permission;
-import org.asf.cyan.api.permissions.PermissionProvider;
-import org.asf.cyan.api.permissions.Permission.Mode;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import modkit.permissions.Permission;
+import modkit.permissions.PermissionProvider;
+import modkit.permissions.Permission.Mode;
 import net.minecraft.server.MinecraftServer;
 
 public class BukkitPermissionProvider implements PermissionProvider {

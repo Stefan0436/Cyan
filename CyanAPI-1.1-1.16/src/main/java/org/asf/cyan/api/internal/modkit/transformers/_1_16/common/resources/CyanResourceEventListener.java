@@ -1,8 +1,7 @@
 package org.asf.cyan.api.internal.modkit.transformers._1_16.common.resources;
 
-import org.asf.cyan.api.events.objects.resources.ResourceManagerEventObject;
-import org.asf.cyan.api.events.resources.manager.ResourceManagerStartupEvent;
-
+import modkit.events.objects.resources.ResourceManagerEventObject;
+import modkit.events.resources.manager.ResourceManagerStartupEvent;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;

@@ -3,19 +3,19 @@ package org.asf.cyan.api.internal.modkit.components._1_16.common.resources.api;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.asf.cyan.api.events.objects.resources.ResourceManagerEventObject;
-import org.asf.cyan.api.events.resources.manager.ResourceManagerStartupEvent;
 import org.asf.cyan.api.internal.IModKitComponent;
 import org.asf.cyan.api.internal.modkit.components._1_16.common.resources.CyanPackResources;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.mods.IModManifest;
-import org.asf.cyan.api.resources.Resource;
-import org.asf.cyan.api.resources.Resources;
 import org.asf.cyan.core.CyanInfo;
 import org.asf.cyan.mods.events.IEventListenerContainer;
 import org.asf.cyan.mods.events.SimpleEvent;
 import org.asf.cyan.mods.internal.BaseEventController;
 
+import modkit.events.objects.resources.ResourceManagerEventObject;
+import modkit.events.resources.manager.ResourceManagerStartupEvent;
+import modkit.resources.Resource;
+import modkit.resources.Resources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 

@@ -3,21 +3,22 @@ package org.asf.cyan.api.internal.modkit.components._1_16.common.network;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
-import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;
-import org.asf.cyan.api.events.objects.network.ServerConnectionEventObject;
 import org.asf.cyan.api.internal.ClientPacketListenerExtension;
 import org.asf.cyan.api.internal.IModKitComponent;
 import org.asf.cyan.api.internal.ServerGamePacketListenerExtension;
 import org.asf.cyan.api.modloader.information.game.GameSide;
-import org.asf.cyan.api.network.PacketWriter;
-import org.asf.cyan.api.network.channels.AbstractPacketProcessor;
-import org.asf.cyan.api.network.channels.PacketChannel;
-import org.asf.cyan.api.network.channels.PacketChannelContext;
-import org.asf.cyan.api.network.channels.PacketChannelList;
 import org.asf.cyan.core.CyanCore;
 
+import modkit.events.objects.network.ClientConnectionEventObject;
+import modkit.events.objects.network.ServerConnectionEventObject;
+import modkit.network.PacketWriter;
+import modkit.network.channels.AbstractPacketProcessor;
+import modkit.network.channels.PacketChannel;
+import modkit.network.channels.PacketChannelContext;
+import modkit.network.channels.PacketChannelList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.Connection;
@@ -72,12 +73,13 @@ public class ChannelContextCore extends PacketChannelContext implements IModKitC
 	}
 
 	@Override
-	protected PacketChannel getChannel(String id, PacketChannelContext context) {
+	protected PacketChannel[] getChannels(String id, PacketChannelContext context) {
+		ArrayList<PacketChannel> matchingChannels = new ArrayList<PacketChannel>();
 		for (PacketChannel ch : channels) {
 			if (ch.id().equals(id))
-				return ch.instantiate(context);
+				matchingChannels.add(ch.instantiate(context));
 		}
-		return null;
+		return matchingChannels.toArray(t -> new PacketChannel[t]);
 	}
 
 	@Override

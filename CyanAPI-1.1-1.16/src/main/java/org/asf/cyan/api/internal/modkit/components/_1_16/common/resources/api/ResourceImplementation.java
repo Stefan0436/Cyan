@@ -2,9 +2,8 @@ package org.asf.cyan.api.internal.modkit.components._1_16.common.resources.api;
 
 import java.io.InputStream;
 
-import org.asf.cyan.api.resources.Resource;
-import org.asf.cyan.api.resources.Resources;
-
+import modkit.resources.Resource;
+import modkit.resources.Resources;
 import net.minecraft.resources.ResourceLocation;
 
 public class ResourceImplementation extends Resource {

@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import org.asf.cyan.api.internal.modkit.transformers._1_16.common.PlayerEntryExtension;
-import org.asf.cyan.api.permissions.Permission;
-import org.asf.cyan.api.permissions.Permission.Mode;
-import org.asf.cyan.api.permissions.PermissionProvider;
 
 import com.mojang.authlib.GameProfile;
 
+import modkit.permissions.Permission;
+import modkit.permissions.PermissionProvider;
+import modkit.permissions.Permission.Mode;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.ServerOpListEntry;
 

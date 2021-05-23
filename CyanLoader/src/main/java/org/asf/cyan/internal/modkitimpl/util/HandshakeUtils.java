@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import org.asf.cyan.api.common.CyanComponent;
-import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;
-import org.asf.cyan.api.network.channels.ClientPacketProcessor;
-import org.asf.cyan.api.network.channels.PacketChannel;
-import org.asf.cyan.api.network.channels.ServerPacketProcessor;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeLoaderPacket;
+
+import modkit.network.channels.ClientPacketProcessor;
+import modkit.network.channels.PacketChannel;
+import modkit.network.channels.ServerPacketProcessor;
 
 public abstract class HandshakeUtils extends CyanComponent {
 
@@ -27,7 +27,7 @@ public abstract class HandshakeUtils extends CyanComponent {
 
 	public abstract boolean isUUIDPresentInPlayerList(ServerPacketProcessor processor, String key);
 
-	public abstract <T extends PacketChannel> T getChannel(Class<T> type, ClientConnectionEventObject event);
+	public abstract <T extends PacketChannel> T getChannel(Class<T> type, Object client);
 
 	public abstract void dispatchConnectionEvent(ClientPacketProcessor processor);
 

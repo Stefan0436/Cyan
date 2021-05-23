@@ -13,7 +13,5 @@ public class Protocols {
 	// We support:
 	//
 	public static final double MODKIT_PROTOCOL = 1.1;
-	public static final double MIN_MODKIT = 1.1;
-	public static final double MAX_MODKIT = 2.0;
 
 }

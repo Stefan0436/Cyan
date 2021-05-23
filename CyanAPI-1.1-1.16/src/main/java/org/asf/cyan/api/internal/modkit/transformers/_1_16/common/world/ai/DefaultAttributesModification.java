@@ -3,8 +3,6 @@ package org.asf.cyan.api.internal.modkit.transformers._1_16.common.world.ai;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 
-import org.asf.cyan.api.events.ingame.entities.EntityAttributesEvent;
-import org.asf.cyan.api.events.objects.ingame.entities.EntityAttributesEventObject;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.Constructor;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
@@ -15,6 +13,8 @@ import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 
+import modkit.events.ingame.entities.EntityAttributesEvent;
+import modkit.events.objects.ingame.entities.EntityAttributesEventObject;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;

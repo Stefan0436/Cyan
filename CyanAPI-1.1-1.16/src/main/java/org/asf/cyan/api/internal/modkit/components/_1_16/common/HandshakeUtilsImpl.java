@@ -6,24 +6,24 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.asf.cyan.api.events.network.CyanClientHandshakeEvent;
-import org.asf.cyan.api.events.network.CyanServerHandshakeEvent;
-import org.asf.cyan.api.events.network.ServerSideConnectedEvent;
-import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;
-import org.asf.cyan.api.events.objects.network.ServerConnectionEventObject;
 import org.asf.cyan.api.internal.IModKitComponent;
 import org.asf.cyan.api.internal.ServerGamePacketListenerExtension;
 import org.asf.cyan.api.internal.modkit.transformers._1_16.common.network.ServerStatusInterface;
-import org.asf.cyan.api.network.channels.ClientPacketProcessor;
-import org.asf.cyan.api.network.channels.PacketChannel;
-import org.asf.cyan.api.network.channels.ServerPacketProcessor;
-import org.asf.cyan.api.protocol.handshake.Handshake;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeLoaderPacket;
 import org.asf.cyan.internal.modkitimpl.util.HandshakeUtils;
 
 import com.google.gson.JsonObject;
 
+import modkit.events.network.ModKitClientHandshakeEvent;
+import modkit.events.network.ModKitServerHandshakeEvent;
+import modkit.events.network.ServerSideConnectedEvent;
+import modkit.events.objects.network.ClientConnectionEventObject;
+import modkit.events.objects.network.ServerConnectionEventObject;
+import modkit.network.channels.ClientPacketProcessor;
+import modkit.network.channels.PacketChannel;
+import modkit.network.channels.ServerPacketProcessor;
+import modkit.protocol.handshake.Handshake;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
@@ -67,6 +67,7 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 			@Override
 			public void handlePongResponse(ClientboundPongResponsePacket arg0) {
 				stop = true;
+				conn.disconnect(new TranslatableComponent("multiplayer.status.finished"));
 			}
 
 			@Override
@@ -147,13 +148,13 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 	}
 
 	@Override
-	public <T extends PacketChannel> T getChannel(Class<T> type, ClientConnectionEventObject event) {
-		return PacketChannel.getChannel(type, event);
+	public <T extends PacketChannel> T getChannel(Class<T> type, Object client) {
+		return PacketChannel.getChannel(type, () -> (Minecraft) client);
 	}
 
 	@Override
 	public void dispatchConnectionEvent(ClientPacketProcessor processor) {
-		CyanClientHandshakeEvent.getInstance().dispatch(new ClientConnectionEventObject(processor.getConnection(),
+		ModKitClientHandshakeEvent.getInstance().dispatch(new ClientConnectionEventObject(processor.getConnection(),
 				processor.getClient(), processor.getServerBrand()));
 	}
 
@@ -213,7 +214,7 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 
 	@Override
 	public void dispatchFinishEvent(ServerPacketProcessor processor) {
-		CyanServerHandshakeEvent.getInstance().dispatch(new ServerConnectionEventObject(processor.getConnection(),
+		ModKitServerHandshakeEvent.getInstance().dispatch(new ServerConnectionEventObject(processor.getConnection(),
 				processor.getServer(), processor.getPlayer(), processor.getClientBrand())).getResult();
 		ServerSideConnectedEvent.getInstance().dispatch(new ServerConnectionEventObject(processor.getConnection(),
 				processor.getServer(), processor.getPlayer(), processor.getClientBrand()));

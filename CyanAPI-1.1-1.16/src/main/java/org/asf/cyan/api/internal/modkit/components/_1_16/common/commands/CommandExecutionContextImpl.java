@@ -1,10 +1,10 @@
 package org.asf.cyan.api.internal.modkit.components._1_16.common.commands;
 
-import org.asf.cyan.api.commands.Command.CommandExecutionContext;
 import org.asf.cyan.api.internal.IModKitComponent;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import modkit.commands.Command.CommandExecutionContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.server.MinecraftServer;

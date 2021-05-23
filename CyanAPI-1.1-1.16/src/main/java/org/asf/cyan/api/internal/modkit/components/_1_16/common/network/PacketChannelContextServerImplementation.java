@@ -2,18 +2,18 @@ package org.asf.cyan.api.internal.modkit.components._1_16.common.network;
 
 import java.util.function.Supplier;
 
-import org.asf.cyan.api.events.objects.network.ClientConnectionEventObject;
-import org.asf.cyan.api.events.objects.network.ServerConnectionEventObject;
 import org.asf.cyan.api.internal.IModKitComponent;
 import org.asf.cyan.api.internal.ServerGamePacketListenerExtension;
 import org.asf.cyan.api.internal.modkit.components._1_16.common.network.buffer.FriendlyByteBufOutputFlow;
 import org.asf.cyan.api.modloader.information.game.GameSide;
-import org.asf.cyan.api.network.PacketWriter;
-import org.asf.cyan.api.network.channels.AbstractPacketProcessor;
-import org.asf.cyan.api.network.channels.PacketChannelContext;
 import org.asf.cyan.internal.modkitimpl.channels.PacketProcessorList;
 
 import io.netty.buffer.Unpooled;
+import modkit.events.objects.network.ClientConnectionEventObject;
+import modkit.events.objects.network.ServerConnectionEventObject;
+import modkit.network.PacketWriter;
+import modkit.network.channels.AbstractPacketProcessor;
+import modkit.network.channels.PacketChannelContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;

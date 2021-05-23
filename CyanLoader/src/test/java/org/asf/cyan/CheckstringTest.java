@@ -2,9 +2,10 @@ package org.asf.cyan;
 
 import static org.junit.Assert.assertTrue;
 
-import org.asf.cyan.api.util.CheckString;
 import org.asf.cyan.api.versioning.Version;
 import org.junit.Test;
+
+import modkit.util.CheckString;
 
 public class CheckstringTest {
 	@Test

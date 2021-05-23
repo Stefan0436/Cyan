@@ -1,12 +1,12 @@
 package org.asf.cyan.api.internal.modkit.components._1_16.common.commands.cyan.tasks;
 
-import org.asf.cyan.api.advanced.Client;
-import org.asf.cyan.api.commands.Command;
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.internal.modkit.components._1_16.common.commands.cyan.CyanCommandProvider;
-import org.asf.cyan.api.util.server.language.ClientLanguage;
 import org.asf.cyan.internal.modkitimpl.info.Protocols;
 
+import modkit.advanced.Client;
+import modkit.commands.Command;
+import modkit.util.server.language.ClientLanguage;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 

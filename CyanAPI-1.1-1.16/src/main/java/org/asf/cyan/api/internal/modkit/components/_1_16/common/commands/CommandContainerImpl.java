@@ -3,16 +3,16 @@ package org.asf.cyan.api.internal.modkit.components._1_16.common.commands;
 import java.util.ArrayList;
 import java.util.function.Function;
 
-import org.asf.cyan.api.commands.Command;
-import org.asf.cyan.api.commands.Command.CommandContainer;
-import org.asf.cyan.api.commands.Command.CommandExecutionContext;
 import org.asf.cyan.api.internal.IModKitComponent;
-import org.asf.cyan.api.permissions.PermissionManager;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import modkit.commands.Command;
+import modkit.commands.Command.CommandContainer;
+import modkit.commands.Command.CommandExecutionContext;
+import modkit.permissions.PermissionManager;
 import net.minecraft.commands.CommandSourceStack;
 
 public class CommandContainerImpl extends CommandContainer implements IModKitComponent {

@@ -1,11 +1,12 @@
 package org.asf.cyan.internal.modkitimpl.handshake.packets;
 
-import org.asf.cyan.api.events.network.AbstractPacket;
-import org.asf.cyan.api.network.PacketReader;
-import org.asf.cyan.api.network.PacketWriter;
-import org.asf.cyan.api.network.PacketWriter.RawWriter;
-import org.asf.cyan.api.network.PacketReader.RawReader;
 import java.util.stream.Stream;
+
+import modkit.events.network.AbstractPacket;
+import modkit.network.PacketReader;
+import modkit.network.PacketWriter;
+import modkit.network.PacketReader.RawReader;
+import modkit.network.PacketWriter.RawWriter;
 
 public class HandshakeFailedPacket extends AbstractPacket<HandshakeFailedPacket> {
 

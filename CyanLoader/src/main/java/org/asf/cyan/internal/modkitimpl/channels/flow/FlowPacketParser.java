@@ -6,9 +6,10 @@ import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
-import org.asf.cyan.api.network.ByteFlow;
 import org.asf.cyan.api.packet.PacketEntry;
 import org.asf.cyan.api.packet.PacketParser;
+
+import modkit.network.ByteFlow;
 
 public class FlowPacketParser extends PacketParser {
 

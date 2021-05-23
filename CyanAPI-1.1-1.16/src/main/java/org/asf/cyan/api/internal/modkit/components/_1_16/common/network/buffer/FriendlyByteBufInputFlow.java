@@ -1,6 +1,6 @@
 package org.asf.cyan.api.internal.modkit.components._1_16.common.network.buffer;
 
-import org.asf.cyan.api.network.ByteFlow;
+import modkit.network.ByteFlow;
 import net.minecraft.network.FriendlyByteBuf;
 
 public class FriendlyByteBufInputFlow implements ByteFlow {
