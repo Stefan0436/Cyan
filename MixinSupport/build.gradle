@@ -86,9 +86,9 @@ processResources {
 
 	from(sourceSets.main.resources.srcDirs) {
 		expand(
-				"minmixin": "${minmixin}",
-				"group": project.group
-				)
+			"minmixin": "${minmixin}",
+			"group": project.group
+		)
 	}
 
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE

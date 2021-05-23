@@ -19,7 +19,7 @@ public class LegacyModKitSupportHook extends ClassLoadHook {
 
 	public static class ModKitClassRemapper extends Remapper {
 
-		private boolean ran = false;
+		private static boolean ran = false;
 		private Logger log;
 
 		private HashMap<String, String> packages;

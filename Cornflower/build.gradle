@@ -89,6 +89,10 @@ dependencies {
 	implementation project(":ClassTrust")
 	implementation project(":CyanLoader")
 	implementation project(":TrustExplorer")
+	implementation (project(':ModKit')) {
+        exclude group: '', module: 'server'
+        exclude group: '', module: 'client'
+	}
 	
 	mavendependency group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.7'
 	mavendependency group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'

@@ -8,9 +8,6 @@ Cyan Update Changelog: 1.0.0 (Alpha 14):
  - MTK MSA Account Support (MTK A22) -- TODO
   
  // A15
- - Mod loading (Cyan 1.0.0.A12) -- TODO
- - ModKit Download (Cyan 1.0.0.A12) -- TODO
- 
  - ModKit Entity API (CyanAPI ModKit 1.2) -- TODO
  - ModKit Block Entity API (CyanAPI ModKit 1.2) -- TODO
  
@@ -28,7 +25,6 @@ Cyan Update Changelog: 1.0.0 (Alpha 14):
  
  // B1: LTS:
  - Fix CCFG String Splitter Bug -- TODO
- - Mod loading progress messages (pre-startup window for long tasks) -- TODO
  - ModKit Recipe API (CyanAPI ModKit 1.3) -- TODO
  - ModKit Dimension API (CyanAPI ModKit 1.3) -- TODO
  - ModKit Block API (CyanAPI ModKit 1.3) -- TODO
@@ -36,4 +32,4 @@ Cyan Update Changelog: 1.0.0 (Alpha 14):
  - ModKit GUI API (CyanAPI ModKit 1.3) -- TODO
  
  // B2:
- - ModKit Player, Entity and other interface types (ModKit 2.0, replaces the need for vanilla types, they will however be available for modders) -- TODO
+ - ModKit Player, Entity and other interface types (ModKit 2.0, replaces the need for vanilla types, they will however be available to modders) -- TODO
