@@ -21,6 +21,7 @@ public abstract class ModkitModloader extends Modloader {
 	 * Determines whether or not this modloader is the root modloader.
 	 */
 	public boolean isRootModloader() {
+		getModKitRootModloader();
 		return isRoot;
 	}
 	

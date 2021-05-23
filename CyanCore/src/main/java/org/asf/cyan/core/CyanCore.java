@@ -420,6 +420,11 @@ public class CyanCore extends CyanComponent {
 			}
 			if (openloader != null)
 				conf.addUrls(openloader.getURLs());
+			if (addedUrls.size() != 0) {
+				for (URL u : addedUrls) {
+					conf.addUrls(u);
+				}
+			}
 			conf.addUrls(loader.getURLs());
 		}
 
@@ -774,5 +779,11 @@ public class CyanCore extends CyanComponent {
 
 	public static void addToPackageScan(String pkg) {
 		extraPkgs.add(pkg);
+	}
+
+	public static void setSupertype(String name, String superName) {
+		if (core.reflections == null)
+			core.initReflections();
+		core.reflections.getStore().put(SubTypesScanner.class, superName.replace("/", "."), name.replace("/", "."));
 	}
 }

@@ -65,6 +65,7 @@ import org.asf.cyan.fluid.implementation.CyanReportBuilder;
 import org.asf.cyan.fluid.implementation.CyanTransformerMetadata;
 import org.asf.cyan.fluid.remapping.Mapping;
 import org.asf.cyan.internal.KickStartConfig;
+import org.asf.cyan.internal.LegacyModKitSupportHook;
 import org.asf.cyan.internal.modkitimpl.info.Protocols;
 import org.asf.cyan.internal.modkitimpl.util.EventUtilImpl;
 import org.asf.cyan.loader.configs.SecurityConfiguration;
@@ -407,21 +408,6 @@ public class CyanLoader extends ModkitModloader
 			buildCrashReport(t, ex);
 			System.exit(1);
 		});
-		Thread.setDefaultUncaughtExceptionHandler((t, ex) -> {
-			StringBuilder buffer = new StringBuilder();
-			ex.printStackTrace(new PrintStream(new OutputStream() {
-
-				@Override
-				public void write(int arg0) throws IOException {
-					buffer.append((char) arg0);
-				}
-
-			}));
-			LOG.fatal(buffer.toString().trim());
-			StartupWindow.WindowAppender.fatalError(ex.getClass().getSimpleName() + ": " + ex.getLocalizedMessage());
-			buildCrashReport(t, ex);
-			System.exit(1);
-		});
 
 		CyanLoader ld = new CyanLoader();
 		ld.addInformationProvider(CyanInfo.getProvider());
@@ -585,7 +571,8 @@ public class CyanLoader extends ModkitModloader
 			ReportCategory cyanMods = builder.newCategory("Installed CYAN Mods");
 			ReportNode coremodsCategoryCyanLoader = builder.newNode(cyanMods, "Loaded CYAN Coremods");
 			ReportNode modsCategoryCyanLoader = builder.newNode(cyanMods, "Loaded CYAN Mods");
-			CyanLoader.appendCyanInfo((str, obj) -> coremodsCategoryCyanLoader.add(str, obj).toString().replace("\n\t", "\n"),
+			CyanLoader.appendCyanInfo(
+					(str, obj) -> coremodsCategoryCyanLoader.add(str, obj).toString().replace("\n\t", "\n"),
 					(str, obj) -> modsCategoryCyanLoader.add(str, obj.toString().replace("\n\t", "\n")));
 		}
 
@@ -2066,6 +2053,15 @@ public class CyanLoader extends ModkitModloader
 
 				for (Mapping<?> cmap : compatibilityMappings)
 					Fluid.loadMappings(cmap);
+			}
+
+		});
+		CyanCore.registerPreLoadHook(new Runnable() {
+
+			@Override
+			public void run() {
+				info("Loading FLUID internal class hooks...");
+				Fluid.registerHook(new LegacyModKitSupportHook());
 			}
 
 		});

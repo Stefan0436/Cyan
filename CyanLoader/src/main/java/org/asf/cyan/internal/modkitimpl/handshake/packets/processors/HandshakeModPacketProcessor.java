@@ -24,7 +24,7 @@ public class HandshakeModPacketProcessor extends ServerPacketProcessor {
 
 		int mods = 0;
 		for (String id : packet.entries.keySet()) {
-			if (!id.equals("modloader") && !id.equals("game")) {
+			if (!id.equals("game") && !id.equals("modloader")) {
 				ClientImpl.assignMod(this, id, packet.entries.get(id));
 				mods++;
 			}

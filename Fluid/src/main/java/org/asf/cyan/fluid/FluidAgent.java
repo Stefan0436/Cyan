@@ -112,7 +112,7 @@ public class FluidAgent extends CyanComponent {
 
 	static boolean ranHooks = false;
 	private static boolean loadedAgents = false;
-	
+
 	/**
 	 * Main agent startup method
 	 * 
@@ -218,7 +218,7 @@ public class FluidAgent extends CyanComponent {
 								error("FLUID hook apply failed, hook type: " + hook.getClass().getTypeName(), e);
 							}
 						}
-
+						
 						bytecode = pool.getByteCode(cc.name);
 					}
 					if (transformerMatch) {
