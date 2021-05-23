@@ -55,17 +55,15 @@ public class Handshake extends CyanComponent {
 			if (status != 0) {
 				final String failure;
 				final Object[] args;
-				if (status == 1) {
-					failure = "modkit.protocol.outdated.remote";
-					args = new Object[] { "§6" + ModKitProtocol.CURRENT, "§6" + serverMinProtocol,
-							"§6" + serverMinProtocol };
+				if (status == 2) {
+					failure = "modkit.protocol.outdated.local";
+					args = new Object[] { "§6" + serverProtocol, "§6" + ModKitProtocol.MIN_PROTOCOL };
 					info("Connection failed: outdated server modkit protocol: " + serverProtocol + ", client protocol: "
 							+ ModKitProtocol.CURRENT + " (min: " + ModKitProtocol.MIN_PROTOCOL + ", max: "
 							+ ModKitProtocol.MAX_PROTOCOL + ")");
 				} else {
-					failure = "modkit.protocol.outdated.local";
-					args = new Object[] { "§6" + ModKitProtocol.CURRENT, "§6" + serverMaxProtocol,
-							"§6" + serverMaxProtocol };
+					failure = "modkit.protocol.outdated.remote";
+					args = new Object[] { "§6" + ModKitProtocol.CURRENT, "§6" + serverMinProtocol };
 					info("Connection failed: outdated client modkit protocol: " + ModKitProtocol.CURRENT
 							+ ", server protocol: " + serverProtocol + " (min: " + serverMinProtocol + ", max: "
 							+ serverMaxProtocol + ")");
