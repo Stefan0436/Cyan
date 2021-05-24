@@ -375,7 +375,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 				if (cp.isEmpty())
 					cp = lib.getCanonicalPath();
 				else
-					cp += ":" + lib.getCanonicalPath();
+					cp += (OsInfo.getCurrent() == OsInfo.windows ? ";" : ":") + lib.getCanonicalPath();
 			}
 			if (keys.containsKey("mtk.append.classpath")) {
 				for (String lib : Splitter.split(keys.get("mtk.append.classpath"), ':')) {
