@@ -26,6 +26,7 @@ import javax.swing.JTextField;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import java.awt.FlowLayout;
 
 public class YggdrasilAuthenticationWindow {
 
@@ -63,9 +64,12 @@ public class YggdrasilAuthenticationWindow {
 		}
 	}
 
+	/**
+	 * @wbp.parser.entryPoint
+	 */
 	private void initialize() {
 		frame = new JDialog();
-		frame.setBounds(100, 100, 622, 399);
+		frame.setBounds(100, 100, 671, 399);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
@@ -80,44 +84,35 @@ public class YggdrasilAuthenticationWindow {
 		JPanel panel = new JPanel();
 		panel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		frame.getContentPane().add(panel, BorderLayout.CENTER);
+		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 
-		JLabel lblNewLabel = new JLabel("Minecraft Username");
+		JPanel panel_2 = new JPanel();
+		panel_2.setPreferredSize(new Dimension(600, 200));
+		panel_2.setLayout(null);
 
 		textField = new JTextField();
+		textField.setBounds(0, 69, 600, 19);
+		panel_2.add(textField);
 		textField.setColumns(10);
 
+		JLabel lblNewLabel = new JLabel("Minecraft Username");
+		lblNewLabel.setBounds(0, 48, 600, 15);
+		panel_2.add(lblNewLabel);
+
 		JLabel lblNewLabel_1 = new JLabel("Minecraft Password");
+		lblNewLabel_1.setBounds(0, 94, 600, 15);
+		panel_2.add(lblNewLabel_1);
 
 		textField_1 = new JPasswordField();
+		textField_1.setBounds(0, 115, 600, 19);
+		panel_2.add(textField_1);
 		textField_1.setEnabled(false);
 		textField_1.setColumns(10);
 
 		lblNewLabel_2 = new JLabel("");
-
-		GroupLayout gl_panel = new GroupLayout(panel);
-		gl_panel.setHorizontalGroup(gl_panel.createParallelGroup(Alignment.LEADING).addGroup(gl_panel
-				.createSequentialGroup().addContainerGap()
-				.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
-						.addComponent(textField, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 594, Short.MAX_VALUE)
-						.addComponent(lblNewLabel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 594, Short.MAX_VALUE)
-						.addGroup(Alignment.TRAILING,
-								gl_panel.createParallelGroup(Alignment.LEADING)
-										.addComponent(lblNewLabel_1, GroupLayout.PREFERRED_SIZE, 594,
-												GroupLayout.PREFERRED_SIZE)
-										.addComponent(textField_1, GroupLayout.PREFERRED_SIZE, 594,
-												GroupLayout.PREFERRED_SIZE))
-						.addComponent(lblNewLabel_2))
-				.addContainerGap()));
-		gl_panel.setVerticalGroup(gl_panel.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel.createSequentialGroup().addGap(41).addComponent(lblNewLabel)
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-								GroupLayout.PREFERRED_SIZE)
-						.addPreferredGap(ComponentPlacement.UNRELATED).addComponent(lblNewLabel_1).addGap(6)
-						.addComponent(textField_1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-								GroupLayout.PREFERRED_SIZE)
-						.addGap(33).addComponent(lblNewLabel_2).addContainerGap(90, Short.MAX_VALUE)));
-		panel.setLayout(gl_panel);
+		lblNewLabel_2.setBounds(0, 146, 600, 42);
+		panel_2.add(lblNewLabel_2);
+		panel.add(panel_2);
 
 		JPanel panel_1 = new JPanel();
 		frame.getContentPane().add(panel_1, BorderLayout.SOUTH);
@@ -135,7 +130,8 @@ public class YggdrasilAuthenticationWindow {
 			public void actionPerformed(ActionEvent arg0) {
 				info = null;
 				lblNewLabel_2.setText("");
-				if (!textField.getText().isEmpty() && (textField.hasFocus() || (btnNewButton.hasFocus() && textField_1.getPassword().length == 0))) {
+				if (!textField.getText().isEmpty() && (textField.hasFocus()
+						|| (btnNewButton.hasFocus() && textField_1.getPassword().length == 0))) {
 					if (YggdrasilAuthentication.hasBeenSaved(textField.getText())) {
 						try {
 							info = YggdrasilAuthentication.authenticate(textField.getText());
