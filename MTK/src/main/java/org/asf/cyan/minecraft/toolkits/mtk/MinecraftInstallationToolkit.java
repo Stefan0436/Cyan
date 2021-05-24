@@ -397,7 +397,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 			if (cp.isEmpty())
 				cp = mainJar.getCanonicalPath();
 			else
-				cp += ":" + mainJar.getCanonicalPath();
+				cp += (OsInfo.getCurrent() == OsInfo.windows ? ";" : ":") + mainJar.getCanonicalPath();
 		}
 
 		keys.put("version_name", version.getVersion());
