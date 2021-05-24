@@ -1,6 +1,7 @@
 package org.asf.cyan;
 
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -39,6 +40,8 @@ import javax.swing.JOptionPane;
 import java.awt.Dimension;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import java.awt.Font;
 import javax.swing.border.BevelBorder;
@@ -409,6 +412,11 @@ public class Installer extends CyanComponent {
 		MinecraftInstallationToolkit.setMinecraftDirectory(cache);
 
 		if (!cli) {
+			try {
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+					| UnsupportedLookAndFeelException e1) {
+			}
 			frmCyanInstaller = new JFrame();
 			frmCyanInstaller.setTitle("Installer");
 			frmCyanInstaller.setResizable(false);
@@ -435,7 +443,7 @@ public class Installer extends CyanComponent {
 		lblNewLabel.setVerticalAlignment(SwingConstants.TOP);
 		lblNewLabel.setPreferredSize(new Dimension(200, 18));
 
-		JLabel lblKickstart = new JLabel("KickStart Installer 1.4 ");
+		JLabel lblKickstart = new JLabel("KickStart Installer 1.5 ");
 		panel.add(lblKickstart, BorderLayout.EAST);
 		lblKickstart.setFont(new Font("SansSerif", Font.BOLD, 12));
 		lblKickstart.setHorizontalAlignment(SwingConstants.TRAILING);
@@ -464,15 +472,20 @@ public class Installer extends CyanComponent {
 		lblNewLabel_2.setFont(new Font("SansSerif", Font.PLAIN, 16));
 		panel_1.add(lblNewLabel_2, BorderLayout.SOUTH);
 
+		JPanel panel_3 = new JPanel();
+		panel_3.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		
 		JPanel panel_2 = new JPanel();
-		panel_2.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		panel_2.setPreferredSize(new Dimension(555, 200));
+		panel_3.add(panel_2);
 
 		if (!cli)
-			frmCyanInstaller.getContentPane().add(panel_2, BorderLayout.CENTER);
+			frmCyanInstaller.getContentPane().add(panel_3, BorderLayout.CENTER);
+		panel_3.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
 		panel_2.setLayout(null);
 
 		textField = new JTextField();
-		textField.setBounds(77, 130, 365, 26);
+		textField.setBounds(35, 120, 365, 26);
 		textField.setText(new File(dir, ".minecraft").getAbsolutePath());
 		JButton btnNewButton = new JButton("Install Client");
 		btnNewButton.addActionListener(new ActionListener() {
@@ -503,7 +516,7 @@ public class Installer extends CyanComponent {
 				}, "Installer").start();
 			}
 		});
-		btnNewButton.setBounds(42, 93, 275, 25);
+		btnNewButton.setBounds(0, 83, 275, 25);
 		panel_2.add(btnNewButton);
 
 		JButton btnNewButton_1 = new JButton("Create Server");
@@ -540,7 +553,7 @@ public class Installer extends CyanComponent {
 				}, "Installer").start();
 			}
 		});
-		btnNewButton_1.setBounds(322, 93, 275, 25);
+		btnNewButton_1.setBounds(280, 83, 275, 25);
 		panel_2.add(btnNewButton_1);
 
 		panel_2.add(textField);
@@ -557,16 +570,16 @@ public class Installer extends CyanComponent {
 					textField.setText(f.getSelectedFile().getAbsolutePath());
 			}
 		});
-		btnNewButton_2.setBounds(445, 130, 117, 25);
+		btnNewButton_2.setBounds(403, 119, 117, 28);
 		panel_2.add(btnNewButton_2);
 
 		chckbxNewCheckBox = new JCheckBox("Create launcher profile");
 		chckbxNewCheckBox.setSelected(true);
-		chckbxNewCheckBox.setBounds(77, 156, 189, 23);
+		chckbxNewCheckBox.setBounds(35, 146, 189, 23);
 		panel_2.add(chckbxNewCheckBox);
 
 		chckbxNewCheckBox_1 = new JCheckBox("Associate Mod Installer Extensions");
-		chckbxNewCheckBox_1.setBounds(270, 156, 292, 23);
+		chckbxNewCheckBox_1.setBounds(228, 146, 292, 23);
 		if (project.platform.equals("SPIGOT")) {
 			btnNewButton.setVisible(false);
 			btnNewButton_1.setSize(275 + 280, 25);

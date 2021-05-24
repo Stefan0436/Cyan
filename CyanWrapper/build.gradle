@@ -405,6 +405,10 @@ dependencies {
 	implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
 
 	wrapper 'org.javassist:javassist:3.27.1-ASF-SNAPSHOT-5'
+	implementation (project(':ModKit')) {
+        exclude group: '', module: 'server'
+        exclude group: '', module: 'client'
+	}
 
 	// wrapper project(":MixinSupport")
 	// implementation project(":MixinSupport")
