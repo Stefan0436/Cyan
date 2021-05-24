@@ -44,8 +44,8 @@ public class ProcessingOutputAppender extends AbstractAppender {
 	public void append(LogEvent event) {
 		String msg = new String(this.getLayout().toByteArray(event));
 		if (CyanCore.isIdeMode()) {
-			msg = msg.replaceAll("§.", "");
-		} else if (msg.contains("§")) {
+			msg = msg.replaceAll("\u00A7", "");
+		} else if (msg.contains("\u00A7")) {
 			String newMsg = "";
 			boolean escape = false;
 			boolean check = false;
@@ -99,11 +99,11 @@ public class ProcessingOutputAppender extends AbstractAppender {
 					} else if (ch == 'r') {
 						newMsg += ansi().reset();
 					} else if (ch != 'k') {
-						newMsg += "§" + ch;
+						newMsg += "\u00A7" + ch;
 					}
 					continue;
 				}
-				if (ch == '§') {
+				if (ch == '\u00A7') {
 					check = true;
 				} else {
 					newMsg += ch;
