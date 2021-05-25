@@ -4,7 +4,7 @@
 	position: -webkit-sticky;
 	position: sticky;
 	top: 0;
-	height: 5%;
+	height: 45px;
 }
 
 ul {
@@ -45,7 +45,7 @@ li a:hover {
 
 #logo {
 	width: 24px;
-	height: 15px;
+	height: 17px;
 	background-image: url(../images/logo.jpg);
 	background-position: center;
 	background-repeat: no-repeat;

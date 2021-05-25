@@ -1,13 +1,161 @@
+body {
+	margin: 0;
+}
+
+#imageBtn {
+    display: block;
+	font-size: 16px;
+	width: calc(100% - 4px);
+	border: 2px outset grey;
+    text-align: center;
+	margin-right: 0.5%;
+	background-color: white;
+	user-select: none;
+    transition: 0.2s;
+}
+
+#imageBtn:active {
+    transition: 0.2s;
+	background-color: lightgrey;
+}
+
+button {
+    transition: 0.2s;
+	border: 2px outset grey;
+	background-color: white;
+}
+
+button:active {
+    transition: 0.2s;
+	background-color: lightgrey;
+}
+
+#content {
+	background-color: darkgrey;
+    height: calc(100% - 45px);
+}
+
+.accountbar {
+	float: right;
+	width: calc(100% - 57px);
+	height: 48px;
+	margin: 0px;
+	border-bottom: 0.5px solid black;
+	background-color: grey;
+    transition: width 0.4s;
+}
+
+#detailcontent {
+	margin: 5px;
+	width: 94.25%;
+}
+
+#usernameBox {
+	width: 100%;
+}
+
+#nicknameBox {
+	width: 100%;
+}
+
+#accountdetails {	
+	position: absolute;
+	background-color: grey;
+	
+	width: 185px;
+	height: 255px;
+	
+	border: 2px solid white;
+	border-radius: 5px;
+	
+	top: 105px;
+	right: 0;
+	margin: 3px;
+}
+
+#accountdetails::after {
+  content: " ";
+  position: absolute;
+  bottom: 101%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent white transparent;
+}
+
+.closedaccount {
+	opacity: 0;
+	transition: 0.4s;
+	visibility: hidden;	
+}
+
+.openaccount {
+	opacity: 1;
+	transition: 0.4s;
+	visibility: visible;
+}
+
+.account-details {
+	float: right;
+	width: 195px;
+	height: 100%;
+	background-color: darkgrey;
+	border-left: 1px solid;
+	user-select: none;
+    transition: background 0.4s;
+}
+
+.account-details:hover {
+	background-color: grey;
+    transition: 0.4s;
+}
+
+.account-name {
+	margin-left: 2;
+	margin-top: 5.5;
+}
+
+.account-image {
+	position: absolute;
+	right: 1px;
+	top: 45px;
+	margin: 2px;
+	width: 43px;
+	height: 43px;
+	text-align: center;
+	font-size: 31px;
+	border-radius: 33px;
+	border: 1px solid;	
+	background-color: grey;
+}
+
+.change .accountbar {
+	width: calc(100% - 199px);
+}
+
 .sidebar {
 	float: left;
 	width: 56px;
 	background: rgba(95, 95, 95, 0.85);
-    height: 95vh;
-	transition: 0.4s;
+    height: 100%;
+    transition: width 0.4s;
+	border-right: 0.5px solid black;
+}
+
+.entries {
+	overflow: hidden;
+	overflow-y: hidden;
+	float: left;
+	width: 100%;
+	height: calc(100% - 45px);
 }
 
 .menu-control-container {
+	margin-top: 5px;
+	margin-bottom: 5px;
 	height: 40px;
+	width: 100%;
 	margin-bottom: 2px;
 }
 
@@ -46,6 +194,14 @@
 	height: auto;
 	width: 100%;
 	color: white;
+	opacity: 1;
+	transition: 0.4s;	
+}
+
+.hidden {
+	visibility: hidden;
+	opacity: 0;
+	transition: 0.4s;
 }
 
 .entry {

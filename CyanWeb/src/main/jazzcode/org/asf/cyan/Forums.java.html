@@ -4,17 +4,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <title>Forums - The Cyan Modloader</title>
 </head>
-<script>
-function toggleMenu(cont) {
-	if (cont.classList.contains("change")) {
-		document.getElementsByClassName("sidebar")[0].style.width = "56px";
-		document.getElementsByClassName("menu-control")[0].style.left = "10px";
-	} else {
-		document.getElementsByClassName("sidebar")[0].style.width = "198px";
-		document.getElementsByClassName("menu-control")[0].style.left = "84px";	
-	}
-	cont.classList.toggle("change");
-}
+<script src="js/Forums.js">
 </script>
 <body>
 	<?jcil
@@ -27,18 +17,54 @@ function toggleMenu(cont) {
 	<div id="content">
 		<div class="sidebar">
 			<ul class="sidemenu">
-				<li class="header">
-					<div class="menu-control-container" onclick="toggleMenu(this)">
-						<div class="menu-control">
+				<li style="height:auto;width:100%">
+					<div class="menu-control-container" onclick="toggleMenu(document.getElementById('content'))">
+						<div class="menu-control" title="Show the menu">
 							<div class="menu-cont-bar1"></div>
 							<div class="menu-cont-bar2"></div>
 							<div class="menu-cont-bar3"></div>
 						</div>
 					</div>
 				</li>
-				<li class="header">Tags</li>
-				<li class="entry"><a>test</a></li>
+				<div class="entries">
+					<li class="header hidden">Tags</li>
+					<li class="entry hidden"><a href="..">test</a></li>
+				</div>
 			</ul>
 		</div>
-	</div>
+		<div class="accountbar">
+			<div class="account-details" onclick="account()">
+				<div class="account-name">
+					<a>Profile:</a><br/>
+					<a id="nickname">Not Logged In</a>
+				</div>
+				<div class="account-image">
+					&#10068;
+				</div>
+			</div>
+		</div>
+		<div id="accountdetails" class="closedaccount">
+			<div id="detailcontent">
+				Username:<br/>
+				<input type="text" id="usernameBox"></textarea>
+				<br/>
+				<br/>
+				Nickname:<br/>
+				<input type="text" id="nicknameBox"></textarea>
+				<br/>
+				<br/>
+				Image:<br/>
+				<form id="imageUpload" action="jc:changeProfileIcon()" method="post" enctype="multipart/form-data">
+					<input id="image" type="file" onchange="selectFile()" accept=".jpg;.jpeg" style="display:none;"></input>
+					<label id="imageBtn" for="image">Select file...</label>
+				</form>
+				<button style="float:right;width:50%">Save</button>
+				<button style="float:left;width:50%" onclick="resetAccount()">Cancel</button>
+				<br/>
+				<br/>
+				<br/>
+				<button style="width:100%">Log out</button>
+			</div>
+		</div>
+	</div>	
 </body>
