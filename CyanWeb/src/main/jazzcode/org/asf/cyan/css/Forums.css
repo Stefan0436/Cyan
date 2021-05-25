@@ -58,6 +58,43 @@ button:active {
 	width: 100%;
 }
 
+#confirmlogout {
+	position: absolute;
+	
+	border: 0.5px inset black;
+	background-color: lightgrey;
+}
+
+.inactiveLogout {
+	top: 50%;
+	left: 50%;
+	width: 0px;
+	height: 0px;
+	opacity: 0;
+	transition: 0.4s;
+	visibility: hidden;
+}
+
+.inactiveLogoutTitle {
+	font-size: 0;
+	transition: 0.1s;
+}
+
+.activeLogoutTitle {
+	font-size: 24;
+	transition: 0.1s;
+}
+
+.activeLogout {
+	top: calc(50% - 100px);
+	left: calc(50% - 200px);
+	width: 400px;
+	height: 200px;
+	opacity: 1;
+	transition: 0.4s;
+	visibility: visible;
+}
+
 #accountdetails {	
 	position: absolute;
 	background-color: grey;

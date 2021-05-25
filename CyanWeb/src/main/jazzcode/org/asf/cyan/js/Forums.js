@@ -52,3 +52,10 @@ function resetAccount() {
 	document.getElementById("image").value = ""
 	document.getElementById("imageBtn").innerHTML = "Select file...";
 }
+
+function toggleLogout() {
+	document.getElementById("confirmlogout").classList.toggle("activeLogout");
+	document.getElementById("confirmlogout").classList.toggle("inactiveLogout");
+	document.getElementById("logoutTitle").classList.toggle("activeLogoutTitle");
+	document.getElementById("logoutTitle").classList.toggle("inactiveLogoutTitle");
+}
