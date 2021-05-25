@@ -4,10 +4,11 @@
 	position: -webkit-sticky;
 	position: sticky;
 	top: 0;
+	height: 5%;
 }
 
 ul {
-	height: 45px;
+	height: 100%;
 	list-style-type: none;
 	margin: 0;
 	padding: 0;
@@ -43,8 +44,8 @@ li a:hover {
 }
 
 #logo {
-	width: 20px;
-	height: 20px;
+	width: 24px;
+	height: 15px;
 	background-image: url(../images/logo.jpg);
 	background-position: center;
 	background-repeat: no-repeat;

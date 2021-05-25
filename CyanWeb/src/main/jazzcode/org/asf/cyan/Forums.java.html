@@ -1,0 +1,44 @@
+<html></html>
+<head>
+<link rel="stylesheet" href="css/Forums.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<title>Forums - The Cyan Modloader</title>
+</head>
+<script>
+function toggleMenu(cont) {
+	if (cont.classList.contains("change")) {
+		document.getElementsByClassName("sidebar")[0].style.width = "56px";
+		document.getElementsByClassName("menu-control")[0].style.left = "10px";
+	} else {
+		document.getElementsByClassName("sidebar")[0].style.width = "198px";
+		document.getElementsByClassName("menu-control")[0].style.left = "84px";	
+	}
+	cont.classList.toggle("change");
+}
+</script>
+<body>
+	<?jcil
+	install "org.asf.cyan.Forums"
+	install "org.asf.cyan.webcomponents.AnimatedFadein"; run installFadein()
+	install "org.asf.cyan.webcomponents.Menubar"; run installMenubar()
+	set page "Forums"
+	run init()
+	?>
+	<div id="content">
+		<div class="sidebar">
+			<ul class="sidemenu">
+				<li class="header">
+					<div class="menu-control-container" onclick="toggleMenu(this)">
+						<div class="menu-control">
+							<div class="menu-cont-bar1"></div>
+							<div class="menu-cont-bar2"></div>
+							<div class="menu-cont-bar3"></div>
+						</div>
+					</div>
+				</li>
+				<li class="header">Tags</li>
+				<li class="entry"><a>test</a></li>
+			</ul>
+		</div>
+	</div>
+</body>

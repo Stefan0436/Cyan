@@ -94,6 +94,11 @@ public class NewsBackend extends JWebService {
 					function.getClient(), null, null, null);
 		}
 		while (refreshing) {
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				break;
+			}
 		}
 
 		ArrayList<NewsMessage> messages = new ArrayList<NewsMessage>(newsMessages);
