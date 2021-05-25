@@ -50,5 +50,5 @@ function selectFile() {
 
 function resetAccount() {
 	document.getElementById("image").value = ""
-		document.getElementById("imageBtn").innerHTML = "Select file...";
+	document.getElementById("imageBtn").innerHTML = "Select file...";
 }

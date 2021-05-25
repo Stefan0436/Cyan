@@ -47,7 +47,7 @@ button:active {
 
 #detailcontent {
 	margin: 5px;
-	width: 94.25%;
+	width: 96%;
 }
 
 #usernameBox {
@@ -62,8 +62,8 @@ button:active {
 	position: absolute;
 	background-color: grey;
 	
-	width: 185px;
-	height: 255px;
+	width: 248px;
+	height: 278px;
 	
 	border: 2px solid white;
 	border-radius: 5px;
@@ -98,7 +98,7 @@ button:active {
 
 .account-details {
 	float: right;
-	width: 195px;
+	width: 256px;
 	height: 100%;
 	background-color: darkgrey;
 	border-left: 1px solid;
