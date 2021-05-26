@@ -64,14 +64,13 @@ function resetAccount() {
 }
 
 function changeAccountInfo() {
+	account();
+	document.getElementById("cancelLogin").classList.toggle("cancelLoginActive");
+	document.getElementById("cancelLogin").classList.toggle("cancelLoginInactive");
+	document.getElementById("cancelLogin").innerHTML = "Submitting changes...";
+	document.getElementById("cancelLogin").disabled = true;
+	document.getElementsByClassName("account-details")[0].onclick = function(){}
 	if (document.getElementById("image").files.length != 0) {
-		account();
-		document.getElementById("cancelLogin").classList.toggle("cancelLoginActive");
-		document.getElementById("cancelLogin").classList.toggle("cancelLoginInactive");
-		document.getElementById("cancelLogin").innerHTML = "Submitting changes...";
-		document.getElementById("cancelLogin").disabled = true;
-		document.getElementsByClassName("account-details")[0].onclick = function(){}
-	
 		url = document.getElementById("imageUpload").action;
 	    $.ajax({
 	      	url: url,
@@ -137,6 +136,34 @@ function changeAccountInfo() {
 			success: function(json) {
 				document.getElementById("nickname").innerHTML = json.nickname;
 				$("#account-image").css("background-image", "url('data:image/png;base64, " + json.accountimage+"')'");
+				document.getElementById("cancelLogin").innerHTML = "Upload completed"
+				document.getElementById("cancelLogin").style.backgroundColor = "green";
+				setTimeout(function(){
+					document.getElementById("cancelLogin").style.backgroundColor = "white";
+					setTimeout(function(){
+						document.getElementById("cancelLogin").style.backgroundColor = "green";
+						setTimeout(function(){
+							document.getElementById("cancelLogin").style.backgroundColor = "white";
+							setTimeout(function(){
+								document.getElementById("cancelLogin").style.backgroundColor = "green";
+								setTimeout(function(){
+									document.getElementById("cancelLogin").classList.toggle("cancelLoginInactive");
+									setTimeout(function() {
+									document.getElementById("cancelLogin").classList.toggle("cancelLoginActive");
+										document.getElementById("cancelLogin").style.backgroundColor = "white";
+							      		document.getElementById("cancelLogin").innerHTML = "Cancel Login";
+										document.getElementById("cancelLogin").disabled = false;
+									}, 500);
+									document.getElementById("image").value = ""
+									document.getElementById("imageBtn").innerHTML = "Select file...";
+									document.getElementsByClassName("account-details")[0].onclick = function(){
+										accountCheck();
+									}
+								}, 500)	
+							}, 500)
+						}, 500)						
+					}, 500)
+				}, 500)
 			}
 		})
 	}
