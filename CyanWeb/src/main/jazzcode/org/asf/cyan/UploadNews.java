@@ -159,8 +159,8 @@ public class UploadNews extends AbstractWebComponent {
 				getResponse().message = "File found";
 
 				String path = URLDecoder.decode(function.parameters[0], "UTF-8");
-				getCookies().set("session",
-						Cookie.create("session").setValue("logout").setOption(CookieOption.PATH, "/"));
+				getCookies().set(group + ".session",
+						Cookie.create(group + ".session").setValue("logout").setOption(CookieOption.PATH, "/"));
 				getResponse().headers.put("Location", path);
 			}
 		}

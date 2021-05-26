@@ -61,7 +61,7 @@ public class Forums extends AbstractWebComponent {
 		if (user != null) {
 			function.writeLine("account();");
 		} else {
-			getCookies().set("session", Cookie.create("session").setValue("logout").setOption(CookieOption.PATH, "/"));
+			getCookies().set("cyanforums.session", Cookie.create("cyanforums.session").setValue("logout").setOption(CookieOption.PATH, "/"));
 			function.writeLine("document.getElementById(\"loginFrame\").classList.toggle(\"loginFrameActive\");");
 			function.writeLine("document.getElementById(\"loginFrame\").classList.toggle(\"loginFrameInactive\");");
 			function.writeLine("document.getElementById(\"cancelLogin\").classList.toggle(\"cancelLoginActive\");");
@@ -144,7 +144,7 @@ public class Forums extends AbstractWebComponent {
 						+ userData.get("avatar", String.class) + "')\")");
 			}
 		} else {
-			getCookies().set("session", Cookie.create("session").setValue("logout").setOption(CookieOption.PATH, "/"));
+			getCookies().set("cyanforums.session", Cookie.create("cyanforums.session").setValue("logout").setOption(CookieOption.PATH, "/"));
 		}
 	}
 
@@ -207,7 +207,7 @@ public class Forums extends AbstractWebComponent {
 			return;
 
 		if (!frontend.check("cyanforums", getRequest(), getResponse())) {
-			getCookies().set("session", Cookie.create("session").setValue("logout").setOption(CookieOption.PATH, "/"));
+			getCookies().set("cyanforums.session", Cookie.create("cyanforums.session").setValue("logout").setOption(CookieOption.PATH, "/"));
 			function.write("&#10068;");
 		}
 	}
@@ -221,7 +221,7 @@ public class Forums extends AbstractWebComponent {
 			return;
 		}
 		if (query.containsKey("logout") && query.get("logout").equals("true")) {
-			getCookies().set("session", Cookie.create("session").setValue("logout").setOption(CookieOption.PATH, "/"));
+			getCookies().set("cyanforums.session", Cookie.create("cyanforums.session").setValue("logout").setOption(CookieOption.PATH, "/"));
 		}
 	}
 
