@@ -6,71 +6,104 @@
 </head>
 <script src="js/Forums.js">
 </script>
+<?jcil
+install "org.asf.cyan.Forums"
+install "org.asf.cyan.webcomponents.AnimatedFadein"; run installFadein()
+install "org.asf.cyan.webcomponents.Menubar"; run installMenubar()
+set page "Forums"
+?>
+<script>
+
+_oldNav = window.navDirect;
+window.navDirect = function(target) {
+	if (document.getElementById("cancelLogin").classList.contains("cancelLoginActive")) {
+		document.getElementById("cancelLogin").classList.toggle("cancelLoginInactive");
+		document.getElementById("cancelLogin").classList.toggle("cancelLoginActive");
+	}
+	_oldNav(target);
+}
+
+</script>
 <body>
 	<?jcil
-	install "org.asf.cyan.Forums"
-	install "org.asf.cyan.webcomponents.AnimatedFadein"; run installFadein()
-	install "org.asf.cyan.webcomponents.Menubar"; run installMenubar()
-	set page "Forums"
 	run init()
 	?>
 	<div id="content">
-		<div class="sidebar">
-			<ul class="sidemenu">
-				<li style="height:auto;width:100%">
-					<div class="menu-control-container" onclick="toggleMenu(document.getElementById('content'))">
-						<div class="menu-control" title="Show the menu">
-							<div class="menu-cont-bar1"></div>
-							<div class="menu-cont-bar2"></div>
-							<div class="menu-cont-bar3"></div>
+		<div id="forumDiv">
+			<div class="sidebar">
+				<ul class="sidemenu">
+					<li style="height:auto;width:100%">
+						<div class="menu-control-container" onclick="toggleMenu(document.getElementById('content'))">
+							<div class="menu-control" title="Show the menu">
+								<div class="menu-cont-bar1"></div>
+								<div class="menu-cont-bar2"></div>
+								<div class="menu-cont-bar3"></div>
+							</div>
 						</div>
+					</li>
+					<div class="entries">
+						<li class="header hidden">Tags</li>
+						<li class="entry hidden"><a href="..">test</a></li>
 					</div>
-				</li>
-				<div class="entries">
-					<li class="header hidden">Tags</li>
-					<li class="entry hidden"><a href="..">test</a></li>
+				</ul>
+			</div>
+			<div id="confirmlogout" class="inactiveLogout">
+				<a id="logoutTitle" class="inactiveLogoutTitle">Are you sure you want to log out?</a>
+				<hr class="ln" style="margin-top:0">
+				<button id="cancelLogout" class="cancelLogoutInactive" onclick="toggleLogout()">Cancel</button>
+				<button id="confirmLogoutBtn" class="confirmLogoutBtnInactive" onclick="logoutConfirmBtn()">Logout</button>
+			</div>
+			<div class="accountbar">
+				<div class="account-details" onclick="accountCheck()">
+					<div class="account-name">
+						<a>Profile:</a><br/>
+						<a id="nickname">Not Logged In</a>
+					</div>
+					<div id="account-image">
+						<?jcil
+						run accountImage()
+						?>
+					</div>
 				</div>
-			</ul>
-		</div>
-		<div id="confirmlogout" class="inactiveLogout">
-			<a id="logoutTitle" class="inactiveLogoutTitle">Are you sure you want to log out?</a>
-			<hr class="ln" style="margin-top:0"><br />
-		</div>
-		<div class="accountbar">
-			<div class="account-details" onclick="account()">
-				<div class="account-name">
-					<a>Profile:</a><br/>
-					<a id="nickname">Not Logged In</a>
-				</div>
-				<div class="account-image">
-					&#10068;
+			</div>
+			<div id="accountdetails" class="closedaccount">
+				<div id="detailcontent">
+					Username:<br/>
+					<input type="text" id="usernameBox"></textarea>
+					<br/>
+					<br/>
+					Nickname:<br/>
+					<input type="text" id="nicknameBox"></textarea>
+					<br/>
+					<br/>
+					Image:<br/>
+					<form id="imageUpload" action="jc:changeProfileIcon()" method="post" enctype="multipart/form-data">
+						<input id="image" type="file" onchange="selectFile()" accept=".jpg;.jpeg" style="display:none;" name="avatar"></input>
+						<label id="imageBtn" for="image">Select file...</label>
+					</form>
+					<button style="float:right;width:50%" onclick="changeAccountInfo()">Save</button>
+					<button style="float:left;width:50%" onclick="resetAccount()">Cancel</button>
+					<br/>
+					<br/>
+					<br/>
+					<button style="width:100%" onclick="logoutBtn()">Log out</button>
+					<br/>
+					<button style="width:100%" onclick="account()">Close menu</button>
 				</div>
 			</div>
 		</div>
-		<div id="accountdetails" class="closedaccount">
-			<div id="detailcontent">
-				Username:<br/>
-				<input type="text" id="usernameBox"></textarea>
-				<br/>
-				<br/>
-				Nickname:<br/>
-				<input type="text" id="nicknameBox"></textarea>
-				<br/>
-				<br/>
-				Image:<br/>
-				<form id="imageUpload" action="jc:changeProfileIcon()" method="post" enctype="multipart/form-data">
-					<input id="image" type="file" onchange="selectFile()" accept=".jpg;.jpeg" style="display:none;"></input>
-					<label id="imageBtn" for="image">Select file...</label>
-				</form>
-				<button style="float:right;width:50%">Save</button>
-				<button style="float:left;width:50%" onclick="resetAccount()">Cancel</button>
-				<br/>
-				<br/>
-				<br/>
-				<button style="width:100%">Log out</button>
-				<br/>
-				<button style="width:100%" onclick="account()">Close menu</button>
-			</div>
-		</div>
-	</div>	
+		<iframe class="loginFrameInactive" id="loginFrame" frameBorder="0">
+		</iframe>
+		<button id="cancelLogin" class="cancelLoginInactive" onclick="cancelLogin()">Cancel Login</button>
+	</div>
 </body>
+<script>
+function accountCheck() {
+	<?jcil
+	run accountCheckJavaScript()
+	?>
+}
+<?jcil
+run accountSetupJavaScript()
+?>
+</script>

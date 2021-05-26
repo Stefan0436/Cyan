@@ -51,6 +51,105 @@ function selectFile() {
 function resetAccount() {
 	document.getElementById("image").value = ""
 	document.getElementById("imageBtn").innerHTML = "Select file...";
+	
+	$.ajax({
+		method: "GET",
+        dataType: "json",
+		url: "/org.asf.cyan.Forums/jz:pullUserInfo()",
+		success: function(json) {
+			document.getElementById("usernameBox").value = json.username;
+			document.getElementById("nicknameBox").value = json.nickname;
+		}
+	})
+}
+
+function changeAccountInfo() {
+	if (document.getElementById("image").files.length != 0) {
+		account();
+		document.getElementById("cancelLogin").classList.toggle("cancelLoginActive");
+		document.getElementById("cancelLogin").classList.toggle("cancelLoginInactive");
+		document.getElementById("cancelLogin").innerHTML = "Submitting changes...";
+		document.getElementById("cancelLogin").disabled = true;
+		document.getElementsByClassName("account-details")[0].onclick = function(){}
+	
+		url = document.getElementById("imageUpload").action;
+	    $.ajax({
+	      	url: url,
+		    type: 'POST',
+		    data: new FormData( document.getElementById("imageUpload") ),
+		    processData: false,
+		    contentType: false,
+	      	success: function() {
+				$.ajax({
+					method: "POST",
+			        dataType: "json",
+			        contentType: 'application/x-www-form-urlencoded',
+					url: "/org.asf.cyan.Forums/jz:updateUserInfo()",
+					data: {
+						"nickname": document.getElementById("nicknameBox").value,
+						"username": document.getElementById("usernameBox").value
+					},
+					success: function(json) {
+						document.getElementById("nickname").innerHTML = json.nickname;
+						$("#account-image").css("background-image", "url('data:image/png;base64, " + json.accountimage+"')");
+						document.getElementById("cancelLogin").innerHTML = "Upload completed"
+						document.getElementById("cancelLogin").style.backgroundColor = "green";
+						setTimeout(function(){
+							document.getElementById("cancelLogin").style.backgroundColor = "white";
+							setTimeout(function(){
+								document.getElementById("cancelLogin").style.backgroundColor = "green";
+								setTimeout(function(){
+									document.getElementById("cancelLogin").style.backgroundColor = "white";
+									setTimeout(function(){
+										document.getElementById("cancelLogin").style.backgroundColor = "green";
+										setTimeout(function(){
+											document.getElementById("cancelLogin").classList.toggle("cancelLoginInactive");
+											setTimeout(function() {
+											document.getElementById("cancelLogin").classList.toggle("cancelLoginActive");
+												document.getElementById("cancelLogin").style.backgroundColor = "white";
+									      		document.getElementById("cancelLogin").innerHTML = "Cancel Login";
+												document.getElementById("cancelLogin").disabled = false;
+											}, 500);
+											document.getElementById("image").value = ""
+											document.getElementById("imageBtn").innerHTML = "Select file...";
+											document.getElementsByClassName("account-details")[0].onclick = function(){
+												accountCheck();
+											}
+										}, 500)	
+									}, 500)
+								}, 500)						
+							}, 500)
+						}, 500)
+					}
+				})
+	   		}	
+		})
+	} else {
+		$.ajax({
+			method: "POST",
+	        dataType: "json",
+	        contentType: 'application/x-www-form-urlencoded',
+			url: "/org.asf.cyan.Forums/jz:updateUserInfo()",
+			data: {
+				"nickname": document.getElementById("nicknameBox").value,
+				"username": document.getElementById("usernameBox").value
+			},
+			success: function(json) {
+				document.getElementById("nickname").innerHTML = json.nickname;
+				$("#account-image").css("background-image", "url('data:image/png;base64, " + json.accountimage+"')'");
+			}
+		})
+	}
+}
+
+function logoutBtn() {
+	account();
+	toggleLogout();
+}
+
+function logoutConfirmBtn() {
+	toggleLogout();
+	navDirect(window.location + "&logout=true&returnurl=" + encodeURIComponent(window.location))
 }
 
 function toggleLogout() {
@@ -58,4 +157,17 @@ function toggleLogout() {
 	document.getElementById("confirmlogout").classList.toggle("inactiveLogout");
 	document.getElementById("logoutTitle").classList.toggle("activeLogoutTitle");
 	document.getElementById("logoutTitle").classList.toggle("inactiveLogoutTitle");
+	document.getElementById("cancelLogout").classList.toggle("cancelLogoutInactive");
+	document.getElementById("cancelLogout").classList.toggle("cancelLogoutActive");
+	document.getElementById("confirmLogoutBtn").classList.toggle("confirmLogoutBtnInactive");
+	document.getElementById("confirmLogoutBtn").classList.toggle("confirmLogoutBtnActive");
+}
+
+function cancelLogin() {
+	document.getElementById("loginFrame").classList.toggle("loginFrameInactive");
+	document.getElementById("cancelLogin").classList.toggle("cancelLoginInactive");
+	document.getElementById("cancelLogin").classList.toggle("cancelLoginActive");
+	setTimeout(function() { 
+		document.getElementById("loginFrame").classList.toggle("loginFrameActive");
+	}, 500);
 }
