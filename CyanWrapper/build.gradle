@@ -721,7 +721,7 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 		MinecraftMappingsToolkit.loadMappings(version, GameSide.CLIENT)
 		MinecraftInstallationToolkit.extractNatives(version)
 
-		mainClass project.group+".CyanIDEWrapper"
+		mainClass "org.asf.software.sideterminal.SideTermMain"
 
 		File jar = MinecraftModdingToolkit.deobfuscateJar(version, GameSide.CLIENT)
 		classpath jar
@@ -757,8 +757,8 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
 		jvm MinecraftInstallationToolkit.generateJvmArguments(version, null,
 				new File[0], MinecraftInstallationToolkit.getNativesDirectory(version), jar, null, false)
-		jvm "org.asf.software.sideterminal.SideTermMain"
-
+		argument project.group+".CyanIDEWrapper"
+		
 		Log4jToGradleAppender.noLogInfo()
 	}
 }
@@ -778,7 +778,8 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 			MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.CLIENT)
 		MinecraftInstallationToolkit.extractNatives(version)
 
-		mainClass project.group+".CyanIDEWrapper"
+		mainClass "org.asf.software.sideterminal.SideTermMain"
+		argument project.group+".CyanIDEWrapper"
 
 		File jar = MinecraftInstallationToolkit.getVersionJar(version, GameSide.CLIENT)
 		classpath jar
@@ -836,7 +837,8 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 		}
 		MinecraftMappingsToolkit.loadMappings(version, GameSide.SERVER)
 
-		mainClass project.group+".CyanIDEWrapper"
+		mainClass "org.asf.software.sideterminal.SideTermMain"
+		argument project.group+".CyanIDEWrapper"
 
 		File jar = MinecraftModdingToolkit.deobfuscateJar(version, GameSide.SERVER)
 		libsMC.forEach { k, v ->
@@ -888,7 +890,8 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 		if (MinecraftInstallationToolkit.getVersionJar(version, GameSide.SERVER) == null)
 			MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.SERVER)
 
-		mainClass project.group+".CyanIDEWrapper"
+		mainClass "org.asf.software.sideterminal.SideTermMain"
+		argument project.group+".CyanIDEWrapper"
 
 		File jar = MinecraftInstallationToolkit.getVersionJar(version, GameSide.SERVER)
 		libsMC.forEach { k, v ->
