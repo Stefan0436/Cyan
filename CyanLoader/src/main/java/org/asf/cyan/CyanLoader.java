@@ -2637,4 +2637,41 @@ public class CyanLoader extends ModkitModloader
 		return Protocols.MODKIT_PROTOCOL;
 	}
 
+	public String getLoaders() {
+		String modloaders = "";
+		for (Modloader modloader : Modloader.getAllModloaders()) {
+			if (!modloaders.isEmpty()) {
+				modloaders += ", ";
+			}
+
+			modloaders += modloader.getSimpleName();
+		}
+		return modloaders;
+	}
+
+	public String getLoaderVersions() {
+		String loaderversions = "";
+
+		for (Modloader modloader : Modloader.getAllModloaders()) {
+			if (!loaderversions.isEmpty()) {
+				loaderversions += ", ";
+			}
+			loaderversions += modloader.getName() + "; "
+					+ (modloader.getVersion() == null ? "Generic" : modloader.getVersion());
+		}
+
+		return loaderversions;
+	}
+
+	public void addLoadedModInfo(BiConsumer<String, Object> setDetail) {
+		for (Modloader modloader : Modloader.getAllModloaders()) {
+			if (modloader.supportsMods())
+				setDetail.accept("Loaded " + modloader.getSimpleName().toUpperCase() + " Mods",
+						modloader.getLoadedMods().length);
+			if (modloader.supportsCoreMods())
+				setDetail.accept("Loaded " + modloader.getSimpleName().toUpperCase() + " Coremods",
+						modloader.getLoadedCoremods().length);
+		}
+	}
+
 }

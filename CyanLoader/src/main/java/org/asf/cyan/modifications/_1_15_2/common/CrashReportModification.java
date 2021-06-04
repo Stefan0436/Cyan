@@ -128,31 +128,13 @@ public class CrashReportModification {
 
 	@InjectAt(location = InjectLocation.HEAD, targetCall = "setDetail(java.lang.String, net.minecraft.CrashReportDetail)", targetOwner = "net.minecraft.CrashReportCategory", offset = 2)
 	private void initDetails() {
-		String modloaders = "";
-		String loaderversions = "";
-
-		for (Modloader modloader : Modloader.getAllModloaders()) {
-			if (!modloaders.isEmpty()) {
-				modloaders += ", ";
-				loaderversions += ", ";
-			}
-
-			modloaders += modloader.getSimpleName();
-			loaderversions += modloader.getName() + "; "
-					+ (modloader.getVersion() == null ? "Generic" : modloader.getVersion());
-		}
+		String modloaders = CyanLoader.getModloader(CyanLoader.class).getLoaders();
+		String loaderversions = CyanLoader.getModloader(CyanLoader.class).getLoaderVersions();
 
 		systemDetails.setDetail("Running Modloader(s)", modloaders);
 		systemDetails.setDetail("Modloader Version(s)", loaderversions);
 		systemDetails.setDetail("Modloader Phase", Modloader.getModloader().getPhase());
-		for (Modloader modloader : Modloader.getAllModloaders()) {
-			if (modloader.supportsMods())
-				systemDetails.setDetail("Loaded " + modloader.getSimpleName().toUpperCase() + " Mods",
-						modloader.getLoadedMods().length);
-			if (modloader.supportsCoreMods())
-				systemDetails.setDetail("Loaded " + modloader.getSimpleName().toUpperCase() + " Coremods",
-						modloader.getLoadedCoremods().length);
-		}
+		CyanLoader.getModloader(CyanLoader.class).addLoadedModInfo((t1, t2) -> systemDetails.setDetail(t1, t2));
 		systemDetails.setDetail("Applied transformers", TransformerMetadata.getLoadedTransformers().length);
 	}
 

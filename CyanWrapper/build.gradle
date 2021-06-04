@@ -339,7 +339,7 @@ dependencies {
 	implementation 'org.reflections:reflections:0.9.12'
 
 	testImplementation 'junit:junit:4.12'
-	testWrapper 'org.asf.software:SideTerminal:1.0.0.A1'
+	testWrapper 'org.asf.software:SideTerminal:1.0.0.A3'
 
 	//	wrapper "org.spongepowered:mixin:${mixinversion}"
 	//	implementation "org.spongepowered:mixin:${mixinversion}"
