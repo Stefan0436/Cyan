@@ -331,6 +331,7 @@ repositories {
 
 configurations {
 	wrapper
+	testWrapper
 }
 
 dependencies {
@@ -338,6 +339,7 @@ dependencies {
 	implementation 'org.reflections:reflections:0.9.12'
 
 	testImplementation 'junit:junit:4.12'
+	testWrapper 'org.asf.software:SideTerminal:1.0.0.A1'
 
 	//	wrapper "org.spongepowered:mixin:${mixinversion}"
 	//	implementation "org.spongepowered:mixin:${mixinversion}"
@@ -558,6 +560,7 @@ def calcSha1(file) // credits to dagezi: https://gist.github.com/dagezi/9594839
 }
 
 def libsMC = new HashMap<File, File>()
+def libsTest = new HashMap<File, File>()
 configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each { dep ->
 	if (dep.getModuleArtifacts().size() > 0) {
 		File source = null
@@ -624,6 +627,72 @@ configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each {
 		}
 	}
 }
+configurations.testWrapper.resolvedConfiguration.firstLevelModuleDependencies.each { dep ->
+	if (dep.getModuleArtifacts().size() > 0) {
+		File source = null
+		File lib = null
+		boolean add = true
+
+		project(":").childProjects.each { proj ->
+			if (dep.moduleGroup.equals(proj.value.group) && dep.moduleName.equals(proj.value.name) && dep.moduleVersion.equals(proj.value.version)) {
+				add = false
+			}
+		}
+
+		if (add) {
+			for (def artifact : dep.getModuleArtifacts()) {
+				if (artifact.classifier != null && artifact.classifier.equals("sources"))
+					source = artifact.file
+				else if (artifact.classifier == null) {
+					lib = artifact.file
+				}
+			}
+		}
+
+		if (source == null && lib != null && add) {
+			def str = lib.getName()
+			if (str.endsWith(".jar") || str.endsWith(".jar"))
+				str = str.substring(0, str.lastIndexOf("."))
+			if (new File(lib.getParentFile(), str+"-sources.jar").exists()) {
+				source = new File(lib.getParentFile(), str+"-sources.jar")
+			} else if (new File(lib.getParentFile(), str+"-src.jar").exists()) {
+				source = new File(lib.getParentFile(), str+"-src.jar")
+			} else if (new File(lib.getParentFile(), str+"-Sources.jar").exists()) {
+				source = new File(lib.getParentFile(), str+"-Sources.jar")
+			} else if (new File(lib.getParentFile(), str+"-Src.jar").exists()) {
+				source = new File(lib.getParentFile(), str+"-Src.jar")
+			} else {
+				def file = lib.getParentFile().getParentFile()
+				if (file != null) {
+					for (File dir : file.listFiles(new FileFilter() {
+								@Override
+								public boolean accept(File f2) {
+									return f2.isDirectory()
+								}
+							})) {
+						file = dir
+						if (new File(file, str+"-sources.jar").exists()) {
+							source = new File(file, str+"-sources.jar")
+						} else if (new File(file, str+"-src.jar").exists()) {
+							source = new File(file, str+"-src.jar")
+						} else if (new File(file, str+"-Sources.jar").exists()) {
+							source = new File(file, str+"-Sources.jar")
+						} else if (new File(file, str+"-Src.jar").exists()) {
+							source = new File(file, str+"-Src.jar")
+						} else {
+							continue
+						}
+						break
+					}
+				}
+			}
+		}
+
+		if (lib != null && add) {
+			libsTest.put(lib, source)
+		}
+	}
+}
 
 createEclipseLaunches {
 	disable = true;
@@ -664,6 +733,13 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 				classpath k
 			}
 		}
+		libsTest.forEach { k, v ->
+			if (v != null) {
+				classpath k, v
+			} else {
+				classpath k
+			}
+		}
 
 		project(":").childProjects.each { proj ->
 			classpath proj.value
@@ -681,6 +757,7 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
 		jvm MinecraftInstallationToolkit.generateJvmArguments(version, null,
 				new File[0], MinecraftInstallationToolkit.getNativesDirectory(version), jar, null, false)
+		jvm "org.asf.software.sideterminal.SideTermMain"
 
 		Log4jToGradleAppender.noLogInfo()
 	}
@@ -713,6 +790,13 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 				classpath k
 			}
 		}
+		libsTest.forEach { k, v ->
+			if (v != null) {
+				classpath k, v
+			} else {
+				classpath k
+			}
+		}
 
 		project(":").childProjects.each { proj ->
 			classpath proj.value
@@ -729,7 +813,7 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
 		jvm MinecraftInstallationToolkit.generateJvmArguments(version, null,
 				new File[0], MinecraftInstallationToolkit.getNativesDirectory(version), jar, null, false)
-
+		jvm "org.asf.software.sideterminal.SideTermMain"
 
 		Log4jToGradleAppender.noLogInfo()
 	}
@@ -762,6 +846,13 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 				classpath k
 			}
 		}
+		libsTest.forEach { k, v ->
+			if (v != null) {
+				classpath k, v
+			} else {
+				classpath k
+			}
+		}
 		classpath jar
 
 		project(":").childProjects.each { proj ->
@@ -779,6 +870,7 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 
 		jvm "-javaagent:"+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
+		jvm "org.asf.software.sideterminal.SideTermMain"
 
 		Log4jToGradleAppender.noLogInfo()
 	}
@@ -806,6 +898,13 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 				classpath k
 			}
 		}
+		libsTest.forEach { k, v ->
+			if (v != null) {
+				classpath k, v
+			} else {
+				classpath k
+			}
+		}
 		classpath jar
 
 		project(":").childProjects.each { proj ->
@@ -821,6 +920,7 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 
 		jvm "-javaagent:"+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
+		jvm "org.asf.software.sideterminal.SideTermMain"
 
 		Log4jToGradleAppender.noLogInfo()
 	}
