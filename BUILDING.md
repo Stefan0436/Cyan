@@ -24,8 +24,8 @@ You will need to mark the bash script as executable, run: `chmod 755 buildlocal.
 For linux, the command would be `./buildlocal.sh`<br />
 For windows, this is a bit tricky:
 1. `gradlew.bat -PcurrentXML -PoverrideCyanLibraryURL="" -PresetLibSourceCache processResources`
-2. `gradlew.bat -PcurrentXML -PoverrideCyanLibraryURL="" build gameData serverJar`<br />
-3. `gradlew.bat -PcurrentXML -PresetLibSourceCache processResources`<br />
+2. `gradlew.bat -PcurrentXML -PoverrideCyanLibraryURL="" build gameData serverJar` <br />
+3. `gradlew.bat -PcurrentXML -PresetLibSourceCache processResources` <br />
 
 Both commands build for the version specified in config.gradle.
 
@@ -36,7 +36,7 @@ For windows, its even trickier (you will be prompted for the version):
 ```batch
 SET /P "gameversion=Game version: "
 gradlew.bat -PoverrideGameVersion="%gameversion%" -PcurrentXML -PoverrideCyanLibraryURL="" -PresetLibSourceCache processResources
-gradlew.bat -PoverrideGameVersion="%gameversion%" -PcurrentXML -PoverrideCyanLibraryURL="" build gameData serverJar`
+gradlew.bat -PoverrideGameVersion="%gameversion%" -PcurrentXML -PoverrideCyanLibraryURL="" build gameData serverJar
 gradlew.bat -PoverrideGameVersion="%gameversion%" -PcurrentXML -PresetLibSourceCache processResources
 ```
 
