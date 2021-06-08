@@ -64,31 +64,65 @@ apply from: '../config.gradle'
 sourceCompatibility = '1.9'
 targetCompatibility = '1.9'
 
+File cyanCache = new File(getCacheRoot(), "cyan-wrapper-project");
+if (!cyanCache.exists()) cyanCache.mkdirs();
+
 if (file("../modloaderbuild.gradle").exists()) {
 	ext.stabilityValue = 'testing'
 	ext.stability = { t ->
 		ext.stability = t;
 	}
 	
-	ext.forgeVersions = []
+	ext.forgeVersions = [:]
 	ext.forge = { ... t ->
 		for (def ver : t) {
-			forgeVersions.add(ver);
+			File forgeInstaller = new File(cyanCache, "forge-" + minecraft + "-" + ver + "-installer.jar")
+			File downloadmarker = new File(cyanCache, forgeInstaller.getName()+".lck")
+			URL url = new URL(forgeurltemplate.replaceAll("\\%game\\%", minecraft).replaceAll("\\%forgeversion\\%", ver))
+			if (!forgeInstaller.exists() || downloadmarker.exists()) {
+				if (!forgeInstaller.getParentFile().exists())
+					forgeInstaller.getParentFile().mkdirs()
+				if (downloadmarker.exists()) downloadmarker.delete()
+				downloadmarker.createNewFile()
+		
+				println "Downloading forge installer to cache..."
+				if (forgeInstaller.exists()) forgeInstaller.delete()
+				FileOutputStream strm = new FileOutputStream(forgeInstaller);
+				InputStream inp = url.openStream()
+				inp.transferTo(strm)
+				strm.close()
+				inp.close()
+				downloadmarker.delete()
+			}
+		
+			println "Searching for MCP version in forge jar..."
+			String mcpVersion = "";
+			ZipFile installerZip = new ZipFile(forgeInstaller);
+			ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + minecraft + "-" + ver + "/forge-" + minecraft + "-" + ver + ".jar");
+			ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
+			while (forgeStrm.available() != 0) {
+				ZipEntry entry = forgeStrm.getNextEntry();
+				if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+					Manifest manifest = new Manifest(forgeStrm);
+					Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+					mcpVersion = MCP.getValue("Implementation-Version");
+					break;
+				}
+			}
+			forgeStrm.close();
+			installerZip.close();
+			forgeVersions.put(ver, mcpVersion);
 		}
 	}
 	
-	ext.paperVersions = []
-	ext.paper = { ... t ->
-		for (def ver : t) {
-			paperVersions.add(ver);
-		}
+	ext.paperVersions = [:]
+	ext.paper = { Map t ->
+		paperVersions.putAll(t);
 	}
 	
-	ext.fabricVersions = []
-	ext.paper = { ... t ->
-		for (def ver : t) {
-			fabricVersions.add(ver);
-		}
+	ext.fabricVersions = [:]
+	ext.fabric = { Map t ->
+		fabricVersions.putAll(t);
 	}
 	
 	apply from: "../modloaderbuild.gradle"
@@ -99,6 +133,7 @@ if (file("../modloaderbuild.gradle").exists()) {
 	} else if (ext.stability.equals("lts")) {
 		ext.LTS = "true";
 	}
+	println paperVersions
 }
 
 import org.asf.cyan.api.config.Configuration;
@@ -194,9 +229,6 @@ project(":").childProjects.each { proj ->
 }
 
 def fallback_url="https://aerialworks.ddns.net/maven"
-
-File cyanCache = new File(getCacheRoot(), "cyan-wrapper-project");
-if (!cyanCache.exists()) cyanCache.mkdirs();
 
 def netTestUrl = fallback_url
 def getServerConnection = {
