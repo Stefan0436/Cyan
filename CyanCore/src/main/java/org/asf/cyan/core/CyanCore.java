@@ -67,9 +67,10 @@ public class CyanCore extends CyanComponent {
 	 *                    included)
 	 */
 	public static void addAllowedPackage(String packageName) {
-		if (loadPhase.equals(LoadPhase.NOT_READY) || loadPhase.equals(LoadPhase.CORELOAD))
+		if (loadPhase.equals(LoadPhase.NOT_READY) || loadPhase.equals(LoadPhase.CORELOAD)) {
+			debug("Added package: " + packageName + " to the list of allowed packages.");
 			allowedPackages.add(packageName);
-		else
+		} else
 			throw new IllegalStateException("CyanCore is already past CORELOAD");
 	}
 
@@ -323,14 +324,6 @@ public class CyanCore extends CyanComponent {
 		info("Searching for Cyan Components in loaded jars...");
 		trace("FIND all classes annotated with CYAN_COMPONENT, caller: " + CallTrace.traceCallName());
 		Set<Class<?>> classes = reflections.getTypesAnnotatedWith(CYAN_COMPONENT.class);
-		for (Class<?> cls : new ArrayList<Class<?>>(classes)) {
-			String tName = cls.getTypeName();
-			if (!tName.startsWith("org.asf.cyan.") && !tName.equals("org.asf.cyan.")
-					&& !allowedPackages.stream().anyMatch(t -> t.equals(tName) || tName.startsWith(t + "."))) {
-				classes.remove(cls);
-			}
-		}
-
 		trace("LOOP through found classes, caller: " + CallTrace.traceCallName());
 		return classes.toArray(t -> new Class<?>[t]);
 	}
@@ -385,14 +378,14 @@ public class CyanCore extends CyanComponent {
 								newURL = i.toString().substring(0, i.toString().lastIndexOf(rname));
 							}
 							i = new URL(newURL);
-						}
 
-						if (rname.startsWith("org/asf/cyan/") || rname.equals("org/asf/cyan")
-								|| allowedPackages.stream().anyMatch(t -> t.equals(rname.replaceAll("/", "."))
-										|| rname.replaceAll("/", ".").startsWith(t + "."))) {
-							if (!conf.getUrls().contains(i)) {
-								debug("Added URL for component scan. URL: " + i.toString());
-								conf.addUrls(i);
+							if (rname.startsWith("org/asf/cyan/") || rname.equals("org/asf/cyan")
+									|| allowedPackages.stream().anyMatch(t -> t.equals(rname.replaceAll("/", "."))
+											|| rname.replaceAll("/", ".").startsWith(t + "."))) {
+								if (!conf.getUrls().contains(i)) {
+									debug("Added URL for component scan. URL: " + i.toString());
+									conf.addUrls(i);
+								}
 							}
 						}
 					}
@@ -405,12 +398,22 @@ public class CyanCore extends CyanComponent {
 				try {
 					Enumeration<URL> roots = cl.getResources(rname);
 					for (URL i : Collections.list(roots)) {
-						if (rname.startsWith("org/asf/cyan/") || rname.equals("org/asf/cyan")
-								|| allowedPackages.stream().anyMatch(t -> t.equals(rname.replaceAll("/", "."))
-										|| rname.replaceAll("/", ".").startsWith(t + "."))) {
-							if (!conf.getUrls().contains(i)) {
-								debug("Added URL for component scan. URL: " + i.toString());
-								conf.addUrls(i);
+						if (i.toString().endsWith(rname)) {
+							String newURL = "";
+							if (i.toString().startsWith("jar:")) {
+								newURL = i.toString().substring(4, i.toString().lastIndexOf("!/"));
+							} else {
+								newURL = i.toString().substring(0, i.toString().lastIndexOf(rname));
+							}
+							i = new URL(newURL);
+
+							if (rname.startsWith("org/asf/cyan/") || rname.equals("org/asf/cyan")
+									|| allowedPackages.stream().anyMatch(t -> t.equals(rname.replaceAll("/", "."))
+											|| rname.replaceAll("/", ".").startsWith(t + "."))) {
+								if (!conf.getUrls().contains(i)) {
+									debug("Added URL for component scan. URL: " + i.toString());
+									conf.addUrls(i);
+								}
 							}
 						}
 					}

@@ -1,0 +1,372 @@
+buildscript{
+	repositories{
+		mavenCentral()
+		maven {
+			name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven"
+		}
+	}
+	dependencies{
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A35'
+	}
+}
+
+import java.util.jar.Manifest;
+import java.util.jar.JarOutputStream;
+import java.util.jar.JarInputStream;
+import java.util.zip.ZipEntry;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.FileOutputStream;
+import org.gradle.api.Project;
+import org.gradle.api.tasks.OutputFile;
+import org.asf.cyan.api.config.Configuration;
+import org.gradle.api.tasks.bundling.AbstractArchiveTask;
+import org.asf.cyan.api.config.serializing.ObjectSerializer;
+import org.asf.cyan.api.config.annotations.Exclude;
+import org.gradle.api.internal.file.copy.CopyAction;
+import org.gradle.api.internal.file.copy.CopyActionProcessingStream;
+import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.TaskInputs;
+import org.gradle.api.tasks.TaskProvider;
+import org.gradle.api.tasks.WorkResult;
+import org.gradle.api.tasks.WorkResults;
+import java.util.Map;
+import java.util.Base64;
+import java.util.HashMap;
+
+public class KickStartInstallerTask extends AbstractArchiveTask {
+	
+	public static class KickStartProject extends Configuration<KickStartProject> {
+		
+		@Exclude
+		public boolean __$stMC;
+	
+		@Override
+		public String filename() {
+			return null;
+		}
+	
+		@Override
+		public String folder() {
+			return null;
+		}
+	
+		public String profileName;
+		public String profileIcon;
+	
+		public String wrapper;
+		public String manifest;
+	
+		public String id;
+		public String inheritsFrom;
+		public String game;
+	
+		public String name;
+		public String version;
+	
+		public String mappings;
+		public String platform;
+	
+		public String loaderVersion = "";
+		public String loader = "";
+	
+		public String serverMain;
+		public String clientMain;
+		public String serverOutput;
+		public String[] bootLibs = new String[0];
+		public String[] loadFirst = new String[0];
+		public String[] fatServer = new String[0];
+	
+		public HashMap<String, String> jarManifest = new HashMap<String, String>();
+	
+		public HashMap<String, String> repositories = new HashMap<String, String>();
+		public HashMap<String, HashMap<String, String>> artifactModifications = new HashMap<String, HashMap<String, String>>();
+	
+		public KickStartProject fromClosure(Closure closure)  {
+			closure.setDelegate(this);
+			closure.call();
+			return this;
+		}
+		
+		public void manifest(String manifest) {
+			this.manifest = manifest;
+		}
+	
+		public void profileName(String name) {
+			this.profileName = name;
+		}
+	
+		public void profileIcon(String icon) {
+			this.profileIcon = icon;
+		}
+		
+		public void wrapper(String wrapper) {
+			this.wrapper = wrapper;
+		}
+		
+		public void id(String id) {
+			this.id = id;
+		}
+		
+		public void name(String name) {
+			this.name = name;
+		}
+		
+		public void game(String game) {
+			this.game = game;
+		}
+		
+		public void inheritsFrom(String inheritsFrom) {
+			this.inheritsFrom = inheritsFrom;
+		}
+		
+		public void projectVersion(String version) {
+			this.version = version;
+		}
+		
+		public void mappings(String mappings) {
+			this.mappings = mappings;
+		}
+		
+		public void platform(String platform) {
+			this.platform = platform;
+		}
+		
+		public void loader(String loader) {
+			this.loader = loader;
+		}
+		
+		public void loaderVersion(String loaderVersion) {
+			this.loaderVersion = loaderVersion;
+		}
+		
+		public void serverOutput(String serverOutput) {
+			this.serverOutput = serverOutput;
+		}
+		
+		public void serverMain(String serverMain) {
+			this.serverMain = serverMain;
+		}
+		
+		public void clientMain(String clientMain) {
+			this.clientMain = clientMain;
+		}
+		
+		public void bootLibs(String... bootLibs) {
+			this.bootLibs = bootLibs;
+		}
+		
+		public void loadFirst(String... loadFirst) {
+			this.loadFirst = loadFirst;
+		}
+		
+		public void fatServer(String... fatServer) {
+			this.fatServer = fatServer;
+		}
+		
+		public void serverJarManifest(String key, String value) {
+			this.jarManifest.put(key, value);
+		}
+		
+		public void serverJarManifest(Map<String, ?> manifest) {
+			for (String key : manifest.keySet()) {
+				serverJarManifest(key, manifest.get(key).toString());            
+	      	}
+		}
+		
+		public void repository(String key, String value) {
+			this.repositories.put(key, value);
+		}
+		
+		public void repositories(Map<String, String> repositories) {
+			this.repositories.putAll(repositories);
+		}
+		
+		public void modification(String group, String name, Closure closure) {
+			ModificationHolder holder = new ModificationHolder();
+			holder.fromClosure(closure);
+			if (holder.method == null)
+				return;
+			
+			String key = group + ":" + name;
+			HashMap<String, String> data = artifactModifications.getOrDefault(key, new HashMap<String, String>());
+			
+			String command = holder.method;
+			if (holder.position != null)
+				command += ":" + holder.position;
+			if (holder.contentType != null)
+				command += "//" + holder.contentType;
+			
+			data.put(holder.file, command + "\n" + holder.data);
+			
+			artifactModifications.put(key, data);
+		}
+		
+		public class ModificationHolder {
+			
+			public static final String CCFG = "ccfg-edit";
+			public static final String APPEND = "append";
+			public static final String INSERT = "insert";
+			public static final String REPLACE = "replace";
+	
+			public static final String PLAIN = "plaintext";
+			public static final String BINARY = "binary";
+			
+			public void fromClosure(Closure closure)  {
+				closure.setDelegate(this);
+				closure.call();
+			}
+			
+			public String file;
+			public void path(String file) {
+				this.file = file;
+			}
+			
+			public String method;
+			public void method(String method) {
+				this.method = method;
+			}
+			
+			public String position;
+			public void position(String position) {
+				this.position = position;
+			}
+			
+			public String contentType;
+			public void contentType(String type) {
+				this.contentType = type;
+			}
+			public void target(String target) {
+				this.contentType = target;
+			}
+			
+			public String data = "";
+			public void data(String data) {
+				this.data = data.stripLeading();
+			}
+			
+			public void data(Map<String, ?> data) {
+				this.data = ObjectSerializer.serialize(data);
+			}
+			
+			public void data(byte[] data) {
+				data(new String(Base64.getEncoder().encode(data)));
+			}
+		}
+	
+	}
+
+	public String maven = "https://aerialworks.ddns.net/maven";
+	
+	public String installerVersion = "1.0.0.A1"
+	public String installerURL = "%M/org/asf/cyan/Installer-all/%v/Installer-all-%v.jar";
+	public KickStartProject installerProject;
+	
+	public KickStartInstallerTask() {
+		getArchiveExtension().set("jar");
+		getDestinationDirectory().set(new File(getProject().getBuildDir(), "installers"));
+		
+		File plainInstaller = new File(getProject().getBuildDir(), "tmp/installers/clear-" + installerVersion + "-kickstart.jar");
+		if (!plainInstaller.exists()) {
+			if (!plainInstaller.getParentFile().exists())
+				plainInstaller.getParentFile().mkdirs();
+			try {
+				URL u = new URL(installerURL.replace("%M", maven).replace("%v", installerVersion));
+				InputStream strm = u.openStream();
+				FileOutputStream strmOut = new FileOutputStream(plainInstaller);
+				strm.transferTo(strmOut);
+				strm.close();
+				strmOut.close();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		this.from(plainInstaller);
+	}
+	
+	public void installerVersion(String version) {
+		this.installerVersion = version;
+	}
+
+	public void project(Closure closure) {
+		installerProject = new KickStartProject().fromClosure(closure);
+	}
+	
+	public void project(KickStartProject project) {
+		installerProject = project;
+	}
+	
+	@Override
+	protected CopyAction createCopyAction() {
+		return new InstallerCopyAction(getInputs(), getArchiveFile().get().getAsFile());
+	}
+		
+	private class InstallerCopyAction implements CopyAction {
+
+		private File output;
+		private TaskInputs inputs;
+
+		public InstallerCopyAction(TaskInputs inputs, File output) {
+			this.output = output;
+			this.inputs = inputs;
+		}
+
+		@Override
+		public WorkResult execute(CopyActionProcessingStream stream) {
+			if (installerProject == null) {
+				throw new RuntimeException("Missing installer project configuration block.");
+			}
+			
+			try {
+				File plainInstaller = new File(getProject().getBuildDir(), "tmp/installers/clear-" + installerVersion + "-kickstart.jar");
+				InputStream mfStream = new URL("jar:" + plainInstaller.toURI().toURL() + "!/META-INF/MANIFEST.MF").openStream();				
+				Manifest mf = new Manifest(mfStream);
+				mfStream.close();
+				
+				FileOutputStream jarFile = new FileOutputStream(output);
+				JarOutputStream jar = new JarOutputStream(jarFile, mf);
+				
+				for (File f : inputs.getFiles()) {
+					FileInputStream fileIn = new FileInputStream(f);
+					JarInputStream strm = new JarInputStream(fileIn);
+					ZipEntry ent = strm.getNextEntry();
+					while (ent != null) {
+						String pth = ent.getName().replace("\\", "/");
+						if (pth.equals("project.ccfg")) {
+							ent = strm.getNextEntry();
+							continue;
+						}
+						ZipEntry ent2 = new ZipEntry(ent.getName());
+						jar.putNextEntry(ent2);
+						if (!ent2.getName().replace("\\", "/").endsWith("/"))
+							strm.transferTo(jar);
+						jar.closeEntry();
+						ent = strm.getNextEntry();
+					}
+					strm.close();
+					fileIn.close(); 
+				}
+				
+				ZipEntry proj = new ZipEntry("project.ccfg");
+				jar.putNextEntry(proj);
+				jar.write(installerProject.toString().getBytes());
+				jar.closeEntry();
+				
+				jar.close();
+				jarFile.close();
+				
+				return WorkResults.didWork(true);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+	}
+	
+}
+
+project.ext.KickStartInstallerTask = KickStartInstallerTask.class
+project.ext.kickstartManifest = { closure ->
+	return new KickStartInstallerTask.KickStartProject().fromClosure(closure);
+}

@@ -18,6 +18,8 @@ plugins {
 apply plugin: 'eclipse'
 apply plugin: 'org.asf.cyan.cornflower'
 
+apply from: '../KickStartInstallerJarTask.gradle'
+
 import sun.security.ec.point.ProjectivePoint
 import java.time.OffsetDateTime
 
@@ -61,6 +63,43 @@ import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType
 apply from: '../config.gradle'
 sourceCompatibility = '1.9'
 targetCompatibility = '1.9'
+
+if (file("../modloaderbuild.gradle").exists()) {
+	ext.stabilityValue = 'testing'
+	ext.stability = { t ->
+		ext.stability = t;
+	}
+	
+	ext.forgeVersions = []
+	ext.forge = { ... t ->
+		for (def ver : t) {
+			forgeVersions.add(ver);
+		}
+	}
+	
+	ext.paperVersions = []
+	ext.paper = { ... t ->
+		for (def ver : t) {
+			paperVersions.add(ver);
+		}
+	}
+	
+	ext.fabricVersions = []
+	ext.paper = { ... t ->
+		for (def ver : t) {
+			fabricVersions.add(ver);
+		}
+	}
+	
+	apply from: "../modloaderbuild.gradle"
+	if (ext.stability.equals("latest")) {
+		ext.addToLatest = "true";				
+	} else if (ext.stability.equals("stable")) {
+		ext.addToStable = "true";		
+	} else if (ext.stability.equals("lts")) {
+		ext.LTS = "true";
+	}
+}
 
 import org.asf.cyan.api.config.Configuration;
 public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
@@ -536,6 +575,8 @@ librarysources.each { k, v ->
 	filedata += k+" = "+v+System.lineSeparator();
 }
 Files.writeString(libSourceCache.toPath(), filedata)
+
+println ""
 
 def index=0
 configurations.wrapper.resolvedConfiguration.firstLevelModuleDependencies.each { dep ->
@@ -1821,19 +1862,23 @@ processResources {
 		cyantype = "ALPHA"
 		latestalpha = cyanversion
 	}
-	else if (cyanversion.contains(".B")) {
+	if (cyanversion.contains(".B")) {
 		cyantype = "BETA"
 		latestbeta = cyanversion
 		latestalpha = cyanversion
 	}
-	else if (cyanversion.contains(".P")) {
-		cyantype = "PREVIEW"
+	if (cyanversion.contains(".P") || project.hasProperty("addToLatest")) {
+		if (cyanversion.contains(".P"))
+			cyantype = "PREVIEW"
+			
 		latestpreview = cyanversion
 		latestbeta = cyanversion
 		latestalpha = cyanversion
 	}
-	else if (cyanversion.contains(".R")) {
-		cyantype = "RELEASE"
+	if (cyanversion.contains(".R") || project.hasProperty("addToStable") || (project.hasProperty("LTS") && project.getProperty("LTS"))) {
+		if (cyanversion.contains(".R"))
+			cyantype = "RELEASE"
+		
 		lateststable = cyanversion
 		latestpreview = cyanversion
 		latestbeta = cyanversion
@@ -2200,14 +2245,16 @@ task serverJar (type: Jar, dependsOn: build) {
 	outputs.upToDateWhen { return false; }
 	
 	if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
-	cyanclasspath+="vanilla-server.jar"
 	
 	if (!modloader.isEmpty() && modloader.startsWith("paper-")) {
 		def paperversion = modloader.substring("paper-".length())
 		if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
 		cyanclasspath+="paper-server-${paperversion}.jar"
 		cyanclasspath+=" cache/patched_${minecraft}.jar"
-	}
+	} else {
+		cyanclasspath+="vanilla-server.jar"
+  	}
+
 
 	from sourceSets.main.output
 	libnames.add(project.group+"."+project.name)
@@ -2352,18 +2399,12 @@ task serverJar (type: Jar, dependsOn: build) {
 			Files.move(output.toPath(), loader.toPath())
 		}
 
-		println " |"
-		println " | Downloading vanilla server..."
-		File server = org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit.downloadVersionJar(org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit.getVersion(minecraft), org.asf.cyan.api.modloader.information.game.GameSide.SERVER)
-		if (new File(dest, "vanilla-server.jar").exists()) new File(dest, "vanilla-server.jar").delete()
-		println " +-- Installing vanilla server..."
-		Files.copy(server.toPath(), new File(dest, "vanilla-server.jar").toPath())
 		if (!modloader.isEmpty() && modloader.startsWith("paper-")) {
 			println " |"
 			def paperversion = modloader.substring("paper-".length())
 			println " | Downloading paper server..."
 
-			server = new File(org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit.getMinecraftDirectory(), "tmp/download/paper")
+			File server = new File(org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit.getMinecraftDirectory(), "tmp/download/paper")
 			if (!server.exists())
 				server.mkdirs()
 
@@ -2389,8 +2430,123 @@ task serverJar (type: Jar, dependsOn: build) {
 				classpath new File(dest, "paper-server-${paperversion}.jar")
 				jvmArgs '-Dpaperclip.patchonly=true'
 			}
+		} else {
+  			println " |"
+			println " | Downloading vanilla server..."
+			File server = org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit.downloadVersionJar(org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit.getVersion(minecraft), org.asf.cyan.api.modloader.information.game.GameSide.SERVER)
+			if (new File(dest, "vanilla-server.jar").exists()) new File(dest, "vanilla-server.jar").delete()
+			println " +-- Installing vanilla server..."
+			Files.copy(server.toPath(), new File(dest, "vanilla-server.jar").toPath())
 		}
 		println " +-- Server build completed."
 	}
 }
 serverJar.dependsOn build
+
+task serverDownloads() {}
+
+task vanillaManifest () {
+	doLast {
+		project.ext.cyanVanillaManifest = cyanManifest 'CyanServerWrapper', 'CyanClientWrapper', 'Cyan %gv', 'Lapis_Ore', '', '', minecraft, minecraft, 'VANILLA' 
+	}
+}
+serverDownloads.finalizedBy vanillaManifest
+
+ext.cyanManifest = { wrapperServer, wrapperClient, profile, icon, modloader, modloaderVersion, inherits, mappingsVersion, platformName ->
+	return kickstartManifest {
+    
+    	name 'Cyan'
+    
+    	clientMain project.group + '.' + wrapperClient
+    	serverMain project.group + '.' + wrapperServer
+    
+    	projectVersion cyanversion
+    	game minecraft
+    	profileName profile
+    	profileIcon icon
+    	
+    	loader modloader 
+    	loaderVersion modloaderVersion
+    	inheritsFrom inherits
+    	
+    	mappings mappingsVersion
+    	platform platformName
+    
+    	wrapper project.version    	
+    	
+    	id '%i-cyan-%pv'
+    	manifest '/org/asf/cyan/CyanWrapper/%wv-cyan-%pv/CyanWrapper-%wv-cyan-%pv-%gv-cyan-%pv.json'
+    	
+    	if (!modloader.equals("forge"))
+    		loadFirst 'gson'
+    	else
+    		loadFirst 'gson', 'log4j-core', 'log4j-api'
+    	
+    	bootLibs 'javassist', 'reflections'
+    	serverOutput 'minecraft-%i-cyan-%pv-server.jar'
+    	fatServer 'org.asf.cyan:CyanWrapper', 'org.asf.cyan:Fluid', 'org.asf.cyan:CyanCore', 'org.asf.cyan:CyanComponents'
+    	
+    	repositories([
+    		'asf': 'https://aerialworks.ddns.net/maven',
+    		'central': 'https://repo1.maven.org/maven2'
+    	])    	
+    	
+    	serverJarManifest([
+    		'Launcher-Agent-Class': 'org.asf.cyan.fluid.FluidAgent',
+    		'Multi-Release': 'true',
+    		
+    		'Specification-Title': 'CyanWrapper',
+    		'Specification-Vendor': "$authorname",
+    		'Specification-Version': '%pv',
+    		
+    		'Implementation-Title': 'CyanWrapper',
+    		'Implementation-Vendor': "$authorname",
+    		'Implementation-Version': '%i-cyan-%pv'
+    	])
+    	
+    	modification 'org.asf.cyan', 'CyanCore', {
+    		path 'cyan.release.ccfg'
+    		method CCFG
+    		
+    		target 'org.asf.cyan.core.CyanInfo'
+    		
+    		data ([
+    			'minecraftCyanVersion': '%i-cyan-%pv',
+    			'minecraftVersion': '%gv',
+    			'modloaderVersion': '%lv'
+    		])
+    	}
+    	
+    	modification 'org.asf.cyan', 'CyanWrapper', {
+    		path 'mappings.info'
+    		method REPLACE
+    		contentType PLAIN
+    		data '%mv'
+    	}
+    	
+    }
+}
+
+task vanillaInstaller (type: KickStartInstallerTask, dependsOn: vanillaManifest) {
+	doFirst {
+    	project project.ext.cyanVanillaManifest
+    }
+    
+    destinationDirectory = file("${buildDir}/Installers/")
+    archiveBaseName = "$minecraft-cyan"
+    archiveVersion = "$cyanversion"
+    archiveClassifier = "installer"
+}
+serverDownloads.finalizedBy vanillaInstaller
+
+if (file("../modloaderbuild.gradle").exists()) {
+	
+
+	task clearBuildFile() {
+		doLast {
+			file("../modloaderbuild.gradle").delete()
+		}
+	}	
+	serverDownloads.finalizedBy clearBuildFile
+}
+

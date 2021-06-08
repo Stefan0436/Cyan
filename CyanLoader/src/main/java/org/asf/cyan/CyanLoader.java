@@ -244,7 +244,6 @@ public class CyanLoader extends ModkitModloader
 
 	private static void prepare(String side) throws IOException {
 		CyanCore.addAllowedPackage("modkit");
-		ModkitModloader.RootRules.defaultRules();
 		Configuration.setLoggers(str -> warn(str), str -> error(str));
 		setupModloader(side);
 		loaded = true;

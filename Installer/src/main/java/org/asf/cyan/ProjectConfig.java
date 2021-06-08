@@ -19,6 +19,7 @@ public class ProjectConfig extends Configuration<ProjectConfig> {
 		}
 
 	}
+	
 	public static ContentProvider contentProvider = new DefaultContentProvider();
 	
 	public static abstract class ContentProvider {
