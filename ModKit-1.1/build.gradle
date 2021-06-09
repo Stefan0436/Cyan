@@ -15,8 +15,8 @@ plugins {
 	id 'maven-publish'
 }
 
-sourceCompatibility = '1.9'
-targetCompatibility = '1.9'
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
 
 apply plugin: 'eclipse'
 apply plugin: 'org.asf.cyan.cornflower'

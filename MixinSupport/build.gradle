@@ -5,8 +5,8 @@ apply from: '../config.gradle'
 apply plugin: 'eclipse'
 buildDir = '../build/MixinSupport'
 
-sourceCompatibility = '1.9'
-targetCompatibility = '1.9'
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
 
 group="org.asf.cyan"
 def author="AerialWorks Software Foundation"
