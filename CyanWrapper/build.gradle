@@ -62,8 +62,8 @@ import org.asf.cyan.api.modloader.information.game.GameSide
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType
 
 apply from: '../config.gradle'
-sourceCompatibility = '1.9'
-targetCompatibility = '1.9'
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
 
 File cyanCache = new File(getCacheRoot(), "cyan-wrapper-project");
 if (!cyanCache.exists()) cyanCache.mkdirs();
@@ -2109,7 +2109,7 @@ processResources {
         File logShaFile = new File(cyanCache, "logsha.info")
         File logSizeFile = new File(cyanCache, "logsize.info")
         if (!project.hasProperty("noDownload") && !project.hasProperty("currentXML")) {
-            if (getServerConnectionSpecific(url)) {
+            if (getServerConnectionSpecific(xml)) {
                 println "Downloading CyanLoader logging context..."
                 URL xml = new URL(url)
                 URL sha = new URL(url+".sha1")
