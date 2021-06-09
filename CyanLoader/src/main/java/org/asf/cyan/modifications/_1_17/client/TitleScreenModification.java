@@ -38,11 +38,11 @@ public class TitleScreenModification {
 	@InjectAt(location = InjectLocation.HEAD, targetCall = "getCurrentVersion()", targetOwner = "net.minecraft.SharedConstants")
 	@TargetName(target = "render")
 	public void render1(@TargetType(target = "com.mojang.blaze3d.vertex.PoseStack") Object var1, int var2, int var3, float var4, 
-		@LocalVariable float var5, 
+		@LocalVariable float var5,
 		@LocalVariable boolean var6,
 		@LocalVariable int var7,
 		@LocalVariable boolean var8,
-		@LocalVariable float var9, 
+		@LocalVariable float var9,
 		@LocalVariable int var10
 	) {
 		String modloaderStr = Modloader.getModloader().toString();
