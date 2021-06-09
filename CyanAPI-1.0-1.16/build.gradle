@@ -74,12 +74,13 @@ MinecraftInstallationToolkit.downloadVersionJar(info, GameSide.SERVER)
 eclipseClasspath {
 	doFirst {		
 		MinecraftModdingToolkit.sourcesJar(info, GameSide.CLIENT)
-		MinecraftModdingToolkit.deobfuscateJar(info, GameSide.SERVER)
 		MinecraftModdingToolkit.sourcesJar(info, GameSide.SERVER)
 	}
 }	
 
 File jarFile = MinecraftModdingToolkit.deobfuscateJar(info, GameSide.CLIENT)
+MinecraftModdingToolkit.deobfuscateJar(info, GameSide.SERVER)
+
 Log4jToGradleAppender.noLogInfo()
 ext.cornflowerCachesDir = jarFile.getParent()
 
