@@ -2,6 +2,7 @@ package org.asf.cyan.api.internal.modkit.components._1_17.common;
 
 import java.net.ConnectException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.UUID;
@@ -104,7 +105,8 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 
 		public static boolean begin(Minecraft minecraft, Screen parent, String ip, int port) {
 			try {
-				Connection conn = Connection.connectToServer(InetAddress.getByName(ip), port, false);
+				Connection conn = Connection.connectToServer(new InetSocketAddress(InetAddress.getByName(ip), port),
+						false);
 				StatusResponseHandler handler = new StatusResponseHandler(conn);
 				conn.setListener(handler);
 				conn.send(new ClientIntentionPacket(ip, port, ConnectionProtocol.STATUS));

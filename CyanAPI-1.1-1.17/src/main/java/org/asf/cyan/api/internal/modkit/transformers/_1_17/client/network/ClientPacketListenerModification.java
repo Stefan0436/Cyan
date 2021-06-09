@@ -52,8 +52,8 @@ public class ClientPacketListenerModification implements ClientPacketListenerExt
 			Entity entity = moddedCyanEntityType.getConstructor().apply(moddedCyanEntityType.type, level);
 			entity.setId(packet.getId());
 			entity.moveTo(packet.getX(), packet.getY(), packet.getZ());
-			entity.xRot = (packet.getxRot() * 360) / 256f; // credits to mojang
-			entity.yRot = (packet.getyRot() * 360) / 256f; // credits to mojang
+			entity.setXRot((packet.getxRot() * 360) / 256f); // credits to mojang
+			entity.setYRot((packet.getyRot() * 360) / 256f); // credits to mojang
 			entity.setUUID(packet.getUUID());
 			level.putNonPlayerEntity(entity.getId(), entity);
 		}

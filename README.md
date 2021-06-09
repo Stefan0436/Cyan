@@ -6,7 +6,7 @@ Cyan is an upcoming modloader geared towards compatibility,<br/>
 Currently, we are writing compatibility for Forge, Fabric and Paper.
 
 # Project setup
-Use `gradle createEclipseLaunches` to setup the environment. (gradlew.bat on windows, ./gradlew for linux users without a gradle installation)
+Use `gradle createEclipseLaunches eclipse jar` to setup the environment. (gradlew.bat on windows, ./gradlew for linux users without a gradle installation)
 
 # Compiling
 Use `./buildlocal.sh` on linux to quickly build the project, argument `--version` can be used to specify game version,

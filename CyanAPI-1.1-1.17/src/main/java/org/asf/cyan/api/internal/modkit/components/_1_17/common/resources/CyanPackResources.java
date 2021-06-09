@@ -12,8 +12,6 @@ import java.util.Set;
 import org.asf.cyan.CyanLoader;
 import org.asf.cyan.api.internal.CyanAPIComponent;
 import org.asf.cyan.api.modloader.Modloader;
-import org.asf.cyan.api.versioning.Version;
-import org.asf.cyan.core.CyanInfo;
 import org.asf.cyan.mods.IMod;
 
 import net.minecraft.resources.ResourceLocation;
@@ -26,6 +24,7 @@ public class CyanPackResources extends VanillaPackResources {
 	private Set<String> modNamespaces;
 
 	public CyanPackResources() {
+		super(null);
 		modNamespaces = new HashSet<String>(init());
 		current = this;
 	}
@@ -177,7 +176,7 @@ public class CyanPackResources extends VanillaPackResources {
 		metadata.append("{\n");
 		metadata.append("\t\"pack\": {\n");
 		metadata.append("\t\t\"description\": \"Embedded resource pack for Cyan Mods.\",\n");
-        metadata.append("\t\t\"pack_format\": 7\n");
+		metadata.append("\t\t\"pack_format\": 7\n");
 		metadata.append("\t}\n");
 		metadata.append("}");
 		return metadata.toString();

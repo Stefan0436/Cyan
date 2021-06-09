@@ -8,6 +8,8 @@ import org.asf.cyan.api.internal.modkit.components._1_17.common.network.buffer.F
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.internal.modkitimpl.channels.PacketProcessorList;
 
+import com.mojang.realmsclient.RealmsMainScreen;
+
 import io.netty.buffer.Unpooled;
 import modkit.events.objects.network.ClientConnectionEventObject;
 import modkit.events.objects.network.ServerConnectionEventObject;
@@ -23,7 +25,6 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
-import net.minecraft.realms.RealmsBridge;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -157,8 +158,7 @@ public class PacketChannelContextClientImplementation extends PacketChannelConte
 		if (wasLocal) {
 			client.setScreen(new TitleScreen());
 		} else if (wasRealms) {
-			RealmsBridge bridge = new RealmsBridge();
-			bridge.switchToRealms(new TitleScreen());
+			client.setScreen(new RealmsMainScreen(new TitleScreen()));
 		} else {
 			client.setScreen(new JoinMultiplayerScreen(new TitleScreen()));
 		}
