@@ -246,7 +246,6 @@ def getServerConnection = {
 	}
 }
 def getServerConnection = { url ->
-	->
 	try {
 		URL u = new URL(url);
 		URLConnection uc = u.openConnection();
