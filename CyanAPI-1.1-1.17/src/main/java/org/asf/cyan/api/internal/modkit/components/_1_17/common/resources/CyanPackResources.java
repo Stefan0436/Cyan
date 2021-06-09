@@ -177,13 +177,7 @@ public class CyanPackResources extends VanillaPackResources {
 		metadata.append("{\n");
 		metadata.append("\t\"pack\": {\n");
 		metadata.append("\t\t\"description\": \"Embedded resource pack for Cyan Mods.\",\n");
-		if (Version.fromString(CyanInfo.getMinecraftVersion()).isLessOrEqualTo(Version.fromString("1.16.1"))) {
-			metadata.append("\t\t\"pack_format\": 5\n");
-		} else if (Version.fromString(CyanInfo.getMinecraftVersion()).isLessOrEqualTo(Version.fromString("1.17"))) {
-			metadata.append("\t\t\"pack_format\": 6\n");
-		} else {
-			metadata.append("\t\t\"pack_format\": 7\n");
-		}
+        metadata.append("\t\t\"pack_format\": 7\n");
 		metadata.append("\t}\n");
 		metadata.append("}");
 		return metadata.toString();
