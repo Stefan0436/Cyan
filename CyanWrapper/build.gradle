@@ -232,8 +232,7 @@ project(":").childProjects.each { proj ->
 def fallback_url="https://aerialworks.ddns.net/maven"
 
 def netTestUrl = fallback_url
-def getServerConnection = {
-	->
+def getServerConnection = {	->
 	try {
 		URL u = new URL(netTestUrl);
 		URLConnection uc = u.openConnection();
@@ -245,7 +244,7 @@ def getServerConnection = {
 		return false;
 	}
 }
-def getServerConnection = { url ->
+def getServerConnectionSpecific = { url ->
 	try {
 		URL u = new URL(url);
 		URLConnection uc = u.openConnection();
@@ -2110,7 +2109,7 @@ processResources {
         File logShaFile = new File(cyanCache, "logsha.info")
         File logSizeFile = new File(cyanCache, "logsize.info")
         if (!project.hasProperty("noDownload") && !project.hasProperty("currentXML")) {
-            if (getServerConnection(url)) {
+            if (getServerConnectionSpecific(url)) {
                 println "Downloading CyanLoader logging context..."
                 URL xml = new URL(url)
                 URL sha = new URL(url+".sha1")
