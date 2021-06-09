@@ -378,14 +378,16 @@ public class CyanCore extends CyanComponent {
 								newURL = i.toString().substring(0, i.toString().lastIndexOf(rname));
 							}
 							i = new URL(newURL);
+						} else if (i.toString().startsWith("jar:")) {
+							i = new URL( i.toString().substring(4, i.toString().lastIndexOf("!/")));
+						}
 
-							if (rname.startsWith("org/asf/cyan/") || rname.equals("org/asf/cyan")
-									|| allowedPackages.stream().anyMatch(t -> t.equals(rname.replaceAll("/", "."))
-											|| rname.replaceAll("/", ".").startsWith(t + "."))) {
-								if (!conf.getUrls().contains(i)) {
-									debug("Added URL for component scan. URL: " + i.toString());
-									conf.addUrls(i);
-								}
+						if (rname.startsWith("org/asf/cyan/") || rname.equals("org/asf/cyan")
+								|| allowedPackages.stream().anyMatch(t -> t.equals(rname.replaceAll("/", "."))
+										|| rname.replaceAll("/", ".").startsWith(t + "."))) {
+							if (!conf.getUrls().contains(i)) {
+								debug("Added URL for component scan. URL: " + i.toString());
+								conf.addUrls(i);
 							}
 						}
 					}
@@ -406,14 +408,16 @@ public class CyanCore extends CyanComponent {
 								newURL = i.toString().substring(0, i.toString().lastIndexOf(rname));
 							}
 							i = new URL(newURL);
+						} else if (i.toString().startsWith("jar:")) {
+							i = new URL( i.toString().substring(4, i.toString().lastIndexOf("!/")));
+						}
 
-							if (rname.startsWith("org/asf/cyan/") || rname.equals("org/asf/cyan")
-									|| allowedPackages.stream().anyMatch(t -> t.equals(rname.replaceAll("/", "."))
-											|| rname.replaceAll("/", ".").startsWith(t + "."))) {
-								if (!conf.getUrls().contains(i)) {
-									debug("Added URL for component scan. URL: " + i.toString());
-									conf.addUrls(i);
-								}
+						if (rname.startsWith("org/asf/cyan/") || rname.equals("org/asf/cyan")
+								|| allowedPackages.stream().anyMatch(t -> t.equals(rname.replaceAll("/", "."))
+										|| rname.replaceAll("/", ".").startsWith(t + "."))) {
+							if (!conf.getUrls().contains(i)) {
+								debug("Added URL for component scan. URL: " + i.toString());
+								conf.addUrls(i);
 							}
 						}
 					}
