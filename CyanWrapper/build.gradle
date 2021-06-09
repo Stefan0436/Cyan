@@ -232,10 +232,21 @@ project(":").childProjects.each { proj ->
 def fallback_url="https://aerialworks.ddns.net/maven"
 
 def netTestUrl = fallback_url
-def getServerConnection = {
-	->
+def getServerConnection = {	->
 	try {
 		URL u = new URL(netTestUrl);
+		URLConnection uc = u.openConnection();
+		uc.connect();
+		return true;
+	} catch (MalformedURLException e) {
+		return false;
+	} catch (IOException e) {
+		return false;
+	}
+}
+def getServerConnectionSpecific = { url ->
+	try {
+		URL u = new URL(url);
 		URLConnection uc = u.openConnection();
 		uc.connect();
 		return true;
@@ -2098,7 +2109,7 @@ processResources {
         File logShaFile = new File(cyanCache, "logsha.info")
         File logSizeFile = new File(cyanCache, "logsize.info")
         if (!project.hasProperty("noDownload") && !project.hasProperty("currentXML")) {
-            if (getServerConnection()) {
+            if (getServerConnectionSpecific(url)) {
                 println "Downloading CyanLoader logging context..."
                 URL xml = new URL(url)
                 URL sha = new URL(url+".sha1")
@@ -2126,7 +2137,15 @@ processResources {
                     throw new IOException("No connection to the fallback url, cannot download logging information, it is not stored in cache either!")
                 }
             }
-        } else if (project.hasProperty("currentXML")) {
+        } else {
+			if (!project.hasProperty("currentXML")) {
+				println ""
+				println ""
+				println "WARNING!"
+				println "Could not resolve remote log XML, will use local data!"
+				println ""
+				println ""
+			}
             println "Using local file for log sha1 and size properties"
             File xml = new File(project(":CyanLoader").sourceSets.main.output.resourcesDir, "log4j2.xml")
             if (!xml.exists()) {
