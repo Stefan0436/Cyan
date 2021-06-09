@@ -38,6 +38,14 @@ task createCyanSourceZip(type: Zip, dependsOn: 'prepareSourceZip') {
 	classifier 'FULL-SOURCES'
 }
 
+task createCyanSourceTarGz(type: Tar, dependsOn: 'prepareSourceZip') {
+	compression Compression.GZIP
+	extension 'tar.gz'
+	from file(buildDir.getCanonicalPath()+"/git-output")
+	destinationDirectory = file('../build/CyanLoader/Tars')
+	classifier 'FULL-SOURCES'
+}
+
 jar.dependsOn('processResources')
 
 repositories {
@@ -212,6 +220,11 @@ configurePublish {
 				artifact tasks.createCyanSourceZip
 				classifier 'full'
 			}
+
+			task {
+				artifact tasks.createCyanSourceTarGz
+				classifier 'full'
+			}
 		}
 	}
 
@@ -299,6 +312,7 @@ artifacts {
 
 	if (!file("nogit").exists()) {
 		archives createCyanSourceZip
+		archives createCyanSourceTarGz
 	}
 }
 

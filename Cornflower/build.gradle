@@ -416,18 +416,6 @@ processResources {
 	}
 }
 
-
-
-task copyEclipseConfig {
-	onlyIf { return !file(".settings/org.eclipse.jdt.apt.core.prefs").exists() }
-	copy {
-		from "config presets"
-		into ".settings"
-		include "org.eclipse.jdt.apt.core.prefs"
-	}
-}
-eclipseClasspath.dependsOn copyEclipseConfig
-
 cleanEclipse {
 	delete ".settings"
 	delete "bin"

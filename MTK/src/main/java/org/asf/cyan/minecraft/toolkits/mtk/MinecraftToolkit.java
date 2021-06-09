@@ -298,8 +298,8 @@ public class MinecraftToolkit extends CyanComponent {
 			String releaseTime = ver.get("releaseTime");
 
 			trace("PARSE MinecraftVersionInfo object, caller: " + CallTrace.traceCallName());
-			MinecraftVersionInfo versionInfo = new MinecraftVersionInfo(id, MinecraftVersionType.parse(type),
-					new URL(url), OffsetDateTime.parse(releaseTime));
+			MinecraftVersionInfo versionInfo = new MinecraftVersionInfo(id,
+					MinecraftVersionType.parse(type.toUpperCase()), new URL(url), OffsetDateTime.parse(releaseTime));
 
 			trace("CHECK latest release and snapshot version strings if they match " + id + ", caller: "
 					+ CallTrace.traceCallName());
@@ -364,8 +364,9 @@ public class MinecraftToolkit extends CyanComponent {
 						releaseTime = releaseTime.substring(0, releaseTime.length() - 5) + "+00:00";
 
 					trace("PARSE MinecraftVersionInfo object, caller: " + CallTrace.traceCallName());
-					MinecraftVersionInfo versionInfo = new MinecraftVersionInfo(id, MinecraftVersionType.parse(type),
-							new URL(url), OffsetDateTime.parse(releaseTime));
+					MinecraftVersionInfo versionInfo = new MinecraftVersionInfo(id,
+							MinecraftVersionType.parse(type.toUpperCase()), new URL(url),
+							OffsetDateTime.parse(releaseTime));
 
 					if (!available_versions.containsKey(id)) {
 						trace("ADD MinecraftVersionInfo object to the available_versions map, version: "

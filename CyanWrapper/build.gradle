@@ -20,6 +20,7 @@ apply plugin: 'org.asf.cyan.cornflower'
 
 apply from: '../KickStartInstallerJarTask.gradle'
 
+import org.asf.cyan.api.versioning.Version
 import sun.security.ec.point.ProjectivePoint
 import java.time.OffsetDateTime
 
@@ -67,13 +68,16 @@ targetCompatibility = '1.9'
 File cyanCache = new File(getCacheRoot(), "cyan-wrapper-project");
 if (!cyanCache.exists()) cyanCache.mkdirs();
 
+ext.forgeVersions = [:]
+ext.paperVersions = [:]
+ext.fabricVersions = [:]
+
 if (file("../modloaderbuild.gradle").exists()) {
 	ext.stabilityValue = 'testing'
 	ext.stability = { t ->
 		ext.stability = t;
 	}
 	
-	ext.forgeVersions = [:]
 	ext.forge = { ... t ->
 		for (def ver : t) {
 			File forgeInstaller = new File(cyanCache, "forge-" + minecraft + "-" + ver + "-installer.jar")
@@ -115,12 +119,10 @@ if (file("../modloaderbuild.gradle").exists()) {
 		}
 	}
 	
-	ext.paperVersions = [:]
 	ext.paper = { Map t ->
 		paperVersions.putAll(t);
 	}
 	
-	ext.fabricVersions = [:]
 	ext.fabric = { Map t ->
 		fabricVersions.putAll(t);
 	}
@@ -133,7 +135,6 @@ if (file("../modloaderbuild.gradle").exists()) {
 	} else if (ext.stability.equals("lts")) {
 		ext.LTS = "true";
 	}
-	println paperVersions
 }
 
 import org.asf.cyan.api.config.Configuration;
@@ -1686,12 +1687,50 @@ processResources {
 				testingSpigotMappings.put(minecraft, mappingsVersion)
 			}
 		}
+		
+		forgeVersions.keySet().stream().sorted({ String t1, String t2 ->
+			return -Version.fromString(t1).compareTo(Version.fromString(t2));	
+		}).forEach { version ->
+			forgeSupportVersions.put("testing-forge", minecraft + "-" + version)
+			forgeSupportVersions.put("testing-forge-" + minecraft, version)
+			forgeSupportVersions.put("testing-cyan-" + minecraft + "-" + cyanversion, version)
+			forgeSupportVersions.put(minecraft + "-" + version + "-testing", cyanversion);
+		}
+		
+		fabricVersions.keySet().stream().sorted({ t1, t2 ->
+			return -Version.fromString(t1).compareTo(Version.fromString(t2));	
+		}).forEach { version ->
+			fabricSupportVersions.put("testing-fabric", minecraft + "-" + version)
+			fabricSupportVersions.put("testing-fabric-" + minecraft, version)
+			fabricSupportVersions.put("testing-cyan-" + minecraft + "-" + cyanversion, version)
+			fabricSupportVersions.put(minecraft + "-" + version + "-testing", cyanversion);
+		}
+		
+	    paperVersions.keySet().stream().sorted({ t1, t2 ->
+			return -Version.fromString(t1).compareTo(Version.fromString(t2));	
+		}).forEach { version ->
+			paperSupportVersions.put("testing-paper", minecraft + "-" + version)
+			paperSupportVersions.put("testing-paper-" + minecraft, version)
+			paperSupportVersions.put("testing-cyan-" + minecraft + "-" + cyanversion, version)
+			paperSupportVersions.put(minecraft + "-" + version + "-testing", cyanversion);
+
+			testingSpigotMappings.put(minecraft, paperVersions.get(version))
+		}
 	}
 
 	if (modloader.startsWith("paper-") && (!project.hasProperty("removePaper") || !project.getProperty("removePaper").equals(loaderversion))) {
 		paperMappingVersions.put(mappingsVersion, loaderversion)
 		spigotMappingVersions.put("paper-" + minecraft + "-" + loaderversion, mappingsVersion)
 		spigotMappingVersions.put("cyan-" + minecraft + "-" + cyanversion, mappingsVersion)
+	}
+	
+    paperVersions.keySet().stream().sorted({ t1, t2 ->
+		return -Version.fromString(t1).compareTo(Version.fromString(t2));	
+	}).forEach { version ->
+		def mappings = paperVersions.get(version)
+		paperMappingVersions.put(mappings, version)
+		spigotMappingVersions.put("paper-" + minecraft + "-" + version, mappings)
+		spigotMappingVersions.put("cyan-" + minecraft + "-" + cyanversion, mappings)
 	}
 
 	if (project.hasProperty("addToLatest")) {
@@ -1717,6 +1756,36 @@ processResources {
 				testingSpigotMappings.put(minecraft, mappingsVersion)
 				latestSpigotMappings.put(minecraft, mappingsVersion)
 			}
+		}
+		
+		forgeVersions.keySet().stream().sorted({ String t1, String t2 ->
+			return -Version.fromString(t1).compareTo(Version.fromString(t2));
+		}).forEach { version ->
+			forgeSupportVersions.put("latest-forge", minecraft + "-" + version)
+			forgeSupportVersions.put("latest-forge-" + minecraft, version)
+			forgeSupportVersions.put("latest-cyan-" + minecraft + "-" + cyanversion, version)
+			forgeSupportVersions.put(minecraft + "-" + version + "-latest", cyanversion);
+		}
+		
+		fabricVersions.keySet().stream().sorted({ t1, t2 ->
+			return -Version.fromString(t1).compareTo(Version.fromString(t2));
+		}).forEach { version ->
+			fabricSupportVersions.put("latest-fabric", minecraft + "-" + version)
+			fabricSupportVersions.put("latest-fabric-" + minecraft, version)
+			fabricSupportVersions.put("latest-cyan-" + minecraft + "-" + cyanversion, version)
+			fabricSupportVersions.put(minecraft + "-" + version + "-latest", cyanversion);
+		}
+		
+		paperVersions.keySet().stream().sorted({ t1, t2 ->
+			return -Version.fromString(t1).compareTo(Version.fromString(t2));
+		}).forEach { version ->
+			paperSupportVersions.put("latest-paper", minecraft + "-" + version)
+			paperSupportVersions.put("latest-paper-" + minecraft, version)
+			paperSupportVersions.put("latest-cyan-" + minecraft + "-" + cyanversion, version)
+			paperSupportVersions.put(minecraft + "-" + version + "-latest", cyanversion);
+
+			testingSpigotMappings.put(minecraft, paperVersions.get(version))
+			latestSpigotMappings.put(minecraft, paperVersions.get(version))
 		}
 	} else if (project.hasProperty("addToStable") || (project.hasProperty("LTS") && project.getProperty("LTS").equals("true"))) {
 		gameVersions.put(minecraft + "-stable", cyanversion)
@@ -1759,6 +1828,52 @@ processResources {
 				stableSpigotMappings.put(minecraft, mappingsVersion)
 			}
 		}
+		
+		forgeVersions.keySet().stream().sorted({ String t1, String t2 ->
+			return -Version.fromString(t1).compareTo(Version.fromString(t2));
+		}).forEach { version ->
+			forgeSupportVersions.put("stable-forge", minecraft + "-" + version)
+			forgeSupportVersions.put("stable-forge-" + minecraft, version)
+			forgeSupportVersions.put("stable-cyan-" + minecraft + "-" + cyanversion, version)
+			forgeSupportVersions.put(minecraft + "-" + version + "-stable", cyanversion);
+			
+			forgeSupportVersions.put("latest-forge", minecraft + "-" + version)
+			forgeSupportVersions.put("latest-forge-" + minecraft, version)
+			forgeSupportVersions.put("latest-cyan-" + minecraft + "-" + cyanversion, version)			
+			forgeSupportVersions.put(minecraft + "-" + version + "-latest", cyanversion);
+		}
+		
+		fabricVersions.keySet().stream().sorted({ t1, t2 ->
+			return -Version.fromString(t1).compareTo(Version.fromString(t2));
+		}).forEach { version ->
+			fabricSupportVersions.put("stable-fabric", minecraft + "-" + version)
+			fabricSupportVersions.put("stable-fabric-" + minecraft, version)
+			fabricSupportVersions.put("stable-cyan-" + minecraft + "-" + cyanversion, version)
+			fabricSupportVersions.put(minecraft + "-" + version + "-stable", cyanversion);
+			
+			fabricSupportVersions.put("latest-fabric", minecraft + "-" + version)
+			fabricSupportVersions.put("latest-fabric-" + minecraft, version)
+			fabricSupportVersions.put("latest-cyan-" + minecraft + "-" + cyanversion, version)
+			fabricSupportVersions.put(minecraft + "-" + version + "-latest", cyanversion);
+		}
+		
+		paperVersions.keySet().stream().sorted({ t1, t2 ->
+			return -Version.fromString(t1).compareTo(Version.fromString(t2));
+		}).forEach { version ->
+			paperSupportVersions.put("stable-paper", minecraft + "-" + version)
+			paperSupportVersions.put("stable-paper-" + minecraft, version)
+			paperSupportVersions.put("stable-cyan-" + minecraft + "-" + cyanversion, version)
+			paperSupportVersions.put(minecraft + "-" + version + "-stable", cyanversion);
+			
+			paperSupportVersions.put("latest-paper", minecraft + "-" + version)
+			paperSupportVersions.put("latest-paper-" + minecraft, version)
+			paperSupportVersions.put("latest-cyan-" + minecraft + "-" + cyanversion, version)
+			paperSupportVersions.put(minecraft + "-" + version + "-latest", cyanversion);
+			
+			stableSpigotMappings.put(minecraft, paperVersions.get(version))
+			testingSpigotMappings.put(minecraft, paperVersions.get(version))
+			latestSpigotMappings.put(minecraft, paperVersions.get(version))
+		}
 
 		if (project.hasProperty("LTS") && project.getProperty("LTS").equals("true")) {
 			gameVersions.put(minecraft + "-lts-" + cyanversion, cyanversion)
@@ -1777,6 +1892,32 @@ processResources {
 				latestSpigotMappings.put(minecraft, mappingsVersion)
 				stableSpigotMappings.put(minecraft, mappingsVersion)
 			}
+			
+			forgeVersions.keySet().stream().sorted({ String t1, String t2 ->
+				return -Version.fromString(t1).compareTo(Version.fromString(t2));
+			}).forEach { version ->
+				forgeSupportVersions.put("lts-"+cyanversion+"-forge-" + minecraft, version);
+				forgeSupportVersions.put(minecraft + "-" + version + "-lts-"+cyanversion, cyanversion);
+			}
+			
+			fabricVersions.keySet().stream().sorted({ t1, t2 ->
+				return -Version.fromString(t1).compareTo(Version.fromString(t2));
+			}).forEach { version ->
+				fabricSupportVersions.put("lts-"+cyanversion+"-fabric-" + minecraft, version);
+				fabricSupportVersions.put(minecraft + "-" + version + "-lts-"+cyanversion, cyanversion);
+			}
+			
+			paperVersions.keySet().stream().sorted({ t1, t2 ->
+				return -Version.fromString(t1).compareTo(Version.fromString(t2));
+			}).forEach { version ->
+				paperSupportVersions.put("lts-"+cyanversion+"-paper-" + minecraft, version);
+				paperSupportVersions.put(minecraft + "-" + version + "-lts-"+cyanversion, cyanversion);
+				
+				stableSpigotMappings.put(minecraft, paperVersions.get(version))
+				testingSpigotMappings.put(minecraft, paperVersions.get(version))
+				latestSpigotMappings.put(minecraft, paperVersions.get(version))
+			}
+	
 		}
 	}
 
@@ -2572,13 +2713,168 @@ task vanillaInstaller (type: KickStartInstallerTask, dependsOn: vanillaManifest)
 serverDownloads.finalizedBy vanillaInstaller
 
 if (file("../modloaderbuild.gradle").exists()) {
+	def forgeInstallers = []
+	def fabricInstallers = []
+	def paperInstallers = []
 	
-
-	task clearBuildFile() {
-		doLast {
-			file("../modloaderbuild.gradle").delete()
+	forgeVersions.forEach { version, mappings ->
+		tasks.register('forge_' + version.replaceAll('[^A-Za-z0-9_]', "_") + '_Installer', KickStartInstallerTask) {
+			project(cyanManifest 'CyanForgeServerWrapper', 'CyanForgeClientWrapper', 'Cyan %gv (Forge ' + version + ')', 'Furnace', 'forge', version, minecraft + '-forge-' + version, mappings, 'MCP')			
+			destinationDirectory = file("${buildDir}/Installers/")
+			archiveBaseName = "$minecraft-forge-$version-cyan"
+			archiveVersion = "$cyanversion"
+			archiveClassifier = "installer"
 		}
-	}	
-	serverDownloads.finalizedBy clearBuildFile
+		def installer = tasks.getByName('forge_' + version.replaceAll('[^A-Za-z0-9_]', "_") + '_Installer')
+		forgeInstallers.add installer
+		serverDownloads.finalizedBy installer
+	}
+	
+	fabricVersions.forEach { version, mappings ->
+		tasks.register('fabric_' + version.replaceAll('[^A-Za-z0-9_]', "_") + '_Installer', KickStartInstallerTask) {
+			project(cyanManifest 'CyanFabricServerWrapper', 'CyanFabricClientWrapper', 'Cyan %gv (Fabric ' + version + ')', 'Lectern_Book', 'fabric-loader', version, 'fabric-loader-' + version + '-' + minecraft, mappings, 'YARN')			
+			destinationDirectory = file("${buildDir}/Installers/")
+			archiveBaseName = "$minecraft-fabric-$version-cyan"
+			archiveVersion = "$cyanversion"
+			archiveClassifier = "installer"
+		}
+		def installer = tasks.getByName('fabric_' + version.replaceAll('[^A-Za-z0-9_]', "_") + '_Installer')
+		fabricInstallers.add installer
+		serverDownloads.finalizedBy installer
+	}
+	
+	paperVersions.forEach { version, mappings ->
+		tasks.register('paper_' + version.replaceAll('[^A-Za-z0-9_]', "_") + '_Installer', KickStartInstallerTask) {
+			project(cyanManifest 'CyanPaperServerWrapper', 'CyanClientWrapper', 'Cyan %gv (Paper ' + version + ')', 'Lapis_Ore', 'paper', version, minecraft + '-paper-' + version, mappings, 'SPIGOT')			
+			destinationDirectory = file("${buildDir}/Installers/")
+			archiveBaseName = "$minecraft-paper-$version-cyan"
+			archiveVersion = "$cyanversion"
+			archiveClassifier = "installer"
+		}
+		def installer = tasks.getByName('paper_' + version.replaceAll('[^A-Za-z0-9_]', "_") + '_Installer')
+		paperInstallers.add installer
+		serverDownloads.finalizedBy installer
+	}
+	
+	task copyModdedInstallers(type: Copy) {
+		for (def tsk : forgeInstallers) {
+			from tsk.getArchiveFile()
+			dependsOn tsk
+		}
+		for (def tsk : fabricInstallers) {
+			from tsk.getArchiveFile()
+			dependsOn tsk
+		}
+		for (def tsk : paperInstallers) {
+			from tsk.getArchiveFile()
+			dependsOn tsk
+		}
+		into file("$buildDir/serverdata/$cyanversion/installers/$minecraft")
+	}
+	serverDownloads.finalizedBy copyModdedInstallers
 }
+	
+task copyInstaller(type: Copy, dependsOn: vanillaInstaller) {
+	from vanillaInstaller.getArchiveFile()
+	into file("$buildDir/serverdata/$cyanversion/installers/$minecraft")
+}
+serverDownloads.finalizedBy copyInstaller
 
+task cleanTempArchiveData() {
+	delete file("$buildDir/serverdata/$cyanversion/tmp")
+}
+serverDownloads.finalizedBy cleanTempArchiveData
+
+task copySourceArchives(type: Copy, dependsOn: cleanTempArchiveData) {
+	dependsOn project(":CyanLoader").tasks.getByName('createCyanSourceZip')
+	dependsOn project(":CyanLoader").tasks.getByName('createCyanSourceTarGz')
+	
+	from project(":CyanLoader").tasks.getByName('createCyanSourceZip').getArchiveFile()
+	from project(":CyanLoader").tasks.getByName('createCyanSourceTarGz').getArchiveFile()
+	
+	into file("$buildDir/serverdata/$cyanversion/tmp/archives")
+}
+serverDownloads.finalizedBy copySourceArchives
+
+task copyVanillaInstallerConfig(dependsOn: vanillaManifest) {
+	doLast {
+		if (file("$buildDir/serverdata/$cyanversion/installer-configs/$minecraft/project.ccfg").exists())
+			file("$buildDir/serverdata/$cyanversion/installer-configs/$minecraft/project.ccfg").delete();
+		if (!file("$buildDir/serverdata/$cyanversion/installer-configs/$minecraft/project.ccfg").getParentFile().exists())
+			file("$buildDir/serverdata/$cyanversion/installer-configs/$minecraft/project.ccfg").getParentFile().mkdirs();
+		Files.write(file("$buildDir/serverdata/$cyanversion/installer-configs/$minecraft/project.ccfg").toPath(), project.ext.cyanVanillaManifest.toString().getBytes())
+	}
+}
+serverDownloads.finalizedBy copyVanillaInstallerConfig
+
+task copyVersions(dependsOn: processResources) {
+	doLast {
+		if (file("$buildDir/serverdata/$cyanversion/versions.ccfg").exists())
+			file("$buildDir/serverdata/$cyanversion/versions.ccfg").delete();
+		if (!file("$buildDir/serverdata/$cyanversion/versions.ccfg").getParentFile().exists())
+			file("$buildDir/serverdata/$cyanversion/versions.ccfg").getParentFile().mkdirs();
+		Files.copy(new File(sourceSets.main.output.resourcesDir, "versions.ccfg").toPath(), file("$buildDir/serverdata/$cyanversion/versions.ccfg").toPath())
+	}
+}
+serverDownloads.finalizedBy copyVersions
+
+task installArchives(dependsOn: copySourceArchives) {
+	doLast {
+		File archiveOne = new File("$buildDir/serverdata/$cyanversion/tmp/archives", project(":CyanLoader").tasks.getByName('createCyanSourceZip').getArchiveFile().get().getAsFile().getName())
+		File archiveTwo = new File("$buildDir/serverdata/$cyanversion/tmp/archives", project(":CyanLoader").tasks.getByName('createCyanSourceTarGz').getArchiveFile().get().getAsFile().getName())
+		
+		File archiveDestOne = new File("$buildDir/serverdata/$cyanversion/sources.zip")
+		File archiveDestTwo = new File("$buildDir/serverdata/$cyanversion/sources.tar.gz")
+		
+		if (!archiveDestOne.getParentFile().exists())
+			archiveDestOne.getParentFile().mkdirs()
+		if (!archiveDestTwo.getParentFile().exists())
+			archiveDestTwo.getParentFile().mkdirs()
+		
+		if (archiveDestOne.exists())
+			archiveDestOne.delete()
+		if (archiveDestTwo.exists())
+			archiveDestTwo.delete()
+		
+		Files.copy(archiveOne.toPath(), archiveDestOne.toPath())
+		Files.copy(archiveTwo.toPath(), archiveDestTwo.toPath())
+		delete file("$buildDir/serverdata/$cyanversion/tmp")
+	}
+}
+serverDownloads.finalizedBy installArchives
+
+task createModkitZip(type: Zip) {
+	from file("../modkits/modkit-$minecraft-$cyanversion")
+	destinationDirectory = file("$buildDir/serverdata/$cyanversion/modkits/$minecraft")
+	archiveBaseName = 'modkit'
+	archiveVersion = "$minecraft-$cyanversion"
+}
+serverDownloads.finalizedBy createModkitZip
+
+task createModkitTarGz(type: Tar) {
+	compression Compression.GZIP
+	extension 'tar.gz'
+	from file("../modkits/modkit-$minecraft-$cyanversion")
+	destinationDirectory = file("$buildDir/serverdata/$cyanversion/modkits/$minecraft")
+	archiveBaseName = 'modkit'
+	archiveVersion = "$minecraft-$cyanversion"
+}
+serverDownloads.finalizedBy createModkitTarGz
+
+task createCoreModKitZip(type: Zip) {
+	from file("../modkits/modkit-$minecraft-$cyanversion")
+	destinationDirectory = file("$buildDir/serverdata/$cyanversion/modkits/$minecraft")
+	archiveBaseName = 'modkit'
+	archiveVersion = "$minecraft-$cyanversion"
+}
+serverDownloads.finalizedBy createCoreModKitZip
+
+task createCoreModKitTarGz(type: Tar) {
+	compression Compression.GZIP
+	extension 'tar.gz'
+	from file("../coremodkits/coremodkit-$minecraft-$cyanversion")
+	destinationDirectory = file("$buildDir/serverdata/$cyanversion/coremodkits/$minecraft")
+	archiveBaseName = 'coremodkit'
+	archiveVersion = "$minecraft-$cyanversion"
+}
+serverDownloads.finalizedBy createCoreModKitTarGz

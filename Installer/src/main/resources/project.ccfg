@@ -1,0 +1,74 @@
+name> 'Cyan'
+version> '1.0.0.A13'
+
+game> '1.16.5'
+
+mappings> '1.16.5'
+platform> VANILLA
+
+inheritsFrom> '1.16.5'
+
+loaderVersion> ''
+loader> ''
+
+wrapper> '1.0.0.A9'
+
+clientMain> 'org.asf.cyan.CyanClientWrapper'
+serverMain> 'org.asf.cyan.CyanServerWrapper'
+
+profileName> 'Cyan %gv'
+profileIcon> 'Lapis_Ore'
+
+
+manifest> '/org/asf/cyan/CyanWrapper/%wv-cyan-%pv/CyanWrapper-%wv-cyan-%pv-%gv-cyan-%pv.json'
+
+repositories> {
+    asf> 'https://aerialworks.ddns.net/maven'
+    central> 'https://repo1.maven.org/maven2'
+}
+
+fatServer> [ 'org.asf.cyan:CyanWrapper' 'org.asf.cyan:Fluid' 'org.asf.cyan:CyanCore' 'org.asf.cyan:CyanComponents' ]
+loadFirst> [ 'gson' ]
+bootLibs> [ 'javassist' 'reflections' ]
+serverOutput> 'minecraft-%i-cyan-%pv-server.jar'
+
+id> '%i-cyan-%pv'
+
+jarManifest> {
+    Launcher-Agent-Class> 'org.asf.cyan.fluid.FluidAgent'
+    Multi-Release> true
+    
+    Specification-Title> 'CyanWrapper'
+    Specification-Vendor> 'AerialWorks Software Foundation'
+    Specification-Version> '%pv'
+    Implementation-Title> 'CyanWrapper'
+    Implementation-Vendor> 'AerialWorks Software Foundation'
+    Implementation-Version> '%i-cyan-%pv'
+    
+    Implementation-Timestamp> '%time'
+}
+
+artifactModifications> {
+    org.asf.cyan:CyanCore> {
+        # methods:
+        # ccfg-edit//configclass -- change ccfg files (config class must be a part of the same jar)
+        # append//contenttype    -- append to file
+        # insert:p//contenttype  -- insert in file (p marks the position, the byte offset)
+        # replace//contenttype   -- replace file
+        #
+        # content types:
+        # binary    -- base64
+        # plaintext -- plain text
+        #
+        cyan.release.ccfg> 'ccfg-edit//org.asf.cyan.core.CyanInfo
+        minecraftCyanVersion> \'%i-cyan-%pv\'
+        minecraftVersion> \'%gv\'
+        modloaderVersion> \'%lv\'
+        '
+    }
+    
+    org.asf.cyan:CyanWrapper> {
+        mappings.info> 'replace//plaintext
+        %mv'
+    }
+}
