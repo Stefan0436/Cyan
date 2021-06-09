@@ -161,7 +161,11 @@ public class MinecraftVersionToolkit extends CyanComponent {
 	 *         Latest_snapshot is empty)
 	 */
 	public static MinecraftVersionInfo getLatestSnapshotVersion() {
-		return MinecraftToolkit.available_versions.getOrDefault("Latest_snapshot", null);
+		MinecraftVersionInfo info = MinecraftToolkit.available_versions.get("Latest_snapshot");
+		if (info == null)
+			return getLatestReleaseVersion();
+		else
+			return info;
 	}
 
 	/**
