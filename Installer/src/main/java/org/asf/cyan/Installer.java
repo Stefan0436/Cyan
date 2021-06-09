@@ -265,23 +265,23 @@ public class Installer extends CyanComponent {
 			return;
 		}
 		ProjectConfig project = new ProjectConfig();
-		if (project.loader.equalsIgnoreCase("forge")) {
+		if (project.loader.equalsIgnoreCase("forge")
+				&& Version.fromString(project.game).isLessThan(Version.fromString("1.17"))) {
 			Version java = Version.fromString(System.getProperty("java.version"));
 			if (Version.fromString("12").isLessOrEqualTo(java)) {
 				JOptionPane.showMessageDialog(null,
-						"Forge is not compatible with versions above Java 11, please use Java 11 to install.",
+						"Forge (Pre-1.17) is not compatible with versions above Java 11, please use Java 11 to install.",
 						"Cannot install", JOptionPane.ERROR_MESSAGE);
 				System.exit(-1);
 			}
-		} else if (project.loader.equalsIgnoreCase("paper")) {
-			Version java = Version.fromString(System.getProperty("java.version"));
-			if (Version.fromString(project.game).isGreaterOrEqualTo(Version.fromString("1.17"))
-					&& Version.fromString("16").isGreaterThan(java)) {
-				JOptionPane.showMessageDialog(null,
-						"Paper 1.17+ is not compatible with versions below Java 16, please use Java 16+ to install.",
-						"Cannot install", JOptionPane.ERROR_MESSAGE);
-				System.exit(-1);
-			}
+		}
+		Version java = Version.fromString(System.getProperty("java.version"));
+		if (Version.fromString(project.game).isGreaterOrEqualTo(Version.fromString("1.17"))
+				&& Version.fromString("16").isGreaterThan(java)) {
+			JOptionPane.showMessageDialog(null,
+					"Cyan 1.17+ is not compatible with versions below Java 16, please use Java 16+ to install.",
+					"Cannot install", JOptionPane.ERROR_MESSAGE);
+			System.exit(-1);
 		}
 		EventQueue.invokeLater(new Runnable() {
 
@@ -443,7 +443,7 @@ public class Installer extends CyanComponent {
 		lblNewLabel.setVerticalAlignment(SwingConstants.TOP);
 		lblNewLabel.setPreferredSize(new Dimension(200, 18));
 
-		JLabel lblKickstart = new JLabel("KickStart Installer 1.5 ");
+		JLabel lblKickstart = new JLabel("KickStart Installer 1.6 ");
 		panel.add(lblKickstart, BorderLayout.EAST);
 		lblKickstart.setFont(new Font("SansSerif", Font.BOLD, 12));
 		lblKickstart.setHorizontalAlignment(SwingConstants.TRAILING);
@@ -474,7 +474,7 @@ public class Installer extends CyanComponent {
 
 		JPanel panel_3 = new JPanel();
 		panel_3.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		
+
 		JPanel panel_2 = new JPanel();
 		panel_2.setPreferredSize(new Dimension(555, 200));
 		panel_3.add(panel_2);

@@ -2109,7 +2109,7 @@ processResources {
         File logShaFile = new File(cyanCache, "logsha.info")
         File logSizeFile = new File(cyanCache, "logsize.info")
         if (!project.hasProperty("noDownload") && !project.hasProperty("currentXML")) {
-            if (getServerConnectionSpecific(url)) {
+            if (getServerConnectionSpecific(new URL(url))) {
                 println "Downloading CyanLoader logging context..."
                 URL xml = new URL(url)
                 URL sha = new URL(url+".sha1")
