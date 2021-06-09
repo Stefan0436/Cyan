@@ -247,8 +247,7 @@ def getServerConnection = {	->
 def getServerConnectionSpecific = { url ->
 	try {
 		URL u = new URL(url);
-		URLConnection uc = u.openConnection();
-		uc.connect();
+		u.openStream().close();
 		return true;
 	} catch (MalformedURLException e) {
 		return false;
@@ -2108,8 +2107,8 @@ processResources {
 
         File logShaFile = new File(cyanCache, "logsha.info")
         File logSizeFile = new File(cyanCache, "logsize.info")
-        if (!project.hasProperty("noDownload") && !project.hasProperty("currentXML")) {
-            if (getServerConnectionSpecific(new URL(url))) {
+        if (!project.hasProperty("noDownload") && !project.hasProperty("currentXML") && (getServerConnectionSpecific(url) || (logShaFile.exists() && logSizeFile.exists()))) {
+            if (getServerConnectionSpecific(url)) {
                 println "Downloading CyanLoader logging context..."
                 URL xml = new URL(url)
                 URL sha = new URL(url+".sha1")
@@ -2130,7 +2129,7 @@ processResources {
                 Files.writeString(logShaFile.toPath(), logSha)
                 Files.writeString(logSizeFile.toPath(), logSize)
             } else {
-                if (logShaFile.exists() && logSizeFile.exists() ) {
+                if (logShaFile.exists() && logSizeFile.exists()) {
                     logSha = Files.readString(logShaFile.toPath())
                     logSize = Files.readString(logSizeFile.toPath())
                 } else {
