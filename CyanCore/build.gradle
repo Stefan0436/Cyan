@@ -13,8 +13,8 @@ if (project.hasProperty("overrideCyanLibraryURL")) {
 	fallback_url=project.getProperty("overrideCyanLibraryURL")
 }
 
-sourceCompatibility = '1.9'
-targetCompatibility = '1.9'
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
 
 group="org.asf.cyan"
 def authorname="AerialWorks Software Foundation"

@@ -7,8 +7,8 @@ apply from: '../config.gradle'
 apply plugin: 'eclipse'
 buildDir = '../build/CyanUtil'
 
-sourceCompatibility = '1.9'
-targetCompatibility = '1.9'
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
 
 group="org.asf.cyan"
 def authorname="AerialWorks Software Foundation"

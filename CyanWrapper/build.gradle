@@ -62,8 +62,8 @@ import org.asf.cyan.api.modloader.information.game.GameSide
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType
 
 apply from: '../config.gradle'
-sourceCompatibility = '1.9'
-targetCompatibility = '1.9'
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
 
 File cyanCache = new File(getCacheRoot(), "cyan-wrapper-project");
 if (!cyanCache.exists()) cyanCache.mkdirs();

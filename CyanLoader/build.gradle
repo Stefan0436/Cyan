@@ -27,8 +27,8 @@ createEclipseLaunches {
 	disable = true
 }
 
-sourceCompatibility = '1.9'
-targetCompatibility = '1.9'	
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'	
 
 buildDir = '../build/CyanLoader'
 

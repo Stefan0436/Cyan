@@ -11,8 +11,8 @@ group="org.asf.cyan"
 version="1.0.0.A10"
 def authorname = "AerialWorks Software Foundation"
 
-sourceCompatibility = '1.9'
-targetCompatibility = '1.9'
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
 
 configurePublish {
 	pretty_name "CyanComponents"
