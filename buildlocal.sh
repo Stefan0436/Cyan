@@ -81,5 +81,5 @@ if [ "$mappings" != "auto" ]; then
 	extraargs+=" -PoverrideMappingsVersion=\"$mappings\""
 fi
 
-./gradlew -c settings.lite.gradle installLiteLibs
+    ./gradlew -c settings.lite.gradle installLiteLibs
 eval './gradlew '"$extraargs"' -PresetLibSourceCache -PoverrideCyanLibraryURL="" -PcurrentXML processResources && ./gradlew '"$extraargs"' -PoverrideCyanLibraryURL="" -PcurrentXML build '"$BUILDCMD"' && echo && echo Done, saved in build.'

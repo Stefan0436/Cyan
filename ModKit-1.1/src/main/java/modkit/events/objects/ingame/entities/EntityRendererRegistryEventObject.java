@@ -38,6 +38,14 @@ public class EntityRendererRegistryEventObject extends EventObject {
 
 	private HashMap<EntityType<?>, EntityRenderer<?>> rendererInstances = new HashMap<EntityType<?>, EntityRenderer<?>>();
 
+	public EntityRendererRegistryEventObject() {
+
+	}
+
+	/**
+	 * @deprecated Does not work in 1.17+, see addEntity.
+	 */
+	@Deprecated
 	public EntityRendererRegistryEventObject(ReloadableResourceManager resourceManager, Object dispatcher,
 			TextureManager textureManager, Font font, Options options) {
 		this.resourceManager = resourceManager;
@@ -54,20 +62,38 @@ public class EntityRendererRegistryEventObject extends EventObject {
 	 */
 	@Deprecated
 	public ReloadableResourceManager getResourceManager() {
+		if (Version.fromString(Modloader.getModloaderGameVersion()).isGreaterOrEqualTo(Version.fromString("1.17")))
+			throw new RuntimeException("EntityRendererRegistryEventObject.getResourceManager() does not work in 1.17+");
+		warn("DEPRECATION NOTICE: A mod called EntityRendererRegistryEventObject.getResourceManager(), it has been deprecated since Minecraft 1.17 was released, it should not be used.");
+
 		return resourceManager;
 	}
 
 	/**
 	 * Retrieves the entity dispatcher
+	 * 
+	 * @deprecated Does not work in 1.17+, see addEntity.
 	 */
+	@Deprecated
 	public EntityRenderDispatcher getDispatcher() {
+		if (Version.fromString(Modloader.getModloaderGameVersion()).isGreaterOrEqualTo(Version.fromString("1.17")))
+			throw new RuntimeException("EntityRendererRegistryEventObject.getDispatcher() does not work in 1.17+");
+		warn("DEPRECATION NOTICE: A mod called EntityRendererRegistryEventObject.getDispatcher(), it has been deprecated since Minecraft 1.17 was released, it should not be used.");
+
 		return dispatcher;
 	}
 
 	/**
 	 * Retrieves the texture manager
+	 * 
+	 * @deprecated Does not work in 1.17+, see addEntity.
 	 */
+	@Deprecated
 	public TextureManager getTextureManager() {
+		if (Version.fromString(Modloader.getModloaderGameVersion()).isGreaterOrEqualTo(Version.fromString("1.17")))
+			throw new RuntimeException("EntityRendererRegistryEventObject.getTextureManager() does not work in 1.17+");
+		warn("DEPRECATION NOTICE: A mod called EntityRendererRegistryEventObject.getTextureManager(), it has been deprecated since Minecraft 1.17 was released, it should not be used.");
+
 		return textureManager;
 	}
 
@@ -82,7 +108,9 @@ public class EntityRendererRegistryEventObject extends EventObject {
 	@Deprecated
 	public <T extends Entity> void addEntity(EntityType<? extends T> entityType, EntityRenderer<? extends T> renderer) {
 		if (Version.fromString(Modloader.getModloaderGameVersion()).isGreaterOrEqualTo(Version.fromString("1.17")))
-			warn("DEPRECATION NOTICE: A mod called EntityRendererRegistryEventObject.addEntity(type, renderer), it has been deprecated since Minecraft 1.17 and should not be used.");
+			throw new RuntimeException(
+					"EntityRendererRegistryEventObject.addEntity(type, renderer) does not work in 1.17+");
+		warn("DEPRECATION NOTICE: A mod called EntityRendererRegistryEventObject.addEntity(type, renderer), it has been deprecated since Minecraft 1.17 was released, it should not be used.");
 
 		this.<T>addEntity(entityType, (ctx) -> {
 			return renderer;
@@ -105,7 +133,10 @@ public class EntityRendererRegistryEventObject extends EventObject {
 
 	/**
 	 * Retrieves the client options
+	 * 
+	 * @deprecated Does not work in 1.17+, see addEntity.
 	 */
+	@Deprecated
 	public Options getClientOptions() {
 		return options;
 	}
@@ -117,25 +148,10 @@ public class EntityRendererRegistryEventObject extends EventObject {
 	 *             of all entity renderers will forged context.
 	 */
 	@Deprecated
-	public Map<EntityType<?>, EntityRenderer<?>> getEntities() {
-		return getEntities(true);
-	}
-
-	/**
-	 * Retrieves the map of registered mod entity renderers
-	 * 
-	 * @param warnDeprecation True to warn for deprecation, false otherwise
-	 *                        (internal)
-	 * @since ModKit 1.1
-	 * @deprecated Will not work properly in 1.17+, avoid usage, forces construction
-	 *             of all entity renderers will forged context.
-	 */
-	@Deprecated
 	@SuppressWarnings("unchecked")
-	public Map<EntityType<?>, EntityRenderer<?>> getEntities(boolean warnDeprecation) {
-		if (warnDeprecation && Version.fromString(Modloader.getModloaderGameVersion())
-				.isGreaterOrEqualTo(Version.fromString("1.17")))
-			warn("DEPRECATION NOTICE: A mod called EntityRendererRegistryEventObject.getEntities, it has been deprecated since Minecraft 1.17 and should not be used.");
+	public Map<EntityType<?>, EntityRenderer<?>> getEntities() {
+		if (Version.fromString(Modloader.getModloaderGameVersion()).isGreaterOrEqualTo(Version.fromString("1.17")))
+			throw new RuntimeException("EntityRendererRegistryEventObject.getEntities() does not work in 1.17+");
 
 		entities.forEach((type, constr) -> {
 			@SuppressWarnings("rawtypes")
@@ -165,7 +181,10 @@ public class EntityRendererRegistryEventObject extends EventObject {
 
 	/**
 	 * Retrieves the font
+	 * 
+	 * @deprecated Does not work in 1.17+, see addEntity.
 	 */
+	@Deprecated
 	public Font getFont() {
 		return font;
 	}
