@@ -14,6 +14,7 @@ function prepare() {
 
 function build() {
     chmod +x gradlew buildlocal.sh
+    ./gradlew -c settings.lite.gradle installLiteLibs
     ./gradlew -PcurrentXML -PnoServer=true -PnoClient=true -PuncheckedClient=true processResources
     ./gradlew -PcurrentXML -PnoServer=true -PnoClient=true -PuncheckedClient=true processResources
     ./gradlew -PcurrentXML -PnoServer=true -PnoClient=true -PuncheckedClient=true serverDownloads

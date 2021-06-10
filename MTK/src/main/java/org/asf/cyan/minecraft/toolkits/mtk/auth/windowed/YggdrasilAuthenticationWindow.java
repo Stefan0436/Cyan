@@ -23,9 +23,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.FlowLayout;
 
 public class YggdrasilAuthenticationWindow {

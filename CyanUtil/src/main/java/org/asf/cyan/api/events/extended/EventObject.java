@@ -1,6 +1,8 @@
 package org.asf.cyan.api.events.extended;
 
-public abstract class EventObject {
+import org.asf.cyan.api.common.CyanComponent;
+
+public abstract class EventObject extends CyanComponent {
 	public enum EventResult {
 		CANCEL, CONTINUE, UNDEFINED
 	}

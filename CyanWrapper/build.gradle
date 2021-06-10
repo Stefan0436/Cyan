@@ -1,12 +1,8 @@
 buildscript {
-	repositories {
-		mavenCentral()
-		maven {
-			name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven"
-		}
-	}
 	dependencies {
-		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A35'
+		for (File f : file("../litelibs").listFiles()) {
+			classpath files(f)
+		}
 	}
 }
 
@@ -810,7 +806,7 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 		MinecraftInstallationToolkit.setIDE()
 
 		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(minecraft)
-		if (!MinecraftInstallationToolkit.checkVersion(version))
+		if (!MinecraftInstallationToolkit.checkInstallation(version, true))
 			MinecraftInstallationToolkit.downloadVersionAndLibraries(version)
 		if (MinecraftInstallationToolkit.getVersionJar(version, GameSide.CLIENT) == null)
 			MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.CLIENT)
@@ -872,7 +868,7 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 		MinecraftInstallationToolkit.setIDE()
 
 		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(minecraft)
-		if (!MinecraftInstallationToolkit.checkVersion(version))
+		if (!MinecraftInstallationToolkit.checkInstallation(version, true))
 			MinecraftInstallationToolkit.downloadVersionAndLibraries(version)
 		if (MinecraftInstallationToolkit.getVersionJar(version, GameSide.CLIENT) == null)
 			MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.CLIENT)

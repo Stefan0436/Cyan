@@ -11,7 +11,7 @@ import java.util.Scanner;
 import org.asf.cyan.core.CyanInfo;
 import org.asf.cyan.core.CyanUpdateInfo;
 import org.asf.cyan.cornflower.gradle.Cornflower;
-import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.cyan.CyanModloader;
+import org.asf.cyan.cornflower.gradle.flowerinternal.projectextensions.CornflowerMainExtension;
 import org.asf.cyan.cornflower.gradle.utilities.GradleUtil;
 import org.asf.cyan.cornflower.gradle.utilities.modding.PlatformClosureOwner;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftMappingsToolkit;
@@ -36,7 +36,7 @@ public class YarnPlatformClosureOwner extends PlatformClosureOwner {
 		File manifest = new File(owner.infoDir, "manifest.ccfg");
 		try {
 			StringBuilder conf = new StringBuilder();
-			URL u = new URL(CyanModloader.maven + CyanInfo.infoPath);
+			URL u = new URL(CornflowerMainExtension.AerialWorksMaven + CyanInfo.infoPath);
 			Scanner sc = new Scanner(u.openStream());
 			while (sc.hasNext())
 				conf.append(sc.nextLine() + System.lineSeparator());

@@ -1,0 +1,16 @@
+rootProject.name = 'LiteCyan'
+
+include('CCFG')
+include('CyanComponents')
+include('CyanCore')
+include('CyanUtil')
+include('MTK')
+include('Fluid')
+include('Cornflower')
+
+gradle.allprojects {
+    project.ext.liteBuild = true
+    project.afterEvaluate {
+        project.buildDir = file('build/lite/' + project.name)
+    }
+}

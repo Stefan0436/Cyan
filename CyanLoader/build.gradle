@@ -1,10 +1,8 @@
 buildscript {
-	repositories {
-		mavenCentral()
-		maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
-	}
 	dependencies {
-		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A35'
+		for (File f : file("../litelibs").listFiles()) {
+			classpath files(f)
+		}
 	}
 }
 

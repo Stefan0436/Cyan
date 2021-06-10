@@ -2,6 +2,7 @@ package org.asf.cyan.cornflower.gradle.flowerinternal.projectextensions;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -20,7 +21,6 @@ import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.closu
 import org.asf.cyan.cornflower.gradle.tasks.RiftJarTask;
 import org.asf.cyan.cornflower.gradle.utilities.IProjectExtension;
 import org.asf.cyan.cornflower.gradle.utilities.modding.ApiDependency;
-import org.asf.cyan.cornflower.gradle.utilities.modding.CyanModfileManifestGenerator;
 import org.asf.cyan.cornflower.gradle.utilities.modding.GameDependency;
 import org.asf.cyan.cornflower.gradle.utilities.modding.IPlatformConfiguration;
 import org.asf.cyan.cornflower.gradle.utilities.modding.ModloaderDependency;
@@ -40,6 +40,8 @@ import org.gradle.api.Project;
 import groovy.lang.Closure;
 
 public class CornflowerMainExtension implements IProjectExtension {
+
+	public static final String AerialWorksMaven = "https://aerialworks.ddns.net/maven";
 
 	public static class PlatformConfiguration {
 		public ArrayList<IPlatformConfiguration> all = new ArrayList<IPlatformConfiguration>();
@@ -73,7 +75,16 @@ public class CornflowerMainExtension implements IProjectExtension {
 	public static final Class<org.asf.cyan.cornflower.classpath.util.PathPriority> PathPriority = org.asf.cyan.cornflower.classpath.util.PathPriority.class;
 
 	public static final Class<?> EclipseLaunchGenerator = org.asf.cyan.cornflower.gradle.tasks.EclipseLaunchGenerator.class;
-	public static final Class<?> CtcUtil = org.asf.cyan.cornflower.gradle.tasks.CtcTask.class;
+	public static Class<?> CtcUtil;
+	
+	static {
+		try {
+			CtcUtil = Class.forName("org.asf.cyan.cornflower.gradle.tasks.CtcTask");
+		} catch (ClassNotFoundException e) {
+			CtcUtil = null;
+		} 
+	}
+	
 	public static final Class<?> RiftJar = org.asf.cyan.cornflower.gradle.tasks.RiftJarTask.class;
 
 	public static final ModloaderDependency Modloader = new ModloaderDependency();
@@ -91,7 +102,20 @@ public class CornflowerMainExtension implements IProjectExtension {
 	public static final GameSide CLIENT = GameSide.CLIENT;
 
 	public static Configuration<?> modfileManifest(Closure<?> closure) {
-		return CyanModfileManifestGenerator.fromClosure(closure);
+		try {
+			Class.forName("org.asf.cyan.cornflower.gradle.utilities.modding.CyanModfileManifestGenerator");
+		} catch (Exception e) {
+			throw new RuntimeException("Cannot call modfileManifest from LiteCyan.");
+		}
+
+		try {
+			return (Configuration<?>) Class
+					.forName("org.asf.cyan.cornflower.gradle.utilities.modding.CyanModfileManifestGenerator")
+					.getMethod("fromClosure", Closure.class).invoke(null, closure);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+				| SecurityException | ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static void platforms(Project proj, Closure<?> closure) {
