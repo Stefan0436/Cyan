@@ -243,8 +243,6 @@ public class CyanLoader extends ModkitModloader
 	}
 
 	private static void prepare(String side) throws IOException {
-		CyanCore.addToPackageScan("modkit");
-		CyanCore.addAllowedPackage("modkit");
 		Configuration.setLoggers(str -> warn(str), str -> error(str));
 		setupModloader(side);
 		loaded = true;
@@ -337,6 +335,8 @@ public class CyanLoader extends ModkitModloader
 	public static void setupModloader(String side) throws IOException {
 		if (setup)
 			return;
+		CyanCore.addToPackageScan("modkit");
+		CyanCore.addAllowedPackage("modkit");
 
 		if (developerMode) {
 			if (System.getProperty("authorizeDebugPackages") != null)
@@ -364,7 +364,8 @@ public class CyanLoader extends ModkitModloader
 			}
 			System.setProperty("log4j2.configurationFile", url.toString());
 			System.setProperty("log4j.configurationFile", url.toString());
-			CyanCore.disableAgent();
+			if (System.getProperty("cyanDevEnv.noDisable.Agent") == null)
+				CyanCore.disableAgent();
 		}
 
 		CyanCore.setSide(side);

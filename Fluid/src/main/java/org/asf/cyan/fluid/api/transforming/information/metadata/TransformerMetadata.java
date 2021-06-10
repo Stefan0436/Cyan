@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -724,10 +725,11 @@ public abstract class TransformerMetadata extends CyanComponent {
 			String mthModOld = Modifier.toString(methodData.getOldModifier()).replaceAll(" ", ", ");
 			String mthModNew = Modifier.toString(methodData.getNewModifier()).replaceAll(" ", ", ");
 
-			MethodNode trMthNode = transformer.methods.stream()
+			Optional<MethodNode> nodeOpt = transformer.methods.stream()
 					.filter(t -> t.name.equals(methodData.getTransformerMemberName())
 							&& t.desc.equals(methodData.toTransformerDescriptor()))
-					.findFirst().get();
+					.findFirst();
+			MethodNode trMthNode = nodeOpt.get();
 
 			String transformMethod = "unrecognized";
 			if (methodData.isNew()) {

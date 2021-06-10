@@ -346,7 +346,7 @@ public abstract class Transformer extends CyanComponent {
 
 							debug("Created method " + ninfo.name);
 							transformedMethods.add(ninfo.name + " " + ninfo.toDescriptor() + " " + clName + " "
-									+ meth.name + "&" + meth.desc + " " + oldMod + " " + newMod + " true");
+									+ meth.name + "&" + originalDesc + " " + oldMod + " " + newMod + " true");
 						}
 					}
 

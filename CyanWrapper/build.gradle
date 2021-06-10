@@ -62,8 +62,24 @@ import org.asf.cyan.api.modloader.information.game.GameSide
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType
 
 apply from: '../config.gradle'
+
 sourceCompatibility = '1.11'
 targetCompatibility = '1.11'
+
+eclipseClasspath { 
+	doFirst {
+		if (useJava16) {
+			sourceCompatibility = '1.16'
+			targetCompatibility = '1.16'
+		}
+	}
+	doLast {
+		if (useJava16) {
+			sourceCompatibility = '1.11'
+			targetCompatibility = '1.11'
+		}
+	}
+}
 
 File cyanCache = new File(getCacheRoot(), "cyan-wrapper-project");
 if (!cyanCache.exists()) cyanCache.mkdirs();
@@ -898,7 +914,6 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
 		jvm MinecraftInstallationToolkit.generateJvmArguments(version, null,
 				new File[0], MinecraftInstallationToolkit.getNativesDirectory(version), jar, null, false)
-		jvm "org.asf.software.sideterminal.SideTermMain"
 
 		Log4jToGradleAppender.noLogInfo()
 	}
@@ -953,10 +968,11 @@ task createDeobfServerLaunch (type: EclipseLaunchGenerator) {
 
 		if (!new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").exists())
 			Files.writeString(new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").toPath(), "eula=true")
-
-		jvm "-javaagent:"+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
+			
+		jvm "-DcyanAgentJar="+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
+		jvm "-Djdk.attach.allowAttachSelf=true"
+		jvm "-DcyanDevEnv.noDisable.Agent=true"
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
-		jvm "org.asf.software.sideterminal.SideTermMain"
 
 		Log4jToGradleAppender.noLogInfo()
 	}
@@ -1004,10 +1020,11 @@ task createObfusServerLaunch (type: EclipseLaunchGenerator) {
 
 		if (!new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").exists())
 			Files.writeString(new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "servers/cyan/"+minecraft+"/eula.txt").toPath(), "eula=true")
-
-		jvm "-javaagent:"+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
+			
+		jvm "-DcyanAgentJar="+project(':Fluid').tasks.jar.archivePath.getCanonicalPath()
+		jvm "-Djdk.attach.allowAttachSelf=true"
+		jvm "-DcyanDevEnv.noDisable.Agent=true"
 		jvm "-Dcyancore.resourceloader.rewriteresource.org.asf.cyan.core.CyanInfo.source="+project(":CyanCore").sourceSets.main.output.resourcesDir.getCanonicalPath()
-		jvm "org.asf.software.sideterminal.SideTermMain"
 
 		Log4jToGradleAppender.noLogInfo()
 	}

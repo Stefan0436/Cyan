@@ -296,13 +296,13 @@ public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 	}
 }
 
-if (JavaVersion.current().compareTo(JavaVersion.VERSION_16) != 0 && JavaVersion.current().compareTo(JavaVersion.VERSION_16) != 1){	
-	def majorversion = minecraft
-	if (majorversion.split("\\.").length >= 3)
-		majorversion = majorversion.substring(0, majorversion.lastIndexOf("."))
+def majorversion = minecraft
+if (majorversion.split("\\.").length >= 3)
+	majorversion = majorversion.substring(0, majorversion.lastIndexOf("."))
 
-	if (Version.fromString(majorversion).isGreaterOrEqualTo(Version.fromString("1.17")))	
-		throw new RuntimeException("Cyan for Minecraft 1.17 requires Java 16 or greater.")	
+ext.useJava16 = Version.fromString(majorversion).isGreaterOrEqualTo(Version.fromString("1.17"))
+if (Version.fromString(majorversion).isGreaterOrEqualTo(Version.fromString("1.17")) && JavaVersion.current().compareTo(JavaVersion.VERSION_16) != 0 && JavaVersion.current().compareTo(JavaVersion.VERSION_16) != 1){		
+	throw new RuntimeException("Cyan for Minecraft 1.17 requires Java 16 or greater.")
 }
 
 gradle.allprojects {	
