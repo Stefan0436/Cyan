@@ -44,7 +44,12 @@ public class LegacyModKitSupportHook extends ClassLoadHook {
 				ran = true;
 				internal = types.get(internal.replace("/", ".")).replace(".", "/");
 			}
-			String pkg = internal.substring(0, internal.lastIndexOf("/")).replace("/", ".");
+			final String pkg;
+			if (internal.contains("/")) {
+				pkg = internal.substring(0, internal.lastIndexOf("/")).replace("/", ".");
+			} else {
+				return internal;
+			}
 			if (packages.keySet().stream().anyMatch(t -> t.equals(pkg) || pkg.startsWith(t + "."))) {
 				if (!ran) {
 					log.warn("Applying support remappers for ModKit " + name + " Mods (LEGACY MODS PRESENT)");
