@@ -68,7 +68,6 @@ public class CyanCore extends CyanComponent {
 	 */
 	public static void addAllowedPackage(String packageName) {
 		if (loadPhase.equals(LoadPhase.NOT_READY) || loadPhase.equals(LoadPhase.CORELOAD)) {
-			debug("Added package: " + packageName + " to the list of allowed packages.");
 			allowedPackages.add(packageName);
 		} else
 			throw new IllegalStateException("CyanCore is already past CORELOAD");

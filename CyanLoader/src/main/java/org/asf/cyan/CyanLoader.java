@@ -243,7 +243,6 @@ public class CyanLoader extends ModkitModloader
 	}
 
 	private static void prepare(String side) throws IOException {
-		CyanCore.addAllowedPackage("modkit");
 		Configuration.setLoggers(str -> warn(str), str -> error(str));
 		setupModloader(side);
 		loaded = true;
@@ -336,7 +335,9 @@ public class CyanLoader extends ModkitModloader
 	public static void setupModloader(String side) throws IOException {
 		if (setup)
 			return;
-
+		CyanCore.addToPackageScan("modkit");
+		CyanCore.addAllowedPackage("modkit");
+		
 		if (developerMode) {
 			if (System.getProperty("authorizeDebugPackages") != null)
 				allowedComponentPackages = System.getProperty("authorizeDebugPackages").split(":");
