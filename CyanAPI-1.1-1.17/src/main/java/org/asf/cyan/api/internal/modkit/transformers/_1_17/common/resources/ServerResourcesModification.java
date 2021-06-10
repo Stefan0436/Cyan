@@ -16,6 +16,7 @@ import modkit.events.objects.ingame.crafting.RecipeManagerEventObject;
 import modkit.events.objects.ingame.tags.TagManagerEventObject;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.Commands.CommandSelection;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.tags.TagManager;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -31,29 +32,29 @@ public class ServerResourcesModification {
 
 	@Constructor
 	@InjectAt(location = InjectLocation.HEAD, targetCall = "registerReloadListener(net.minecraft.server.packs.resources.PreparableReloadListener)", targetOwner = "net.minecraft.server.packs.resources.ReloadableResourceManager")
-	public void init1(@TargetType(target = "net.minecraft.commands.Commands$CommandSelection") CommandSelection var1,
-			int var2) {
+	public void init1(@TargetType(target = "net.minecraft.core.RegistryAccess") RegistryAccess acc,
+			@TargetType(target = "net.minecraft.commands.Commands$CommandSelection") CommandSelection var1, int var2) {
 		RecipeManagerStartupEvent.getInstance().dispatch(new RecipeManagerEventObject(recipes)).getResult();
 	}
 
 	@Constructor
 	@InjectAt(location = InjectLocation.HEAD, targetCall = "registerReloadListener(net.minecraft.server.packs.resources.PreparableReloadListener)", targetOwner = "net.minecraft.server.packs.resources.ReloadableResourceManager")
-	public void init2(@TargetType(target = "net.minecraft.commands.Commands$CommandSelection") CommandSelection var1,
-			int var2) {
+	public void init2(@TargetType(target = "net.minecraft.core.RegistryAccess") RegistryAccess acc,
+			@TargetType(target = "net.minecraft.commands.Commands$CommandSelection") CommandSelection var1, int var2) {
 		TagManagerStartupEvent.getInstance().dispatch(new TagManagerEventObject(tagManager)).getResult();
 	}
 
 	@Constructor
 	@InjectAt(location = InjectLocation.HEAD, targetCall = "registerReloadListener(net.minecraft.server.packs.resources.PreparableReloadListener)", targetOwner = "net.minecraft.server.packs.resources.ReloadableResourceManager")
-	public void init3(@TargetType(target = "net.minecraft.commands.Commands$CommandSelection") CommandSelection var1,
-			int var2) {
+	public void init3(@TargetType(target = "net.minecraft.core.RegistryAccess") RegistryAccess acc,
+			@TargetType(target = "net.minecraft.commands.Commands$CommandSelection") CommandSelection var1, int var2) {
 		CommandManagerStartupEvent.getInstance().dispatch(new CommandManagerEventObject(commands)).getResult();
 	}
 
 	@Constructor
 	@InjectAt(location = InjectLocation.TAIL)
-	public void init4(@TargetType(target = "net.minecraft.commands.Commands$CommandSelection") CommandSelection var1,
-			int var2) {
+	public void init4(@TargetType(target = "net.minecraft.core.RegistryAccess") RegistryAccess acc,
+			@TargetType(target = "net.minecraft.commands.Commands$CommandSelection") CommandSelection var1, int var2) {
 		resources.registerReloadListener(new CyanResourceEventListener());
 		resources.registerReloadListener(new CyanReloadListener());
 	}
