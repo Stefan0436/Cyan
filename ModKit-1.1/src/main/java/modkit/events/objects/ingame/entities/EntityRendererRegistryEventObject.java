@@ -35,7 +35,6 @@ public class EntityRendererRegistryEventObject extends EventObject {
 
 	@SuppressWarnings("rawtypes")
 	private HashMap<EntityType<?>, Function> entities = new HashMap<EntityType<?>, Function>();
-
 	private HashMap<EntityType<?>, EntityRenderer<?>> rendererInstances = new HashMap<EntityType<?>, EntityRenderer<?>>();
 
 	public EntityRendererRegistryEventObject() {
@@ -138,6 +137,10 @@ public class EntityRendererRegistryEventObject extends EventObject {
 	 */
 	@Deprecated
 	public Options getClientOptions() {
+		if (Version.fromString(Modloader.getModloaderGameVersion()).isGreaterOrEqualTo(Version.fromString("1.17")))
+			throw new RuntimeException("EntityRendererRegistryEventObject.getClientOptions() does not work in 1.17+");
+		warn("DEPRECATION NOTICE: A mod called EntityRendererRegistryEventObject.getClientOptions(), it has been deprecated since Minecraft 1.17 was released, it should not be used.");
+
 		return options;
 	}
 
@@ -186,6 +189,10 @@ public class EntityRendererRegistryEventObject extends EventObject {
 	 */
 	@Deprecated
 	public Font getFont() {
+		if (Version.fromString(Modloader.getModloaderGameVersion()).isGreaterOrEqualTo(Version.fromString("1.17")))
+			throw new RuntimeException("EntityRendererRegistryEventObject.getFont() does not work in 1.17+");
+		warn("DEPRECATION NOTICE: A mod called EntityRendererRegistryEventObject.getFont(), it has been deprecated since Minecraft 1.17 was released, it should not be used.");
+
 		return font;
 	}
 
