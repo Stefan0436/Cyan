@@ -296,19 +296,20 @@ public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 	}
 }
 
-def majorversion = minecraft
-if (majorversion.split("\\.").length >= 3)
-	majorversion = majorversion.substring(0, majorversion.lastIndexOf("."))
-
-ext.useJava16 = Version.fromString(majorversion).isGreaterOrEqualTo(Version.fromString("1.17"))
-if (Version.fromString(majorversion).isGreaterOrEqualTo(Version.fromString("1.17")) && JavaVersion.current().compareTo(JavaVersion.VERSION_16) != 0 && JavaVersion.current().compareTo(JavaVersion.VERSION_16) != 1){		
-	throw new RuntimeException("Cyan for Minecraft 1.17 requires Java 16 or greater.")
-}
-
 gradle.allprojects {	
 	if (project.hasProperty("overrideGameVersion")) {
 		ext.minecraft=project.getProperty("overrideGameVersion")
 	}
+	
+    def majorversion = minecraft
+    if (majorversion.split("\\.").length >= 3)
+        majorversion = majorversion.substring(0, majorversion.lastIndexOf("."))
+
+    ext.useJava16 = Version.fromString(majorversion).isGreaterOrEqualTo(Version.fromString("1.17"))
+    if (Version.fromString(majorversion).isGreaterOrEqualTo(Version.fromString("1.17")) && JavaVersion.current().compareTo(JavaVersion.VERSION_16) != 0 && JavaVersion.current().compareTo(JavaVersion.VERSION_16) != 1){		
+        throw new RuntimeException("Cyan for Minecraft 1.17 requires Java 16 or greater.")
+    }
+
 	ext.exactgameversion=minecraft
 	if (project.hasProperty("setModLoader")) {
 		ext.modloader=project.getProperty("setModLoader")
