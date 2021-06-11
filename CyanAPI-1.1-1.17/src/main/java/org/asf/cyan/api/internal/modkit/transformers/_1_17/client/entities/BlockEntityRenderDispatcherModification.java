@@ -25,9 +25,9 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 public class BlockEntityRenderDispatcherModification {
 
 	private final Font font = null;
-	public final TextureManager textureManager = null;
+	public final TextureManager textureManager = null; // FIXME: not passed in 1.17
 	private final Map<BlockEntityType<?>, BlockEntityRenderer<?>> renderers = null;
-	public Options options = null;
+	public Options options = null; // FIXME: not passed in 1.17
 
 	@Constructor
 	@InjectAt(location = InjectLocation.TAIL)
