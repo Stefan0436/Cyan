@@ -1,11 +1,4 @@
-![Build Status 1.16](https://github.com/Stefan0436/Cyan/actions/workflows/cyan-1.16.5.yml/badge.svg) ![Build Status 1.17](https://github.com/Stefan0436/Cyan/actions/workflows/cyan-1.17.yml/badge.svg) ![Latest Release](https://img.shields.io/badge/Latest%20Release-[releaseversion]-blueviolet) ![Development Release](https://img.shields.io/badge/Development%20RVersion-[current_version]-ff69b4) [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
-
-[release_version]: 1.0.0.A13
-[current_version]: 1.0.0.A14
-
-[paper_support_116]: 776
-[fabric_support_116]: 0.11.3
-[forge_support_116]: 36.1.31
+![Build Status 1.16](https://github.com/Stefan0436/Cyan/actions/workflows/cyan-1.16.5.yml/badge.svg) ![Build Status 1.17](https://github.com/Stefan0436/Cyan/actions/workflows/cyan-1.17.yml/badge.svg) ![Latest Release](https://img.shields.io/badge/Latest%20Release-1.0.0.A13-blueviolet) ![Development Release](https://img.shields.io/badge/Development%20Version-1.0.0.A14-ff69b4) [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
 # NOTICE
 The github repository mirrors to https://aerialworks.ddns.net/ASF/Cyan.git, you can fork Cyan on github, pull requests will be merged manually.
