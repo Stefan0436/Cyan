@@ -7,6 +7,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 14):
  - ModKit Threads API (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2, count of threads is displayed in crash logs) -- TODO
  - ModKit Custom Invenotry Tabs (CyanAPI ModKit 1.1) -- TODO
  - ModKit World Load Warning if mods have changed (CyanAPI ModKit 1.1) -- TODO
+ - ModKit ported to 1.17 and fully tested (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2) -- TODO
  - ModKit ported to 1.15.2 and fully tested (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2) -- TODO
  - MTK MSA Account Support (MTK A22) -- TODO
   
