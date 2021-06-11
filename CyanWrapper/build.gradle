@@ -84,7 +84,20 @@ ext.forgeVersions = [:]
 ext.paperVersions = [:]
 ext.fabricVersions = [:]
 
-if (file("../modloaderbuild.gradle").exists()) {
+def majorversion = minecraft
+if (majorversion.split("\\.").length >= 3)
+	majorversion = majorversion.substring(0, majorversion.lastIndexOf("."))
+	
+def buildfile = file("../modloaderbuild.gradle")
+if (!buildfile.exists()) {
+	if (file("../modloaderbuild-${minecraft}.gradle").exists()) {
+		buildfile = file("../modloaderbuild-${minecraft}.gradle");
+	} else if (file("../modloaderbuild-${majorversion}.gradle").exists()) {
+		buildfile = file("../modloaderbuild-${majorversion}.gradle");
+	}
+}
+
+if (buildfile.exists()) {
 	ext.stabilityValue = 'testing'
 	ext.stability = { t ->
 		ext.stability = t;
@@ -139,7 +152,7 @@ if (file("../modloaderbuild.gradle").exists()) {
 		fabricVersions.putAll(t);
 	}
 	
-	apply from: "../modloaderbuild.gradle"
+	apply from: buildfile.getAbsolutePath()
 	if (ext.stability.equals("latest")) {
 		ext.addToLatest = "true";				
 	} else if (ext.stability.equals("stable")) {
@@ -2743,7 +2756,7 @@ task vanillaInstaller (type: KickStartInstallerTask, dependsOn: vanillaManifest)
 }
 serverDownloads.finalizedBy vanillaInstaller
 
-if (file("../modloaderbuild.gradle").exists()) {
+if (buildfile.exists()) {
 	def forgeInstallers = []
 	def fabricInstallers = []
 	def paperInstallers = []
