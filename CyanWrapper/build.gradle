@@ -259,11 +259,7 @@ def getServerConnection = {	->
 def getServerConnectionSpecific = { url ->
 	try {
 		URL u = new URL(url);
-<<<<<<< HEAD
 		u.openStream().close();
-=======
-		u.openStream().close();
->>>>>>> 954cef397482da7753dc5129b7c333760e9ef133
 		return true;
 	} catch (MalformedURLException e) {
 		return false;
