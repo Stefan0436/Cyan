@@ -42,7 +42,6 @@ public class CyanIDEWrapper {
 	 */
 	public static void main(String[] args) throws IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException, IOException {
-
 		MinecraftInstallationToolkit.setIDE();
 		CyanLoader.enableDeveloperMode();
 

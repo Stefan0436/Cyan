@@ -7,6 +7,7 @@ import java.time.OffsetDateTime;
 
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.cyan.CyanModloader;
+import org.asf.cyan.cornflower.gradle.flowerinternal.projectextensions.CornflowerMainExtension;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IGameExecutionContext;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftMappingsToolkit;
@@ -35,7 +36,7 @@ public class ServerGame implements IGameExecutionContext, ILaunchProvider {
 		try {
 			cyanVersion = new MinecraftVersionInfo(version + "-cyan-" + modloader.getVersion(),
 					MinecraftVersionType.UNKNOWN,
-					new URL(CyanModloader.maven + "/org/asf/cyan/CyanWrapper/" + modloader.libraries.get("CyanWrapper")
+					new URL(CornflowerMainExtension.AerialWorksMaven + "/org/asf/cyan/CyanWrapper/" + modloader.libraries.get("CyanWrapper")
 							+ "/CyanWrapper-" + modloader.libraries.get("CyanWrapper") + "-" + version + "-cyan-"
 							+ modloader.getVersion() + ".json"),
 					OffsetDateTime.now());

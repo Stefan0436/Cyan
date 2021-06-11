@@ -1,6 +1,6 @@
 // Main configuration file, shared across projects
 // After these two comments, the first 10 lines should not contain code, they must be compatible with bash (ext. is stripped)
-ext.minecraft="1.16.5"
+ext.minecraft="1.17"
 ext.versionType="release"
 
 ext.minmixin="0.7.10"
@@ -21,17 +21,238 @@ buildscript {
 	repositories {
 		jcenter()
 		mavenCentral()
-		maven {
-			name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven"
-		}
+		maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }		
 	}
 	dependencies {
-		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A32'
+		classpath group: 'com.google.code.gson', name: 'gson', version: '2.8.7'
+		classpath group: 'org.asf.cyan', name: 'CCFG', version: '1.0.0.A16'
+		classpath group: 'org.asf.aos.util.service', name: 'aosutil-service-SLIB-UTIL', version: '0.0.0.13'
 	}
 }
 
 import com.google.gson.JsonParser
 import com.google.gson.JsonArray
+
+public class Version {
+
+	private ArrayList<VersionSegment> segments = new ArrayList<VersionSegment>();
+
+	protected static class VersionSegment {
+		public String data = null;
+		public int value = -1;
+
+		public int separator = -1;
+		public boolean hasSeparator = false;
+
+		@Override
+		public String toString() {
+			return data + (separator != -1 ? (char) separator : "");
+		}
+	}
+
+	protected Version() {
+	}
+
+	/**
+	 * Parses the given string into a version wrapper instance.
+	 *
+	 * @param version Version String
+	 * @return Version instance.
+	 */
+	public static Version fromString(String version) {
+		Version ver = new Version();
+		return ver.parse(version);
+	}
+
+	private Version parse(String version) {
+		segments.clear();
+
+		boolean lastWasAlpha = false;
+		boolean first = true;
+
+		VersionSegment last = new VersionSegment();
+		segments.add(last);
+
+		for (char chr : version.toCharArray()) {
+			int ch = chr
+			if (!first) {
+				if (last.data != null) {
+					if ((Character.isAlphabetic(ch) && !lastWasAlpha) || (Character.isDigit(ch) && lastWasAlpha)) {
+						if (last.data.matches('^[0-9]+$'))
+							last.value = Integer.valueOf(last.data);
+
+						last.hasSeparator = true;
+						if (last.value == -1 && last.data != null && last.data.length() > 0
+								&& Character.isAlphabetic(last.data.charAt(0)))
+							last.value = last.data.charAt(0);
+
+						last = new VersionSegment();
+						segments.add(last);
+					}
+				}
+			}
+
+			if (!Character.isDigit(ch) && !Character.isAlphabetic(ch)) {
+				if (first) {
+					continue;
+				}
+
+				if (last.data != null) {
+					if (last.data.matches('^[0-9]+$'))
+						last.value = Integer.valueOf(last.data);
+
+					last.separator = ch;
+					last.hasSeparator = true;
+					last = new VersionSegment();
+					segments.add(last);
+				}
+				continue;
+			}
+
+			if (Character.isAlphabetic(ch) && lastWasAlpha) {
+				if (last.value == -1)
+					last.value = last.data.charAt(0);
+				last.data += ch;
+				continue;
+			}
+
+			if (last.data == null) {
+				last.data = "";
+			}
+			last.data += ch;
+
+			lastWasAlpha = Character.isAlphabetic(ch);
+			first = false;
+		}
+
+		if (last.data != null && last.data.matches('^[0-9]+$'))
+			last.value = Integer.valueOf(last.data);
+		if (last.value == -1 && last.data != null && last.data.length() > 0
+				&& Character.isAlphabetic(last.data.charAt(0)))
+			last.value = last.data.charAt(0);
+
+		return this;
+	}
+
+	/**
+	 * Compares this version to another
+	 *
+	 * @param other Version to compare to
+	 * @return 1 if greater, 0 if equal and -1 if less.
+	 */
+	public int compareTo(Version other) {
+		if (isEqualTo(other))
+			return 0;
+		if (isGreaterThan(other))
+			return 1;
+		if (isLessThan(other))
+			return -1;
+
+		return 0;
+	}
+
+	public boolean isEqualTo(Version other) {
+		if (other.segments.size() != segments.size())
+			return false;
+
+		int i = 0;
+		for (VersionSegment segment : segments) {
+			VersionSegment otherSegment = other.segments.get(i);
+			if (segment.value != otherSegment.value)
+				return false;
+			i++;
+		}
+
+		return true;
+	}
+
+	public boolean isGreaterThan(Version other) {
+		if (isEqualTo(other))
+			return false;
+		int i = 0;
+		boolean lastWasGreater = false;
+		for (VersionSegment segment : segments) {
+			if (i >= other.segments.size())
+				return true;
+
+			VersionSegment otherSegment = other.segments.get(i);
+			if (isSnapshot(otherSegment) && !isSnapshot(segment))
+				return true;
+			else if (!isSnapshot(segment) && isSnapshot(otherSegment))
+				return false;
+
+			if (segment.value < otherSegment.value)
+				return false;
+			else if (segment.value != otherSegment.value)
+				lastWasGreater = true;
+			i++;
+		}
+		if (i < other.segments.size()) {
+			if (lastWasGreater)
+				return true;
+			if (isSnapshot(other.segments.get(i)))
+				return true;
+			return false;
+		}
+
+		return true;
+	}
+
+	private boolean isSnapshot(VersionSegment t) {
+		return t.toString().toLowerCase().contains("snapshot") || t.toString().toLowerCase().contains("beta")
+				|| t.toString().toLowerCase().contains("alpha") || t.toString().toLowerCase().contains("pre");
+	}
+
+	public boolean isLessThan(Version other) {
+		if (isEqualTo(other))
+			return false;
+		
+		boolean lastWasLess = false;
+		int i = 0;
+		for (VersionSegment segment : segments) {
+			if (i >= other.segments.size()) {
+				if (isSnapshot(segment) && !other.segments.stream().anyMatch({ t -> isSnapshot(t) })) {
+					break;
+				}
+				return lastWasLess;
+			}
+
+			VersionSegment otherSegment = other.segments.get(i);
+			if (isSnapshot(otherSegment) && !isSnapshot(segment))
+				return false;
+			else if (!isSnapshot(otherSegment) && isSnapshot(segment))
+				return true;
+
+			if (segment.value > otherSegment.value)
+				return false;
+			lastWasLess = segment.value < otherSegment.value;
+			
+			i++;
+		}
+
+		return true;
+	}
+
+	public boolean isGreaterOrEqualTo(Version other) {
+		int comp = compareTo(other);
+		return comp == 1 || comp == 0;
+	}
+
+	public boolean isLessOrEqualTo(Version other) {
+		int comp = compareTo(other);
+		return comp == -1 || comp == 0;
+	}
+
+	@Override
+	public String toString() {
+		String str = "";
+		for (VersionSegment segment : segments) {
+			str += segment.toString();
+		}
+		return str;
+	}
+
+}
 
 import org.asf.cyan.api.config.Configuration;
 public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
@@ -79,6 +300,16 @@ gradle.allprojects {
 	if (project.hasProperty("overrideGameVersion")) {
 		ext.minecraft=project.getProperty("overrideGameVersion")
 	}
+	
+    def majorversion = minecraft
+    if (majorversion.split("\\.").length >= 3)
+        majorversion = majorversion.substring(0, majorversion.lastIndexOf("."))
+
+    ext.useJava16 = Version.fromString(majorversion).isGreaterOrEqualTo(Version.fromString("1.17"))
+    if (Version.fromString(majorversion).isGreaterOrEqualTo(Version.fromString("1.17")) && JavaVersion.current().compareTo(JavaVersion.VERSION_16) != 0 && JavaVersion.current().compareTo(JavaVersion.VERSION_16) != 1){		
+        throw new RuntimeException("Cyan for Minecraft 1.17 requires Java 16 or greater.")
+    }
+
 	ext.exactgameversion=minecraft
 	if (project.hasProperty("setModLoader")) {
 		ext.modloader=project.getProperty("setModLoader")

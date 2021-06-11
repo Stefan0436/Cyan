@@ -1,12 +1,8 @@
 buildscript {
-	repositories {
-		mavenCentral()
-		maven {
-			name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven"
-		}
-	}
 	dependencies {
-		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A37'
+		for (File f : file("../litelibs").listFiles()) {
+			classpath files(f)
+		}
 	}
 }
 
@@ -74,12 +70,13 @@ MinecraftInstallationToolkit.downloadVersionJar(info, GameSide.SERVER)
 eclipseClasspath {
 	doFirst {		
 		MinecraftModdingToolkit.sourcesJar(info, GameSide.CLIENT)
-		MinecraftModdingToolkit.deobfuscateJar(info, GameSide.SERVER)
 		MinecraftModdingToolkit.sourcesJar(info, GameSide.SERVER)
 	}
 }	
 
 File jarFile = MinecraftModdingToolkit.deobfuscateJar(info, GameSide.CLIENT)
+MinecraftModdingToolkit.deobfuscateJar(info, GameSide.SERVER)
+
 Log4jToGradleAppender.noLogInfo()
 ext.cornflowerCachesDir = jarFile.getParent()
 

@@ -6,7 +6,13 @@ Cyan is an upcoming modloader geared towards compatibility,<br/>
 Currently, we are writing compatibility for Forge, Fabric and Paper.
 
 # Project setup
-Use `gradle createEclipseLaunches` to setup the environment. (gradlew.bat on windows, ./gradlew for linux users without a gradle installation)
+Cyan needs itself to build, for this, you build LiteCyan, a bundle of libraries needed to run Cornflower.<br/>
+On Linux, run: `chmod +x gradlew ; ./gradlew -c settings.lite.gradle installLiteLibs`<br/>
+On Windows, run: `.\gradlew.bat -c settings.lite.gradle installLiteLibs`
+
+After that, you can use the following commands to set up the development environment:<br/>
+On Linux, run: `./gradlew eclipse jar createEclipseLaunches`<br/>
+On Windows, run: `.\gradlew.bat eclipse jar createEclipseLaunches`<br/>
 
 # Compiling
 Use `./buildlocal.sh` on linux to quickly build the project, argument `--version` can be used to specify game version,

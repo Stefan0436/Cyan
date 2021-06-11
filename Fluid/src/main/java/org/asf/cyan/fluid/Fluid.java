@@ -52,9 +52,9 @@ import com.sun.tools.attach.VirtualMachine;
  *
  */
 public class Fluid extends CyanComponent {
-	
+
 	private static File dumpDir = new File(".");
-	
+
 	/**
 	 * Sets the transformer dump directory
 	 */
@@ -460,7 +460,8 @@ public class Fluid extends CyanComponent {
 			debug("Attaching to vm with PID " + Long.toString(ProcessHandle.current().pid()) + " (self)...");
 			final VirtualMachine vm = VirtualMachine.attach(Long.toString(ProcessHandle.current().pid()));
 			debug("Finding jar path...");
-			String path = new File(FluidAgent.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getCanonicalPath();
+			String path = new File(FluidAgent.class.getProtectionDomain().getCodeSource().getLocation().toURI())
+					.getCanonicalPath();
 			debug("Path: " + path);
 			if (System.getProperty("cyanAgentJar") != null && !path.endsWith(".jar")) {
 				path = System.getProperty("cyanAgentJar");
@@ -730,6 +731,8 @@ public class Fluid extends CyanComponent {
 		for (Mapping<?> clsMapping : root.mappings) {
 			if (clsMapping.obfuscated.equals(cls.name.replaceAll("/", "."))) {
 				for (MethodNode method : cls.methods) {
+					if (Modifier.isPrivate(method.access))
+						continue;
 					String str = "";
 					String desc = method.desc;
 					String[] types = Fluid.parseMultipleDescriptors(
@@ -756,17 +759,21 @@ public class Fluid extends CyanComponent {
 						if (methodMap.mappingType.equals(MAPTYPE.METHOD) && !Modifier.isPrivate(method.access)
 								&& methodMap.obfuscated.equals(method.name)
 								&& Arrays.equals(types, methodMap.argumentTypes)) {
-							target.methods.put(methodMap.obfuscated + " " + method.desc, methodMap.name);
+							if (!target.methods.containsKey(methodMap.obfuscated + " " + method.desc))
+								target.methods.put(methodMap.obfuscated + " " + method.desc, methodMap.name);
 							break;
 						}
 					}
 				}
 
 				for (FieldNode field : cls.fields) {
+					if (Modifier.isPrivate(field.access))
+						continue;
 					for (Mapping<?> fieldMap : clsMapping.mappings) {
 						if (fieldMap.mappingType.equals(MAPTYPE.PROPERTY) && !Modifier.isPrivate(field.access)
 								&& fieldMap.obfuscated.equals(field.name)) {
-							target.fields.put(fieldMap.obfuscated + " " + field.desc, fieldMap.name);
+							if (!target.fields.containsKey(fieldMap.obfuscated + " " + field.desc))
+								target.fields.put(fieldMap.obfuscated + " " + field.desc, fieldMap.name);
 							break;
 						}
 					}

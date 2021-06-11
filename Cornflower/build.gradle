@@ -26,7 +26,7 @@ def display="Cornflower Gradle Plugin"
 def authorname="AerialWorks Software Foundation"
 def plugindescription="Cyan Cornflower - Gradle plugin to help with Cyan modding"
 def versiontype="ALPHA"
-version="1.0.0.A39"
+version="1.0.0.A40"
 
 sourceSets {
 	main {
@@ -44,6 +44,14 @@ buildDir = '../build/Cornflower'
 task javaDocs(type: Javadoc) {
 	classpath = sourceSets.main.runtimeClasspath
 	source = sourceSets.main.allJava
+	
+	if (project.hasProperty("liteBuild")) {
+		exclude "**/tasks/CtcTask.**"
+		exclude "**/tasks/CmfTask.**"
+		exclude "**/gradle/utilities/modding/manifests/**"
+		exclude "**/flowerinternal/implementation/cyan/**"
+		exclude "**/gradle/utilities/modding/CyanModfileManifestGenerator.**"
+	}	
 }
 
 repositories {
@@ -77,6 +85,12 @@ dependencies {
 	implementation group: 'org.ow2.asm', name: 'asm-tree', version: '9.1'
 	implementation group: 'org.ow2.asm', name: 'asm-commons', version: '9.1'
 	implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
+	implementation 'org.javassist:javassist:3.27.1-ASF-SNAPSHOT-5'
+	
+	implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
+	implementation group: 'org.jboss.windup.decompiler.fernflower', name: 'windup-fernflower', version: '1.0.0.20171018'
+	implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-api', version: '5.1.2.Final'
+	implementation group: 'org.jboss.windup.utils', name: 'windup-utils', version: '5.1.2.Final'
 	
 	implementation 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.13'
 	
@@ -86,12 +100,15 @@ dependencies {
 	implementation project(":CyanUtil")
 	implementation project(":Fluid")
 	implementation project(":CCFG")
-	implementation project(":ClassTrust")
-	implementation project(":CyanLoader")
-	implementation project(":TrustExplorer")
-	implementation (project(':ModKit')) {
-        exclude group: '', module: 'server'
-        exclude group: '', module: 'client'
+	
+	if (!project.hasProperty("liteBuild")) {
+		implementation project(":ClassTrust")
+		implementation project(":CyanLoader")
+		implementation project(":TrustExplorer")
+		implementation (project(':ModKit')) {
+	        exclude group: '', module: 'server'
+	        exclude group: '', module: 'client'
+		}
 	}
 	
 	mavendependency group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.7'
@@ -118,10 +135,23 @@ dependencies {
 	mavendependency project(":CyanComponents")
 	mavendependency project(":CyanUtil")
 	mavendependency project(":Fluid")
-	mavendependency project(":CCFG")
-	mavendependency project(":ClassTrust")
-	mavendependency project(":TrustExplorer")
-	mavendependency project(":CyanLoader")
+	mavendependency project(":CCFG")	
+	
+	if (!project.hasProperty("liteBuild")) {
+		mavendependency project(":ClassTrust")
+		mavendependency project(":TrustExplorer")
+		mavendependency project(":CyanLoader")
+	}
+}
+
+if (project.hasProperty("liteBuild")) {
+	compileJava {
+		exclude "**/tasks/CtcTask.java"
+		exclude "**/tasks/CmfTask.java"
+		exclude "**/gradle/utilities/modding/manifests"
+		exclude "**/flowerinternal/implementation/cyan"
+		exclude "**/gradle/utilities/modding/CyanModfileManifestGenerator.java"
+	}
 }
 
 jar {
@@ -135,6 +165,10 @@ jar {
 			"Implementation-Vendor" :"${authorname}",
 			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
 		])
+	}
+	
+	if (project.hasProperty("liteBuild")) {
+		archiveClassifier = "LiteCyan";
 	}
 	exclude "**/tests/**"
 	includeEmptyDirs = false
@@ -172,12 +206,11 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 
 task javadocJar(type: Jar, dependsOn: 'javaDocs') {
-	from javadoc
+	from javaDocs
 	classifier = 'javadoc'
 	destinationDirectory = libsDirectory.dir("Javadocs")
 	exclude "**/org/asf/cyan/tests/**"
 }
-
 
 task cornflowerMTKJar(type: Jar, dependsOn: jar) {
 	from sourceSets.main.output
@@ -204,7 +237,7 @@ task cornflowerMTKJar(type: Jar, dependsOn: jar) {
 }
 
 task cornflowerMTKJavadocJar(type: Jar, dependsOn: 'javaDocs') {
-	from javadoc
+	from javaDocs
 	classifier = 'MTK-javadoc'
 	destinationDirectory = libsDirectory.dir("Javadocs")
 	exclude "**/org/asf/cyan/tests/**"
@@ -252,7 +285,7 @@ task cornflowerAPIJar(type: Jar, dependsOn: jar) {
 }
 
 task cornflowerAPIJavadocJar(type: Jar, dependsOn: 'javaDocs') {
-	from javadoc
+	from javaDocs
 	classifier = 'API-javadoc'
 	destinationDirectory = libsDirectory.dir("Javadocs")
 	include "**/utilities/**"
@@ -293,7 +326,7 @@ task cornflowerExtAPIJar(type: Jar, dependsOn: jar) {
 }
 
 task cornflowerExtAPIJavadocJar(type: Jar, dependsOn: 'javaDocs') {
-	from javadoc
+	from javaDocs
 	classifier = 'EXT-API-javadoc'
 	destinationDirectory = libsDirectory.dir("Javadocs")
 	include "**/utilities/**"
@@ -448,7 +481,7 @@ task cpLibs {
 				copy {
 					String version = dep.moduleVersion;
 					from (dep.getModuleArtifacts()[0].file.getParent() )
-					into ( libsDirectory.dir("Required Libraries"))
+					into (libsDirectory.dir("Required Libraries"))
 					include "**/"+dep.getModuleArtifacts()[0].file.getName()
 					rename { fileName ->
 						fileName = dep.moduleName+".jar"
@@ -459,5 +492,20 @@ task cpLibs {
 	}
 }
 classes.finalizedBy('cpLibs')
+
+if (project.hasProperty("liteBuild")) {
+	task installLiteLibs (dependsOn: [jar, cpLibs]) {
+		outputs.upToDateWhen { return false; }
+		doLast {
+			copy {
+				from libsDirectory.dir("Required Libraries")
+				from tasks.jar.getArchiveFile()
+				
+				rename tasks.jar.getArchiveFile().get().getAsFile().getName(), "Cornflower.jar"
+				into file("../litelibs")
+			}
+		}
+	}
+}
 
 initializeASFMVNPublish()

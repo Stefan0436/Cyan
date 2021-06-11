@@ -11,6 +11,7 @@ import java.util.Scanner;
 import org.asf.cyan.core.CyanInfo;
 import org.asf.cyan.core.CyanUpdateInfo;
 import org.asf.cyan.cornflower.gradle.Cornflower;
+import org.asf.cyan.cornflower.gradle.flowerinternal.projectextensions.CornflowerMainExtension;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IModloader;
 import org.asf.cyan.cornflower.gradle.utilities.GradleUtil;
 import org.gradle.api.Project;
@@ -19,7 +20,6 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler;
 
 public class CyanModloader implements IModloader {
 
-	public static final String maven = "https://aerialworks.ddns.net/maven";
 	public static final String infoPathTemplate = "/org/asf/cyan/CyanVersionHolder/%version%/CyanVersionHolder-%version%-versions.ccfg";
 
 	public HashMap<String, String> libraries = new HashMap<String, String>();
@@ -49,7 +49,7 @@ public class CyanModloader implements IModloader {
 		if (version.equals("latest")) {
 			try {
 				StringBuilder conf = new StringBuilder();
-				URL u = new URL(maven + CyanInfo.infoPath);
+				URL u = new URL(CornflowerMainExtension.AerialWorksMaven + CyanInfo.infoPath);
 				Scanner sc = new Scanner(u.openStream());
 				while (sc.hasNext())
 					conf.append(sc.nextLine() + System.lineSeparator());
@@ -89,7 +89,7 @@ public class CyanModloader implements IModloader {
 		File manifest = new File(infoDir, "mainfest-" + version + ".ccfg");
 		String config = "";
 		try {
-			URL u = new URL(maven + infoPathTemplate.replace("%version%", version));
+			URL u = new URL(CornflowerMainExtension.AerialWorksMaven + infoPathTemplate.replace("%version%", version));
 			StringBuilder conf = new StringBuilder();
 			Scanner sc = new Scanner(u.openStream());
 			while (sc.hasNext())
@@ -138,7 +138,7 @@ public class CyanModloader implements IModloader {
 
 		repositories.maven((repo) -> {
 			repo.setName("AerialWorks");
-			repo.setUrl(maven);
+			repo.setUrl(CornflowerMainExtension.AerialWorksMaven);
 		});
 	}
 

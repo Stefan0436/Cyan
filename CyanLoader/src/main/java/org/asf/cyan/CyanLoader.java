@@ -364,7 +364,8 @@ public class CyanLoader extends ModkitModloader
 			}
 			System.setProperty("log4j2.configurationFile", url.toString());
 			System.setProperty("log4j.configurationFile", url.toString());
-			CyanCore.disableAgent();
+			if (System.getProperty("cyanDevEnv.noDisable.Agent") == null)
+				CyanCore.disableAgent();
 		}
 
 		CyanCore.setSide(side);

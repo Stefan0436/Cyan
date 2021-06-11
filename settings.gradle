@@ -13,6 +13,10 @@ include('ClassTrust')
 include('TrustExplorer')
 
 apply from: 'config.gradle'
+if (hasProperty("overrideGameVersion")) {
+    minecraft = getProperty("overrideGameVersion")
+}
+
 def nameModKit = "ModKit-$modkit"
 def majorversion = minecraft
 if (majorversion.split("\\.").length >= 3)
