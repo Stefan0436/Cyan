@@ -1,3 +1,5 @@
+![Build Status](https://github.com/Stefan0436/Cyan/actions/workflows/gradle.yml/badge.svg)
+
 # NOTICE
 The github repository mirrors to https://aerialworks.ddns.net/ASF/Cyan.git, you can fork Cyan on github, pull requests will be merged manually.
 
