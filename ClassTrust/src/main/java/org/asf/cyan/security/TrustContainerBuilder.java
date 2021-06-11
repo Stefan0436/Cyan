@@ -102,6 +102,8 @@ public class TrustContainerBuilder {
 
 	/**
 	 * Builds the container
+	 * 
+	 * @return TrustContainer instance.
 	 */
 	public TrustContainer build() {
 		TrustContainer container = new TrustContainer();

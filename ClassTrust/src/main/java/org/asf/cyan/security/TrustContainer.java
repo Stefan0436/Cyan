@@ -32,7 +32,8 @@ public class TrustContainer {
 	}
 
 	/**
-	 * Retieves the container name
+	 * Retrieves the container name
+	 * @return Container name
 	 */
 	public String getContainerName() {
 		return name;
@@ -40,6 +41,7 @@ public class TrustContainer {
 
 	/**
 	 * Retrieves the container version timestamp
+	 * @return Container version
 	 */
 	public String getVersion() {
 		return version;
@@ -47,6 +49,7 @@ public class TrustContainer {
 
 	/**
 	 * Retrieves the container entries
+	 * @return Container entry array
 	 */
 	public PackageTrustEntry[] getEntries() {
 		return entries;

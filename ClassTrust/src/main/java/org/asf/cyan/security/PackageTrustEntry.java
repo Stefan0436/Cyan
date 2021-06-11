@@ -9,6 +9,9 @@ package org.asf.cyan.security;
  */
 public class PackageTrustEntry {
 
+	/**
+	 * Internal constructor
+	 */
 	protected PackageTrustEntry() {
 	}
 

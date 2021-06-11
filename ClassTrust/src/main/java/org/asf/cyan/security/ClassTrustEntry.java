@@ -11,6 +11,9 @@ public class ClassTrustEntry {
 	private String name;
 	private String[] hashes;
 
+	/**
+	 * Internal constructor
+	 */
 	protected ClassTrustEntry() {
 	}
 
