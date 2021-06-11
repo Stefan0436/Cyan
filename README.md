@@ -1,4 +1,4 @@
-![Build Status](https://github.com/Stefan0436/Cyan/actions/workflows/gradle.yml/badge.svg) [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
+![Build Status](https://github.com/Stefan0436/Cyan/actions/workflows/gradle.yml/badge.svg) [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) ![Latest Release](https://img.shields.io/badge/Latest%20Release-1.0.0.A13-blueviolet)
 
 # NOTICE
 The github repository mirrors to https://aerialworks.ddns.net/ASF/Cyan.git, you can fork Cyan on github, pull requests will be merged manually.
