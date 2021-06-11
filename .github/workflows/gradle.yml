@@ -1,0 +1,39 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: arch-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 16
+      uses: actions/setup-java@v2
+      with:
+        java-version: '16'
+        distribution: 'adopt'
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Grant execute permissions to build script
+      run: chmod +x buildlocal.sh
+    - name: Setup LiteCyan libraries for build
+      run: ./gradlew -c settings.lite.gradle installLiteLibs
+    - name: Build for 1.16.5
+      run: ./buildlocal.sh --version 1.16.5
+    - name: Build for 1.16.5 with Paper support
+      run: ./buildlocal.sh --version 1.16.5 --modloader paper
+    - name: Build for 1.16.5 with Fabric support
+      run: ./buildlocal.sh --version 1.16.5 --modloader fabric
+    - name: Build for 1.16.5 with Forge support
+      run: ./buildlocal.sh --version 1.16.5 --modloader forge
+    - name: Build for 1.17
+      run: ./buildlocal.sh --version 1.17
