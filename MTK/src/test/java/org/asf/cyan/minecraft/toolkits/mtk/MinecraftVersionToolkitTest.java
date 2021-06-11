@@ -8,6 +8,7 @@ import com.google.gson.JsonParser;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -18,10 +19,11 @@ import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
 
 public class MinecraftVersionToolkitTest {
 	
-	public MinecraftVersionToolkitTest() {		
+	public MinecraftVersionToolkitTest() throws IOException {		
 		if (!CyanCore.isInitialized()) {
 			CyanCore.simpleInit();
 			MinecraftToolkit.resetServerConnectionState();
+			MinecraftInstallationToolkit.setMinecraftDirectory(new File("bin/test/mtk"));
 			MinecraftToolkit.initializeMTK();
 		}
 	}

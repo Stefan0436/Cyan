@@ -7,6 +7,9 @@ build
 # Ignore LiteLibs
 litelibs
 
+# Ignore MTK cache
+MTK/caches
+
 # Eclipse
 .settings/
 .project
