@@ -2,7 +2,8 @@ package org.asf.cyan.fluid.api.transforming.util;
 
 /**
  * 
- * Utility functions for transformers (only works with transformers)
+ * Utility functions for transformers (only works with transformers, only
+ * supports constant parameters for loading)
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
  *
