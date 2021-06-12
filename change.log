@@ -2,6 +2,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 14):
  - Overhaul build script
  - Improved ModKit Protocol Negotiation
  - Repaired Fluid Deobfuscation Target Mappings (Fluid A27)
+ - CodeControl Local Variable Manipulation (Fluid A27)
  - ModKit Server Status Modification (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2)
  - ModKit Key Binding Registry Events (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2) -- TODO
  - ModKit Threads API (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2, count of threads is displayed in crash logs) -- TODO

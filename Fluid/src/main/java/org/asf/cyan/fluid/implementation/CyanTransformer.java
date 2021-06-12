@@ -1,8 +1,10 @@
 package org.asf.cyan.fluid.implementation;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -19,6 +21,7 @@ import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
@@ -40,8 +43,10 @@ import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.TargetName;
 import org.asf.cyan.fluid.api.transforming.TargetType;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
+import org.asf.cyan.fluid.api.transforming.util.CodeControl;
 import org.asf.cyan.fluid.bytecode.FluidClassPool;
 import org.asf.cyan.fluid.bytecode.UnrecognizedEnumInfo;
+import org.asf.cyan.fluid.bytecode.enums.OpcodeUseCase;
 import org.asf.cyan.fluid.remapping.MAPTYPE;
 import org.asf.cyan.fluid.remapping.Mapping;
 
@@ -1175,12 +1180,72 @@ public class CyanTransformer extends Transformer {
 		return self;
 	}
 
+	private static HashMap<OpcodeUseCase, HashMap<String, Integer>> opcodes = new HashMap<OpcodeUseCase, HashMap<String, Integer>>();
+
+	static {
+		for (Field field : Opcodes.class.getFields()) {
+			if (Modifier.isStatic(field.getModifiers())) {
+				field.setAccessible(true);
+				try {
+					Object value = field.get(null);
+					OpcodeUseCase useCase = OpcodeUseCase.valueOf(field.getName().toUpperCase(),
+							field.getType().getTypeName());
+					HashMap<String, Integer> mp = opcodes.getOrDefault(useCase, new HashMap<String, Integer>());
+					mp.put(field.getName().toUpperCase(), (Integer) value);
+					opcodes.put(useCase, mp);
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+				}
+			}
+		}
+	}
+
+	private static int getOpcode(String name) {
+		return opcodes.get(OpcodeUseCase.JVM_OPCODE).get(name);
+	}
+
 	@Override
 	protected FluidMethodInfo transformFMI(FluidMethodInfo self, InsnList instructions, ClassNode transformerNode,
 			String clName, ClassNode cls, FluidClassPool pool) {
-		for (AbstractInsnNode node : instructions) {
+		InsnList lst = new InsnList();
+		for (AbstractInsnNode nd : instructions) {
+			lst.add(nd);
+		}
+		int nodeInd = 0;
+		int skip = 0;
+		int skipForced = 0;
+		for (@SuppressWarnings("unused")
+		AbstractInsnNode nd : lst) {
+			if (skipForced != 0) {
+				skipForced--;
+				continue;
+			}
+			if (skip != 0) {
+				instructions.remove(instructions.get(nodeInd));
+				skip--;
+				continue;
+			}
+			AbstractInsnNode node = instructions.get(nodeInd);
 			if (node instanceof MethodInsnNode) {
 				MethodInsnNode mnode = (MethodInsnNode) node;
+				if (mnode.owner.equals(CodeControl.class.getTypeName().replace(".", "/"))) {
+					if (mnode.name.contains("STORE")) {
+						if (mnode.name.equals("ASTORE") && mnode.getNext() instanceof TypeInsnNode) {
+							skip++;
+						}
+						instructions.remove(mnode);
+					} else if (mnode.name.contains("LOAD")) {
+						int var;
+						if (mnode.getPrevious() instanceof InsnNode) {
+							var = mnode.getPrevious().getOpcode() - 3;
+						} else {
+							IntInsnNode value = (IntInsnNode) mnode.getPrevious();
+							var = value.operand;
+						}
+						instructions.remove(instructions.get(nodeInd - 1));
+						instructions.set(mnode, new VarInsnNode(getOpcode(mnode.name), var));
+					}
+					continue;
+				}
 				if (mnode.owner.equals(transformerNode.name)) {
 					processMethod(mnode, clName, pool, transformerNode);
 				} else {
@@ -1295,6 +1360,8 @@ public class CyanTransformer extends Transformer {
 					}
 				}
 			}
+
+			nodeInd++;
 		}
 		return self;
 	}
