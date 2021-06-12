@@ -42,7 +42,7 @@ jobs:
       run: ./buildworkflow.sh 1.17
 #    - name: Build for 1.17 with Paper support
 #      run: ./buildworkflow.sh 1.17 paper
-#    - name: Build for 1.17 with Fabric support
-#      run: ./buildworkflow.sh 1.17 fabric
+    - name: Build for 1.17 with Fabric support
+      run: ./buildworkflow.sh 1.17 fabric
 #    - name: Build for 1.17 with Forge support
 #      run: ./buildworkflow.sh 1.17 forge
