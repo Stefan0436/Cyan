@@ -218,7 +218,7 @@ public class FluidAgent extends CyanComponent {
 								error("FLUID hook apply failed, hook type: " + hook.getClass().getTypeName(), e);
 							}
 						}
-						
+
 						bytecode = pool.getByteCode(cc.name);
 					}
 					if (transformerMatch) {
