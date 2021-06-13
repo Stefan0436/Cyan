@@ -279,7 +279,8 @@ public class Installer extends CyanComponent {
 		if (Version.fromString(project.game).isGreaterOrEqualTo(Version.fromString("1.17"))
 				&& Version.fromString("16").isGreaterThan(java)) {
 			JOptionPane.showMessageDialog(null,
-					"Cyan 1.17+ is not compatible with versions below Java 16, please use Java 16+ to install.",
+					project.name
+							+ " 1.17+ is not compatible with versions below Java 16, please use Java 16+ to install.",
 					"Cannot install", JOptionPane.ERROR_MESSAGE);
 			System.exit(-1);
 		}
@@ -323,7 +324,8 @@ public class Installer extends CyanComponent {
 			throw new IOException("Missing modloader manifest");
 
 		logger.info("Creating fake version info for modloader...");
-		MinecraftVersionInfo info = new MinecraftVersionInfo(project.inheritsFrom + "-cyan-" + project.version,
+		MinecraftVersionInfo info = new MinecraftVersionInfo(
+				project.inheritsFrom + "-" + project.name.toLowerCase() + "-" + project.version,
 				MinecraftVersionType.UNKNOWN, manifest, OffsetDateTime.now());
 
 		logger.info("Downloading modloader version manifest...");
@@ -443,7 +445,7 @@ public class Installer extends CyanComponent {
 		lblNewLabel.setVerticalAlignment(SwingConstants.TOP);
 		lblNewLabel.setPreferredSize(new Dimension(200, 18));
 
-		JLabel lblKickstart = new JLabel("KickStart Installer 1.6 ");
+		JLabel lblKickstart = new JLabel("KickStart Installer 1.7 ");
 		panel.add(lblKickstart, BorderLayout.EAST);
 		lblKickstart.setFont(new Font("SansSerif", Font.BOLD, 12));
 		lblKickstart.setHorizontalAlignment(SwingConstants.TRAILING);
