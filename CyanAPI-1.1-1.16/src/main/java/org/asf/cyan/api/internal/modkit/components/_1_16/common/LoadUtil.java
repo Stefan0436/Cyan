@@ -16,7 +16,7 @@ public class LoadUtil {
 	public static boolean checkWorldJoin(LevelModDataReader reader, String gameVersion, boolean addGame,
 			Consumer<String> callback) {
 		HashMap<String, String> entries = new HashMap<String, String>();
-		HashMap<String, String> localEntries = new HashMap<String, String>();
+		HashMap<String, String[]> localEntries = new HashMap<String, String[]>();
 		for (String loader : reader.cyanGetAllLoaders()) {
 			entries.put(loader, reader.cyanGetLoader(loader).version);
 			entries.putAll(reader.cyanGetLoader(loader).mods);
@@ -24,12 +24,12 @@ public class LoadUtil {
 		}
 
 		for (Modloader loader : Modloader.getAllModloaders()) {
-			localEntries.put(loader.getName(), loader.getVersion().toString());
+			localEntries.put(loader.getName(), new String[] { loader.getVersion().toString(), loader.getName() });
 			for (IModManifest manifest : loader.getLoadedCoremods()) {
-				localEntries.put(manifest.id(), manifest.version().toString());
+				localEntries.put(manifest.id(), new String[] { manifest.version().toString(), manifest.displayName() });
 			}
 			for (IModManifest manifest : loader.getLoadedMods()) {
-				localEntries.put(manifest.id(), manifest.version().toString());
+				localEntries.put(manifest.id(), new String[] { manifest.version().toString(), manifest.displayName() });
 			}
 		}
 
@@ -60,14 +60,14 @@ public class LoadUtil {
 				statuses.put(key, Colors.DARK_RED + removedMsg);
 			else {
 				Version oldVer = Version.fromString(entries.get(key));
-				Version newVer = Version.fromString(localEntries.get(key));
+				Version newVer = Version.fromString(localEntries.get(key)[0]);
 				if (!oldVer.isEqualTo(newVer)) {
 					if (oldVer.isGreaterThan(newVer))
-						statuses.put(key,
+						statuses.put(localEntries.get(key)[1],
 								Colors.GOLD + downgradedMsg + Colors.LIGHT_GREY + ", " + Colors.DARK_PURPLE + newVer);
 					else
-						statuses.put(key, Colors.DARK_GREEN + upgradedMsg + Colors.LIGHT_GREY + ", "
-								+ Colors.DARK_PURPLE + newVer);
+						statuses.put(localEntries.get(key)[1], Colors.DARK_GREEN + upgradedMsg + Colors.LIGHT_GREY
+								+ ", " + Colors.DARK_PURPLE + newVer);
 				}
 			}
 		}
