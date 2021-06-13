@@ -1,0 +1,324 @@
+buildscript {
+	dependencies {
+		for (File f : file("../litelibs").listFiles()) {
+			classpath files(f)
+		}
+	}
+}
+
+plugins {
+    id 'java'
+	id 'maven-publish'
+}
+
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
+
+apply plugin: 'eclipse'
+apply plugin: 'org.asf.cyan.cornflower'
+
+apply from: '../asf.mvn.publish.gradle'
+apply from: '../config.gradle'
+
+group="org.asf.cyan"
+def authorname="AerialWorks Software Foundation"
+
+ext.specVersion="1.2"
+version = specVersion
+
+buildDir = '../build/ModKit-' + specVersion
+
+import org.asf.cyan.api.modloader.information.game.GameSide
+import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo
+import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType
+import org.asf.cyan.minecraft.toolkits.mtk.MinecraftModdingToolkit
+import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit
+import org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit
+import org.asf.cyan.minecraft.toolkits.mtk.MinecraftMappingsToolkit
+import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender
+import java.nio.file.Files
+import java.time.OffsetDateTime
+Log4jToGradleAppender.logInfo()
+
+MinecraftVersionInfo info = MinecraftVersionToolkit.createOrGetVersion(minecraft, MinecraftVersionType.UNKNOWN, null, OffsetDateTime.now())
+if (!MinecraftMappingsToolkit.areMappingsAvailable(info, GameSide.CLIENT)) {
+	MinecraftMappingsToolkit.downloadVanillaMappings(info, GameSide.CLIENT)
+	MinecraftMappingsToolkit.saveMappingsToDisk(info, GameSide.CLIENT)
+}
+MinecraftMappingsToolkit.loadMappings(info, GameSide.CLIENT)
+
+if (!MinecraftMappingsToolkit.areMappingsAvailable(info, GameSide.SERVER)) {
+	MinecraftMappingsToolkit.downloadVanillaMappings(info, GameSide.SERVER)
+	MinecraftMappingsToolkit.saveMappingsToDisk(info, GameSide.SERVER)
+}
+MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER)
+
+if (!MinecraftInstallationToolkit.isVersionManifestSaved(info))
+	MinecraftInstallationToolkit.saveVersionManifest(info)
+if (!project.hasProperty("uncheckedClient") && !MinecraftInstallationToolkit.checkInstallation(info, true))
+	MinecraftInstallationToolkit.downloadVersionFiles(info, true)
+	
+MinecraftInstallationToolkit.downloadVersionJar(info, GameSide.CLIENT)
+MinecraftInstallationToolkit.downloadVersionJar(info, GameSide.SERVER)
+
+eclipseClasspath {
+	doFirst {		
+		MinecraftModdingToolkit.sourcesJar(info, GameSide.CLIENT)
+		MinecraftModdingToolkit.deobfuscateJar(info, GameSide.SERVER)
+		MinecraftModdingToolkit.sourcesJar(info, GameSide.SERVER)
+	}
+}	
+
+File jarFile = MinecraftModdingToolkit.deobfuscateJar(info, GameSide.CLIENT)
+Log4jToGradleAppender.noLogInfo()
+ext.cornflowerCachesDir = jarFile.getParent()
+
+
+import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
+def loaderversion = "";
+if (modloader.startsWith("paper-")) {
+    loaderversion = modloader.substring("paper-".length())
+} else if (modloader.startsWith("forge-")) {
+    loaderversion = modloader.substring("forge-".length())
+} else if (modloader.startsWith("fabric-loader-")) {
+    loaderversion = modloader.substring("fabric-loader-".length())
+}
+def targetplatform = null
+
+def mappingsVersion = project(":CyanWrapper").ext.mappingsVersion
+platforms {
+    VANILLA {
+        version minecraft
+    }
+    
+    if (modloader.isEmpty()) {
+        targetplatform = LaunchPlatform.VANILLA
+    } else if (modloader.startsWith("paper-")) {
+        targetplatform = LaunchPlatform.SPIGOT
+        SPIGOT {
+            version mappingsVersion
+            modloader loaderversion
+        }
+    } else if (modloader.startsWith("forge-")) {
+        targetplatform = LaunchPlatform.MCP
+        MCP {
+            version mappingsVersion
+            modloader loaderversion
+        }
+    } else if (modloader.startsWith("fabric-loader-")) {
+        targetplatform = LaunchPlatform.YARN
+        YARN {
+            version mappingsVersion
+            modloader loaderversion
+        }
+    }
+}
+def config = platforms.all.stream().filter { t ->
+    return t.getPlatform().equals(targetplatform);
+}.findFirst().get()
+
+if (!modloader.startsWith("paper-")) {
+    task platformRiftJarClient (type: RiftJar, dependsOn: jar) {
+        
+        inputs.property "platform", config.getPlatform()
+        inputs.property "mappingsVersion", config.getCommonMappingsVersion()
+        inputs.property "age", tasks.jar.getArchiveFile().get().getAsFile().lastModified()
+        
+        platform config
+        side CLIENT
+        
+        provider getPlatformRiftProvider(targetplatform, CLIENT)
+        from tasks.jar.getArchiveFile()
+    
+        mappings_identifier targetplatform.toString().toLowerCase() + "-" + config.getDisplayVersion() + "-" + config.getPlatform().toString().toLowerCase()
+        archiveClassifier = "RIFT-" + config.getPlatform().toString().toUpperCase() + "-" + config.getCommonMappingsVersion().replaceAll("[!?/:\\\\]", "-") + "-CLIENT"
+        
+        destinationDirectory = file("../build/ModKit-$specVersion/Jars")
+    
+        doLast {
+            if (project.hasProperty("destinationDirClient")) {
+            File dest = new File(project.getProperty("destinationDirClient"), getArchiveFile().get().getAsFile().getName())
+            if (dest.exists())
+                dest.delete()
+            Files.copy(getArchiveFile().get().getAsFile().toPath(), dest.toPath())
+            }
+        }
+    }
+    if (!project.hasProperty("noClient")) {
+        jar.finalizedBy platformRiftJarClient
+        build.dependsOn platformRiftJarClient
+    }
+}
+
+task platformRiftJarServer (type: RiftJar, dependsOn: jar) {
+
+    inputs.property "platform", config.getPlatform()
+    inputs.property "mappingsVersion", config.getCommonMappingsVersion()
+    inputs.property "age", tasks.jar.getArchiveFile().get().getAsFile().lastModified()
+    
+    platform config
+    side SERVER
+    
+    provider getPlatformRiftProvider(targetplatform, SERVER)
+    from tasks.jar.getArchiveFile()
+    
+    mappings_identifier targetplatform.toString().toLowerCase() + "-" + config.getDisplayVersion() + "-" + config.getPlatform().toString().toLowerCase()
+    mappings_identifier targetplatform.toString().toLowerCase() + "-" + config.getDisplayVersion()
+    archiveClassifier = "RIFT-" + config.getPlatform().toString().toUpperCase() + "-" + config.getCommonMappingsVersion().replaceAll("[!?/:\\\\]", "-") + "-SERVER"
+    
+    destinationDirectory = file("./build/ModKit-$specVersion/Jars")
+    
+    doLast {
+        if (project.hasProperty("destinationDirServer")) {
+            File dest = new File(project.getProperty("destinationDirServer"), getArchiveFile().get().getAsFile().getName())
+            if (dest.exists())
+                dest.delete()
+            Files.copy(getArchiveFile().get().getAsFile().toPath(), dest.toPath())
+        }
+    }
+}
+if (!project.hasProperty("noServer")) {
+    jar.finalizedBy platformRiftJarServer
+    build.dependsOn platformRiftJarServer
+}
+
+jar.dependsOn('processResources')
+repositories {
+    mavenCentral()
+	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
+	flatDir {
+		dirs jarFile.getParentFile()
+	}
+}
+
+createEclipseLaunches {
+    disable = true;
+}
+
+dependencies {
+	implementation name: 'client', version: minecraft + "-deobf"
+	implementation name: 'server', version: minecraft + "-deobf"
+	 
+    testImplementation 'junit:junit:4.12'
+    
+	implementation project(":CyanComponents")
+	implementation project(":CyanUtil")
+	implementation project(":CCFG")
+}
+
+jar {
+	destinationDirectory = file("../build/ModKit-$specVersion/Jars")
+	manifest {
+		attributes([
+			"Specification-Title": "ModKit",
+			"Specification-Vendor": "${authorname}",
+			"Specification-Version": specVersion,
+			
+			"Implementation-Title": project.name,
+			"Implementation-Version": project(":CyanAPI").version,
+			"Implementation-Vendor" :"${authorname}",
+			
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+	exclude "**/extra/**"
+	exclude "**/tests/**"
+	includeEmptyDirs = false
+}
+
+task javaDocs(type: Javadoc) {
+	classpath = sourceSets.main.runtimeClasspath
+	source = sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: 'javaDocs') {
+	from javadoc
+	classifier = 'javadoc'
+	exclude "**/extra/**"
+	destinationDirectory = file("../build/ModKit-$specVersion/Javadocs")
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+	exclude "**/extra/**"
+	destinationDirectory = file("../build/ModKit-$specVersion/Source jars")
+}
+
+test {
+    include "**/**Test**"
+    exclude "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}
+
+task specialTest (type: Test, dependsOn: test) {
+    include "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}
+
+artifacts {
+    archives tasks.sourcesJar
+    archives tasks.javadocJar
+    archives platformRiftJarServer
+    if (!modloader.startsWith("paper-")) {
+        archives platformRiftJarClient
+    }
+}
+    
+configurePublish {
+    pretty_name "ModKit API $specVersion"
+    description "Cyan Modding API"
+    page "https://aerialworks.ddns.net/maven"
+    address "https://aerialworks.ddns.net/maven"
+    
+    author {
+        name "$authorname"
+        id "ASF"
+    }
+    
+    license {
+        name "GNU Lesser General Public License v3.0"
+        url "https://www.gnu.org/licenses/lgpl-3.0.txt"
+    }
+    
+    artifact {
+        name project.name
+        pretty_name "ModKit API"
+        
+        task tasks.jar
+        task tasks.javadocJar
+        task tasks.sourcesJar
+    }
+    
+    if (!modloader.startsWith("paper-")) {
+        artifact {
+            name project.name + "-RIFT-CLIENT"
+            artifact_version project.version + "-RIFT-" + config.getPlatform().toString().toUpperCase() + "-" + config.getCommonMappingsVersion().replaceAll("[!?/:\\\\]", "-") + "-CLIENT"
+            pretty_name "ModKit API"
+            
+            task {
+                artifact tasks.platformRiftJarClient
+                classifier ""
+                extension "jar"
+            }
+        }
+    }
+    
+    artifact {
+        name project.name + "-RIFT-SERVER"
+        artifact_version project.version + "-RIFT-" + config.getPlatform().toString().toUpperCase() + "-" + config.getCommonMappingsVersion().replaceAll("[!?/:\\\\]", "-") + "-SERVER"
+        pretty_name "ModKit API"
+        
+        task {
+            artifact tasks.platformRiftJarServer
+            classifier ""
+            extension "jar"
+        }
+    }
+}
+
+build.dependsOn jar
+println ""
+initializeASFMVNPublish()

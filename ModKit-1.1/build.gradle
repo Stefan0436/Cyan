@@ -23,7 +23,7 @@ apply from: '../config.gradle'
 group="org.asf.cyan"
 def authorname="AerialWorks Software Foundation"
 
-ext.specVersion="1.2"
+ext.specVersion="1.1"
 version = specVersion
 
 buildDir = '../build/ModKit-' + specVersion
