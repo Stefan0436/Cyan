@@ -416,8 +416,8 @@ if (project.hasProperty("overrideLaunchWrapperClient")) {
 if (project.hasProperty("overrideLaunchWrapperServer")) {
 	classWrapperServer=project.getProperty("overrideLaunchWrapperServer")
 }
-
-version="1.0.0.A9-cyan-"+cyanversion
+def wrapperVersion="1.0.0.A10"
+version=wrapperVersion+"-cyan-"+cyanversion
 
 def timeStartHuman=OffsetDateTime.parse("${timeStartDev}").withNano(0).toLocalDate().toString()+" at "+OffsetDateTime.parse("${timeStartDev}").withNano(0).toLocalTime().toString();
 def timeReleaseHuman=OffsetDateTime.parse("${timeRelease}").withNano(0).toLocalDate().toString()+" at "+OffsetDateTime.parse("${timeRelease}").withNano(0).toLocalTime().toString();
@@ -2689,7 +2689,7 @@ ext.cyanManifest = { wrapperServer, wrapperClient, profile, icon, modloader, mod
     	mappings mappingsVersion
     	platform platformName
     
-    	wrapper project.version    	
+    	wrapper wrapperVersion    	
     	
     	id '%i-cyan-%pv'
     	manifest '/org/asf/cyan/CyanWrapper/%wv-cyan-%pv/CyanWrapper-%wv-cyan-%pv-%gv-cyan-%pv.json'
