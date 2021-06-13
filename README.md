@@ -18,7 +18,7 @@ On Windows, run: `.\gradlew.bat eclipse jar createEclipseLaunches`<br/>
 
 # Compiling
 Use `./buildlocal.sh` on linux to quickly build the project, argument `--version` can be used to specify game version,
-please note that CYAN is 1.16+, we cannot support < 1.15 because of mapping issues. Please note that 1.15 is is not compatbile with alpha 13, alpha 14 will re-implement 1.15 support. See [BUILDING](BUILDING.md) for more details on how to compile.
+please note that CYAN is 1.16+, we cannot support < 1.15 because of mapping issues. 1.15 has been scrapped since Alpha 14. See [BUILDING](BUILDING.md) for more details on how to compile.
 
 # AerialWorks Maven Server
 Because we are writing a modloader, we have set up a maven server, here is the url:<br />
@@ -42,20 +42,20 @@ AerialWorks Maven Server: https://aerialworks.ddns.net/maven
 | Cyan API (ModKit)     | LGPL v3             | Cyan Modding API - Version-shared api for creating mods.                                      | Copyright (c) 2021<br/>AerialWorks Software Foundation | Alpha Stage                    |
 
 # Version Compatibility
-| Cyan version | 1.12.X | 1.13.X | 1.14.X | 1.15.X | 1.16.X | 1.17.X |
-| :----------: | :----: | :----: | :----: | :----: | :----: | :----: |
-| 1.0.0.A12    | No     | No     | No     | Yes    | Yes    | No     |
-| 1.0.0.A13    | No     | No     | No     | No     | Yes    | No     |
-| 1.0.0.A14*   | No     | No     | No     | Yes    | Yes    | Yes    |
+| Cyan version | 1.16.X | 1.17.X |
+| :----------: | :----: | :----: |
+| 1.0.0.A12    | Yes    | No     |
+| 1.0.0.A13    | Yes    | No     |
+| 1.0.0.A14*   | Yes    | Yes    |
 
 If the '*' is present, the version is not ready for release
 
 # Modloader compatibility
-| Cyan version | Forge 1.15  | Fabric 1.15 | Paper 1.15   | Forge 1.16 | Fabric 1.16 | Paper 1.16 | Forge 1.17   | Fabric 1.17 | Paper 1.17  |
-| :----------: | :---------: | :---------: | :----------: | :--------: | :---------: | :--------: | :----------: | :---------: | :---------: |
-| 1.0.0.A12    | 31.2.50     | 0.11.3      | Unsupported  | 36.1.13    | 0.11.3      | 634        | Unsupported  | Unsupported | Unsupported |
-| 1.0.0.A13    | Unsupported | Unsupported | Unsupported  | 36.1.23    | 0.11.3      | 703        | Unsupported  | Unsupported | Unsupported |
-| 1.0.0.A14    | 31.2.50     | 0.11.5      | Unsupported  | 36.1.31    | 0.11.5      | 777        | Unknown      | 0.11.5      | Unknown     |
+| Cyan version | Forge 1.16 | Fabric 1.16 | Paper 1.16 | Forge 1.17   | Fabric 1.17 | Paper 1.17  |
+| :----------: | :--------: | :---------: | :--------: | :----------: | :---------: | :---------: |
+| 1.0.0.A12    | 36.1.13    | 0.11.3      | 634        | Unsupported  | Unsupported | Unsupported |
+| 1.0.0.A13    | 36.1.23    | 0.11.3      | 703        | Unsupported  | Unsupported | Unsupported |
+| 1.0.0.A14    | 36.1.31    | 0.11.5      | 777        | Unknown      | 0.11.5      | Unknown     |
 
 # Projects used
 Please note that not a single project is actually distributed, the mappings are being generated (downloaded and re-formatted) by CYAN on launch, only version information is used.
