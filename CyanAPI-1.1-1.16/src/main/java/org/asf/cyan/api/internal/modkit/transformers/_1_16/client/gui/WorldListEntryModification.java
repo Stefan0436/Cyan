@@ -72,7 +72,7 @@ public class WorldListEntryModification {
 				});
 	}
 
-	@InjectAt(location = InjectLocation.HEAD, targetCall = "shouldBackup()", targetOwner = "net.minecraft.world.level.storage.LevelSummary$BackupStatus")
+	@InjectAt(location = InjectLocation.HEAD, targetCall = "shouldBackup()", targetOwner = "net.minecraft.world.level.storage.LevelSummary")
 	public void joinWorld() {
 		if (checkWorldJoin(summary, screen, minecraft, () -> loadWorld()))
 			return;
