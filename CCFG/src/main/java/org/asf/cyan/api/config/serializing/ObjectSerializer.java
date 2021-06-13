@@ -31,7 +31,20 @@ import java.util.ArrayList;
  */
 public class ObjectSerializer {
 
-	static char[] escapeChars = new char[] { '\\', '\'' };
+	static String[] escapeChars = new String[] { "\\", "'" };
+	static {
+		ArrayList<String> chars = new ArrayList<String>();
+		Stream.of(escapeChars).forEach(t -> chars.add(t));
+		for (int ch = 0; ch <= Character.MAX_VALUE; ch++) {
+			if (Character.isISOControl(ch)) {
+				String str = Integer.toOctalString(ch);
+				while (str.length() < 3)
+					str = "0" + str;
+				chars.add(str);
+			}
+		}
+		escapeChars = chars.toArray(t -> new String[t]);
+	}
 
 	@SuppressWarnings("rawtypes")
 	private static class MapPutPropAction extends CCFGPutPropAction {
@@ -131,22 +144,13 @@ public class ObjectSerializer {
 		switch (cls.getTypeName()) {
 		case "java.lang.String":
 
-			for (char ch : escapeChars) {
-				input = input.replace("\\" + ch, Character.toString(ch));
+			for (String ch : escapeChars) {
+				input = input.replace("\\" + ch, ch);
 			}
 			input = input.replaceAll("([^\\\\])\\\\r", "$1\r");
 			input = input.replaceAll("\\\\r", "\\r");
 			input = input.replaceAll("([^\\\\])\\\\t", "$1\t");
 			input = input.replaceAll("\\\\t", "\t");
-
-			for (int ch = 0; ch <= Character.MAX_VALUE; ch++) {
-				if (Character.isISOControl(ch)) {
-					String str = Integer.toOctalString(ch);
-					while (str.length() < 3)
-						str = "0" + str;
-					input = input.replace("\\" + str, Character.toString(ch));
-				}
-			}
 
 			return (T) input;
 		case "java.net.URL":
@@ -378,23 +382,14 @@ public class ObjectSerializer {
 		switch (cls.getTypeName()) {
 		case "java.lang.String":
 			String output = input.toString();
-			for (char ch : escapeChars) {
-				output = output.replace(Character.toString(ch), "\\" + ch);
+			for (String ch : escapeChars) {
+				output = output.replace(ch, "\\" + ch);
 			}
 			output = output.replaceAll("\\\\\\\\r", "\\\\\\\\\\\\r");
 			output = output.replaceAll("\r", "\\\\r");
 			output = output.replaceAll("\\\\\\\\t", "\\\\\\\\\\\\t");
 			output = output.replaceAll("\t", "\\\\t");
-			
-			for (char ch : output.toCharArray()) {
-				if (Character.isISOControl(ch) && ch != '\n') {
-					String str = Integer.toOctalString(ch);
-					while (str.length() < 3)
-						str = "0" + str;
-					output = output.replace(Character.toString(ch), "\\" + str);
-				}
-			}
-			
+
 			return output;
 		case "java.net.URL":
 			return input.toString();
