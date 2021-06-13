@@ -52,8 +52,8 @@ public class LoadUtil {
 		HashMap<String, String> statuses = new HashMap<String, String>();
 		for (String key : localEntries.keySet()) {
 			if (!entries.containsKey(key))
-				statuses.put(key,
-						Colors.GOLD + newMsg + Colors.LIGHT_GREY + ", " + Colors.DARK_PURPLE + localEntries.get(key));
+				statuses.put(localEntries.get(key)[1], Colors.GOLD + newMsg + Colors.LIGHT_GREY + ", "
+						+ Colors.DARK_PURPLE + localEntries.get(key)[0]);
 		}
 		for (String key : entries.keySet()) {
 			if (!localEntries.containsKey(key))
