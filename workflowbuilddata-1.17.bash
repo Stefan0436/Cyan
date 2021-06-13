@@ -1,5 +1,5 @@
 forge=
-fabric=0.11.3
+fabric=0.11.5
 paper=
 
 mappings_paper=
