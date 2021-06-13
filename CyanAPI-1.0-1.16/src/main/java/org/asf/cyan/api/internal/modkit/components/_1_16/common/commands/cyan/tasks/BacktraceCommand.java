@@ -97,15 +97,15 @@ public class BacktraceCommand extends CyanComponent implements Command {
 
 				TransformerMetadata.dumpBacktraceOnly(new File(Fluid.getDumpDir(), "transformer-backtrace"), str -> {
 					if (level.equals("debug"))
-						context.success(new TextComponent("[LOG] §3" + str), true);
+						context.success(new TextComponent("[LOG] \u00A73" + str), true);
 				}, str -> {
 					if (level.equals("info") || level.equals("debug"))
-						context.success(new TextComponent("[LOG] §2" + str), true);
+						context.success(new TextComponent("[LOG] \u00A72" + str), true);
 				}, str -> {
 					if (level.equals("info") || level.equals("debug") || level.equals("warn"))
-						context.success(new TextComponent("[LOG] §6" + str), true);
+						context.success(new TextComponent("[LOG] \u00A76" + str), true);
 				}, (str, e) -> {
-					context.failure(new TextComponent("[LOG] §4" + str));
+					context.failure(new TextComponent("[LOG] \u00A74" + str));
 					error(str, e);
 				});
 

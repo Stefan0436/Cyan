@@ -32,6 +32,6 @@ public class MinecraftServerGuiModification {
 	
 	@InjectAt(location = InjectLocation.HEAD)
 	public void print(javax.swing.JTextArea a, javax.swing.JScrollPane p, java.lang.String s) {
-		s = s.replaceAll("\\§[0-9a-fk-r]", "");
+		s = s.replaceAll("\\\u00A7[0-9a-fk-r]", "");
 	}
 }

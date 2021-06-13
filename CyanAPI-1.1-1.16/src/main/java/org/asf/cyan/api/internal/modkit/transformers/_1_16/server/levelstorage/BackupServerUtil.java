@@ -89,7 +89,7 @@ public class BackupServerUtil extends CyanComponent implements LevelModDataReade
 					} else {
 						warn("");
 						warn("");
-						msg = msg.replaceAll("\\§[0-9a-fk-r]", "");
+						msg = msg.replaceAll("\\\u00A7[0-9a-fk-r]", "");
 						StringBuilder message = new StringBuilder();
 						message.append("Warning, the following server mods have changed:").append("\n").append(msg)
 								.append("\n").append("\n");

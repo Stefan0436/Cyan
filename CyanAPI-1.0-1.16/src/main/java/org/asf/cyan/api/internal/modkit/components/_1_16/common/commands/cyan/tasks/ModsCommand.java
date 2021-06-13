@@ -48,30 +48,30 @@ public class ModsCommand extends CyanComponent implements Command {
 		Client client = Client.getForPlayer(player);
 		for (IModManifest mod : Modloader.getAllMods()) {
 			if (!serverMods.isEmpty())
-				serverMods += "§7, ";
-			serverMods += "§2";
+				serverMods += "\u00A77, ";
+			serverMods += "\u00A72";
 			serverMods += mod.id();
-			serverMods += "§7 (§6";
+			serverMods += "\u00A77 (\u00A76";
 			serverMods += mod.version();
-			serverMods += "§7)";
-			serverMods += "§7";
+			serverMods += "\u00A77)";
+			serverMods += "\u00A77";
 		}
 		Map<String, String> mods = client.getMods();
 		for (String mod : mods.keySet()) {
 			if (!clientMods.isEmpty())
-				clientMods += "§7, ";
-			clientMods += "§2";
+				clientMods += "\u00A77, ";
+			clientMods += "\u00A72";
 			clientMods += mod;
-			clientMods += "§7 (§6";
+			clientMods += "\u00A77 (\u00A76";
 			clientMods += mods.get(mod);
-			clientMods += "§7)";
-			clientMods += "§7";
+			clientMods += "\u00A77)";
+			clientMods += "\u00A77";
 		}
 
 		if (serverMods.isEmpty())
-			serverMods = "§4None installed";
+			serverMods = "\u00A74None installed";
 		if (clientMods.isEmpty())
-			clientMods = "§4None installed";
+			clientMods = "\u00A74None installed";
 
 		if (player == null) {
 			context.success(new TextComponent("\n" + ClientLanguage

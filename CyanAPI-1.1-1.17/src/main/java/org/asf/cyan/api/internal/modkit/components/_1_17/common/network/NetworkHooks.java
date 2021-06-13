@@ -99,7 +99,7 @@ public class NetworkHooks {
 						.count() != 0) {
 					player.connection.tick();
 					player.connection.disconnect(new TextComponent(
-							"§9This server runs a Cyan-like modloader and requires some client mods.\nPlease install a compatible modloader before trying again."));
+							"\u00A79This server runs a Cyan-like modloader and requires some client mods.\nPlease install a compatible modloader before trying again."));
 					return true;
 				} else {
 					ServerSideConnectedEvent.getInstance()

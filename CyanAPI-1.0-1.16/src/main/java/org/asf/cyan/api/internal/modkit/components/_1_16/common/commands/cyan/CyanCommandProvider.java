@@ -26,22 +26,22 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 	public void initializeComponent() {
 		BaseEventController.addEventContainer(this);
 		ClientLanguage.registerLanguageKey("cyan.dump.message.error",
-				"§6Cannot dump backtrace as another dump is in progress.");
+				"\u00A76Cannot dump backtrace as another dump is in progress.");
 		ClientLanguage.registerLanguageKey("cyan.dump.message.error.existing",
-				"§6Cannot dump backtrace as another dump has already been saved.");
-		ClientLanguage.registerLanguageKey("cyan.dump.message1", "§bBeginning transformer backtrace dump...");
-		ClientLanguage.registerLanguageKey("cyan.dump.error", "§bAn error occured on the server, Exception: %s");
+				"\u00A76Cannot dump backtrace as another dump has already been saved.");
+		ClientLanguage.registerLanguageKey("cyan.dump.message1", "\u00A7bBeginning transformer backtrace dump...");
+		ClientLanguage.registerLanguageKey("cyan.dump.error", "\u00A7bAn error occured on the server, Exception: %s");
 		ClientLanguage.registerLanguageKey("cyan.dump.message2",
-				"§bDump has been created on the server, §6please remember that you are not allowed to distribute the dump.");
+				"\u00A7bDump has been created on the server, \u00A76please remember that you are not allowed to distribute the dump.");
 
 		ClientLanguage.registerLanguageKey("cyan.info.header",
-				"§bMinecraft Cyan %s§b, Modloader Version: %s§b\n---------------%s§b---------------------%s§b\n");
+				"\u00A7bMinecraft Cyan %s\u00A7b, Modloader Version: %s\u00A7b\n---------------%s\u00A7b---------------------%s\u00A7b\n");
 
 		ClientLanguage.registerLanguageKey("cyan.info.data",
-				"§5Server Brand: §6%s\n§5Client Brand: §6%s\n§5Server Modloader Version: §6%s\n§5Game Version: §6%s\n§5Server Mods: §6%s\n§5Client Mods: §6%s\n");
+				"\u00A75Server Brand: \u00A76%s\n\u00A75Client Brand: \u00A76%s\n\u00A75Server Modloader Version: \u00A76%s\n\u00A75Game Version: \u00A76%s\n\u00A75Server Mods: \u00A76%s\n\u00A75Client Mods: \u00A76%s\n");
 		ClientLanguage.registerLanguageKey("cyan.info.technical",
-				"§4ModKit Protocol Version: §6%s\n§4Modloader Protocol Version: §6%s\n§4Client ModKit Protocol Version: §6%s\n§4Client Modloader Protocol Version: §6%s\n§4Client Game Version: §6%s\n§4Client Modloader Version: §6%s\n");
-		ClientLanguage.registerLanguageKey("cyan.info.mods", "§5Server Mods:\n§4%s\n\n§5Client Mods:\n§4%s\n");
+				"\u00A74ModKit Protocol Version: \u00A76%s\n\u00A74Modloader Protocol Version: \u00A76%s\n\u00A74Client ModKit Protocol Version: \u00A76%s\n\u00A74Client Modloader Protocol Version: \u00A76%s\n\u00A74Client Game Version: \u00A76%s\n\u00A74Client Modloader Version: \u00A76%s\n");
+		ClientLanguage.registerLanguageKey("cyan.info.mods", "\u00A75Server Mods:\n\u00A74%s\n\n\u00A75Client Mods:\n\u00A74%s\n");
 
 		ClientLanguage.registerLanguageKey("cyan.commands.cyan.description", "Utility command for the cyan modloader.");
 		ClientLanguage.registerLanguageKey("cyan.commands.cyan.usage", "<task> [arguments...]");
@@ -75,8 +75,8 @@ public class CyanCommandProvider extends CyanComponent implements Command, IEven
 			line2 += "-";
 
 		if (context.getPlayer() != null)
-			context.successTranslatable("cyan.info.header", "§b" + game, "§b" + modloaderVersion, "§b" + line1,
-					"§b" + line2);
+			context.successTranslatable("cyan.info.header", "\u00A7b" + game, "\u00A7b" + modloaderVersion, "\u00A7b" + line1,
+					"\u00A7b" + line2);
 		return context.getPlayer();
 	}
 

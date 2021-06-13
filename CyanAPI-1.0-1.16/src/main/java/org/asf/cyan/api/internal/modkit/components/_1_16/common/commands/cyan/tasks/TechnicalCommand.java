@@ -43,19 +43,19 @@ public class TechnicalCommand extends CyanComponent implements Command {
 		Client client = Client.getForPlayer(player);
 		if (player == null) {
 			context.success(new TextComponent("\n" + ClientLanguage.createComponent(player, "cyan.info.technical",
-					"§6" + Protocols.MODKIT_PROTOCOL, "§6" + Protocols.LOADER_PROTOCOL,
-					"§6" + (client.getProtocol() == -1 ? "Not present" : client.getProtocol()),
-					"§6" + (client.getModloaderProtocol() == -1 ? "Not present" : client.getModloaderProtocol()),
-					"§6" + (client.getGameVersion() == null ? "Not present" : client.getGameVersion()),
-					"§6" + (client.getModloaderVersion() == null ? "Not present" : client.getModloaderVersion()))
+					"\u00A76" + Protocols.MODKIT_PROTOCOL, "\u00A76" + Protocols.LOADER_PROTOCOL,
+					"\u00A76" + (client.getProtocol() == -1 ? "Not present" : client.getProtocol()),
+					"\u00A76" + (client.getModloaderProtocol() == -1 ? "Not present" : client.getModloaderProtocol()),
+					"\u00A76" + (client.getGameVersion() == null ? "Not present" : client.getGameVersion()),
+					"\u00A76" + (client.getModloaderVersion() == null ? "Not present" : client.getModloaderVersion()))
 					.getString().trim()));
 		} else {
-			context.successTranslatable("cyan.info.technical", "§6" + Protocols.MODKIT_PROTOCOL,
-					"§6" + Protocols.LOADER_PROTOCOL,
-					"§6" + (client.getProtocol() == -1 ? "Not present" : client.getProtocol()),
-					"§6" + (client.getModloaderProtocol() == -1 ? "Not present" : client.getModloaderProtocol()),
-					"§6" + (client.getGameVersion() == null ? "Not present" : client.getGameVersion()),
-					"§6" + (client.getModloaderVersion() == null ? "Not present" : client.getModloaderVersion()));
+			context.successTranslatable("cyan.info.technical", "\u00A76" + Protocols.MODKIT_PROTOCOL,
+					"\u00A76" + Protocols.LOADER_PROTOCOL,
+					"\u00A76" + (client.getProtocol() == -1 ? "Not present" : client.getProtocol()),
+					"\u00A76" + (client.getModloaderProtocol() == -1 ? "Not present" : client.getModloaderProtocol()),
+					"\u00A76" + (client.getGameVersion() == null ? "Not present" : client.getGameVersion()),
+					"\u00A76" + (client.getModloaderVersion() == null ? "Not present" : client.getModloaderVersion()));
 		}
 		return 0;
 	}

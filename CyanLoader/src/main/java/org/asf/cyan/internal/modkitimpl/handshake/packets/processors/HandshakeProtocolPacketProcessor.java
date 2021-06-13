@@ -32,13 +32,13 @@ public class HandshakeProtocolPacketProcessor extends ServerPacketProcessor {
 			final Object[] args;
 			if (status == 2) {
 				failure = "modkit.protocol.outdated.local";
-				args = new Object[] { "§6" + ModKitProtocol.CURRENT, "§6" + packet.minProtocolVersion };
+				args = new Object[] { "\u00A76" + ModKitProtocol.CURRENT, "\u00A76" + packet.minProtocolVersion };
 				info("Client connection failed: outdated server modkit protocol: " + ModKitProtocol.CURRENT
 						+ ", client protocol: " + packet.currentProtocolVersion + " (min: " + packet.minProtocolVersion
 						+ ", max: " + packet.maxProtocolVersion + ")");
 			} else {
 				failure = "modkit.protocol.outdated.remote";
-				args = new Object[] { "§6" + packet.currentProtocolVersion, "§6" + ModKitProtocol.MIN_PROTOCOL };
+				args = new Object[] { "\u00A76" + packet.currentProtocolVersion, "\u00A76" + ModKitProtocol.MIN_PROTOCOL };
 				info("Client connection failed: outdated client modkit protocol: " + packet.currentProtocolVersion
 						+ ", server protocol: " + ModKitProtocol.CURRENT + " (min: " + ModKitProtocol.MIN_PROTOCOL
 						+ ", max: " + ModKitProtocol.MAX_PROTOCOL + ")");

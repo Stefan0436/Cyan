@@ -57,13 +57,13 @@ public class Handshake extends CyanComponent {
 				final Object[] args;
 				if (status == 2) {
 					failure = "modkit.protocol.outdated.local";
-					args = new Object[] { "§6" + serverProtocol, "§6" + ModKitProtocol.MIN_PROTOCOL };
+					args = new Object[] { "\u00A76" + serverProtocol, "\u00A76" + ModKitProtocol.MIN_PROTOCOL };
 					info("Connection failed: outdated server modkit protocol: " + serverProtocol + ", client protocol: "
 							+ ModKitProtocol.CURRENT + " (min: " + ModKitProtocol.MIN_PROTOCOL + ", max: "
 							+ ModKitProtocol.MAX_PROTOCOL + ")");
 				} else {
 					failure = "modkit.protocol.outdated.remote";
-					args = new Object[] { "§6" + ModKitProtocol.CURRENT, "§6" + serverMinProtocol };
+					args = new Object[] { "\u00A76" + ModKitProtocol.CURRENT, "\u00A76" + serverMinProtocol };
 					info("Connection failed: outdated client modkit protocol: " + ModKitProtocol.CURRENT
 							+ ", server protocol: " + serverProtocol + " (min: " + serverMinProtocol + ", max: "
 							+ serverMaxProtocol + ")");
@@ -89,7 +89,7 @@ public class Handshake extends CyanComponent {
 					Modloader loader = Modloader.getModloader(name);
 					if (loader == null) {
 						disconnectCall
-								.accept(new TranslatableComponent("modkit.missingmodded.client.loader", "§6" + name));
+								.accept(new TranslatableComponent("modkit.missingmodded.client.loader", "\u00A76" + name));
 						return false;
 					}
 
@@ -144,7 +144,7 @@ public class Handshake extends CyanComponent {
 
 			if (!presentLoaders.contains(ModkitModloader.getModKitRootModloader().getName())) {
 				disconnectCall.accept(new TranslatableComponent("modkit.missingmodded.server.loader",
-						"§6" + ModkitModloader.getModKitRootModloader().getName()));
+						"\u00A76" + ModkitModloader.getModKitRootModloader().getName()));
 				return false;
 			}
 
@@ -184,15 +184,15 @@ public class Handshake extends CyanComponent {
 				for (String key : output1.keySet()) {
 					String val = output1.get(key);
 					if (!missingClient.isEmpty())
-						missingClient += "§7, ";
-					missingClient += "§5";
+						missingClient += "\u00A77, ";
+					missingClient += "\u00A75";
 					missingClient += key;
 					if (!val.isEmpty()) {
-						missingClient += "§7 (§6";
+						missingClient += "\u00A77 (\u00A76";
 						missingClient += val;
-						missingClient += "§7)";
+						missingClient += "\u00A77)";
 					}
-					missingClient += "§7";
+					missingClient += "\u00A77";
 
 					if (!missingClientNonColor.isEmpty())
 						missingClientNonColor += ", ";
@@ -203,15 +203,15 @@ public class Handshake extends CyanComponent {
 				for (String key : output2.keySet()) {
 					String val = output2.get(key);
 					if (!missingServer.isEmpty())
-						missingServer += "§7, ";
-					missingServer += "§5";
+						missingServer += "\u00A77, ";
+					missingServer += "\u00A75";
 					missingServer += key;
 					if (!val.isEmpty()) {
-						missingServer += "§7 (§6";
+						missingServer += "\u00A77 (\u00A76";
 						missingServer += val;
-						missingServer += "§7)";
+						missingServer += "\u00A77)";
 					}
-					missingServer += "§7";
+					missingServer += "\u00A77";
 
 					if (!missingServerNonColor.isEmpty())
 						missingServerNonColor += ", ";

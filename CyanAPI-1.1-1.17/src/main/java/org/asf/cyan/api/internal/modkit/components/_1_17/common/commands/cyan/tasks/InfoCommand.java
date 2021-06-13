@@ -43,14 +43,14 @@ public class InfoCommand extends CyanComponent implements Command {
 		Client client = Client.getForPlayer(player);
 		if (player == null) {
 			context.success(new TextComponent("\n" + ClientLanguage.createComponent(player, "cyan.info.data",
-					"§6" + context.getServer().getServerModName(), "§6" + client.getBrand(),
-					"§6" + Modloader.getModloaderVersion(), "§6" + Modloader.getModloaderGameVersion(),
-					"§6" + Modloader.getAllMods().length, "§6" + client.getMods().size()).getString().trim()));
+					"\u00A76" + context.getServer().getServerModName(), "\u00A76" + client.getBrand(),
+					"\u00A76" + Modloader.getModloaderVersion(), "\u00A76" + Modloader.getModloaderGameVersion(),
+					"\u00A76" + Modloader.getAllMods().length, "\u00A76" + client.getMods().size()).getString().trim()));
 		} else {
-			context.successTranslatable("cyan.info.data", "§6" + context.getServer().getServerModName(),
-					"§6" + client.getBrand(), "§6" + Modloader.getModloaderVersion(),
-					"§6" + Modloader.getModloaderGameVersion(), "§6" + Modloader.getAllMods().length,
-					"§6" + client.getMods().size());
+			context.successTranslatable("cyan.info.data", "\u00A76" + context.getServer().getServerModName(),
+					"\u00A76" + client.getBrand(), "\u00A76" + Modloader.getModloaderVersion(),
+					"\u00A76" + Modloader.getModloaderGameVersion(), "\u00A76" + Modloader.getAllMods().length,
+					"\u00A76" + client.getMods().size());
 		}
 		return 0;
 	}

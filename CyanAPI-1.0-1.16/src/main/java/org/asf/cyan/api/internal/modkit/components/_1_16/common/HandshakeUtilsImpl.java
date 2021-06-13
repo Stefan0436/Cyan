@@ -76,8 +76,8 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 
 	@Override
 	public void disconnectColored1(ServerPacketProcessor processor, HandshakeFailedPacket response, double protocol) {
-		processor.getPlayer().connection.disconnect(new TranslatableComponent(response.language, "§6" + protocol,
-				"§6" + response.displayVersion, "§6" + response.version));
+		processor.getPlayer().connection.disconnect(new TranslatableComponent(response.language, "\u00A76" + protocol,
+				"\u00A76" + response.displayVersion, "\u00A76" + response.version));
 	}
 
 	@Override
