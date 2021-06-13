@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
  * World data event object -- contains world data tags for reading and writing
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
+ * @since ModKit 1.1
  *
  */
 public class LevelDataEventObject extends EventObject {

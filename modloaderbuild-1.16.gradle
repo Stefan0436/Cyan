@@ -19,6 +19,7 @@ forge(
 )
 
 paper ([
+    '777': 'f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3',
     '776': 'f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3',
     '775': 'f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3',
     '774': 'f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3',

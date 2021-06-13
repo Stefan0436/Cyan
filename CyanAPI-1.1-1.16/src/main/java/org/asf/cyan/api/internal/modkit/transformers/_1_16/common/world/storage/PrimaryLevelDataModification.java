@@ -1,5 +1,7 @@
 package org.asf.cyan.api.internal.modkit.transformers._1_16.common.world.storage;
 
+import java.util.HashMap;
+
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
@@ -23,8 +25,9 @@ import net.minecraft.world.level.storage.PrimaryLevelData;
 
 @FluidTransformer
 @TargetClass(target = "net.minecraft.world.level.storage.PrimaryLevelData")
-public class PrimaryLevelDataModification implements PrimaryLevelDataExtension {
+public class PrimaryLevelDataModification implements PrimaryLevelDataExtension, LevelModDataReader {
 
+	private HashMap<String, ModloaderMeta> cyanModloaders = new HashMap<String, ModloaderMeta>();
 	private CompoundTag modkitModData;
 
 	@InjectAt(location = InjectLocation.TAIL)
@@ -38,12 +41,16 @@ public class PrimaryLevelDataModification implements PrimaryLevelDataExtension {
 			@TargetType(target = "com.mojang.serialization.Lifecycle") Lifecycle var7) {
 
 		PrimaryLevelData data = CodeControl.ASTORE();
-		((PrimaryLevelDataExtension) data)
-				.setCyanModData((CompoundTag) var0.getElement("ModKitMods", new CompoundTag()));
+		cyanSetupData(data, var0);
+		return data;
+	}
+
+	private static void cyanSetupData(PrimaryLevelData data, Dynamic<Tag> var0) {
+		((PrimaryLevelDataExtension) data).setCyanModData(
+				(CompoundTag) var0.getElement("ModKitMods", new CompoundTag()), (CompoundTag) var0.getValue());
 		LevelDataEventObject levelDataObject = new LevelDataEventObject((CompoundTag) var0.getValue(),
 				(CompoundTag) var0.getElement("ModKitMods", new CompoundTag()));
 		LevelLoadEvent.getInstance().dispatch(levelDataObject).getResult();
-		return data;
 	}
 
 	@InjectAt(location = InjectLocation.TAIL)
@@ -55,8 +62,21 @@ public class PrimaryLevelDataModification implements PrimaryLevelDataExtension {
 	}
 
 	@Override
-	public void setCyanModData(CompoundTag data) {
+	public void setCyanModData(CompoundTag data, CompoundTag root) {
 		modkitModData = data;
+		if (cyanModloaders == null)
+			cyanModloaders = new HashMap<String, ModloaderMeta>();
+		ModloaderMeta.loadAll(cyanModloaders, root);
+	}
+
+	@Override
+	public String[] cyanGetAllLoaders() {
+		return cyanModloaders.keySet().toArray(t -> new String[t]);
+	}
+
+	@Override
+	public ModloaderMeta cyanGetLoader(String loader) {
+		return cyanModloaders.get(loader);
 	}
 
 }

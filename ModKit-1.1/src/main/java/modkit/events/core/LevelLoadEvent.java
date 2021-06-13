@@ -9,6 +9,7 @@ import modkit.events.objects.core.LevelDataEventObject;
  * Level load event -- called on world load
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
+ * @since ModKit 1.1
  *
  */
 public class LevelLoadEvent extends AbstractExtendedEvent<LevelDataEventObject> {

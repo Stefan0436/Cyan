@@ -9,6 +9,7 @@ import modkit.events.objects.core.LevelDataEventObject;
  * Level save event -- called on world save
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
+ * @since ModKit 1.1
  *
  */
 public class LevelSaveEvent extends AbstractExtendedEvent<LevelDataEventObject> {

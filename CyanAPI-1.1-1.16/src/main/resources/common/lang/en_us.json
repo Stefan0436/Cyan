@@ -24,5 +24,13 @@
 	"cyan.info.mods": "§5Server Mods:\n§4%s\n\n§5Client Mods:\n§4%s\n",
 	
 	"cyan.commands.cyan.description": "Utility command for the cyan modlaoder.",
-	"cyan.commands.cyan.usage": "<task> [arguments...]"
+	"cyan.commands.cyan.usage": "<task> [arguments...]",
+	
+	"modkit.removed": "Removed",
+	"modkit.new": "New",
+	"modkit.downgraded": "Downgraded",
+	"modkit.upgraded": "Upgraded",
+	
+	"modkit.worldbackup.question": "§2Do you want to create a backup before loading?",
+	"modkit.worldbackup.message": "§eThe world you are trying to load has mod changes:\n%s"
 }

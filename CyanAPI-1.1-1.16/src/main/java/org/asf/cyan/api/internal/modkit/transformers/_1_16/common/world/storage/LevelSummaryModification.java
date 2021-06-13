@@ -15,7 +15,7 @@ import net.minecraft.world.level.storage.LevelVersion;
 
 @FluidTransformer
 @TargetClass(target = "net.minecraft.world.level.storage.LevelSummary")
-public class LevelSummaryModification implements LevelSummaryExtension {
+public class LevelSummaryModification implements LevelModDataReader {
 
 	private HashMap<String, ModloaderMeta> cyanModloaders = new HashMap<String, ModloaderMeta>();
 

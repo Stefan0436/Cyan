@@ -4,10 +4,9 @@ Cyan Update Changelog: 1.0.0 (Alpha 14):
  - Repaired Fluid Deobfuscation Target Mappings (Fluid A27)
  - CodeControl Local Variable Manipulation (Fluid A27)
  - ModKit Server Status Modification (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2)
- - ModKit Key Binding Registry Events (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2) -- TODO
+ - ModKit Key Binding Registry Events (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2)
  - ModKit Threads API (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2, count of threads is displayed in crash logs) -- TODO
- - ModKit Custom Invenotry Tabs (CyanAPI ModKit 1.1) -- TODO
- - ModKit World Load Warning if mods have changed (CyanAPI ModKit 1.1) -- TODO
+ - ModKit World Load Warning if mods have changed (CyanAPI ModKit 1.1)
  - ModKit ported to 1.17 and fully tested (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2)
  - ModKit ported to 1.15.2 and fully tested (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2) -- TODO
  - MTK MSA Account Support (MTK A22) -- TODO
@@ -38,3 +37,4 @@ Cyan Update Changelog: 1.0.0 (Alpha 14):
  
  // B2:
  - ModKit Player, Entity and other interface types (ModKit 2.0, replaces the need for vanilla types, they will however be available to modders) -- TODO
+ - ModKit Custom Invenotry Tabs (CyanAPI ModKit 2.0) -- TODO

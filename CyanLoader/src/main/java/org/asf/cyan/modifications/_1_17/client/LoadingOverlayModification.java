@@ -1,6 +1,7 @@
 package org.asf.cyan.modifications._1_17.client;
 
 import org.asf.cyan.api.fluid.annotations.VersionRegex;
+import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.LocalVariable;
@@ -40,8 +41,12 @@ public class LoadingOverlayModification {
 		@LocalVariable int var8,
 		@LocalVariable int var9
 	) {
-		if (var6 < 1.0 && var6 > 0.1)
-			drawCenteredString(var1, minecraft.font, "Cyan Mod Loader - Loading mods...", var4 - ((var4 - var2) / 2), var3 - 12, 65535);
+		if (var6 < 1.0 && var6 > 0.1) {
+			int mods = Modloader.getAllMods().length;
+			drawCenteredString(var1, minecraft.font,
+					"Cyan Mod Loader: " + mods + " mod" + (mods != 1 ? "s" : "") + " loaded",
+					var4 - ((var4 - var2) / 2), var3 - 12, 65535);
+		}
 	}
 
 }
