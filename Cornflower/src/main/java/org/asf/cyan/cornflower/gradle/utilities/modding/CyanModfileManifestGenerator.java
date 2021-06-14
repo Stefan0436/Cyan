@@ -109,15 +109,25 @@ public class CyanModfileManifestGenerator {
 	}
 
 	public void jar(Provider<RegularFile> jarfile, IPlatformConfiguration platform, GameSide side, String outputDir) {
-		jar(jarfile, platform.getPlatform(), side, outputDir);
+		if (platform != null) {
+			manifest.addJar(jarfile, platform.getPlatform().toString(), side.toString(), outputDir, null, null,
+					(platform.getModloaderVersion() != null ? platform.getCommonMappingsVersion() : null));
+		} else {
+			jar(jarfile, (LaunchPlatform) null, side, outputDir);
+		}
 	}
 
 	public void jar(Provider<RegularFile> jarfile, IPlatformConfiguration platform, GameSide side) {
-		jar(jarfile, platform.getPlatform(), side);
+		jar(jarfile, platform, side, "jars");
 	}
 
 	public void jar(Provider<RegularFile> jarfile, IPlatformConfiguration platform) {
-		jar(jarfile, platform.getPlatform());
+		jar(jarfile, platform, "jars");
+	}
+
+	public void jar(Provider<RegularFile> jarfile, IPlatformConfiguration platform, String outputDir) {
+		jar(jarfile, platform, GameSide.CLIENT, outputDir);
+		jar(jarfile, platform, GameSide.SERVER, outputDir);
 	}
 
 	public void jar(File jarfile, IPlatformConfiguration platform) {

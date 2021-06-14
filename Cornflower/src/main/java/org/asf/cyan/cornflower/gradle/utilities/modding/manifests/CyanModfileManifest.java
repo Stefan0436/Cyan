@@ -149,7 +149,7 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> impl
 
 			checkString += " gameversion:" + gameVersion;
 		}
-		if (mappingsVersion != null) {
+		if (mappingsVersion != null && (platform == null || !platform.equals("DEOBFUSCATED"))) {
 			if (checkString.equals("any"))
 				checkString = "";
 			else

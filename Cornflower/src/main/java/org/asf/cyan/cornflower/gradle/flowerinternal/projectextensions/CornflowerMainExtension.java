@@ -7,6 +7,7 @@ import java.net.URL;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.asf.cyan.api.config.Configuration;
 import org.asf.cyan.api.modloader.information.game.GameSide;
@@ -75,16 +76,19 @@ public class CornflowerMainExtension implements IProjectExtension {
 	public static final Class<org.asf.cyan.cornflower.classpath.util.PathPriority> PathPriority = org.asf.cyan.cornflower.classpath.util.PathPriority.class;
 
 	public static final Class<?> EclipseLaunchGenerator = org.asf.cyan.cornflower.gradle.tasks.EclipseLaunchGenerator.class;
-	public static Class<?> CtcUtil;
-	
-	static {
-		try {
-			CtcUtil = Class.forName("org.asf.cyan.cornflower.gradle.tasks.CtcTask");
-		} catch (ClassNotFoundException e) {
-			CtcUtil = null;
-		} 
-	}
-	
+	public static Class<?> CtcUtil = new Supplier<Class<?>>() {
+
+		@Override
+		public Class<?> get() {
+			try {
+				return Class.forName("org.asf.cyan.cornflower.gradle.tasks.CtcTask");
+			} catch (ClassNotFoundException e) {
+			}
+			return null;
+		}
+
+	}.get();
+
 	public static final Class<?> RiftJar = org.asf.cyan.cornflower.gradle.tasks.RiftJarTask.class;
 
 	public static final ModloaderDependency Modloader = new ModloaderDependency();
@@ -167,6 +171,31 @@ public class CornflowerMainExtension implements IProjectExtension {
 		}
 
 		return null;
+	}
+
+	public static IRiftToolchainProvider getPlatformRiftProvider(Project project, IPlatformConfiguration platform,
+			GameSide side) {
+
+		PlatformConfiguration platforms = (PlatformConfiguration) project.getExtensions().getExtraProperties()
+				.get("platforms");
+
+		String vanillaVersion = "undefined";
+		for (IPlatformConfiguration conf : platforms.all) {
+			if (conf instanceof VanillaPlatform)
+				vanillaVersion = conf.getCommonMappingsVersion();
+
+			if (platform == conf) {
+				MinecraftVersionInfo gameVersion = MinecraftVersionToolkit.getVersion(vanillaVersion);
+				if (gameVersion == null)
+					gameVersion = new MinecraftVersionInfo(vanillaVersion, MinecraftVersionType.UNKNOWN, null,
+							OffsetDateTime.now());
+
+				return SimpleRiftBuilder.getProviderForPlatform(conf.getPlatform(), gameVersion, side,
+						conf.getModloaderVersion(), conf.getMappingsVersion(side));
+			}
+		}
+
+		return getPlatformRiftProvider(project, platform.getPlatform(), side);
 	}
 
 	public static void addPlatformRiftTasks(Project project, Closure<?> closure) {
@@ -252,7 +281,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 			@Override
 			public RiftJarTask call() {
 				RiftJarTask tsk = (RiftJarTask) getDelegate();
-				tsk.provider(getPlatformRiftProvider(project, config.getPlatform(), side));
+				tsk.provider(getPlatformRiftProvider(project, config, side));
 
 				tsk.mappings_identifier(config.getPlatform().toString().toLowerCase() + "-"
 						+ config.getDisplayVersion().replaceAll("[!?/:\\\\]", "-") + "-"
