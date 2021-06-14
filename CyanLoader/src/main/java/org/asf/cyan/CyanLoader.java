@@ -1048,8 +1048,8 @@ public class CyanLoader extends ModkitModloader
 		ZipInputStream strm = new ZipInputStream(new FileInputStream(ccmf));
 		boolean cacheOutOfDate = false;
 		ModInfoCache info = new ModInfoCache();
-		File cache = new File(cyanDir, "caches/coremods/" + manifest.modId);
-		File modCache = new File(cyanDir, "caches/coremods/" + manifest.modId + "/mod.cache");
+		File cache = new File(cyanDir, "caches/coremods/" + manifest.modGroup+"/"+manifest.modId);
+		File modCache = new File(cyanDir, "caches/coremods/" + manifest.modGroup+"/"+manifest.modId + "/mod.cache");
 
 		if (!modCache.exists()) {
 			cache.mkdirs();
@@ -1473,8 +1473,8 @@ public class CyanLoader extends ModkitModloader
 		ZipInputStream strm = new ZipInputStream(new FileInputStream(cmf));
 		boolean cacheOutOfDate = false;
 		ModInfoCache info = new ModInfoCache();
-		File cache = new File(cyanDir, "caches/mods/" + manifest.modId);
-		File modCache = new File(cyanDir, "caches/mods/" + manifest.modId + "/mod.cache");
+		File cache = new File(cyanDir, "caches/mods/" + manifest.modGroup+"/"+manifest.modId);
+		File modCache = new File(cyanDir, "caches/mods/" + manifest.modGroup+"/"+manifest.modId+ "/mod.cache");
 
 		if (!modCache.exists()) {
 			cache.mkdirs();
