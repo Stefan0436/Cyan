@@ -90,12 +90,12 @@ createEclipseLaunches.dependsOn runManifest
 project.afterEvaluate {
 	createServerLaunch {
 		jvm "-DdebugModfileManifests=M//${project.buildDir}/run/mod.manifest.ccfg"
-		jvm '-Dcyan.load.classpath=${project_classpath:'+project.getName()+'}'
+		jvm '-Dcyan.load.classpath=${project_loc:'+project.getName()+'}/bin/main'+File.pathSeparator+'${project_loc:'+project.getName()+'}/bin/test'
 	}
 
 	createClientLaunch {
 		jvm "-DdebugModfileManifests=M//${project.buildDir}/run/mod.manifest.ccfg"
-		jvm '-Dcyan.load.classpath=${project_classpath:'+project.getName()+'}'
+		jvm '-Dcyan.load.classpath=${project_loc:'+project.getName()+'}/bin/main'+File.pathSeparator+'${project_loc:'+project.getName()+'}/bin/test'
 	}
 }
 
