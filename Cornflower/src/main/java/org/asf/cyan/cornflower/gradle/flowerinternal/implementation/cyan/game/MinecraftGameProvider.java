@@ -95,7 +95,7 @@ public class MinecraftGameProvider implements IGame {
 					new LaunchClosure(project, (tsk) -> {
 						tsk.name("Launch " + side.name() + " (Deobfuscated)");
 						tsk.workingDir(new File(project.getRootDir(), "run/" + side.name()));
-						tsk.classpath(project);
+						
 						tsk.sourceLookup(project);
 						tsk.classpath(dependencies);
 						tsk.sourceLookup(sourceLookup);

@@ -32,6 +32,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import org.asf.cyan.api.config.Configuration;
+import org.asf.cyan.api.config.serializing.internal.Splitter;
 import org.asf.cyan.api.events.IEventProvider;
 import org.asf.cyan.api.events.core.EventBusFactory;
 import org.asf.cyan.api.events.extended.IExtendedEvent;
@@ -102,6 +103,8 @@ import modkit.util.CheckString;
  */
 public class CyanLoader extends ModkitModloader
 		implements IModProvider, ModkitModloader.ModkitProtocolRules, IEventListenerContainer {
+
+	private static File[] extraClassPath = new File[0];
 
 	private CyanLoader() {
 		mavenRepositories.put("AerialWorks", "https://aerialworks.ddns.net/maven");
@@ -337,7 +340,7 @@ public class CyanLoader extends ModkitModloader
 			return;
 		CyanCore.addToPackageScan("modkit");
 		CyanCore.addAllowedPackage("modkit");
-		
+
 		if (developerMode) {
 			if (System.getProperty("authorizeDebugPackages") != null)
 				allowedComponentPackages = System.getProperty("authorizeDebugPackages").split(":");
@@ -345,10 +348,17 @@ public class CyanLoader extends ModkitModloader
 			System.err.println("");
 			System.err.println("");
 			System.err.println("DANGER!");
-			System.err.println("Coremodule loading mechanism has been released to the command line!");
+			System.err.println("Jar and coremod loading mechanisms have been released to the command line!");
 			System.err.println("Shut down the program if you are not running in a development environment!");
 			System.err.println("");
 			System.err.println("");
+
+			ArrayList<File> paths = new ArrayList<File>();
+			for (String str : Splitter.split(System.getProperty("cyan.load.classpath"), File.pathSeparator)) {
+				if (!str.isEmpty())
+					paths.add(new File(str));
+			}
+			extraClassPath = paths.toArray(t -> new File[t]);
 		} else {
 			if (System.getProperty("authorizeDebugPackages") != null) {
 				System.err.println(
@@ -1048,8 +1058,8 @@ public class CyanLoader extends ModkitModloader
 		ZipInputStream strm = new ZipInputStream(new FileInputStream(ccmf));
 		boolean cacheOutOfDate = false;
 		ModInfoCache info = new ModInfoCache();
-		File cache = new File(cyanDir, "caches/coremods/" + manifest.modGroup+"/"+manifest.modId);
-		File modCache = new File(cyanDir, "caches/coremods/" + manifest.modGroup+"/"+manifest.modId + "/mod.cache");
+		File cache = new File(cyanDir, "caches/coremods/" + manifest.modGroup + "/" + manifest.modId);
+		File modCache = new File(cyanDir, "caches/coremods/" + manifest.modGroup + "/" + manifest.modId + "/mod.cache");
 
 		if (!modCache.exists()) {
 			cache.mkdirs();
@@ -1473,8 +1483,8 @@ public class CyanLoader extends ModkitModloader
 		ZipInputStream strm = new ZipInputStream(new FileInputStream(cmf));
 		boolean cacheOutOfDate = false;
 		ModInfoCache info = new ModInfoCache();
-		File cache = new File(cyanDir, "caches/mods/" + manifest.modGroup+"/"+manifest.modId);
-		File modCache = new File(cyanDir, "caches/mods/" + manifest.modGroup+"/"+manifest.modId+ "/mod.cache");
+		File cache = new File(cyanDir, "caches/mods/" + manifest.modGroup + "/" + manifest.modId);
+		File modCache = new File(cyanDir, "caches/mods/" + manifest.modGroup + "/" + manifest.modId + "/mod.cache");
 
 		if (!modCache.exists()) {
 			cache.mkdirs();
@@ -2320,6 +2330,12 @@ public class CyanLoader extends ModkitModloader
 		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Importing regular mods...");
+		for (File f : extraClassPath) {
+			try {
+				CyanCore.addUrl(f.toURI().toURL());
+			} catch (MalformedURLException e) {
+			}
+		}
 		importMods(mods);
 		StartupWindow.WindowAppender.increaseProgress();
 	}
