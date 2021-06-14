@@ -354,9 +354,11 @@ public class CyanLoader extends ModkitModloader
 			System.err.println("");
 
 			ArrayList<File> paths = new ArrayList<File>();
-			for (String str : Splitter.split(System.getProperty("cyan.load.classpath"), File.pathSeparator)) {
-				if (!str.isEmpty())
-					paths.add(new File(str));
+			if (System.getProperty("cyan.load.classpath") != null) {
+				for (String str : Splitter.split(System.getProperty("cyan.load.classpath"), File.pathSeparator)) {
+					if (!str.isEmpty())
+						paths.add(new File(str));
+				}
 			}
 			extraClassPath = paths.toArray(t -> new File[t]);
 		} else {
