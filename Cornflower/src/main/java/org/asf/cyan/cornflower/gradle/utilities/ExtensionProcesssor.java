@@ -37,6 +37,8 @@ class ExtensionProcesssor {
 				if (Modifier.isStatic(a.getModifiers()) && Modifier.isFinal(a.getModifiers())) {
 					if (a.getType().getTypeName().equals(Class.class.getTypeName())) {
 						Class<?> cls = (Class<?>) a.get(null);
+						if (cls == null)
+							continue;
 						if (cls.isEnum()) {
 							HashMap<String, Object> mp = new HashMap<String, Object>();
 
@@ -56,7 +58,10 @@ class ExtensionProcesssor {
 							target.getExtensions().getExtraProperties().set(a.getName(), cls);
 						}
 					} else {
-						target.getExtensions().add(a.getName(), a.get(null));
+						Object obj = a.get(null);
+						if (obj == null)
+							continue;
+						target.getExtensions().add(a.getName(), obj);
 					}
 				}
 			}
