@@ -1,0 +1,10 @@
+{
+    "__comment__1": "This is a language file, the en_us language is the default file used by the game.",
+    "__comment__2": "Unlike most modloaders, Cyan scans for resources in 3 directories: client, common and server.",
+    "__comment__3": "The common folder is shared, you can use it to set regular resources.",
+    "__comment__4": "The server folder is for server 'data' but might be used by the client",
+    "__comment__5": "The client folder is only used by the client for textures, languages and such.",
+
+    "$descriptionKey": "$description",
+	"commands.example.success": "Mod example output: received text: %s, and a number: %s"
+}

@@ -1,0 +1,349 @@
+buildscript {
+	repositories {
+		mavenCentral()
+		maven {
+			name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven"
+		}
+	}
+	dependencies {
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A44'
+	}
+}
+
+plugins {
+	id 'java'
+}
+
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.asf.cyan.cornflower'
+
+// Project information
+group="org.example"
+version="1.0.0.A1"
+
+// Automatically assigned
+def mod_id = project.name
+def mod_group = project.group
+
+
+// Loader information
+def gameVersion = "1.17"
+def cyanVersion = "1.0.0.A14"
+def modkitVersion = "1.1"
+
+// Mod information
+def mod_class_name = "ExampleCoremod"
+def mod_package_name = "org.example.examplemod"
+
+def mod_display_name = "Example Coremod"
+
+
+// The mod description language key
+def modDescLanguageKey = "${mod_group}.${mod_id}.description" // Uses the group and id for language
+
+// Fallback description
+def modDescription = '''
+Example Coremod
+
+This is a multiline short description explaining the mod's subject, or something like that.
+This description is visible in the installer and in the game, however a mod list is not in place yet.
+
+Changes made will be pushed through to the language file if processResources is called.
+
+However the debug environment will not show the description in the user language because it cannot
+parse processing code and will use the fallback provided by the manifest.
+
+This description is also a part of the manifest, and can be changed at any time.
+Running the 'runManifest' task re-generates the debug manifest file.
+'''
+
+
+// Mod Debugging Manifest
+task runManifest() {
+	def conf = modfileManifest {
+		modid mod_id
+		modgroup mod_group
+
+		mod_class mod_class_name
+		mod_package mod_package_name
+
+		display_name mod_display_name
+		mod_version project.version
+
+		mod_description modDescLanguageKey, modDescription
+	}
+	doLast {
+		File dest = new File("${project.buildDir}/run/mod.manifest.ccfg")
+		if (!dest.getParentFile().exists())
+			dest.getParentFile().mkdirs()
+
+		java.nio.file.Files.writeString(dest.toPath(), conf.toString());
+	}
+}
+createEclipseLaunches.dependsOn runManifest
+
+// Instructs Cyan to load the coremod in the debug enviroment
+project.afterEvaluate {
+	createServerLaunch {
+		jvm "-DdebugModfileManifests=CM//${project.buildDir}/run/mod.manifest.ccfg";
+		jvm "-DauthorizeDebugPackages=${mod_package_name}";
+		classpath project;
+	}
+
+	createClientLaunch {
+		jvm "-DdebugModfileManifests=CM//${project.buildDir}/run/mod.manifest.ccfg";
+		jvm "-DauthorizeDebugPackages=${mod_package_name}";
+		classpath project;
+	}
+}
+
+// Dependency configuration
+dependencies {
+	//
+	// Selects modloader dependencies:
+	// 2   = Base Moddidng						(API_BASE_MODDING)
+	// 4   = Core Modding (includes modding)	(API_CORE_MODDING)
+	// 8   = FLUID								(API_FLUID)
+	// 16  = CyanCore							(API_CYANCORE)
+	// 32  = MTK								(API_MTK)
+	// 64  = ClassTrust							(API_CLASSTRUST)
+	//
+	// 128 = Full CyanLoader (unrecommended, use of base/core modding is preferred)
+	//
+	implementation Modloader.forModloader("cyan", cyanVersion, API_CORE_MODDING | API_FLUID)
+
+	// Selects game dependencies
+	implementation Game.forGame("Minecraft", gameVersion)
+
+	// Adds the ModKit API, Cyan 1.0.0.A13 only provides specification 1.0
+	implementation API.forAPI("ModKit", modkitVersion)
+}
+
+// Platform configuration
+platforms {
+	// Needs to be present as FIRST entry when using other modding platforms.
+	// Minecraft VANILLA platform, configures the base version.
+	VANILLA {
+		// Game version
+		version gameVersion
+	}
+
+	// MCP Platform, for forge support
+// 	MCP {
+// 		// YYYYMMDD.HHMMSS, should match upstream forge
+// 		version "20210115.111550"
+// 
+// 		// Forge version
+// 		modloader "36.1.31"
+// 	}
+
+	// Yarn Platform, for fabric support
+	YARN {
+		// Build version for YARN,
+		// Search for matching game version in http://maven.modmuss50.me/net/fabricmc/yarn/maven-metadata.xml
+		// Or use getSupportedYarnVersion("game-version", "cyan-version") to do so automatically
+		version "1.17+build.11" // getSupportedYarnVersion(gameVersion, cyanVersion)
+
+		// Fabric version
+		// For latest, use getLatestFabricVersion("game-version")
+		// However it is recommended to use getSupportedFabricVersion("game-version", "cyan-version")
+		modloader "0.11.6" // getSupportedFabricVersion(gameVersion, cyanVersion)
+	}
+
+	// Spigot Platform, for paper support
+//	SPIGOT {
+//		//
+//		// Paper version, only use paper version compatible with the mappings,
+//		//
+//		// Use getPaperVersion("mappings-version") to retrieve the latest paper version that has been
+//		// registered as 'compatible with mappings' in the generic version manifest of CYAN.
+//		//
+//		// Use getPaperVersionByDate("game-vesion", "mappings-version") to retrieve the paper version with date
+//		// aproximatly matching the mappings publish date. (USE AT YOUR OWN RISK, SCRAPES SPIGOT WEB PAGE FOR DATE
+//		// AND RECURSES THROUGH PAPER VERSIONS TO FIND THE UPDATE, PLEASE STORE VALUE AND USE AS LEAST AS POSSIBLE)
+//		//
+//		//
+//		// We strongly recommed for you to use getSupportedPaperVersion("game-version", "cyan-version")
+//		// and getSpigotMappingsByPaperVersion("game-version", "paper-version") to get the mappings.
+//		//
+//		// Paper version:
+//		//
+//		// paperVersion = getSupportedPaperVersion(gameVersion, cyanVersion)
+//		modloader "777" // paperVersion
+//
+//		//
+//		// SPIGOT mappings version, it is best to only use mappings that have been given a green light by the Cyan team.
+//		//
+//		// Use getSpigotMappingsByPaperVersion("game-version", "paper-version") for the mappings used
+//		// together with the paper version during cyan's compilation and testing process (most recommended)
+//		//
+//		// Use getRecommendedSpigotMappings("game-version") for the mappings that have been given a green light
+//		// Use getLatestSpigotMappings("game-version") for mappings in pre-release testing stage
+//		// Use getTestingSpigotMappings("game-version") for mappings in early testing stage (unrecommended, can really break things)
+//		//
+//		//
+//		// If you really want the latest version, you can use the following.
+//		// USE AT YOUR OWN RISK, CYAN WON'T BE HELD RESPONSIBLE FOR DAMAGED WORLDS.
+//		//
+//		// For the latest remote, use getRemoteSpigotMappingsVersion("game-version")
+//		//
+//		//
+//		// Commit hash and craftbukkit build for mappings version (commit:craftbukkit)
+//		version "f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3" // getSpigotMappingsByPaperVersion(paperVersion)
+//	}
+}
+
+// Adds RIFT tasks for the platforms
+addPlatformRiftTasks {
+	platform platforms
+	from tasks.jar.getArchiveFile()
+}
+
+ctc {
+	method uctc
+	source tasks.jar.getArchiveFile()
+	source riftTasks
+	destination "$buildDir/uctc/Main Trust " + mod_id + " " + mod_group
+}
+
+task ctcPack (type: CtcUtil, dependsOn: ctc) {
+	method pack
+	createHash true
+
+	// Source UCTC directory
+	source "$buildDir/uctc/Main Trust " + mod_id + " " + mod_group
+	
+	// Destination file, %version% is replaced by the CtcUtil task
+	destination buildDir.getAbsolutePath() + "/ctcs/%version%/" + mod_group + " " + mod_id + " Main Trust.ctc"
+}
+
+task ctcPublish(type: CtcUtil, dependsOn: ctcPack) {
+	doFirst {
+		source ctcPack.getOutput() // returns null if not called after ctcPack completes
+	}
+
+	method publish
+	destination connectiveHttpURLScheme("https://aerialworks.ddns.net/", mod_group, mod_id, project.version, mod_group + " " + mod_id + " Main Trust")
+
+	//
+	// Publishing credentials are needed for the ASF server
+	//
+	// Add the following to the command line to specify credentials:
+	// gradle ctcPublish -Pctcusername="user-name-here" -Pctcpassword="password-here"
+	//
+	if (project.hasProperty("ctcusername") && project.hasProperty("ctcpassword")) {
+		credentials {
+			usergroup "moddev"
+			username project.getProperty("ctcusername")
+			password project.getProperty("ctcpassword")
+		}
+	}
+}
+
+if (tasks.findByName("publish") != null) {
+	tasks.publish.finalizedBy ctcPublish
+}
+
+cmf {
+	manifest {
+		modfileManifest {
+			// Sets the id and group
+			modid mod_id
+			modgroup mod_group
+
+			// Sets the mod class and package
+			mod_class mod_class_name
+			mod_package mod_package_name
+
+			// Sets the version and name
+			display_name mod_display_name
+			mod_version project.version
+
+			// The following sets the description, the first parameter is the language key
+			// for translation, the second is the actual description.
+			mod_description modDescLanguageKey, modDescription
+			platform platforms
+
+			// Sets the code sources
+			jar tasks.jar.getArchiveFile(), DEOBFUSCATED
+			jar riftTasks
+
+			// Sets the remote dependencies and trust
+			maven_dependency remoteDependencies
+			trust_container tasks.ctcPack, "https://aerialworks.ddns.net/cyan/trust/download"
+
+			//
+			// Add dependencies like this:
+			// dependency 'modgroup:modid', '>=greater-than-version'
+			// dependency 'modgroup:modid', 'specific-version'
+			// dependency 'modgroup:modid', '<=less-than-version'
+			// dependency 'modgroup:modid', '=~version-regex'
+			// dependency 'modgroup:modid', '>=greater-than & <=not-less-than-this'
+			// dependency 'modgroup:modid', '>=greater-than | or-exactly'
+			//
+			// Optional dependencies are added like:
+			// optional_dependency 'modgroup:modid', '>=greater-than-version'
+			// optional_dependency 'modgroup:modid', 'specific-version'
+			// optional_dependency 'modgroup:modid', '<=less-than-version'
+			// optional_dependency 'modgroup:modid', '=~version-regex'
+			// optional_dependency 'modgroup:modid', '>=greater-than & <=not-less-than-this'
+			// optional_dependency 'modgroup:modid', '>=greater-than | or-exactly'
+			//
+			//
+			// In the mod main class, you can use the @ModSupportHandler("group:id") annotation to create a
+			// support handler. Methods annotated with that should have ONE parameter of any of the following types:
+			//
+			// Supported types: AbstractMod, AbstractCoremod, IMod, ICoremod and Direct mod instances
+			// (direct references might malfunction with optional dependencies)
+			//
+			// To avoid a ClassNoDefError with optional dependencies, you can use the ModProvider<ModInstance> type.
+			// The ModProvider interface uses type erasure to work around this potential issue.
+			//
+		}
+	}
+
+	archiveVersion = project.version
+	archiveExtension = 'ccmf'
+	destinationDirectory = file("$buildDir/ccmf")
+}
+
+// Processes resource files
+processResources {
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+	from sourceSets.main.resources.srcDirs
+
+	// The variables to set
+	def props = new HashMap([
+		// Project information
+		'version': project.version,
+		'minecraft': gameVersion,
+		'cyanVersion': cyanVersion,
+		'name': project.name,
+
+		// Escape characters for json
+		'description': modDescription.replace("\\", "\\\\").replace("\b", "\\b").replace("\n", "\\n").replace("\t", "\\t").replace("\"", "\\\"").replace("\r", "\\r"),
+
+		// Set the description language key
+		'descriptionKey': modDescLanguageKey
+	])
+
+	// Expand the variables in files
+	expand props
+
+	// Add the variables as input properties
+	props.forEach { key, val -> inputs.property key, val }
+}
+
+rift.dependsOn jar
+build.finalizedBy rift
+rift.finalizedBy ctc
+ctc.dependsOn rift
+ctc.finalizedBy ctcPack
+ctcPack.dependsOn ctc
+ctcPack.finalizedBy cmf
+cmf.dependsOn ctcPack

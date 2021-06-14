@@ -81,12 +81,7 @@ public class ClientGame implements IGameExecutionContext, ILaunchProvider {
 	@Override
 	public String[] libraries() {
 		prepare();
-		ArrayList<String> libs = new ArrayList<String>();
-		for (String lib : MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion, true)) {
-			if (!lib.contains(":log4j"))
-				libs.add(lib);
-		}
-		return libs.toArray(new String[0]);
+		return MinecraftInstallationToolkit.getLibrariesMavenFormat(cyanVersion, true);
 	}
 
 	@Override
