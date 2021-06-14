@@ -76,7 +76,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 	public static final Class<org.asf.cyan.cornflower.classpath.util.PathPriority> PathPriority = org.asf.cyan.cornflower.classpath.util.PathPriority.class;
 
 	public static final Class<?> EclipseLaunchGenerator = org.asf.cyan.cornflower.gradle.tasks.EclipseLaunchGenerator.class;
-	public static Class<?> CtcUtil = new Supplier<Class<?>>() {
+	public static final Class<?> CtcUtil = new Supplier<Class<?>>() {
 
 		@Override
 		public Class<?> get() {
