@@ -465,7 +465,6 @@ public class CyanLoader extends ModkitModloader
 					mod.readAll(new String(Files.readAllBytes(new File(file.substring(3)).toPath())));
 					ld.modManifests.put(mod.modClassPackage + "." + mod.modClassName, mod);
 					ld.modManifests.put(mod.modGroup + ":" + mod.modId, mod);
-					CyanCore.addToPackageScan(mod.modClassPackage);
 					CyanCore.addAllowedPackage(mod.modClassPackage);
 				}
 			}
