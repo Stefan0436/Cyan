@@ -110,7 +110,8 @@ public class CyanModfileManifestGenerator {
 
 	public void jar(Provider<RegularFile> jarfile, IPlatformConfiguration platform, GameSide side, String outputDir) {
 		if (platform != null) {
-			manifest.addJar(jarfile, platform.getPlatform().toString(), side.toString(), outputDir, null, null,
+			manifest.addJar(jarfile, platform.getPlatform().toString(), side.toString(), outputDir, null,
+					(platform.getPlatform() == LaunchPlatform.VANILLA ? platform.getCommonMappingsVersion() : null),
 					(platform.getModloaderVersion() != null ? platform.getCommonMappingsVersion() : null));
 		} else {
 			jar(jarfile, (LaunchPlatform) null, side, outputDir);
