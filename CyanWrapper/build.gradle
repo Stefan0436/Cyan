@@ -2023,11 +2023,19 @@ processResources {
 		yarnMappingVersions.put("cyan-"+minecraft+"-"+cyanversion, mappingsVersion)
 	}
 
+	
+	fabricVersions.keySet().stream().sorted({ t1, t2 ->
+        return -Version.fromString(t1).compareTo(Version.fromString(t2));
+    }).forEach { version ->        
+        yarnMappingVersions.put("fabric-"+minecraft+"-"+version, fabricVersions.get(version));
+        fabricSupportVersions.put("cyan-"+minecraft+"-"+cyanversion, fabricVersions.get(version));
+    }
+
 	for (String key : yarnMappingVersions.keySet()) {
 		def val = yarnMappingVersions.get(key).replaceAll("\n", "\n    ")
 		yarnMappings += "    $key> '${val}'\n"
 	}
-
+	
 	for (String key : spigotMappingVersions.keySet()) {
 		def val = spigotMappingVersions.get(key).replaceAll("\n", "\n    ")
 		spigotMappings += "    $key> '${val}'\n"
