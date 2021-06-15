@@ -2905,7 +2905,7 @@ serverDownloads.finalizedBy createModkitZip
 
 task createModkitTarGz(type: Tar) {
 	compression Compression.GZIP
-	extension 'tar.gz'
+	archiveExtension = 'tar.gz'
 	from file("../modkits/modkit-$minecraft-$cyanversion")
 	destinationDirectory = file("$buildDir/serverdata/$cyanversion/modkits/$minecraft")
 	archiveBaseName = 'modkit'
@@ -2923,7 +2923,7 @@ serverDownloads.finalizedBy createCoreModKitZip
 
 task createCoreModKitTarGz(type: Tar) {
 	compression Compression.GZIP
-	extension 'tar.gz'
+	archiveExtension = 'tar.gz'
 	from file("../coremodkits/coremodkit-$minecraft-$cyanversion")
 	destinationDirectory = file("$buildDir/serverdata/$cyanversion/coremodkits/$minecraft")
 	archiveBaseName = 'coremodkit'
