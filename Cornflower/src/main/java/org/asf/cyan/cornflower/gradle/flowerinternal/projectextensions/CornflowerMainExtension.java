@@ -148,7 +148,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 		return ConfigurableRiftProvider.fromClosure(provider);
 	}
 
-	public static IRiftToolchainProvider getPlatformRiftProvider(Project project, LaunchPlatform platform,
+	public static IRiftToolchainProvider getRiftProviderForLaunchPlatform(Project project, LaunchPlatform platform,
 			GameSide side) {
 
 		PlatformConfiguration platforms = (PlatformConfiguration) project.getExtensions().getExtraProperties()
@@ -195,7 +195,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 			}
 		}
 
-		return getPlatformRiftProvider(project, platform.getPlatform(), side);
+		return getRiftProviderForLaunchPlatform(project, platform.getPlatform(), side);
 	}
 
 	public static void addPlatformRiftTasks(Project project, Closure<?> closure) {
