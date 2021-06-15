@@ -20,7 +20,7 @@ jobs:
       with:
         path: |
             ~/.gradle/caches/Cornflower
-        key: ${{ runner.os }}-117-${{ hashFiles('./config.gradle') }}-${{ hashFiles('./modloaderbuild-1.17.gradle') }}
+        key: ${{ runner.os }}-117-2-${{ hashFiles('./config.gradle') }}-${{ hashFiles('./modloaderbuild-1.17.gradle') }}
     - name: Set up JDK 16
       uses: actions/setup-java@v2
       with:
