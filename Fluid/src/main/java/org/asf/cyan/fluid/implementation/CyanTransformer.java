@@ -115,7 +115,7 @@ public class CyanTransformer extends Transformer {
 			int i = 0;
 			if (!Modifier.isStatic(newMod))
 				instructions.add(new VarInsnNode(Opcodes.ALOAD, i++));
-			for (int i2 = 0; i2 <= methodInfo.types.length; i2++) {
+			for (int i2 = 0; i2 <= methodInfo.getVarOffset(); i2++) {
 				instructions.add(new VarInsnNode(Opcodes.ALOAD, i++));
 			}
 
@@ -139,7 +139,7 @@ public class CyanTransformer extends Transformer {
 				instructions.add(new InsnNode(Opcodes.RETURN));
 
 			newmethod.name = transformer.name;
-			newmethod.maxLocals = methodInfo.types.length + (Modifier.isStatic(newMod) ? 0 : 1);
+			newmethod.maxLocals = methodInfo.getVarOffset() + (Modifier.isStatic(newMod) ? 0 : 1);
 			newmethod.instructions = instructions;
 			newmethod.maxStack = target.maxStack;
 			newmethod.access = newMod;
@@ -432,7 +432,7 @@ public class CyanTransformer extends Transformer {
 		}
 
 		if (addVarStart == 0)
-			addVarStart = methodInfo.types.length + (Modifier.isStatic(target.access) ? 0 : 1);
+			addVarStart = methodInfo.getVarOffset() + (Modifier.isStatic(target.access) ? 0 : 1);
 
 		target.maxLocals += appendVarLength;
 		InsnList newNodes = new InsnList();

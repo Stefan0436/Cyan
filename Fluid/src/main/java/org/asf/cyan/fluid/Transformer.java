@@ -81,7 +81,7 @@ public abstract class Transformer extends CyanComponent {
 			boolean asmMethods = false;
 			ArrayList<String> transformedMethods = new ArrayList<String>();
 			ArrayList<String> transformedFields = new ArrayList<String>();
-			
+
 			String typeName = transformer.name.replaceAll("/", ".");
 			try {
 				debug("Applying transformer " + typeName + " to class "
@@ -635,6 +635,16 @@ public abstract class Transformer extends CyanComponent {
 		public String name;
 		public String[] types;
 		public String returnType;
+
+		public int getVarOffset() {
+			int i = 0;
+			for (String type : types)
+				if (type.equals("double"))
+					i += 2;
+				else
+					i++;
+			return i;
+		}
 
 		public static List<AnnotationInfo> getParameterAnnotations(MethodNode method, int param) {
 			return selectedTransformer.getParameterAnnotations(method, param);
