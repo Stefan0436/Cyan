@@ -171,12 +171,14 @@ public class ConfigurationTest {
 		TestingConfig test = new TestingConfig().readAll(testConfig);
 		for (String key : test.testMap1.keySet()) {
 			if (!test.testMap1.get(key).equals(testmp1.get(key)))
-				System.err.println("Test failed: " + test.testMap1.get(key) + " should be equal to " + testmp1.get(key));
+				System.err
+						.println("Test failed: " + test.testMap1.get(key) + " should be equal to " + testmp1.get(key));
 			assertTrue(test.testMap1.get(key).equals(testmp1.get(key)));
 		}
 		for (String key : test.testMap2.keySet()) {
 			if (!test.testMap2.get(key).equals(testmp2.get(key)))
-				System.err.println("Test failed: " + test.testMap2.get(key) + " should be equal to " + testmp2.get(key));
+				System.err
+						.println("Test failed: " + test.testMap2.get(key) + " should be equal to " + testmp2.get(key));
 			assertTrue(test.testMap2.get(key).equals(testmp2.get(key)));
 		}
 

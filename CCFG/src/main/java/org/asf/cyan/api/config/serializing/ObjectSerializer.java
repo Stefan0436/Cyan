@@ -149,8 +149,12 @@ public class ObjectSerializer {
 			}
 			input = input.replaceAll("([^\\\\])\\\\r", "$1\r");
 			input = input.replaceAll("\\\\r", "\\r");
+			input = input.replaceAll("([^\\\\])\\\\b", "$1\b");
+			input = input.replaceAll("\\\\b", "\\b");
 			input = input.replaceAll("([^\\\\])\\\\t", "$1\t");
 			input = input.replaceAll("\\\\t", "\t");
+			input = input.replaceAll("([^\\\\])\\\\f", "$1\f");
+			input = input.replaceAll("\\\\f", "\f");
 
 			return (T) input;
 		case "java.net.URL":
@@ -387,7 +391,11 @@ public class ObjectSerializer {
 			}
 			output = output.replaceAll("\\\\\\\\r", "\\\\\\\\\\\\r");
 			output = output.replaceAll("\r", "\\\\r");
+			output = output.replaceAll("\\\\\\\\b", "\\\\\\\\\\\\b");
+			output = output.replaceAll("\b", "\\\\b");
 			output = output.replaceAll("\\\\\\\\t", "\\\\\\\\\\\\t");
+			output = output.replaceAll("\f", "\\\\f");
+			output = output.replaceAll("\\\\\\\\f", "\\\\\\\\\\\\f");
 			output = output.replaceAll("\t", "\\\\t");
 
 			return output;
