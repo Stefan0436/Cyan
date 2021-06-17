@@ -144,17 +144,17 @@ public class ObjectSerializer {
 		switch (cls.getTypeName()) {
 		case "java.lang.String":
 
+			input = input.replaceAll("([^\\\\])\\\\r", "$1\\r");
+			input = input.replaceAll("\\\\r", "\\r");
+			input = input.replaceAll("([^\\\\])\\\\b", "$1\\b");
+			input = input.replaceAll("\\\\b", "\\b");
+			input = input.replaceAll("([^\\\\])\\\\t", "$1\\t");
+			input = input.replaceAll("\\\\t", "\\t");
+			input = input.replaceAll("([^\\\\])\\\\f", "$1\\f");
+			input = input.replaceAll("\\\\f", "\\f");
 			for (String ch : escapeChars) {
 				input = input.replace("\\" + ch, ch);
 			}
-			input = input.replaceAll("([^\\\\])\\\\r", "$1\r");
-			input = input.replaceAll("\\\\r", "\\r");
-			input = input.replaceAll("([^\\\\])\\\\b", "$1\b");
-			input = input.replaceAll("\\\\b", "\\b");
-			input = input.replaceAll("([^\\\\])\\\\t", "$1\t");
-			input = input.replaceAll("\\\\t", "\t");
-			input = input.replaceAll("([^\\\\])\\\\f", "$1\f");
-			input = input.replaceAll("\\\\f", "\f");
 
 			return (T) input;
 		case "java.net.URL":
