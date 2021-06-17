@@ -119,13 +119,13 @@ public class SelectionWindow extends JFrame {
 	}
 
 	public boolean checkInstall(CyanModfileManifest manifest, KickStartInstallation install) {
+		if (manifest.gameVersionRegex != null && !install.gameVersion.matches(manifest.gameVersionRegex))
+			return false;
 		if (install.platform.equals("DEOBFUSCATED")
 				&& manifest.jars.values().stream().anyMatch(t -> t.trim().equals("any")
 						|| (" " + t.trim() + " ").replace("&", " & ").contains(" platform:DEOBFUSCATED "))) {
 			return true;
 		}
-		if (manifest.gameVersionRegex != null && !install.gameVersion.matches(manifest.gameVersionRegex))
-			return false;
 		if (!manifest.platforms.containsKey(install.platform))
 			return false;
 		else
