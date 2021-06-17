@@ -72,13 +72,26 @@ public abstract class Modloader extends CyanComponent {
 
 	private ArrayList<String> postLoadComponents = new ArrayList<String>();
 
-	protected void loadPostponedComponents(ClassLoader loader) throws ClassNotFoundException {
+	@SuppressWarnings("unchecked")
+	protected void loadPostponedComponents(ClassLoader... loaders) throws ClassNotFoundException {
 		for (String typeName : postLoadComponents) {
 			Constructor<IModloaderComponent> ctor;
 			IModloaderComponent component;
 			try {
-				@SuppressWarnings("unchecked")
-				Class<IModloaderComponent> componentCls = (Class<IModloaderComponent>) loader.loadClass(typeName);
+				Class<IModloaderComponent> componentCls = null;
+				ClassNotFoundException e = null;
+				for (ClassLoader loader : loaders) {
+					try {
+						componentCls = (Class<IModloaderComponent>) loader.loadClass(typeName);
+						e = null;
+						break;
+					} catch(ClassNotFoundException ex) {
+						if (e == null)
+							e = ex;
+					}
+				}
+				if (e != null)
+					throw e;
 				if (!presentComponent(componentCls)) {
 					continue;
 				}

@@ -2366,7 +2366,7 @@ public class CyanLoader extends ModkitModloader
 			return;
 		gameLoad = true;
 		info("Finishing bootstrap... Loading postponed components...");
-		loadPostponedComponents(loader);
+		loadPostponedComponents(loader, CyanCore.getCoreClassLoader(), CyanCore.getClassLoader());
 		StartupWindow.WindowAppender.increaseProgress();
 
 		info("Loading final events...");
