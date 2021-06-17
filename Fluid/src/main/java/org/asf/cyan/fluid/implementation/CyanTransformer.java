@@ -425,7 +425,7 @@ public class CyanTransformer extends Transformer {
 				.parseMultipleDescriptors(transformer.desc.substring(1, transformer.desc.lastIndexOf(")")));
 		int min = 0;
 		for (String type : actualParams) {
-			if (type.equals("double[]"))
+			if (type.equals("double"))
 				min += 2;
 			else
 				min++;
