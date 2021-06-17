@@ -126,6 +126,7 @@ public class BackupServerUtil extends CyanComponent implements LevelModDataReade
 		zip.close();
 		fos.close();
 		backupOverride = true;
+		hadPrompted = true;
 	}
 
 	private static void zipFiles(File dir, String pref, ZipOutputStream zip) throws IOException {
@@ -143,7 +144,10 @@ public class BackupServerUtil extends CyanComponent implements LevelModDataReade
 	}
 
 	private static void ignoreMessage() {
+		if (hadPrompted)
+			return;
 		warn("Resuming server startup, no backup will be created.");
+		hadPrompted = true;
 	}
 
 	public static void cancelStartup() {
