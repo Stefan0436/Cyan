@@ -23,7 +23,10 @@ public class ConfigurationTest {
 			length = rnd.nextInt(max);
 		String val = "";
 		for (int i = 0; i < length; i++) {
-			val += (char) rnd.nextInt(Character.MAX_VALUE);
+			int chr = rnd.nextInt(127);
+			while (chr < 32)
+				chr = rnd.nextInt(127);
+			val += (char) chr;
 		}
 		return val;
 	}
