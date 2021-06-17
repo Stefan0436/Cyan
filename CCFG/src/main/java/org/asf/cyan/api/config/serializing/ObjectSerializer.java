@@ -163,7 +163,7 @@ public class ObjectSerializer {
 
 			input = input.replaceAll("([^\\\\])\\\\'", "$1'");
 			input = input.replaceAll("\\\\'", "\\'");
-			input = input.replaceAll("\\\\", "\\");
+			input = input.replace("\\\\", "\\");
 
 			int index = 0;
 			for (String ch : escapeCharSequences) {
