@@ -115,8 +115,27 @@ public class CyanTransformer extends Transformer {
 			int i = 0;
 			if (!Modifier.isStatic(newMod))
 				instructions.add(new VarInsnNode(Opcodes.ALOAD, i++));
-			for (int i2 = 0; i2 <= methodInfo.getVarOffset(); i2++) {
-				instructions.add(new VarInsnNode(Opcodes.ALOAD, i++));
+			for (int i2 = 0; i2 <= methodInfo.types.length; i2++) {
+				if (methodInfo.types[i2].equals("int"))
+					instructions.add(new VarInsnNode(Opcodes.ILOAD, i++));
+				else if (methodInfo.types[i2].equals("float"))
+					instructions.add(new VarInsnNode(Opcodes.FLOAD, i++));
+				else if (methodInfo.types[i2].equals("double"))
+					instructions.add(new VarInsnNode(Opcodes.DLOAD, i++));
+				else if (methodInfo.types[i2].equals("long"))
+					instructions.add(new VarInsnNode(Opcodes.LLOAD, i++));
+				else if (methodInfo.types[i2].equals("int[]"))
+					instructions.add(new VarInsnNode(Opcodes.IALOAD, i++));
+				else if (methodInfo.types[i2].equals("float[]"))
+					instructions.add(new VarInsnNode(Opcodes.FALOAD, i++));
+				else if (methodInfo.types[i2].equals("double[]"))
+					instructions.add(new VarInsnNode(Opcodes.DALOAD, i++));
+				else if (methodInfo.types[i2].equals("long[]"))
+					instructions.add(new VarInsnNode(Opcodes.LALOAD, i++));
+				else if (methodInfo.types[i2].endsWith("[]"))
+					instructions.add(new VarInsnNode(Opcodes.AALOAD, i++));
+				else
+					instructions.add(new VarInsnNode(Opcodes.ALOAD, i++));
 			}
 
 			instructions
@@ -404,7 +423,13 @@ public class CyanTransformer extends Transformer {
 
 		String[] actualParams = Fluid
 				.parseMultipleDescriptors(transformer.desc.substring(1, transformer.desc.lastIndexOf(")")));
-		int min = actualParams.length;
+		int min = 0;
+		for (String type : actualParams) {
+			if (type.equals("double[]"))
+				min += 2;
+			else
+				min++;
+		}
 		if (!Modifier.isStatic(transformer.access) && Modifier.isStatic(target.access))
 			min--;
 		else if (Modifier.isStatic(transformer.access) && !Modifier.isStatic(target.access))
