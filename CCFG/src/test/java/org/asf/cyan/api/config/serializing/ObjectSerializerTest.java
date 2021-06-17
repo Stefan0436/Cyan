@@ -119,7 +119,7 @@ public class ObjectSerializerTest {
 
 	@Test
 	public void testCharacterEscaping() throws IOException {
-		String test1 = "\000\001hi\r\nhi\nhello\r\'test\'\\r\\\\r\'test2\'\\rtest\ttabs";
+		String test1 = "\000\001hi\r\nhi\nhello\r'\\'test\\'\\r\\\\r\'test2\'\\rtest\ttabs";
 		String out1 = ObjectSerializer.serialize(test1);
 		System.out.println(out1);
 		String out2 = ObjectSerializer.deserialize(out1, String.class);
@@ -157,8 +157,8 @@ public class ObjectSerializerTest {
 		ObjectSerializer.parse(out3, getter);
 		String out4 = getter.retrieveValue();
 
-		assertTrue(out4.equals(test1));
 		assertTrue(out2.equals(test1));
+		assertTrue(out4.equals(test1));
 	}
 
 	class CCFGStringPutAction extends CCFGPutPropAction {

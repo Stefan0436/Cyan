@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.asf.aos.util.service.extra.slib.util.PrimitiveClassUtil;
@@ -31,19 +32,24 @@ import java.util.ArrayList;
  */
 public class ObjectSerializer {
 
-	static String[] escapeChars = new String[] { "\\", "'" };
+	static int[] manualEscapeChars = new int[] { '\t', '\n', '\b', '\r', '\f' };
+	static String[] escapeChars;
+	static String[] escapeCharSequences;
 	static {
 		ArrayList<String> chars = new ArrayList<String>();
-		Stream.of(escapeChars).forEach(t -> chars.add(t));
+		ArrayList<String> chars2 = new ArrayList<String>();
 		for (int ch = 0; ch <= Character.MAX_VALUE; ch++) {
-			if (Character.isISOControl(ch)) {
+			final int chf = ch;
+			if (Character.isISOControl(ch) && !IntStream.of(manualEscapeChars).anyMatch(t -> t == chf)) {
 				String str = Integer.toOctalString(ch);
 				while (str.length() < 3)
 					str = "0" + str;
 				chars.add(str);
+				chars2.add(Character.toString(ch));
 			}
 		}
-		escapeChars = chars.toArray(t -> new String[t]);
+		escapeCharSequences = chars.toArray(t -> new String[t]);
+		escapeChars = chars2.toArray(t -> new String[t]);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -144,16 +150,24 @@ public class ObjectSerializer {
 		switch (cls.getTypeName()) {
 		case "java.lang.String":
 
-			input = input.replaceAll("([^\\\\])\\\\r", "$1\\r");
+			input = input.replaceAll("([^\\\\])\\\\r", "$1\r");
 			input = input.replaceAll("\\\\r", "\\r");
-			input = input.replaceAll("([^\\\\])\\\\b", "$1\\b");
+			input = input.replaceAll("([^\\\\])\\\\b", "$1\b");
 			input = input.replaceAll("\\\\b", "\\b");
-			input = input.replaceAll("([^\\\\])\\\\t", "$1\\t");
+			input = input.replaceAll("([^\\\\])\\\\t", "$1\t");
 			input = input.replaceAll("\\\\t", "\\t");
-			input = input.replaceAll("([^\\\\])\\\\f", "$1\\f");
+			input = input.replaceAll("([^\\\\])\\\\f", "$1\f");
 			input = input.replaceAll("\\\\f", "\\f");
-			for (String ch : escapeChars) {
-				input = input.replace("\\" + ch, ch);
+			input = input.replaceAll("([^\\\\])\\\\f", "$1\f");
+			input = input.replaceAll("\\\\f", "\\f");
+
+			input = input.replaceAll("([^\\\\])\\\\'", "$1'");
+			input = input.replaceAll("\\\\'", "\\'");
+			input = input.replaceAll("\\\\", "\\");
+
+			int index = 0;
+			for (String ch : escapeCharSequences) {
+				input = input.replace("\\" + ch, escapeChars[index++]);
 			}
 
 			return (T) input;
@@ -386,17 +400,25 @@ public class ObjectSerializer {
 		switch (cls.getTypeName()) {
 		case "java.lang.String":
 			String output = input.toString();
+
+			output = output.replace("\\'", "\\\\'");
+			output = output.replaceAll("([^\\\\])'", "$1\\\\'");
+
+			output = output.replaceAll("\\\\([^rbtf012])?", "\\\\$1");
+
+			int index = 0;
 			for (String ch : escapeChars) {
-				output = output.replace(ch, "\\" + ch);
+				output = output.replace(ch, "\\" + escapeCharSequences[index++]);
 			}
-			output = output.replaceAll("\\\\\\\\r", "\\\\\\\\\\\\r");
-			output = output.replaceAll("\r", "\\\\r");
-			output = output.replaceAll("\\\\\\\\b", "\\\\\\\\\\\\b");
-			output = output.replaceAll("\b", "\\\\b");
-			output = output.replaceAll("\\\\\\\\t", "\\\\\\\\\\\\t");
-			output = output.replaceAll("\f", "\\\\f");
-			output = output.replaceAll("\\\\\\\\f", "\\\\\\\\\\\\f");
-			output = output.replaceAll("\t", "\\\\t");
+
+			output = output.replace("\\r", "\\\\r");
+			output = output.replace("\r", "\\r");
+			output = output.replace("\\b", "\\\\b");
+			output = output.replace("\b", "\\b");
+			output = output.replace("\\t", "\\\\t");
+			output = output.replace("\t", "\\t");
+			output = output.replace("\\f", "\\\\f");
+			output = output.replace("\f", "\\f");
 
 			return output;
 		case "java.net.URL":
