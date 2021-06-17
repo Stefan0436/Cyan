@@ -163,6 +163,7 @@ public class ObjectSerializer {
 
 			input = input.replaceAll("([^\\\\])\\\\'", "$1'");
 			input = input.replaceAll("\\\\'", "\\'");
+
 			input = input.replace("\\\\", "\\");
 
 			int index = 0;
@@ -401,10 +402,10 @@ public class ObjectSerializer {
 		case "java.lang.String":
 			String output = input.toString();
 
-			output = output.replace("\\'", "\\\\'");
-			output = output.replaceAll("([^\\\\])'", "$1\\\\'");
+			output = output.replace("\\", "\\\\");
 
-			output = output.replaceAll("\\\\([^rbtf012])?", "\\\\$1");
+			output = output.replace("\\'", "\\\\'");
+			output = output.replaceAll("([^\\\\])?'", "$1\\\\'");
 
 			int index = 0;
 			for (String ch : escapeChars) {
@@ -419,7 +420,7 @@ public class ObjectSerializer {
 			output = output.replace("\t", "\\t");
 			output = output.replace("\\f", "\\\\f");
 			output = output.replace("\f", "\\f");
-
+			
 			return output;
 		case "java.net.URL":
 			return input.toString();
@@ -590,8 +591,8 @@ public class ObjectSerializer {
 						if (brquote == 0 && (!quote || chNum + 1 < line.length() && line.charAt(chNum + 1) == '\'')
 								&& array == 0) {
 							escape = true;
-						} else
-							txt.append(ch);
+						}
+						txt.append(ch);
 						if (brquote != 0 && quote && chNum + 1 < line.length() && line.charAt(chNum + 1) == '\'') {
 							quote = !quote;
 						}
