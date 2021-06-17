@@ -38,7 +38,7 @@ task createCyanSourceZip(type: Zip, dependsOn: 'prepareSourceZip') {
 
 task createCyanSourceTarGz(type: Tar, dependsOn: 'prepareSourceZip') {
 	compression Compression.GZIP
-	extension 'tar.gz'
+	archiveExtension = 'tar.gz'
 	from file(buildDir.getCanonicalPath()+"/git-output")
 	destinationDirectory = file('../build/CyanLoader/Tars')
 	classifier 'FULL-SOURCES'
