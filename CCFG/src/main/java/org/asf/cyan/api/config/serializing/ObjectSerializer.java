@@ -160,7 +160,7 @@ public class ObjectSerializer {
 			input = input.replaceAll("\\\\f", "\\f");
 
 			input = input.replace("\\\\", "\\");
-			input = input.replaceAll("\\\\'", "\\'");
+			input = input.replace("\\'", "'");
 
 			int index = 0;
 			for (String ch : escapeCharSequences) {
@@ -238,109 +238,128 @@ public class ObjectSerializer {
 					throw new IOException("No ENUM value " + input + " in class " + cls.getTypeName());
 			} else if (cls.isArray()) {
 				input = Replacer.removeChar(input, '\r');
+				String[] lines = input.split("\n");
+
 				ArrayList<String> inputLst = new ArrayList<String>();
-				StringBuilder str = null;
+
 				boolean indent = false;
-				boolean escape = false;
 				boolean quote = false;
-				int arrayc = 0;
+				int array = 0;
 				int brquote = 0;
-				for (int characterNum = 0; characterNum < input.length(); characterNum++) {
-					char character = input.charAt(characterNum);
-					switch (character) {
-					case ' ':
-						if (!quote && str != null && arrayc == 0 && brquote == 0) {
-							inputLst.add(str.toString());
-							str = null;
-						} else if (str != null) {
-							str.append(character);
-							escape = false;
-						}
-						break;
-					case '\'':
-						if (str == null)
-							str = new StringBuilder();
-						if (!escape && arrayc == 0 && brquote == 0) {
-							quote = !quote;
-						} else {
-							str.append(character);
-							escape = false;
-						}
-						break;
-					case '\\':
-						if (str == null)
-							str = new StringBuilder();
-						if (!escape && arrayc == 0 && brquote == 0) {
-							escape = true;
-						} else {
-							str.append(character);
-							escape = false;
-						}
-						break;
-					case '{':
-						if (str == null)
-							str = new StringBuilder();
-						if (brquote != 0)
-							str.append(character);
-						if (!quote) {
-							brquote++;
-							indent = true;
-						}
-						break;
-					case '}':
-						if (str == null)
-							str = new StringBuilder();
-						if (!quote) {
-							brquote--;
-						} else if (brquote == 0 && !quote)
-							indent = false;
 
-						if (brquote != 0)
-							str.append(character);
-						break;
-					case '[':
-						if (str == null)
-							str = new StringBuilder();
+				StringBuilder txt = null;
 
-						str.append(character);
-						if (brquote == 0 && !quote) {
-							arrayc++;
+				for (String line : lines) {
+					if (indent) {
+						for (int i = 0; i < 4; i++) {
+							if (!line.startsWith(" "))
+								break;
+							line = line.substring(4);
 						}
-						break;
-					case ']':
-						if (str == null)
-							str = new StringBuilder();
-						if (brquote == 0 && !quote && arrayc != 0) {
-							arrayc--;
-						}
-						if (arrayc != 0 || brquote != 0 || quote)
-							str.append(character);
-						break;
-					case '\n':
-						if (indent) {
-							for (int i = 0; i < 4; i++) {
-								if (characterNum + 1 < input.length() && input.charAt(characterNum + 1) == ' ')
-									characterNum++;
+					}
+					boolean escape = false;
+					for (int chNum = 0; chNum < line.length(); chNum++) {
+						char ch = line.charAt(chNum);
+						if (!escape) {
+							switch (ch) {
+							case '\\':
+								if ((!quote || chNum + 1 < line.length() && line.charAt(chNum + 1) == '\'')
+										&& array == 0) {
+									escape = true;
+								}
+								if (txt == null)
+									txt = new StringBuilder();
+								txt.append(ch);
+								break;
+							case '\'':
+								if (array == 0) {
+									quote = !quote;
+									if (brquote != 0) {
+										if (txt == null)
+											txt = new StringBuilder();
+										txt.append(ch);
+									}
+								} else {
+									if (txt == null)
+										txt = new StringBuilder();
+									txt.append(ch);
+								}
+								break;
+							case '{':
+								if (!quote && array == 0) {
+									brquote++;
+									indent = true;
+								} else {
+									if (txt == null)
+										txt = new StringBuilder();
+									txt.append(ch);
+								}
+								break;
+							case '}':
+								if (!quote && array == 0) {
+									brquote--;
+								}
+								if (brquote != 0 || quote || array != 0) {
+									if (txt == null)
+										txt = new StringBuilder();
+									txt.append(ch);
+								} else
+									indent = false;
+								break;
+							case '[':
+								if (array != 0 || quote || brquote != 0) {
+									if (txt == null)
+										txt = new StringBuilder();
+									txt.append(ch);
+								}
+								if (brquote == 0 && !quote) {
+									array++;
+								}
+								break;
+							case ']':
+								if (brquote == 0 && !quote && array != 0) {
+									array--;
+								}
+								if (array != 0 || quote || brquote != 0) {
+									if (txt == null)
+										txt = new StringBuilder();
+									txt.append(ch);
+								}
+								break;
+							case ' ':
+								if (brquote == 0 && !quote && array == 0) {
+									if (txt != null) {
+										inputLst.add(txt.toString());
+										txt = null;
+										quote = false;
+									}
+								} else {
+									if (txt == null)
+										txt = new StringBuilder();
+									txt.append(ch);
+								}
+								break;
+							default:
+								if (txt == null)
+									txt = new StringBuilder();
+								txt.append(ch);
 							}
+						} else {
+							txt.append(ch);
+							escape = false;
 						}
-						str.append(System.lineSeparator());
-						break;
-					default:
-						if (str == null)
-							str = new StringBuilder();
-						str.append(character);
-						escape = false;
 					}
 				}
-				if (str != null && str.length() != 0)
-					inputLst.add(str.toString());
 
-				Object array = Array.newInstance(cls.getComponentType(), inputLst.size());
+				if (txt != null && txt.length() != 0)
+					inputLst.add(txt.toString());
+
+				Object data = Array.newInstance(cls.getComponentType(), inputLst.size());
 				int i = 0;
 				for (String itm : inputLst)
-					Array.set(array, i++, deserialize(itm, cls.getComponentType()));
+					Array.set(data, i++, deserialize(itm, cls.getComponentType()));
 
-				return (T) array;
+				return (T) data;
 			}
 			throw new IOException("Unsupported object");
 		}
@@ -403,7 +422,7 @@ public class ObjectSerializer {
 			output = output.replace("\\'", "\\\\\\'");
 			output = output.replaceAll("([^\\\\])'", "$1\\\\'");
 			output = output.replaceAll("''", "'\\\\'");
-			
+
 			if (output.startsWith("'"))
 				output = "\\" + output;
 			if (output.endsWith("\\"))
@@ -543,6 +562,7 @@ public class ObjectSerializer {
 	 * @param action  Action
 	 */
 	public static void parse(String content, CCFGPutPropAction action) {
+		content = content.replace("\t", "    ");
 		content = Replacer.removeChar(content, '\r');
 		String[] lines = Splitter.split(content, '\n');
 		boolean indent = false;
