@@ -158,13 +158,9 @@ public class ObjectSerializer {
 			input = input.replaceAll("\\\\t", "\\t");
 			input = input.replaceAll("([^\\\\])\\\\f", "$1\f");
 			input = input.replaceAll("\\\\f", "\\f");
-			input = input.replaceAll("([^\\\\])\\\\f", "$1\f");
-			input = input.replaceAll("\\\\f", "\\f");
-
-			input = input.replaceAll("([^\\\\])\\\\'", "$1'");
-			input = input.replaceAll("\\\\'", "\\'");
 
 			input = input.replace("\\\\", "\\");
+			input = input.replaceAll("\\\\'", "\\'");
 
 			int index = 0;
 			for (String ch : escapeCharSequences) {
@@ -402,10 +398,16 @@ public class ObjectSerializer {
 		case "java.lang.String":
 			String output = input.toString();
 
-			output = output.replace("\\", "\\\\");
+			output = output.replaceAll("\\\\([^rbft'012])", "\\\\$0");
 
-			output = output.replace("\\'", "\\\\'");
-			output = output.replaceAll("([^\\\\])?'", "$1\\\\'");
+			output = output.replace("\\'", "\\\\\\'");
+			output = output.replaceAll("([^\\\\])'", "$1\\\\'");
+			output = output.replaceAll("''", "'\\\\'");
+			
+			if (output.startsWith("'"))
+				output = "\\" + output;
+			if (output.endsWith("\\"))
+				output += "\\";
 
 			int index = 0;
 			for (String ch : escapeChars) {
@@ -420,7 +422,7 @@ public class ObjectSerializer {
 			output = output.replace("\t", "\\t");
 			output = output.replace("\\f", "\\\\f");
 			output = output.replace("\f", "\\f");
-			
+
 			return output;
 		case "java.net.URL":
 			return input.toString();
@@ -588,14 +590,11 @@ public class ObjectSerializer {
 						txt = new StringBuilder();
 					switch (ch) {
 					case '\\':
-						if (brquote == 0 && (!quote || chNum + 1 < line.length() && line.charAt(chNum + 1) == '\'')
-								&& array == 0) {
+						if ((!quote || chNum + 1 < line.length()
+								&& (line.charAt(chNum + 1) == '\'' || line.charAt(chNum + 1) == '\\')) && array == 0) {
 							escape = true;
 						}
 						txt.append(ch);
-						if (brquote != 0 && quote && chNum + 1 < line.length() && line.charAt(chNum + 1) == '\'') {
-							quote = !quote;
-						}
 						break;
 					case '\'':
 						if (array == 0) {
@@ -621,7 +620,6 @@ public class ObjectSerializer {
 							txt.append(ch);
 						else
 							indent = false;
-
 						break;
 					case '[':
 						if (array != 0 || quote || brquote != 0)
