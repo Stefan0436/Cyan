@@ -159,13 +159,17 @@ public class ObjectSerializer {
 			input = input.replaceAll("([^\\\\])\\\\f", "$1\f");
 			input = input.replaceAll("\\\\f", "\\f");
 
-			input = input.replace("\\\\", "\\");
-			input = input.replace("\\'", "'");
-
 			int index = 0;
 			for (String ch : escapeCharSequences) {
-				input = input.replace("\\" + ch, escapeChars[index++]);
+				String chr = escapeChars[index++];
+				if (input.startsWith("\\" + ch))
+					input = input.substring(("\\" + ch).length()) + chr;
+				input = input.replaceAll("([^\\\\])\\\\" + ch, "$1" + chr);
+				input = input.replace("\\\\" + ch, "\\" + ch);
 			}
+
+			input = input.replace("\\\\", "\\");
+			input = input.replace("\\'", "'");
 
 			return (T) input;
 		case "java.net.URL":
@@ -428,11 +432,6 @@ public class ObjectSerializer {
 			if (output.endsWith("\\"))
 				output += "\\";
 
-			int index = 0;
-			for (String ch : escapeChars) {
-				output = output.replace(ch, "\\" + escapeCharSequences[index++]);
-			}
-
 			output = output.replace("\\r", "\\\\r");
 			output = output.replace("\r", "\\r");
 			output = output.replace("\\b", "\\\\b");
@@ -441,6 +440,13 @@ public class ObjectSerializer {
 			output = output.replace("\t", "\\t");
 			output = output.replace("\\f", "\\\\f");
 			output = output.replace("\f", "\\f");
+
+			int index = 0;
+			for (String ch : escapeChars) {
+				String seq = escapeCharSequences[index++];
+				output = output.replace("\\" + seq, "\\\\" + seq);
+				output = output.replace(ch, "\\" + seq);
+			}
 
 			return output;
 		case "java.net.URL":

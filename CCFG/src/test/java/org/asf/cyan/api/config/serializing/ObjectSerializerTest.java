@@ -83,7 +83,19 @@ public class ObjectSerializerTest {
 	public void serializeText() throws Exception {
 		String val = genText(Integer.MAX_VALUE / 5000);
 		String serialized = ObjectSerializer.serialize(val);
-		assertTrue(ObjectSerializer.deserialize(serialized, String.class).equals(val));
+		String deserialized = ObjectSerializer.deserialize(serialized, String.class);
+		if (!deserialized.equals(val)) {
+			System.err.println("Failure:\n" + val + "\nshould be equal to:\n" + deserialized);
+			int i = 0;
+			for (char ch : val.toCharArray()) {
+				char ch2 = deserialized.charAt(i++);
+				if (ch != ch2) {
+					System.err.println((int) ch2 + " was not " + (int) ch);
+					break;
+				}
+			}
+		}
+		assertTrue(deserialized.equals(val));
 	}
 
 	// Serializing maps needs to be done with field reflection, else it doesn't work
