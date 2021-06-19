@@ -260,7 +260,7 @@ public class ObjectSerializer {
 						for (int i = 0; i < 4; i++) {
 							if (!line.startsWith(" "))
 								break;
-							line = line.substring(4);
+							line = line.substring(1);
 						}
 					}
 					boolean escape = false;
@@ -296,13 +296,15 @@ public class ObjectSerializer {
 									brquote++;
 									indent = true;
 								} else {
+									if (array != 0)
+										brquote++;
 									if (txt == null)
 										txt = new StringBuilder();
 									txt.append(ch);
 								}
 								break;
 							case '}':
-								if (!quote && array == 0) {
+								if (!quote) {
 									brquote--;
 								}
 								if (brquote != 0 || quote || array != 0) {

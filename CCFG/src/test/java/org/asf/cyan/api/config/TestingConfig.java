@@ -21,6 +21,8 @@ public class TestingConfig extends Configuration<TestingConfig> {
 	public String[] tests = new String[] { "test1", "test2" };
 	public String[] tests2 = new String[] {};
 
+	public TestingConfig[] configs = new TestingConfig[0];
+
 	@Comment(value = "Testing", afterValue = true)
 	@Comment("Testing parameter")
 	public String testStr = "default";
