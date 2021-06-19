@@ -10,6 +10,8 @@ import org.asf.cyan.fluid.remapping.MAPTYPE;
 import org.asf.cyan.fluid.remapping.Mapping;
 
 class CompatibilityMappings extends VanillaMappings {
+	protected ArrayList<String> ignoredTypes = new ArrayList<String>();
+
 	protected Mapping<?> createMapping(String in, String out, MAPTYPE type, String returnType, String... argumentTypes)
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
@@ -41,6 +43,8 @@ class CompatibilityMappings extends VanillaMappings {
 		MinecraftToolkit.infoLog("Creating compatibility mappings...");
 		ArrayList<Mapping<?>> mappingsLst = new ArrayList<Mapping<?>>();
 		for (Mapping<?> mapping : mappings.mappings) {
+			if (ignoredTypes.contains(mapping.name))
+				continue;
 			Mapping<?> newMapping = mapping;
 			Mapping<?> tmp = combine.mapClassToMapping(newMapping.obfuscated, t -> true, true);
 			if (tmp != null)
@@ -104,7 +108,7 @@ class CompatibilityMappings extends VanillaMappings {
 						missingMappingsLst.add(m.type + " " + mapping.name + "." + m.name + " (" + typeStr
 								+ "), obfuscated: " + mapping.obfuscated + "." + map);
 						missingMappings = missingMappings.add(BigInteger.ONE);
-						
+
 						remap = false;
 					}
 					if (remap || alwaysAllowRemap) {

@@ -44,6 +44,7 @@ public class PaperCompatibilityMappings extends CompatibilityMappings {
 
 			Mapping<?> spigotMappings = MinecraftMappingsToolkit.loadMappings(mappingsId, "spigot", info,
 					GameSide.SERVER);
+			ignoredTypes.add("net.minecraft.network.protocol.status.ServerStatus$Serializer");
 			combine("SPIGOT", mappings, spigotMappings, true);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException | IOException e) {
