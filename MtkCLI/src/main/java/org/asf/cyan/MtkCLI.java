@@ -268,7 +268,7 @@ public class MtkCLI extends CyanComponent {
 		System.err.println(
 				" - manifest <version>                                                                                                               - download game version manifests");
 		System.err.println(
-				" - yggdrasil <authfile>                                                                                                            - authenticate a mojang user");
+				" - yggdrasil <authfile>                                                                                                             - authenticate a mojang user");
 		System.err.println(
 				" - runclient <version> <gamedir> <authfile>                                                                                         - runs the client");
 		System.err.println();
