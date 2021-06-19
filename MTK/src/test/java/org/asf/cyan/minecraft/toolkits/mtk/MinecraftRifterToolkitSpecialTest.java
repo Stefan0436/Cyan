@@ -239,17 +239,19 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 			MinecraftMappingsToolkit.saveMappingsToDisk(info, GameSide.SERVER);
 		}
 
+		String mappingsVersion = MinecraftMappingsToolkit.getLatestSpigotMappings(info);
+		String mappingsId = "-" + mappingsVersion.replaceAll("[!?/:\\\\]", "-") + "-mtktest";
 		Mapping<?> vanilla = MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER);
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-mtktest", "spigot", info, GameSide.SERVER)) {
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "spigot", info, GameSide.SERVER)) {
 			MinecraftMappingsToolkit.downloadSpigotMappings(vanilla, info,
 					MinecraftMappingsToolkit.getLatestSpigotMappings(info));
-			MinecraftMappingsToolkit.saveMappingsToDisk("-mtktest", "spigot", info, GameSide.SERVER);
+			MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "spigot", info, GameSide.SERVER);
 		}
 
-		MinecraftMappingsToolkit.loadMappings("-mtktest", "spigot", info, GameSide.SERVER);
+		MinecraftMappingsToolkit.loadMappings(mappingsId, "spigot", info, GameSide.SERVER);
 		MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER);
 		SimpleMappings riftServer = (SimpleMappings) MinecraftRifterToolkit.generateCyanPaperRiftTargets(info,
-				"mtktest", MinecraftMappingsToolkit.getLatestSpigotMappings(info));
+				"mtktest", mappingsVersion);
 		testMappings(null, null, riftServer, MinecraftRifterToolkit.getPaperServerMappings());
 	}
 
