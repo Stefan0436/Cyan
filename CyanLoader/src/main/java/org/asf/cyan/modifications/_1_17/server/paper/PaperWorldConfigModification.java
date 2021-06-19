@@ -22,7 +22,7 @@ public abstract class PaperWorldConfigModification {
 	public Map<Object, Integer> entityPerChunkSaveLimits = null;
 
 	@Erase
-	public void lambda$entityPerChunkSaveLimits$2(
+	public void lambda$entityPerChunkSaveLimits$1(
 			@TargetType(target = "net.minecraft.resources.ResourceLocation") ResourceLocationMock entity) {
 		EntityTypeMock<?> type = (EntityTypeMock<?>) EntityTypeMock.byString(entity.toString())
 				.orElseThrow(new CyanErrorSupplier(entity.toString()));
