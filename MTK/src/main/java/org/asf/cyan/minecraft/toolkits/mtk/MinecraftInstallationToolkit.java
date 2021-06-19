@@ -416,101 +416,103 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		Gson gson = new Gson();
 		recurseInheritsFrom(manifest, manifest, gson);
 
-		for (JsonElement element : manifest.get("arguments").getAsJsonObject().get("jvm").getAsJsonArray()) {
-			if (element.isJsonPrimitive()) {
-				debug("Adding argument: " + element.getAsString());
-				arguments.add(element.getAsString());
-			} else {
-				JsonObject obj = element.getAsJsonObject();
-				String[] values = new String[0];
-				if (obj.has("value")) {
-					JsonElement e = obj.get("value");
-					if (e.isJsonArray()) {
-						values = new String[e.getAsJsonArray().size()];
-						int i = 0;
-						for (JsonElement e2 : e.getAsJsonArray()) {
-							values[i++] = e2.getAsString();
-						}
-					} else if (e.isJsonPrimitive())
-						values = new String[] { e.getAsString() };
-				}
-				boolean allow = true;
-				if (obj.has("rules")) {
-					for (JsonElement r : obj.get("rules").getAsJsonArray()) {
-						JsonObject rule = r.getAsJsonObject();
-						Map<?, ?> rules = gson.fromJson(rule, Map.class);
-						allow = evaluate(rules, keys, gson, null, "allow");
+		if (manifest.has("arguments")) {
+			for (JsonElement element : manifest.get("arguments").getAsJsonObject().get("jvm").getAsJsonArray()) {
+				if (element.isJsonPrimitive()) {
+					debug("Adding argument: " + element.getAsString());
+					arguments.add(element.getAsString());
+				} else {
+					JsonObject obj = element.getAsJsonObject();
+					String[] values = new String[0];
+					if (obj.has("value")) {
+						JsonElement e = obj.get("value");
+						if (e.isJsonArray()) {
+							values = new String[e.getAsJsonArray().size()];
+							int i = 0;
+							for (JsonElement e2 : e.getAsJsonArray()) {
+								values[i++] = e2.getAsString();
+							}
+						} else if (e.isJsonPrimitive())
+							values = new String[] { e.getAsString() };
 					}
-				}
-				if (allow) {
-					for (String str : values) {
-						arguments.add(str);
+					boolean allow = true;
+					if (obj.has("rules")) {
+						for (JsonElement r : obj.get("rules").getAsJsonArray()) {
+							JsonObject rule = r.getAsJsonObject();
+							Map<?, ?> rules = gson.fromJson(rule, Map.class);
+							allow = evaluate(rules, keys, gson, null, "allow");
+						}
+					}
+					if (allow) {
+						for (String str : values) {
+							arguments.add(str);
+						}
 					}
 				}
 			}
-		}
 
-		if (manifest.has("logging")) {
-			if (manifest.get("logging").getAsJsonObject().has("client")) {
-				JsonObject logInfo = manifest.get("logging").getAsJsonObject().get("client").getAsJsonObject();
-				debug("Loading logging information...");
-				String path = null;
-				String argument = "-Dlog4j.configurationFile=${path}";
-				if (logInfo.has("argument")) {
-					argument = logInfo.get("argument").getAsString();
-				}
-				String mode = "log4j2-xml";
-				if (logInfo.has("type")) {
-					mode = logInfo.get("type").getAsString();
-				}
-
-				JsonObject fileInfo = null;
-				if (logInfo.has("file")) {
-					fileInfo = logInfo.get("file").getAsJsonObject();
-					String sha1 = fileInfo.get("sha1").getAsString();
-					String url = fileInfo.get("url").getAsString();
-					long size = fileInfo.get("size").getAsLong();
-
-					File logFile = new File(MinecraftInstallationToolkit.getMinecraftDirectory(),
-							"caches/assets/logging/" + fileInfo.get("id").getAsString());
-
-					if (!logFile.getParentFile().exists()) {
-						logFile.getParentFile().mkdirs();
+			if (manifest.has("logging")) {
+				if (manifest.get("logging").getAsJsonObject().has("client")) {
+					JsonObject logInfo = manifest.get("logging").getAsJsonObject().get("client").getAsJsonObject();
+					debug("Loading logging information...");
+					String path = null;
+					String argument = "-Dlog4j.configurationFile=${path}";
+					if (logInfo.has("argument")) {
+						argument = logInfo.get("argument").getAsString();
+					}
+					String mode = "log4j2-xml";
+					if (logInfo.has("type")) {
+						mode = logInfo.get("type").getAsString();
 					}
 
-					try {
-						if (logFile.exists() && !sha1HEX(Files.readAllBytes(logFile.toPath())).equals(sha1)) {
+					JsonObject fileInfo = null;
+					if (logInfo.has("file")) {
+						fileInfo = logInfo.get("file").getAsJsonObject();
+						String sha1 = fileInfo.get("sha1").getAsString();
+						String url = fileInfo.get("url").getAsString();
+						long size = fileInfo.get("size").getAsLong();
+
+						File logFile = new File(MinecraftInstallationToolkit.getMinecraftDirectory(),
+								"caches/assets/logging/" + fileInfo.get("id").getAsString());
+
+						if (!logFile.getParentFile().exists()) {
+							logFile.getParentFile().mkdirs();
+						}
+
+						try {
+							if (logFile.exists() && !sha1HEX(Files.readAllBytes(logFile.toPath())).equals(sha1)) {
+								logFile.delete();
+							}
+						} catch (NoSuchAlgorithmException | IOException e) {
 							logFile.delete();
 						}
-					} catch (NoSuchAlgorithmException | IOException e) {
-						logFile.delete();
-					}
-					if (!logFile.exists()) {
-						if (!url.equals("")) {
-							info("Downloading logging context...");
-							try {
-								MinecraftInstallationToolkit.Download(logFile, new URL(url), size, sha1, false, false,
-										true, true);
-							} catch (NoSuchAlgorithmException e) {
+						if (!logFile.exists()) {
+							if (!url.equals("")) {
+								info("Downloading logging context...");
+								try {
+									MinecraftInstallationToolkit.Download(logFile, new URL(url), size, sha1, false,
+											false, true, true);
+								} catch (NoSuchAlgorithmException e) {
+								}
 							}
 						}
+
+						if (logFile.exists())
+							path = logFile.getCanonicalPath();
 					}
 
-					if (logFile.exists())
-						path = logFile.getCanonicalPath();
-				}
+					if (mode.equals("log4j2-xml") || mode.equals("log4j-xml") || fileInfo == null || path == null) {
+						path = MinecraftInstallationToolkit.class
+								.getResource("/log4j2" + (ide ? "-ide" : "-game") + ".xml").toString();
+					}
 
-				if (mode.equals("log4j2-xml") || mode.equals("log4j-xml") || fileInfo == null || path == null) {
-					path = MinecraftInstallationToolkit.class.getResource("/log4j2" + (ide ? "-ide" : "-game") + ".xml")
-							.toString();
-				}
+					if (logConf != null) {
+						path = logConf;
+					}
 
-				if (logConf != null) {
-					path = logConf;
+					argument = argument.replace("${path}", path);
+					arguments.add(argument);
 				}
-
-				argument = argument.replace("${path}", path);
-				arguments.add(argument);
 			}
 		}
 
@@ -678,37 +680,43 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		Gson gson = new Gson();
 		recurseInheritsFrom(manifest, manifest, gson);
 
-		for (JsonElement element : manifest.get("arguments").getAsJsonObject().get("game").getAsJsonArray()) {
-			if (element.isJsonPrimitive()) {
-				debug("Adding argument: " + element.getAsString());
-				arguments.add(element.getAsString());
-			} else {
-				JsonObject obj = element.getAsJsonObject();
-				String[] values = new String[0];
-				if (obj.has("value")) {
-					JsonElement e = obj.get("value");
-					if (e.isJsonArray()) {
-						values = new String[e.getAsJsonArray().size()];
-						int i = 0;
-						for (JsonElement e2 : e.getAsJsonArray()) {
-							values[i++] = e2.getAsString();
+		if (manifest.has("arguments")) {
+			for (JsonElement element : manifest.get("arguments").getAsJsonObject().get("game").getAsJsonArray()) {
+				if (element.isJsonPrimitive()) {
+					debug("Adding argument: " + element.getAsString());
+					arguments.add(element.getAsString());
+				} else {
+					JsonObject obj = element.getAsJsonObject();
+					String[] values = new String[0];
+					if (obj.has("value")) {
+						JsonElement e = obj.get("value");
+						if (e.isJsonArray()) {
+							values = new String[e.getAsJsonArray().size()];
+							int i = 0;
+							for (JsonElement e2 : e.getAsJsonArray()) {
+								values[i++] = e2.getAsString();
+							}
+						} else if (e.isJsonPrimitive())
+							values = new String[] { e.getAsString() };
+					}
+					boolean allow = true;
+					if (obj.has("rules")) {
+						for (JsonElement r : obj.get("rules").getAsJsonArray()) {
+							JsonObject rule = r.getAsJsonObject();
+							Map<?, ?> rules = gson.fromJson(rule, Map.class);
+							allow = evaluate(rules, keys, gson, null, "allow");
 						}
-					} else if (e.isJsonPrimitive())
-						values = new String[] { e.getAsString() };
-				}
-				boolean allow = true;
-				if (obj.has("rules")) {
-					for (JsonElement r : obj.get("rules").getAsJsonArray()) {
-						JsonObject rule = r.getAsJsonObject();
-						Map<?, ?> rules = gson.fromJson(rule, Map.class);
-						allow = evaluate(rules, keys, gson, null, "allow");
+					}
+					if (allow) {
+						for (String str : values) {
+							arguments.add(str);
+						}
 					}
 				}
-				if (allow) {
-					for (String str : values) {
-						arguments.add(str);
-					}
-				}
+			}
+		} else {
+			for (String element : parseCommand(manifest.get("minecraftArguments").getAsString())) {
+				arguments.add(element);
 			}
 		}
 
@@ -730,6 +738,35 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		}
 
 		return args;
+	}
+
+	private static ArrayList<String> parseCommand(String args) {
+		ArrayList<String> args3 = new ArrayList<String>();
+		char[] argarray = args.toCharArray();
+		boolean ignorespaces = false;
+		String last = "";
+		int i = 0;
+		for (char c : args.toCharArray()) {
+			if (c == '"' && (i == 0 || argarray[i - 1] != '\\')) {
+				if (ignorespaces)
+					ignorespaces = false;
+				else
+					ignorespaces = true;
+			} else if (c == ' ' && !ignorespaces && (i == 0 || argarray[i - 1] != '\\')) {
+				args3.add(last);
+				last = "";
+			} else if (c != '\\' || (i + 1 < argarray.length && argarray[i + 1] != '"'
+					&& (argarray[i + 1] != ' ' || ignorespaces))) {
+				last += c;
+			}
+
+			i++;
+		}
+
+		if (last == "" == false)
+			args3.add(last);
+
+		return args3;
 	}
 
 	/**
