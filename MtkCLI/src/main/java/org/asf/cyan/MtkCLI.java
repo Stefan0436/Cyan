@@ -3,6 +3,7 @@ package org.asf.cyan;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import org.apache.logging.log4j.Level;
@@ -152,8 +153,33 @@ public class MtkCLI extends CyanComponent {
 				AuthenticationInfo account = AuthenticationInfo.create(authdata[0], authdata[1], authdata[2],
 						UUID.fromString(authdata[3]), MinecraftAccountType.valueOf(authdata[4]));
 				MinecraftInstallationToolkit.extractNatives(MinecraftVersionToolkit.getVersion(version));
+				File gameDir = new File(args[2]);
+				String last = null;
+				if (new File(gameDir, "properties.txt").exists()) {
+					for (String argument : Files.readAllLines(new File(gameDir, "properties.txt").toPath())) {
+						if (!argument.isEmpty() && !argument.startsWith("#")) {
+							if (last != null) {
+								MinecraftInstallationToolkit.putVariable(last, argument);
+								last = null;
+							} else
+								last = argument;
+						}
+					}
+				}
+				ArrayList<String> jvm = new ArrayList<String>();
+				for (String arg : MinecraftInstallationToolkit
+						.generateJvmArguments(MinecraftVersionToolkit.getVersion(version)))
+					jvm.add(arg);
+				if (new File(gameDir, "args.txt").exists()) {
+					for (String argument : Files.readAllLines(new File(gameDir, "args.txt").toPath())) {
+						if (!argument.isEmpty() && !argument.startsWith("#")) {
+							jvm.add(argument);
+						}
+					}
+				}
 				System.exit(MinecraftInstallationToolkit.launchInstallation(MinecraftVersionToolkit.getVersion(version),
-						new File(args[2]), account));
+						gameDir, jvm.toArray(t -> new String[t]), MinecraftInstallationToolkit
+								.generateGameArguments(MinecraftVersionToolkit.getVersion(version), account, gameDir)));
 				return;
 			} else if (args[0].equals("yggdrasil") && args.length >= 2) {
 				String username = null;
