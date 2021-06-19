@@ -72,7 +72,7 @@ public class ObjectSerializerTest {
 		String val = "";
 		for (int i = 0; i < length; i++) {
 			int chr = rnd.nextInt(127);
-			while (chr < 32)
+			while (chr < 32 || Character.isISOControl(chr))
 				chr = rnd.nextInt(127);
 			val += (char) chr;
 		}
@@ -131,7 +131,7 @@ public class ObjectSerializerTest {
 
 	@Test
 	public void testCharacterEscaping() throws IOException {
-		String test1 = "'\000\001hi\r\nhi\nhello\r''\\'test\\'\\r\\\\r\'test2\'\\rtest\ttabs\\";
+		String test1 = "'\000\001hi\r\nhi\nhello\r''\\'test\\'\\r\\\\r\'test2\'\\rtest\\0\ttabs\\";
 		String out1 = ObjectSerializer.serialize(test1);
 		System.out.println(out1);
 		String out2 = ObjectSerializer.deserialize(out1, String.class);

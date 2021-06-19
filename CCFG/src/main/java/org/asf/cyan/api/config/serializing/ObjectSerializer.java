@@ -421,7 +421,16 @@ public class ObjectSerializer {
 		case "java.lang.String":
 			String output = input.toString();
 
-			output = output.replaceAll("\\\\([^rbft'012])", "\\\\$0");
+			int index = 0;
+			for (String ch : escapeChars) {
+				String seq = escapeCharSequences[index++];
+				output = output.replace("\\" + seq, "\\\\" + seq);
+				output = output.replace(ch, "\\" + seq);
+			}
+
+			output = output.replaceAll("\\\\([^rbft012'])", "\\\\$0");
+			output = output.replaceAll("\\\\([012][^0-9][^0-9])", "\\\\$0");
+			output = output.replaceAll("\\\\([012][0-9][^0-9])", "\\\\$0");
 
 			output = output.replace("\\'", "\\\\\\'");
 			output = output.replaceAll("([^\\\\])'", "$1\\\\'");
@@ -440,13 +449,6 @@ public class ObjectSerializer {
 			output = output.replace("\t", "\\t");
 			output = output.replace("\\f", "\\\\f");
 			output = output.replace("\f", "\\f");
-
-			int index = 0;
-			for (String ch : escapeChars) {
-				String seq = escapeCharSequences[index++];
-				output = output.replace("\\" + seq, "\\\\" + seq);
-				output = output.replace(ch, "\\" + seq);
-			}
 
 			return output;
 		case "java.net.URL":

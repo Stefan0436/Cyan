@@ -24,7 +24,7 @@ public class ConfigurationTest {
 		String val = "";
 		for (int i = 0; i < length; i++) {
 			int chr = rnd.nextInt(127);
-			while (chr < 32)
+			while (chr < 32 || Character.isISOControl(chr))
 				chr = rnd.nextInt(127);
 			val += (char) chr;
 		}
