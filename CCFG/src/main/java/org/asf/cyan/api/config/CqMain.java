@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -138,17 +137,7 @@ public class CqMain {
 			URLClassLoader clloader = new URLClassLoader(urls.toArray(t -> new URL[t]), CqMain.class.getClassLoader());
 			Class<?> ccfgcls = Class.forName(cls, true, clloader);
 
-			Configuration<?> ccfg;
-			try {
-				Method mth = ccfgcls.getDeclaredMethod("instantiateFromSerialzer", Class.class);
-				mth.setAccessible(true);
-				ccfg = (Configuration<?>) mth.invoke(null, (Class<? extends Configuration>) ccfgcls);
-			} catch (Exception e) {
-				ccfg = Configuration.instanciateFromSerializer((Class<? extends Configuration>) ccfgcls);
-			}
-
-			ccfg = ccfg.readAll(input);
-
+			Configuration<?> ccfg = ObjectSerializer.deserialize(input, (Class<? extends Configuration>) ccfgcls);
 			boolean getSelf = false;
 			if (path.equals(".")) {
 				getSelf = true;
