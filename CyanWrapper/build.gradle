@@ -2469,16 +2469,15 @@ task serverJar (type: Jar, dependsOn: build) {
 	includeEmptyDirs = false
 	outputs.upToDateWhen { return false; }
 	
-	if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
-	
 	if (!modloader.isEmpty() && modloader.startsWith("paper-")) {
 		def paperversion = modloader.substring("paper-".length())
 		if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
 		cyanclasspath+="paper-server-${paperversion}.jar"
 		cyanclasspath+=" cache/patched_${minecraft}.jar"
-	} else {
-		cyanclasspath+="vanilla-server.jar"
-  	}
+	}
+	
+	if (!cyanclasspath.isEmpty()) cyanclasspath+=" "
+	cyanclasspath+=" vanilla-server.jar"
 
 
 	from sourceSets.main.output
@@ -2655,14 +2654,13 @@ task serverJar (type: Jar, dependsOn: build) {
 				classpath new File(dest, "paper-server-${paperversion}.jar")
 				jvmArgs '-Dpaperclip.patchonly=true'
 			}
-		} else {
-  			println " |"
-			println " | Downloading vanilla server..."
-			File server = org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit.downloadVersionJar(org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit.getVersion(minecraft), org.asf.cyan.api.modloader.information.game.GameSide.SERVER)
-			if (new File(dest, "vanilla-server.jar").exists()) new File(dest, "vanilla-server.jar").delete()
-			println " +-- Installing vanilla server..."
-			Files.copy(server.toPath(), new File(dest, "vanilla-server.jar").toPath())
 		}
+		println " |"
+		println " | Downloading vanilla server..."
+		File server = org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit.downloadVersionJar(org.asf.cyan.minecraft.toolkits.mtk.MinecraftVersionToolkit.getVersion(minecraft), org.asf.cyan.api.modloader.information.game.GameSide.SERVER)
+		if (new File(dest, "vanilla-server.jar").exists()) new File(dest, "vanilla-server.jar").delete()
+		println " +-- Installing vanilla server..."
+		Files.copy(server.toPath(), new File(dest, "vanilla-server.jar").toPath())
 		println " +-- Server build completed."
 	}
 }
