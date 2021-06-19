@@ -10,7 +10,7 @@ import org.asf.cyan.fluid.api.transforming.LocalVariable;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.TargetType;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
-import org.asf.cyan.api.fluid.annotations.PlatformExclude;
+import org.asf.cyan.api.fluid.annotations.PlatformOnly;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 
 import com.google.gson.JsonDeserializationContext;
@@ -22,20 +22,19 @@ import modkit.protocol.transformers.handshake.VersionStatusTransformer;
 import net.minecraft.network.protocol.status.ServerStatus;
 
 @FluidTransformer
-@PlatformExclude(LaunchPlatform.SPIGOT)
+@PlatformOnly(LaunchPlatform.SPIGOT)
 @TargetClass(target = "net.minecraft.network.protocol.status.ServerStatus$Serializer")
-public class ServerStatusSerializerModification {
+public class ServerStatusSerializerModification_Spigot {
 
 	@InjectAt(location = InjectLocation.TAIL)
 	@TargetType(target = "com.google.gson.JsonElement")
-	public void serialize(@TargetType(target = "net.minecraft.network.protocol.status.ServerStatus") ServerStatus var1,
-			Type var2, JsonSerializationContext var3, @LocalVariable JsonObject data) {
+	public void serialize(Object var1, Type var2, JsonSerializationContext var3, @LocalVariable JsonObject data) {
 		if (Modloader.getModloader(CyanLoader.class).isRootModloader())
 			VersionStatusTransformer.applySerializeMethodTransformer(data);
 	}
 
 	@InjectAt(location = InjectLocation.TAIL)
-	@TargetType(target = "net.minecraft.network.protocol.status.ServerStatus")
+	@TargetType(target = "java.lang.Object")
 	public void deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3,
 			@LocalVariable JsonObject data,
 			@LocalVariable @TargetType(target = "net.minecraft.network.protocol.status.ServerStatus") ServerStatus output) {

@@ -10,6 +10,8 @@ import org.asf.cyan.fluid.api.transforming.LocalVariable;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.TargetType;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
+import org.asf.cyan.api.fluid.annotations.PlatformExclude;
+import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
@@ -20,6 +22,7 @@ import modkit.protocol.transformers.handshake.VersionStatusTransformer;
 import net.minecraft.network.protocol.status.ServerStatus;
 
 @FluidTransformer
+@PlatformExclude(LaunchPlatform.SPIGOT)
 @TargetClass(target = "net.minecraft.network.protocol.status.ServerStatus$Serializer")
 public class ServerStatusSerializerModification {
 
