@@ -70,6 +70,10 @@ public class BackupServerUtil extends CyanComponent implements LevelModDataReade
 					if (GraphicsEnvironment.isHeadless()) {
 						warn("");
 						warn("");
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e1) {
+						}
 						System.out.print("Do you want to create a backup? [Y/n/c] ");
 
 						@SuppressWarnings("resource")

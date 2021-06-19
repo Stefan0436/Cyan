@@ -70,6 +70,10 @@ public class BackupServerUtil extends CyanComponent implements LevelModDataReade
 					if (GraphicsEnvironment.isHeadless()) {
 						warn("");
 						warn("");
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e1) {
+						}
 						System.out.print("Do you want to create a backup? [Y/n/c] ");
 
 						@SuppressWarnings("resource")
@@ -126,6 +130,7 @@ public class BackupServerUtil extends CyanComponent implements LevelModDataReade
 		zip.close();
 		fos.close();
 		backupOverride = true;
+		hadPrompted = true;
 	}
 
 	private static void zipFiles(File dir, String pref, ZipOutputStream zip) throws IOException {
@@ -149,6 +154,7 @@ public class BackupServerUtil extends CyanComponent implements LevelModDataReade
 	public static void cancelStartup() {
 		warn("Server startup cancelled.");
 		System.exit(0);
+		hadPrompted = true;
 	}
 
 	@Override
