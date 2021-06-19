@@ -450,69 +450,72 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 					}
 				}
 			}
+		} else {
+			arguments.add("-cp");
+			arguments.add("${classpath}");
+		}
 
-			if (manifest.has("logging")) {
-				if (manifest.get("logging").getAsJsonObject().has("client")) {
-					JsonObject logInfo = manifest.get("logging").getAsJsonObject().get("client").getAsJsonObject();
-					debug("Loading logging information...");
-					String path = null;
-					String argument = "-Dlog4j.configurationFile=${path}";
-					if (logInfo.has("argument")) {
-						argument = logInfo.get("argument").getAsString();
+		if (manifest.has("logging")) {
+			if (manifest.get("logging").getAsJsonObject().has("client")) {
+				JsonObject logInfo = manifest.get("logging").getAsJsonObject().get("client").getAsJsonObject();
+				debug("Loading logging information...");
+				String path = null;
+				String argument = "-Dlog4j.configurationFile=${path}";
+				if (logInfo.has("argument")) {
+					argument = logInfo.get("argument").getAsString();
+				}
+				String mode = "log4j2-xml";
+				if (logInfo.has("type")) {
+					mode = logInfo.get("type").getAsString();
+				}
+
+				JsonObject fileInfo = null;
+				if (logInfo.has("file")) {
+					fileInfo = logInfo.get("file").getAsJsonObject();
+					String sha1 = fileInfo.get("sha1").getAsString();
+					String url = fileInfo.get("url").getAsString();
+					long size = fileInfo.get("size").getAsLong();
+
+					File logFile = new File(MinecraftInstallationToolkit.getMinecraftDirectory(),
+							"caches/assets/logging/" + fileInfo.get("id").getAsString());
+
+					if (!logFile.getParentFile().exists()) {
+						logFile.getParentFile().mkdirs();
 					}
-					String mode = "log4j2-xml";
-					if (logInfo.has("type")) {
-						mode = logInfo.get("type").getAsString();
-					}
 
-					JsonObject fileInfo = null;
-					if (logInfo.has("file")) {
-						fileInfo = logInfo.get("file").getAsJsonObject();
-						String sha1 = fileInfo.get("sha1").getAsString();
-						String url = fileInfo.get("url").getAsString();
-						long size = fileInfo.get("size").getAsLong();
-
-						File logFile = new File(MinecraftInstallationToolkit.getMinecraftDirectory(),
-								"caches/assets/logging/" + fileInfo.get("id").getAsString());
-
-						if (!logFile.getParentFile().exists()) {
-							logFile.getParentFile().mkdirs();
-						}
-
-						try {
-							if (logFile.exists() && !sha1HEX(Files.readAllBytes(logFile.toPath())).equals(sha1)) {
-								logFile.delete();
-							}
-						} catch (NoSuchAlgorithmException | IOException e) {
+					try {
+						if (logFile.exists() && !sha1HEX(Files.readAllBytes(logFile.toPath())).equals(sha1)) {
 							logFile.delete();
 						}
-						if (!logFile.exists()) {
-							if (!url.equals("")) {
-								info("Downloading logging context...");
-								try {
-									MinecraftInstallationToolkit.Download(logFile, new URL(url), size, sha1, false,
-											false, true, true);
-								} catch (NoSuchAlgorithmException e) {
-								}
+					} catch (NoSuchAlgorithmException | IOException e) {
+						logFile.delete();
+					}
+					if (!logFile.exists()) {
+						if (!url.equals("")) {
+							info("Downloading logging context...");
+							try {
+								MinecraftInstallationToolkit.Download(logFile, new URL(url), size, sha1, false, false,
+										true, true);
+							} catch (NoSuchAlgorithmException e) {
 							}
 						}
-
-						if (logFile.exists())
-							path = logFile.getCanonicalPath();
 					}
 
-					if (mode.equals("log4j2-xml") || mode.equals("log4j-xml") || fileInfo == null || path == null) {
-						path = MinecraftInstallationToolkit.class
-								.getResource("/log4j2" + (ide ? "-ide" : "-game") + ".xml").toString();
-					}
-
-					if (logConf != null) {
-						path = logConf;
-					}
-
-					argument = argument.replace("${path}", path);
-					arguments.add(argument);
+					if (logFile.exists())
+						path = logFile.getCanonicalPath();
 				}
+
+				if (mode.equals("log4j2-xml") || mode.equals("log4j-xml") || fileInfo == null || path == null) {
+					path = MinecraftInstallationToolkit.class.getResource("/log4j2" + (ide ? "-ide" : "-game") + ".xml")
+							.toString();
+				}
+
+				if (logConf != null) {
+					path = logConf;
+				}
+
+				argument = argument.replace("${path}", path);
+				arguments.add(argument);
 			}
 		}
 
