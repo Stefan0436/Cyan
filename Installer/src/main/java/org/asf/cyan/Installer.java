@@ -443,7 +443,7 @@ public class Installer extends CyanComponent {
 		lblNewLabel.setVerticalAlignment(SwingConstants.TOP);
 		lblNewLabel.setPreferredSize(new Dimension(200, 18));
 
-		JLabel lblKickstart = new JLabel("KickStart Installer 1.9 ");
+		JLabel lblKickstart = new JLabel("KickStart Installer 1.10 ");
 		panel.add(lblKickstart, BorderLayout.EAST);
 		lblKickstart.setFont(new Font("SansSerif", Font.BOLD, 12));
 		lblKickstart.setHorizontalAlignment(SwingConstants.TRAILING);
@@ -1195,6 +1195,12 @@ public class Installer extends CyanComponent {
 							+ ".jar";
 				}
 			}
+			if (project.loader.equals("paper")) {
+				if (!cp.isEmpty())
+					cp += " ";
+				cp += "paper-server-" + project.loaderVersion + ".jar";
+				cp += " cache/patched_" + project.game + ".jar";
+			}
 			if (!cp.isEmpty())
 				cp += " ";
 			cp += "vanilla-server.jar";
@@ -1238,9 +1244,6 @@ public class Installer extends CyanComponent {
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
 				}
-
-				cp += " paper-server-" + project.loaderVersion + ".jar";
-				cp += " cache/patched_" + project.game + ".jar";
 
 				logger.info("Downloading paper server...");
 				URL u = new URL("https://papermc.io/api/v2/projects/paper/versions/" + project.game + "/builds/"
