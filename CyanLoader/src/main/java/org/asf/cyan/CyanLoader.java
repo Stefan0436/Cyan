@@ -629,7 +629,8 @@ public class CyanLoader extends ModkitModloader
 
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
 		File file = new File(MinecraftInstallationToolkit.getMinecraftDirectory(),
-				"crash-reports/crash-" + dateFormat.format(new Date()) + "-client.txt");
+				"crash-reports/crash-" + dateFormat.format(new Date()) + "-"
+						+ Modloader.getModloaderGameSide().toString().toLowerCase() + ".txt");
 		if (!file.getParentFile().exists())
 			file.getParentFile().mkdirs();
 		try {
