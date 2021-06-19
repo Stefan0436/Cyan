@@ -249,7 +249,7 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 		MinecraftMappingsToolkit.loadMappings("-mtktest", "spigot", info, GameSide.SERVER);
 		MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER);
 		SimpleMappings riftServer = (SimpleMappings) MinecraftRifterToolkit.generateCyanPaperRiftTargets(info,
-				"mtktest", MinecraftMappingsToolkit.getLatestYarnVersion(info));
+				"mtktest", MinecraftMappingsToolkit.getLatestSpigotMappings(info));
 		testMappings(null, null, riftServer, MinecraftRifterToolkit.getPaperServerMappings());
 	}
 

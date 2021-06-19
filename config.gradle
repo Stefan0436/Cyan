@@ -347,7 +347,7 @@ gradle.allprojects {
             def paper = ""
             
             if (mappingsVersion == null) {
-                mappingsVersion = getLatestSpigotMappings(minecraft)
+                throw new IOException("Cannot find compatile paper mappings.");
             }
             
             paper = info.paperByMappings.get(mappingsVersion)
