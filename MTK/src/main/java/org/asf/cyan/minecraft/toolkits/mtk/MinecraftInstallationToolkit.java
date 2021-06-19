@@ -453,6 +453,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		} else {
 			arguments.add("-cp");
 			arguments.add("${classpath}");
+			arguments.add("-Djava.library.path=${natives_directory}");
 		}
 
 		if (manifest.has("logging")) {
