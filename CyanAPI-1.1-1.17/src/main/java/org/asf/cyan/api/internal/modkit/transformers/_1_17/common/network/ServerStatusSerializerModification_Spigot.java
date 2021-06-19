@@ -19,7 +19,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 
 import modkit.protocol.transformers.handshake.VersionStatusTransformer;
-import net.minecraft.network.protocol.status.ServerStatus;
 
 @FluidTransformer
 @PlatformOnly(LaunchPlatform.SPIGOT)
@@ -31,14 +30,6 @@ public class ServerStatusSerializerModification_Spigot {
 	public void serialize(Object var1, Type var2, JsonSerializationContext var3, @LocalVariable JsonObject data) {
 		if (Modloader.getModloader(CyanLoader.class).isRootModloader())
 			VersionStatusTransformer.applySerializeMethodTransformer(data);
-	}
-
-	@InjectAt(location = InjectLocation.TAIL)
-	@TargetType(target = "java.lang.Object")
-	public void deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3,
-			@LocalVariable JsonObject data,
-			@LocalVariable @TargetType(target = "net.minecraft.network.protocol.status.ServerStatus") ServerStatus output) {
-		((ServerStatusInterface) output).setJson(data);
 	}
 
 }

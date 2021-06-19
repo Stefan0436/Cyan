@@ -153,46 +153,46 @@ platforms {
 	}
 
 	// Spigot Platform, for paper support
-//	SPIGOT {
-//		//
-//		// Paper version, only use paper version compatible with the mappings,
-//		//
-//		// Use getPaperVersion("mappings-version") to retrieve the latest paper version that has been
-//		// registered as 'compatible with mappings' in the generic version manifest of CYAN.
-//		//
-//		// Use getPaperVersionByDate("game-vesion", "mappings-version") to retrieve the paper version with date
-//		// aproximatly matching the mappings publish date. (USE AT YOUR OWN RISK, SCRAPES SPIGOT WEB PAGE FOR DATE
-//		// AND RECURSES THROUGH PAPER VERSIONS TO FIND THE UPDATE, PLEASE STORE VALUE AND USE AS LEAST AS POSSIBLE)
-//		//
-//		//
-//		// We strongly recommed for you to use getSupportedPaperVersion("game-version", "cyan-version")
-//		// and getSpigotMappingsByPaperVersion("game-version", "paper-version") to get the mappings.
-//		//
-//		// Paper version:
-//		//
-//		// paperVersion = getSupportedPaperVersion(gameVersion, cyanVersion)
-//		modloader "777" // paperVersion
-//
-//		//
-//		// SPIGOT mappings version, it is best to only use mappings that have been given a green light by the Cyan team.
-//		//
-//		// Use getSpigotMappingsByPaperVersion("game-version", "paper-version") for the mappings used
-//		// together with the paper version during cyan's compilation and testing process (most recommended)
-//		//
-//		// Use getRecommendedSpigotMappings("game-version") for the mappings that have been given a green light
-//		// Use getLatestSpigotMappings("game-version") for mappings in pre-release testing stage
-//		// Use getTestingSpigotMappings("game-version") for mappings in early testing stage (unrecommended, can really break things)
-//		//
-//		//
-//		// If you really want the latest version, you can use the following.
-//		// USE AT YOUR OWN RISK, CYAN WON'T BE HELD RESPONSIBLE FOR DAMAGED WORLDS.
-//		//
-//		// For the latest remote, use getRemoteSpigotMappingsVersion("game-version")
-//		//
-//		//
-//		// Commit hash and craftbukkit build for mappings version (commit:craftbukkit)
-//		version "f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3" // getSpigotMappingsByPaperVersion(paperVersion)
-//	}
+	SPIGOT {
+		//
+		// Paper version, only use paper version compatible with the mappings,
+		//
+		// Use getPaperVersion("mappings-version") to retrieve the latest paper version that has been
+		// registered as 'compatible with mappings' in the generic version manifest of CYAN.
+		//
+		// Use getPaperVersionByDate("game-vesion", "mappings-version") to retrieve the paper version with date
+		// aproximatly matching the mappings publish date. (USE AT YOUR OWN RISK, SCRAPES SPIGOT WEB PAGE FOR DATE
+		// AND RECURSES THROUGH PAPER VERSIONS TO FIND THE UPDATE, PLEASE STORE VALUE AND USE AS LEAST AS POSSIBLE)
+		//
+		//
+		// We strongly recommed for you to use getSupportedPaperVersion("game-version", "cyan-version")
+		// and getSpigotMappingsByPaperVersion("game-version", "paper-version") to get the mappings.
+		//
+		// Paper version:
+		//
+		// paperVersion = getSupportedPaperVersion(gameVersion, cyanVersion)
+		modloader "5" // paperVersion
+
+		//
+		// SPIGOT mappings version, it is best to only use mappings that have been given a green light by the Cyan team.
+		//
+		// Use getSpigotMappingsByPaperVersion("game-version", "paper-version") for the mappings used
+		// together with the paper version during cyan's compilation and testing process (most recommended)
+		//
+		// Use getRecommendedSpigotMappings("game-version") for the mappings that have been given a green light
+		// Use getLatestSpigotMappings("game-version") for mappings in pre-release testing stage
+		// Use getTestingSpigotMappings("game-version") for mappings in early testing stage (unrecommended, can really break things)
+		//
+		//
+		// If you really want the latest version, you can use the following.
+		// USE AT YOUR OWN RISK, CYAN WON'T BE HELD RESPONSIBLE FOR DAMAGED WORLDS.
+		//
+		// For the latest remote, use getRemoteSpigotMappingsVersion("game-version")
+		//
+		//
+		// Commit hash and craftbukkit build for mappings version (commit:craftbukkit)
+		version "3cec511b16ffa31cb414997a14be313716882e12:1_17_R1" // getSpigotMappingsByPaperVersion(paperVersion)
+	}
 }
 
 // Adds RIFT tasks for the platforms
