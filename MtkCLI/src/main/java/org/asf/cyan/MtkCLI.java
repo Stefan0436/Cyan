@@ -155,7 +155,7 @@ public class MtkCLI extends CyanComponent {
 				System.exit(MinecraftInstallationToolkit.launchInstallation(MinecraftVersionToolkit.getVersion(version),
 						new File(args[2]), account));
 				return;
-			} else if (args[0].equals("yggdrassil") && args.length >= 2) {
+			} else if (args[0].equals("yggdrasil") && args.length >= 2) {
 				String username = null;
 				File authFile = new File(args[1]);
 				if (authFile.exists()) {
@@ -268,7 +268,7 @@ public class MtkCLI extends CyanComponent {
 		System.err.println(
 				" - manifest <version>                                                                                                               - download game version manifests");
 		System.err.println(
-				" - yggdrassil <authfile>                                                                                                            - authenticate a mojang user");
+				" - yggdrasil <authfile>                                                                                                            - authenticate a mojang user");
 		System.err.println(
 				" - runclient <version> <gamedir> <authfile>                                                                                         - runs the client");
 		System.err.println();
