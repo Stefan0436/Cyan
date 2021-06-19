@@ -498,7 +498,7 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 
 		HashMap<String, String> packages = new HashMap<String, String>();
 		for (String line : linesPackages) {
-			if (line.startsWith("#"))
+			if (line.startsWith("#") || line.isEmpty())
 				continue;
 
 			String[] entries = line.split(" ");

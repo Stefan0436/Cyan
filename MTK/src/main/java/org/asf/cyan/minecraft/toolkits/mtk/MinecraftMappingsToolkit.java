@@ -21,6 +21,7 @@ import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.fluid.remapping.Mapping;
 import org.asf.cyan.minecraft.toolkits.mtk.internal.MappingsLoadEventProvider;
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
@@ -409,18 +410,22 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 		trace("CLOSE mappings scanner, caller: " + CallTrace.traceCallName());
 		sc.close();
 
-		trace("DOWNLOAD PACKAGE MAPPINGS from " + packageMapppingsURL + ", caller: " + CallTrace.traceCallName());
-		sc = new Scanner(packageMapppingsURL.openStream());
-		while (sc.hasNext())
-			packageMapppings.append(sc.nextLine()).append(System.lineSeparator());
-		trace("CLOSE mappings scanner, caller: " + CallTrace.traceCallName());
-		sc.close();
+		if (Version.fromString(version.getVersion()).isLessThan(Version.fromString("1.17"))) {
+			trace("DOWNLOAD PACKAGE MAPPINGS from " + packageMapppingsURL + ", caller: " + CallTrace.traceCallName());
+			sc = new Scanner(packageMapppingsURL.openStream());
+			while (sc.hasNext())
+				packageMapppings.append(sc.nextLine()).append(System.lineSeparator());
+			trace("CLOSE mappings scanner, caller: " + CallTrace.traceCallName());
+			sc.close();
+		}
 
 		info("Mapping the SPIGOT mappings into CCFG format...");
 		trace("MAP version SPIGOT mappings into CCFG, caller: " + CallTrace.traceCallName());
 		SpigotMappings mappings = new SpigotMappings().parseMultiMappings(fallback, classMappings.toString(),
 				memberMapppings.toString(), packageMapppings.toString(),
-				Map.of("net.minecraft.**", "net.minecraft.server.v" + craftBukkitVersion));
+				Version.fromString(version.getVersion()).isLessThan(Version.fromString("1.17"))
+						? Map.of("net.minecraft.**", "net.minecraft.server.v" + craftBukkitVersion)
+						: Map.of());
 		mappings.mappingsVersion = commit;
 
 		if (MappingsLoadEventProvider.isAccepted()) {

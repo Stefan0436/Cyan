@@ -99,9 +99,6 @@ public class AuthenticationInfo {
 
 		YggdrasilAuthentication.init();
 		YggdrasilAuthenticationWindow window = new YggdrasilAuthenticationWindow();
-		if (window.getAccount() == null) {
-			return null;
-		}
 		return window.getAccount();
 	}
 

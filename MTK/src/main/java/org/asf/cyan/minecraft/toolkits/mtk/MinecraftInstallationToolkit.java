@@ -115,7 +115,8 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		variableStorage.put("launcher_name", "Cyan-MTK");
 		variableStorage.put("launcher_version",
 				(MinecraftToolkit.getVersion().contains("${") ? "unknown" : MinecraftToolkit.getVersion()));
-		variableStorage.put("cyan_version", CyanInfo.getCyanVersion());
+		if (getMainImplementation() instanceof CyanCore)
+			variableStorage.put("cyan_version", CyanInfo.getCyanVersion());
 	}
 
 	// Version file cache, so the toolkit won't have to download the version file

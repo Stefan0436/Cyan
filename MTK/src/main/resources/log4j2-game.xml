@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN"
-	packages="org.asf.cyan.cornflower.gradle.utilities,org.asf.cyan.core.logger">
+<Configuration status="WARN">
 	<Appenders>
-		<ProcessingOutputAppender name="Console" target="SYSTEM_OUT">
+		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout
 				pattern="[%d{HH:mm:ss} %5level] - %highlight{%msg%n%throwable}" />
-		</ProcessingOutputAppender>
+		</Console>
 		<Routing name="Logfile">
 			<Routes pattern="\$\${sd:type}">
 				<Route>
