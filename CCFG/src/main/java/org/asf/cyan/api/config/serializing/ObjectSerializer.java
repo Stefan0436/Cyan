@@ -206,10 +206,10 @@ public class ObjectSerializer {
 				try {
 					Method meth = null;
 					try {
-						meth = cls.getDeclaredMethod("instantiateFromSerialzer", Class.class);
+						meth = cls.getDeclaredMethod("instantiateFromSerializer", Class.class);
 					} catch (NoSuchMethodException e) {
 						try {
-							meth = Configuration.class.getDeclaredMethod("instantiateFromSerialzer", Class.class);
+							meth = Configuration.class.getDeclaredMethod("instantiateFromSerializer", Class.class);
 						} catch (NoSuchMethodException e1) {
 						}
 					}
