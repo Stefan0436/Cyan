@@ -8,7 +8,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -55,6 +54,7 @@ import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
 import org.asf.cyan.api.classloading.DynamicClassLoader;
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.config.Configuration;
+import org.asf.cyan.api.config.serializing.ObjectSerializer;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.fluid.Fluid;
@@ -961,20 +961,8 @@ public class Installer extends CyanComponent {
 							throw new RuntimeException(e1);
 						}
 						loaded.put(confClass.getTypeName(), confClass);
-						Configuration<?> ccfg;
-						try {
-							Method mth = confClass.getDeclaredMethod("instantiateFromSerializer", Class.class);
-							mth.setAccessible(true);
-							ccfg = (Configuration<?>) mth.invoke(null, (Class<? extends Configuration>) confClass);
-						} catch (Exception e2) {
-							try {
-								ccfg = (Configuration<?>) confClass.getConstructor().newInstance();
-							} catch (Exception e3) {
-								tmpLoader.close();
-								throw new RuntimeException(e2);
-							}
-						}
-						ccfg.readAll(inputFile).readAll(patch);
+						Configuration<?> ccfg = ObjectSerializer
+								.deserialize(inputFile, (Class<? extends Configuration>) confClass).readAll(patch);
 						String outputStr = ccfg.toString();
 						tmpLoader.close();
 						outp.write(outputStr.getBytes());
