@@ -963,21 +963,15 @@ public class Installer extends CyanComponent {
 						loaded.put(confClass.getTypeName(), confClass);
 						Configuration<?> ccfg;
 						try {
-							Method mth = confClass.getDeclaredMethod("instanciateFromSerialzer", Class.class);
+							Method mth = confClass.getDeclaredMethod("instantiateFromSerializer", Class.class);
 							mth.setAccessible(true);
 							ccfg = (Configuration<?>) mth.invoke(null, (Class<? extends Configuration>) confClass);
-						} catch (Exception e) {
+						} catch (Exception e2) {
 							try {
-								Method mth = confClass.getDeclaredMethod("instantiateFromSerialzer", Class.class);
-								mth.setAccessible(true);
-								ccfg = (Configuration<?>) mth.invoke(null, (Class<? extends Configuration>) confClass);
-							} catch (Exception e2) {
-								try {
-									ccfg = (Configuration<?>) confClass.getConstructor().newInstance();
-								} catch (Exception e3) {
-									tmpLoader.close();
-									throw new RuntimeException(e2);
-								}
+								ccfg = (Configuration<?>) confClass.getConstructor().newInstance();
+							} catch (Exception e3) {
+								tmpLoader.close();
+								throw new RuntimeException(e2);
 							}
 						}
 						ccfg.readAll(inputFile).readAll(patch);

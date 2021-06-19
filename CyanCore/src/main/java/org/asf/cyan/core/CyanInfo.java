@@ -25,12 +25,12 @@ import org.asf.cyan.api.versioning.VersionStatus;
 public class CyanInfo extends Configuration<CyanInfo> {
 	static CyanInfo info = null;
 	static CyanInfoProvider provider;
-	
+
 	@Exclude
 	public static final String infoPath = "/org/asf/cyan/CyanVersionHolder/generic/CyanVersionHolder-generic-versions.ccfg";
 
 	@SuppressWarnings("unchecked")
-	protected static <T extends Configuration<T>> T instanciateFromSerialzer(Class<T> input)
+	protected static <T extends Configuration<T>> T instantiateFromSerializer(Class<T> input)
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 		return (T) new CyanInfo();
@@ -181,7 +181,7 @@ public class CyanInfo extends Configuration<CyanInfo> {
 	public String releaseDate;
 	public String version;
 	public String modloaderVersion = "";
-	
+
 	@Exclude
 	public String displayAppend;
 	public String checkSource;
@@ -197,7 +197,7 @@ public class CyanInfo extends Configuration<CyanInfo> {
 
 	@Exclude
 	public String updateChangelog;
-	
+
 	private VersionStatus versionStatus = VersionStatus.UNKNOWN;
 
 	/**

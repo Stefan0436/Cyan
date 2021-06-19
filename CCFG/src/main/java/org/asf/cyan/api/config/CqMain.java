@@ -144,7 +144,7 @@ public class CqMain {
 				mth.setAccessible(true);
 				ccfg = (Configuration<?>) mth.invoke(null, (Class<? extends Configuration>) ccfgcls);
 			} catch (Exception e) {
-				ccfg = Configuration.instantiateFromSerialzer((Class<? extends Configuration>) ccfgcls);
+				ccfg = Configuration.instanciateFromSerializer((Class<? extends Configuration>) ccfgcls);
 			}
 
 			ccfg = ccfg.readAll(input);
