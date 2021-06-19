@@ -81,7 +81,7 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 		if (MinecraftToolkit.hasMinecraftDownloadConnection()) {
 			info = MinecraftVersionToolkit.getLatestReleaseVersion();
 		} else {
-			info = MinecraftVersionToolkit.createVersionInfo("1.16.5", MinecraftVersionType.RELEASE,
+			info = MinecraftVersionToolkit.createOrGetVersion("1.16.5", MinecraftVersionType.RELEASE,
 					new URL("file:////tmp"), OffsetDateTime.now());
 		}
 
@@ -121,7 +121,7 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 		if (MinecraftToolkit.hasMinecraftDownloadConnection()) {
 			info = MinecraftVersionToolkit.getLatestReleaseVersion();
 		} else {
-			info = MinecraftVersionToolkit.createVersionInfo("1.16.5", MinecraftVersionType.RELEASE,
+			info = MinecraftVersionToolkit.createOrGetVersion("1.16.5", MinecraftVersionType.RELEASE,
 					new URL("file:////tmp"), OffsetDateTime.now());
 		}
 
@@ -175,7 +175,7 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 		if (MinecraftToolkit.hasMinecraftDownloadConnection()) {
 			info = MinecraftVersionToolkit.getLatestReleaseVersion();
 		} else {
-			info = MinecraftVersionToolkit.createVersionInfo("1.16.5", MinecraftVersionType.RELEASE,
+			info = MinecraftVersionToolkit.createOrGetVersion("1.16.5", MinecraftVersionType.RELEASE,
 					new URL("file:////tmp"), OffsetDateTime.now());
 		}
 
@@ -230,7 +230,7 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 		if (MinecraftToolkit.hasMinecraftDownloadConnection()) {
 			info = MinecraftVersionToolkit.getLatestReleaseVersion();
 		} else {
-			info = MinecraftVersionToolkit.createVersionInfo("1.16.5", MinecraftVersionType.RELEASE,
+			info = MinecraftVersionToolkit.createOrGetVersion("1.16.5", MinecraftVersionType.RELEASE,
 					new URL("file:////tmp"), OffsetDateTime.now());
 		}
 

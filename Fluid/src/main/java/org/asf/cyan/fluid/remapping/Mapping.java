@@ -20,7 +20,7 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected static <T extends Configuration<T>> T instanciateFromSerializer(Class<T> input)
+	protected static <T extends Configuration<T>> T instantiateFromSerializer(Class<T> input)
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 		if (!Mapping.class.isAssignableFrom(input))
@@ -579,7 +579,7 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 									+ clsMapping.obfuscated.substring(clsMapping.obfuscated.indexOf("$") + 1);
 						}
 					}
-					
+
 					classes.put(map.name, map);
 					tempMappings.put(map.obfuscated, map);
 					obfusCache.add(clsMapping.name);
@@ -609,6 +609,8 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 			String obfus = entries[1];
 
 			Mapping<?> ownerClass = classes.get(owner);
+			if (ownerClass == null || ownerClass.obfuscated == null)
+				ownerClass = ownerClass;
 			String type = fieldHelpers.get(ownerClass.obfuscated + " " + obfus);
 			if (type != null) {
 				for (Mapping<?> clsMapping : classes.values()) {
@@ -667,7 +669,7 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 			map.type = type;
 			map.name = name;
 			map.obfuscated = obfus;
-			
+
 			ownerClass.mappings = ArrayUtil.append(ownerClass.mappings, new Mapping<?>[] { map });
 		}
 
