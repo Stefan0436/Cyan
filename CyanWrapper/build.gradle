@@ -1725,7 +1725,7 @@ processResources {
 		}
 		
 		forgeVersions.keySet().stream().sorted({ String t1, String t2 ->
-			return -Version.fromString(t1).compareTo(Version.fromString(t2));	
+			return Version.fromString(t1).compareTo(Version.fromString(t2));	
 		}).forEach { version ->
 			forgeSupportVersions.put("testing-forge", minecraft + "-" + version)
 			forgeSupportVersions.put("testing-forge-" + minecraft, version)
@@ -1734,7 +1734,7 @@ processResources {
 		}
 		
 		fabricVersions.keySet().stream().sorted({ t1, t2 ->
-			return -Version.fromString(t1).compareTo(Version.fromString(t2));	
+			return Version.fromString(t1).compareTo(Version.fromString(t2));	
 		}).forEach { version ->
 			fabricSupportVersions.put("testing-fabric", minecraft + "-" + version)
 			fabricSupportVersions.put("testing-fabric-" + minecraft, version)
@@ -1743,7 +1743,7 @@ processResources {
 		}
 		
 	    paperVersions.keySet().stream().sorted({ t1, t2 ->
-			return -Version.fromString(t1).compareTo(Version.fromString(t2));	
+			return Version.fromString(t1).compareTo(Version.fromString(t2));	
 		}).forEach { version ->
 			paperSupportVersions.put("testing-paper", minecraft + "-" + version)
 			paperSupportVersions.put("testing-paper-" + minecraft, version)
@@ -1761,7 +1761,7 @@ processResources {
 	}
 	
     paperVersions.keySet().stream().sorted({ t1, t2 ->
-		return -Version.fromString(t1).compareTo(Version.fromString(t2));	
+		return Version.fromString(t1).compareTo(Version.fromString(t2));	
 	}).forEach { version ->
 		def mappings = paperVersions.get(version)
 		paperMappingVersions.put(mappings, version)
