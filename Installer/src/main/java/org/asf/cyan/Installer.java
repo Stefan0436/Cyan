@@ -57,7 +57,6 @@ import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.config.Configuration;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
-import org.asf.cyan.core.CyanCore;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.bytecode.sources.FileClassSourceProvider;
 import org.asf.cyan.fluid.implementation.CyanBytecodeExporter;
@@ -409,7 +408,6 @@ public class Installer extends CyanComponent {
 			dir = System.getProperty("user.home");
 		APPDATA = new File(dir);
 
-		CyanCore.initLoader();
 		File cache = new File(APPDATA, ".kickstart");
 		MinecraftInstallationToolkit.setMinecraftDirectory(cache);
 
@@ -445,7 +443,7 @@ public class Installer extends CyanComponent {
 		lblNewLabel.setVerticalAlignment(SwingConstants.TOP);
 		lblNewLabel.setPreferredSize(new Dimension(200, 18));
 
-		JLabel lblKickstart = new JLabel("KickStart Installer 1.8 ");
+		JLabel lblKickstart = new JLabel("KickStart Installer 1.9 ");
 		panel.add(lblKickstart, BorderLayout.EAST);
 		lblKickstart.setFont(new Font("SansSerif", Font.BOLD, 12));
 		lblKickstart.setHorizontalAlignment(SwingConstants.TRAILING);
