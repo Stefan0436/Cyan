@@ -7,6 +7,7 @@ include('CyanUtil')
 include('MTK')
 include('Fluid')
 include('Cornflower')
+include('MtkCLI')
 
 gradle.allprojects {
     project.ext.liteBuild = true

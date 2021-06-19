@@ -1,0 +1,168 @@
+plugins {
+    id 'java'
+	id 'maven-publish'
+}
+
+apply plugin: 'eclipse'
+apply from: '../asf.mvn.publish.gradle'
+buildDir = '../build/MTK-CLI'
+
+group="org.asf.cyan"
+version="1.0.0.A1"
+def authorname = "AerialWorks Software Foundation"
+
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
+
+configurePublish {
+	pretty_name "MTK-CLI"
+	description "MTK Command Line Interface"
+	page "https://aerialworks.ddns.net/maven"
+	address "https://aerialworks.ddns.net/maven"
+	
+	author {
+		name "$authorname"
+		id "ASF"
+	}
+	
+	license {
+		name "GNU Lesser General Public License v3.0"
+		url "https://www.gnu.org/licenses/lgpl-3.0.txt"
+	}
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = "https://aerialworks.ddns.net/maven"
+        name = "AerialWorks"
+    }
+
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.12'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
+	
+	implementation 'org.ow2.asm:asm:9.1'
+	implementation 'org.ow2.asm:asm-tree:9.1'
+	implementation 'org.ow2.asm:asm-commons:9.1'
+	
+	implementation project(":MTK")
+	implementation project(":Fluid")
+	implementation project(':CCFG')
+	implementation project(':CyanComponents')
+	implementation project(':CyanUtil')
+	
+	implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
+	implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
+	implementation group: 'org.jboss.windup.decompiler.fernflower', name: 'windup-fernflower', version: '1.0.0.20171018'
+	implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-api', version: '5.1.2.Final'
+	implementation group: 'org.jboss.windup.utils', name: 'windup-utils', version: '5.1.2.Final'
+    implementation 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.13'
+}
+
+project.configurations.implementation.canBeResolved = true
+
+task installation () {
+	doLast {
+		copy {
+			from "mtk"
+			from "mtk.bat"
+			from "mtk-portable"
+			from "mtk-portable.bat"
+			from "rift"
+			from "rift.bat"
+			from "rift-portable"
+			from "rift-portable.bat"
+			from "pseudocode"
+			from "pseudocode.bat"
+			from "pseudocode-portable"
+			from "pseudocode-portable.bat"
+			into "../build/MTK-CLI/Installations"
+		}
+		for (ResolvedArtifact arti : project.configurations.implementation.resolvedConfiguration.getResolvedArtifacts()) {
+			if (arti.getClassifier() != null)
+				continue;
+			copy {
+				from arti.file
+				rename arti.file.getName(), arti.name + (arti.getClassifier() != null && !arti.getClassifier().isEmpty() ? "-" + arti.getClassifier() : "") + "." + arti.getExtension()
+				into "../build/MTK-CLI/Installations/libs"
+			}
+		}
+		for (def task : project.tasks) {
+			if (task instanceof AbstractArchiveTask) {
+				if (!task.getArchiveClassifier().get().isEmpty())
+					continue;
+					
+				copy {
+					from task.getArchiveFile().get()
+					rename task.getArchiveFile().get().getAsFile().getName(), task.getArchiveBaseName().get() + (task.getArchiveClassifier().get() != null && !task.getArchiveClassifier().get().isEmpty() ? "-" + task.getArchiveClassifier().get() : "") + "." + task.getArchiveExtension().get()
+					into "../build/MTK-CLI/Installations"
+				}
+			}
+		}
+	}
+}
+
+installation.dependsOn project.tasks.build
+build.finalizedBy installation
+
+jar {
+	destinationDirectory = file('../build/MTK-CLI/Jars')
+	manifest {
+		attributes([
+			"Specification-Title": project.name,
+			"Specification-Vendor": "${authorname}",
+			"Specification-Version": project.version,
+			"Implementation-Title": project.name,
+			"Implementation-Version": project.version,
+			"Implementation-Vendor" :"${authorname}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+			"Main-Class": "${project.group}.MtkCLI"
+		])
+	}
+	exclude "**/extra/**"
+	exclude "**/tests/**"
+	includeEmptyDirs = false
+}
+
+task javaDocs(type: Javadoc) {
+	classpath = sourceSets.main.runtimeClasspath
+	source = sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: 'javaDocs') {
+	from javadoc
+	classifier = 'javadoc'
+	exclude "**/extra/**"
+	destinationDirectory = file('../build/MTK-CLI/Javadocs')
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+	exclude "**/extra/**"
+	destinationDirectory = file('../build/MTK-CLI/Source jars')
+}
+
+artifacts {
+	archives sourcesJar
+	archives javadocJar
+}
+
+test {
+    include "**/**Test**"
+    exclude "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}
+
+task specialTest (type: Test, dependsOn: test) {
+    include "**/**SpecialTest**"
+    minHeapSize = "128m"
+  	maxHeapSize = "2G"
+}
+
+initializeASFMVNPublish()

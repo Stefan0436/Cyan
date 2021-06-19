@@ -11,6 +11,7 @@ include('MTK')
 include('Fluid')
 include('ClassTrust')
 include('TrustExplorer')
+include('MtkCLI')
 
 apply from: 'config.gradle'
 if (hasProperty("overrideGameVersion")) {
