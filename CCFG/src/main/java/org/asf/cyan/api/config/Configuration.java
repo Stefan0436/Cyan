@@ -510,7 +510,7 @@ public abstract class Configuration<T extends Configuration<T>> {
 			return false;
 	}
 
-	protected static <T extends Configuration<T>> T instanciateFromSerializer(Class<T> input)
+	protected static <T extends Configuration<T>> T instantiateFromSerializer(Class<T> input)
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 		return (T) input.getConstructor().newInstance();
