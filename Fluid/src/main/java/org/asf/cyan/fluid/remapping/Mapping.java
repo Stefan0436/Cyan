@@ -609,8 +609,6 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 			String obfus = entries[1];
 
 			Mapping<?> ownerClass = classes.get(owner);
-			if (ownerClass == null || ownerClass.obfuscated == null)
-				ownerClass = ownerClass;
 			String type = fieldHelpers.get(ownerClass.obfuscated + " " + obfus);
 			if (type != null) {
 				for (Mapping<?> clsMapping : classes.values()) {
