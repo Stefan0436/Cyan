@@ -55,7 +55,7 @@ If the '*' is present, the version is not ready for release
 | :----------: | :--------: | :---------: | :--------: | :----------: | :---------: | :---------: |
 | 1.0.0.A12    | 36.1.13    | 0.11.3      | 634        | Unsupported  | Unsupported | Unsupported |
 | 1.0.0.A13    | 36.1.23    | 0.11.3      | 703        | Unsupported  | Unsupported | Unsupported |
-| 1.0.0.A14    | 36.1.32    | 0.11.6      | 778        | Unknown      | 0.11.6      | Unknown     |
+| 1.0.0.A14    | 36.1.32    | 0.11.6      | 778        | Unknown      | 0.11.6      | 5           |
 
 # Projects used
 Please note that not a single project is actually distributed, the mappings are being generated (downloaded and re-formatted) by CYAN on launch, only version information is used.
