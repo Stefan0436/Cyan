@@ -2483,10 +2483,13 @@ public class CyanLoader extends ModkitModloader
 		if (installs.exists()) {
 			info("Adding current installation to manifest...");
 			KickStartConfig conf = new KickStartConfig();
+			if (!cyanDir.exists())
+				cyanDir.mkdirs();
 			conf.readAll(new String(Files.readAllBytes(installs.toPath())));
 			ArrayList<KickStartConfig.KickStartInstallation> configs = new ArrayList<KickStartConfig.KickStartInstallation>();
 			for (KickStartConfig.KickStartInstallation install : conf.installations) {
-				if (new File(install.cyanData).exists() && !install.cyanData.equals(cyanDir.getCanonicalPath()))
+				if (install.cyanData != null && new File(install.cyanData).exists()
+						&& !install.cyanData.equals(cyanDir.getCanonicalPath()))
 					configs.add(install);
 			}
 			KickStartConfig.KickStartInstallation install = new KickStartConfig.KickStartInstallation();
