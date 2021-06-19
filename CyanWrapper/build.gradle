@@ -820,7 +820,7 @@ task createDeobfLaunch (type: EclipseLaunchGenerator) {
 
 		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(minecraft)
 		if (!MinecraftInstallationToolkit.checkInstallation(version, true))
-			MinecraftInstallationToolkit.downloadVersionAndLibraries(version)
+			MinecraftInstallationToolkit.downloadVersionFiles(version, true)
 		if (MinecraftInstallationToolkit.getVersionJar(version, GameSide.CLIENT) == null)
 			MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.CLIENT)
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, GameSide.CLIENT)) {
@@ -882,7 +882,7 @@ task createObfusLaunch (type: EclipseLaunchGenerator) {
 
 		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(minecraft)
 		if (!MinecraftInstallationToolkit.checkInstallation(version, true))
-			MinecraftInstallationToolkit.downloadVersionAndLibraries(version)
+			MinecraftInstallationToolkit.downloadVersionFiles(version, true)
 		if (MinecraftInstallationToolkit.getVersionJar(version, GameSide.CLIENT) == null)
 			MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.CLIENT)
 		MinecraftInstallationToolkit.extractNatives(version)
