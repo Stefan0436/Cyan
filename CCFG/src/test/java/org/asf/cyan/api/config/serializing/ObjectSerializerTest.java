@@ -198,7 +198,7 @@ public class ObjectSerializerTest {
 		int i1 = rnd.nextInt();
 		int i2 = rnd.nextInt();
 		String cfg = "{\n" + "    testStr> '" + ObjectSerializer.serialize(v1) + "'\n" + "} {\n" + "    testStr> '"
-				+ ObjectSerializer.serialize(v2) + "'\n" + "} {\n" + "    test4> " + i1 + "\n" + "} {\n" + "    test4> "
+				+ ObjectSerializer.serialize(v2) + "'\n    tests> [ test1 'test 2' test3 'test 4' ]\n" + "} {\n" + "    test4> " + i1 + "\n" + "} {\n" + "    test4> "
 				+ i2 + "\n" + "}";
 		TestingConfig[] tests = ObjectSerializer.deserialize(cfg, TestingConfig[].class);
 		if (!tests[0].testStr.equals(v1)) {
@@ -210,6 +210,10 @@ public class ObjectSerializerTest {
 			System.err.println("The following value was incorrectly deserialized:\n" + tests[1].testStr + "\n" + v2);
 		}
 		assertTrue(tests[1].testStr.equals(v2));
+		assertTrue(tests[1].tests[0].equals("test1"));
+		assertTrue(tests[1].tests[1].equals("test 2"));
+		assertTrue(tests[1].tests[2].equals("test3"));
+		assertTrue(tests[1].tests[3].equals("test 4"));
 		assertTrue(tests[2].test4 == i1);
 		assertTrue(tests[3].test4 == i2);
 	}

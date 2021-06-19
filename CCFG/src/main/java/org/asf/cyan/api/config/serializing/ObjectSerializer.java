@@ -254,6 +254,8 @@ public class ObjectSerializer {
 				StringBuilder txt = null;
 
 				for (String line : lines) {
+					if (txt != null)
+						txt.append(System.lineSeparator());
 					if (indent) {
 						for (int i = 0; i < 4; i++) {
 							if (!line.startsWith(" "))
@@ -316,12 +318,12 @@ public class ObjectSerializer {
 										txt = new StringBuilder();
 									txt.append(ch);
 								}
-								if (brquote == 0 && !quote) {
+								if (!quote) {
 									array++;
 								}
 								break;
 							case ']':
-								if (brquote == 0 && !quote && array != 0) {
+								if (!quote && array != 0) {
 									array--;
 								}
 								if (array != 0 || quote || brquote != 0) {
