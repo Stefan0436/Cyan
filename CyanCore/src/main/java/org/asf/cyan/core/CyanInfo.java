@@ -33,132 +33,138 @@ public class CyanInfo extends Configuration<CyanInfo> {
 	protected static <T extends Configuration<T>> T instantiateFromSerializer(Class<T> input)
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
-		return (T) new CyanInfo();
+		return (T) new CyanInfo(false);
 	}
 
 	private CyanInfo() {
+		this(true);
+	}
+
+	public CyanInfo(boolean b) {
 		super();
-		readAll(readCCFG());
+		if (b) {
+			readAll(readCCFG());
 
-		try {
-			displayAppend = "";
-			CyanCore.infoLog("Connecting to " + checkSource + ", downloading version information...");
-			StringBuilder conf = new StringBuilder();
-			CyanCore.debugLog("Scanning version information... Using URL: " + checkSource + infoPath);
-			URL u = new URL(checkSource + infoPath);
-			CyanCore.debugLog("Opening connection...");
-			Scanner sc = new Scanner(u.openStream());
-			CyanCore.debugLog("Reading all content...");
-			while (sc.hasNext())
-				conf.append(sc.nextLine() + System.lineSeparator());
-			sc.close();
+			try {
+				displayAppend = "";
+				CyanCore.infoLog("Connecting to " + checkSource + ", downloading version information...");
+				StringBuilder conf = new StringBuilder();
+				CyanCore.debugLog("Scanning version information... Using URL: " + checkSource + infoPath);
+				URL u = new URL(checkSource + infoPath);
+				CyanCore.debugLog("Opening connection...");
+				Scanner sc = new Scanner(u.openStream());
+				CyanCore.debugLog("Reading all content...");
+				while (sc.hasNext())
+					conf.append(sc.nextLine() + System.lineSeparator());
+				sc.close();
 
-			CyanCore.debugLog("Parsing response into CCFG object...");
-			CyanUpdateInfo info = new CyanUpdateInfo(conf.toString());
-			if (info.changelogs.containsKey(version)) {
-				changelog = info.changelogs.get(version);
-			}
-			CyanCore.debugLog("Processing version information...");
-			if (!version.equals(info.latestStableVersion)) {
-				if (version.equals(info.latestPreviewVersion)) {
-					displayAppend = "Latest PREVIEW";
-					versionStatus = VersionStatus.LATEST_PREVIEW;
-				} else if (version.equals(info.latestBetaVersion)) {
-					displayAppend = "Latest BETA";
-					versionStatus = VersionStatus.LATEST_BETA;
-				} else if (version.equals(info.latestAlphaVersion)) {
-					displayAppend = "Latest ALPHA";
-					versionStatus = VersionStatus.LATEST_ALPHA;
-				} else {
-					for (String lts : info.longTermSupportVersions) {
-						if (version.equals(lts)) {
-							displayAppend = "LTS";
-							versionStatus = VersionStatus.LTS;
-						}
-					}
-					if (displayAppend.equals("")) {
-						for (String lts : info.requiredUpgrade) {
+				CyanCore.debugLog("Parsing response into CCFG object...");
+				CyanUpdateInfo info = new CyanUpdateInfo(conf.toString());
+				if (info.changelogs.containsKey(version)) {
+					changelog = info.changelogs.get(version);
+				}
+				CyanCore.debugLog("Processing version information...");
+				if (!version.equals(info.latestStableVersion)) {
+					if (version.equals(info.latestPreviewVersion)) {
+						displayAppend = "Latest PREVIEW";
+						versionStatus = VersionStatus.LATEST_PREVIEW;
+					} else if (version.equals(info.latestBetaVersion)) {
+						displayAppend = "Latest BETA";
+						versionStatus = VersionStatus.LATEST_BETA;
+					} else if (version.equals(info.latestAlphaVersion)) {
+						displayAppend = "Latest ALPHA";
+						versionStatus = VersionStatus.LATEST_ALPHA;
+					} else {
+						for (String lts : info.longTermSupportVersions) {
 							if (version.equals(lts)) {
-								displayAppend = "UNSUPPORTED";
-								versionStatus = VersionStatus.UNSUPPORTED;
+								displayAppend = "LTS";
+								versionStatus = VersionStatus.LTS;
 							}
 						}
-					}
-					if (displayAppend.equals("")) {
-						for (String ver : info.allVersions.keySet()) {
-							if (version.equals(ver)) {
-								String type = info.allVersions.get(ver);
-								if (type.equals("BETA") || type.equals("ALPHA") || type.equals("PREVIEW"))
-									type = "Outdated " + type;
-								displayAppend = type;
-								if (type.equals("BETA")) {
-									versionStatus = VersionStatus.OUTDATED_BETA;
-								} else if (type.equals("ALPHA")) {
-									versionStatus = VersionStatus.OUTDATED_ALPHA;
-								} else if (type.equals("PREVIEW")) {
-									versionStatus = VersionStatus.OUTDATED_PREVIEW;
-								} else {
-									versionStatus = VersionStatus.OUTDATED;
+						if (displayAppend.equals("")) {
+							for (String lts : info.requiredUpgrade) {
+								if (version.equals(lts)) {
+									displayAppend = "UNSUPPORTED";
+									versionStatus = VersionStatus.UNSUPPORTED;
 								}
 							}
 						}
-					}
-					if (displayAppend.equals("")) {
-						displayAppend = "In-development";
-					} else if (!displayAppend.contains("LTS") && !displayAppend.contains("Latest")) {
-						String type = info.allVersions.get(version);
-						String newversion = "";
+						if (displayAppend.equals("")) {
+							for (String ver : info.allVersions.keySet()) {
+								if (version.equals(ver)) {
+									String type = info.allVersions.get(ver);
+									if (type.equals("BETA") || type.equals("ALPHA") || type.equals("PREVIEW"))
+										type = "Outdated " + type;
+									displayAppend = type;
+									if (type.equals("BETA")) {
+										versionStatus = VersionStatus.OUTDATED_BETA;
+									} else if (type.equals("ALPHA")) {
+										versionStatus = VersionStatus.OUTDATED_ALPHA;
+									} else if (type.equals("PREVIEW")) {
+										versionStatus = VersionStatus.OUTDATED_PREVIEW;
+									} else {
+										versionStatus = VersionStatus.OUTDATED;
+									}
+								}
+							}
+						}
+						if (displayAppend.equals("")) {
+							displayAppend = "In-development";
+						} else if (!displayAppend.contains("LTS") && !displayAppend.contains("Latest")) {
+							String type = info.allVersions.get(version);
+							String newversion = "";
 
-						if (type.equals("ALPHA"))
-							newversion = info.latestAlphaVersion;
-						else if (type.equals("BETA"))
-							newversion = info.latestBetaVersion;
-						else if (type.equals("PREVIEW"))
-							newversion = info.latestPreviewVersion;
-						else if (type.equals("RELEASE"))
-							newversion = info.latestStableVersion;
+							if (type.equals("ALPHA"))
+								newversion = info.latestAlphaVersion;
+							else if (type.equals("BETA"))
+								newversion = info.latestBetaVersion;
+							else if (type.equals("PREVIEW"))
+								newversion = info.latestPreviewVersion;
+							else if (type.equals("RELEASE"))
+								newversion = info.latestStableVersion;
 
-						updateChangelog = info.changelogs.get(newversion).replaceAll("\n", System.lineSeparator());
-						CyanCore.infoLog("Cyan is out of date, new version: " + newversion);
-						if (info.changelogs.containsKey(newversion)) {
-							CyanCore.infoLog("Changelog:" + System.lineSeparator()
-									+ info.changelogs.get(newversion).replaceAll("\n", System.lineSeparator()));
+							updateChangelog = info.changelogs.get(newversion).replaceAll("\n", System.lineSeparator());
+							CyanCore.infoLog("Cyan is out of date, new version: " + newversion);
+							if (info.changelogs.containsKey(newversion)) {
+								CyanCore.infoLog("Changelog:" + System.lineSeparator()
+										+ info.changelogs.get(newversion).replaceAll("\n", System.lineSeparator()));
+							}
 						}
 					}
-				}
-			} else {
-				versionStatus = VersionStatus.LATEST;
-				displayAppend = "Latest RELEASE";
-			}
-			CyanCore.infoLog("Received version suffix: " + displayAppend);
-		} catch (IOException e) {
-			CyanCore.infoLog("Unable to connect to server.");
-		}
-
-		if (platform == null) {
-			if (modloaderVersion.equals("") && !deobf) {
-				platform = LaunchPlatform.VANILLA;
-			} else if (modloaderVersion.equals("") && deobf) {
-				platform = LaunchPlatform.DEOBFUSCATED;
-			} else {
-				if (modloaderVersion.toLowerCase().startsWith("forge-")) {
-					platform = LaunchPlatform.MCP;
-					modloaderName = "Forge";
-
-					modloaderVersion = modloaderVersion.substring(modloaderVersion.indexOf("-") + 1);
-				} else if (modloaderVersion.toLowerCase().startsWith("fabric-loader-")) {
-					platform = LaunchPlatform.YARN;
-					modloaderName = "Fabric";
-
-					modloaderVersion = modloaderVersion.substring(modloaderVersion.indexOf("-") + 1);
-					modloaderVersion = modloaderVersion.substring(modloaderVersion.indexOf("-") + 1);
-				} else if (modloaderVersion.toLowerCase().startsWith("paper-")) {
-					platform = LaunchPlatform.SPIGOT;
-					modloaderName = "Paper";
-
-					modloaderVersion = modloaderVersion.substring(modloaderVersion.indexOf("-") + 1);
 				} else {
-					platform = LaunchPlatform.UNKNOWN;
+					versionStatus = VersionStatus.LATEST;
+					displayAppend = "Latest RELEASE";
+				}
+				CyanCore.infoLog("Received version suffix: " + displayAppend);
+			} catch (IOException e) {
+				CyanCore.infoLog("Unable to connect to server.");
+			}
+
+			if (platform == null) {
+				if (modloaderVersion.equals("") && !deobf) {
+					platform = LaunchPlatform.VANILLA;
+				} else if (modloaderVersion.equals("") && deobf) {
+					platform = LaunchPlatform.DEOBFUSCATED;
+				} else {
+					if (modloaderVersion.toLowerCase().startsWith("forge-")) {
+						platform = LaunchPlatform.MCP;
+						modloaderName = "Forge";
+
+						modloaderVersion = modloaderVersion.substring(modloaderVersion.indexOf("-") + 1);
+					} else if (modloaderVersion.toLowerCase().startsWith("fabric-loader-")) {
+						platform = LaunchPlatform.YARN;
+						modloaderName = "Fabric";
+
+						modloaderVersion = modloaderVersion.substring(modloaderVersion.indexOf("-") + 1);
+						modloaderVersion = modloaderVersion.substring(modloaderVersion.indexOf("-") + 1);
+					} else if (modloaderVersion.toLowerCase().startsWith("paper-")) {
+						platform = LaunchPlatform.SPIGOT;
+						modloaderName = "Paper";
+
+						modloaderVersion = modloaderVersion.substring(modloaderVersion.indexOf("-") + 1);
+					} else {
+						platform = LaunchPlatform.UNKNOWN;
+					}
 				}
 			}
 		}
