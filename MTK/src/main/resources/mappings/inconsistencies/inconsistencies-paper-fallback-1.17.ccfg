@@ -1,0 +1,18 @@
+#
+# Cyan Inconsistency Mappings, for Paper 1.17 compatibility. (fallback mappings)
+# Written by hand, Copyright(c) 2021 Sky Swimmer, LGPL-3.0.
+#
+
+mappingType> TOPLEVEL
+
+mappings> [ {
+    mappingType> CLASS
+    name> 'net.minecraft.server.level.ServerLevel'
+    obfuscated> 'net.minecraft.server.level.WorldServer'
+    mappings> [ {
+        mappingType> METHOD
+        type> 'net.minecraft.core.BlockPosition'
+        name> 'getSharedSpawnPos'
+        obfuscated> 'getSharedSpawnPos'
+    } ]
+} ]

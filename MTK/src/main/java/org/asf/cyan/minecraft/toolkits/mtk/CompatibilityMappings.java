@@ -1,15 +1,21 @@
 package org.asf.cyan.minecraft.toolkits.mtk;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
 import org.asf.cyan.fluid.remapping.MAPTYPE;
 import org.asf.cyan.fluid.remapping.Mapping;
+import org.asf.cyan.fluid.remapping.SimpleMappings;
+import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
 
-class CompatibilityMappings extends VanillaMappings {
+class CompatibilityMappings extends SimpleMappings {
 	protected ArrayList<String> ignoredTypes = new ArrayList<String>();
 
 	protected Mapping<?> createMapping(String in, String out, MAPTYPE type, String returnType, String... argumentTypes)
@@ -128,6 +134,101 @@ class CompatibilityMappings extends VanillaMappings {
 			}
 		}
 		this.mappings = mappingsLst.toArray(t -> new Mapping<?>[t]);
+	}
+
+	public void applyInconsistencyMappings(MinecraftVersionInfo game, String loader, String loaderVersion)
+			throws IOException {
+		String majorVersion = game.getVersion();
+		if (majorVersion.split(".").length >= 3) {
+			majorVersion = majorVersion.substring(0, majorVersion.lastIndexOf("."));
+		}
+
+		ClassLoader classLoader = getClass().getClassLoader();
+		String inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-" + game.getVersion() + "-"
+				+ loaderVersion + ".ccfg";
+		InputStream strm = classLoader.getResourceAsStream(inconsistencyFile);
+		if (strm == null) {
+			inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-" + majorVersion + "-"
+					+ loaderVersion + ".ccfg";
+			strm = classLoader.getResourceAsStream(inconsistencyFile);
+		}
+		if (strm == null) {
+			inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-fallback-" + game.getVersion()
+					+ ".ccfg";
+			strm = classLoader.getResourceAsStream(inconsistencyFile);
+		}
+		if (strm == null) {
+			inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-fallback-" + majorVersion
+					+ ".ccfg";
+			strm = classLoader.getResourceAsStream(inconsistencyFile);
+		}
+		if (strm != null) {
+			LogManager.getLogger().info("Applying inconsistency mappings patch: <mtk-jar>/" + inconsistencyFile);
+			SimpleMappings mappings = new SimpleMappings().readAll(new String(strm.readAllBytes()));
+			strm.close();
+			applyMappingsPatch(mappings);
+		}
+	}
+
+	protected void applyMappingsPatch(SimpleMappings reobf) {
+		for (Mapping<?> map : reobf.mappings) {
+			if (map.mappingType == MAPTYPE.CLASS) {
+				Mapping<?> patch = map;
+				for (Mapping<?> ex : mappings) {
+					if (ex.mappingType == MAPTYPE.CLASS
+							&& (ex.name.equals(map.name) || ex.obfuscated.equals(map.obfuscated))) {
+						ex.name = map.name;
+						ex.obfuscated = map.obfuscated;
+						map = ex;
+						break;
+					}
+				}
+				if (map == patch) {
+					mappings = ArrayUtil.append(mappings, new Mapping[] { map });
+					continue;
+				}
+
+				for (Mapping<?> member : patch.mappings) {
+					if (member.mappingType == MAPTYPE.METHOD) {
+						Mapping<?> ex = null;
+						for (Mapping<?> ex2 : map.mappings) {
+							if (ex2.mappingType == member.mappingType
+									&& (ex2.name.equals(member.name) || ex2.obfuscated.equals(member.obfuscated))
+									&& Arrays.equals(member.argumentTypes, ex2.argumentTypes)) {
+								ex = ex2;
+								break;
+							}
+						}
+						if (ex == null) {
+							map.mappings = ArrayUtil.append(map.mappings, new Mapping[] { member });
+							continue;
+						}
+
+						ex.name = member.name;
+						ex.obfuscated = member.obfuscated;
+						ex.argumentTypes = member.argumentTypes;
+						ex.type = member.type;
+					} else if (member.mappingType == MAPTYPE.PROPERTY) {
+						Mapping<?> ex = null;
+						for (Mapping<?> ex2 : map.mappings) {
+							if (ex2.mappingType == member.mappingType
+									&& (ex2.name.equals(member.name) || ex2.obfuscated.equals(member.obfuscated))) {
+								ex = ex2;
+								break;
+							}
+						}
+						if (ex == null) {
+							map.mappings = ArrayUtil.append(map.mappings, new Mapping[] { member });
+							continue;
+						}
+
+						ex.name = member.name;
+						ex.obfuscated = member.obfuscated;
+						ex.type = member.type;
+					}
+				}
+			}
+		}
 	}
 
 	// Forked methods from FLUID

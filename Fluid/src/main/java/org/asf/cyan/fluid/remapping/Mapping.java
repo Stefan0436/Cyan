@@ -2,12 +2,14 @@ package org.asf.cyan.fluid.remapping;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
 import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
 import org.asf.cyan.api.config.Configuration;
 import org.asf.cyan.api.config.annotations.OptionalEntry;
@@ -427,6 +429,177 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 				fieldmap.name = field.out;
 				fieldmap.obfuscated = field.in;
 				fieldmap.type = field.type.replaceAll("/", ".");
+				fieldmap.mappingType = MAPTYPE.PROPERTY;
+
+				localmappings.add(fieldmap);
+			}
+
+			map.mappings = localmappings.toArray(t2 -> new Mapping<?>[t2]);
+			return map;
+		}).toArray(t -> new Mapping<?>[t]);
+
+		for (Mapping<?> m : this.mappings) {
+			for (Mapping<?> t : m.mappings) {
+				if (t.mappingType.equals(MAPTYPE.METHOD)) {
+					String[] types = t.argumentTypes;
+					if (types.length != 0) {
+						int ind = 0;
+						for (String type : types) {
+							String tSuffix = "";
+							if (type.contains("[]")) {
+								tSuffix = type.substring(type.indexOf("["));
+								type = type.substring(0, type.indexOf("["));
+							}
+							Mapping<?> map = mapClassToMapping(type, t2 -> true, true);
+							if (map != null)
+								types[ind++] = map.name + tSuffix;
+							else
+								ind++;
+						}
+						t.argumentTypes = types;
+					}
+					Mapping<?> map2 = mapClassToMapping(t.type, t2 -> true, true);
+					if (map2 != null)
+						t.type = map2.name;
+				} else if (t.mappingType.equals(MAPTYPE.PROPERTY)) {
+					Mapping<?> map2 = mapClassToMapping(t.type, t2 -> true, true);
+					if (map2 != null)
+						t.type = map2.name;
+				}
+			}
+		}
+
+		return (T) this;
+	}
+
+	/**
+	 * Parse Tiny V2 mappings into this configuration.
+	 * 
+	 * @param mappings         Tiny mappings input text
+	 * @param inputClassifier  Input classifier to use (obfuscated)
+	 * @param outputClassifier Output classifier to use (deobfuscated)
+	 * @return Self
+	 */
+	@SuppressWarnings("unchecked")
+	public T parseTinyV2Mappings(String mappings, String inputClassifier, String outputClassifier) {
+		mappingType = MAPTYPE.TOPLEVEL;
+		name = null;
+		type = null;
+		obfuscated = null;
+
+		mappings = mappings.replaceAll("\r", "");
+		String[] lines = mappings.split("\n");
+
+		TargetMap mp = new TargetMap();
+
+		int id1 = 0;
+		int id2 = 0;
+
+		int index = 0;
+
+		int count = lines.length;
+		for (String line : lines) {
+			if (line.startsWith("#") || line.isEmpty()) {
+				count--;
+			}
+		}
+		String[] newlines = new String[count];
+		count = 0;
+		for (String line : lines)
+			if (!line.startsWith("#") && !line.isEmpty()) {
+				newlines[count++] = line;
+			}
+		lines = newlines;
+
+		String[] tagsHeader = lines[0].split("\t");
+		if (tagsHeader[0].equals("v1")) {
+			LogManager.getLogger().warn(
+					"WARNING: Called the Tiny 2.0 parser for Tiny v1 mappings! The request is delegated to the legacy parser, this behaviour will be removed in Cyan 2.0!"); // TODO
+			return parseTinyV1Mappings(mappings, inputClassifier, outputClassifier);
+		}
+		for (String str : tagsHeader) {
+			if (str.equals(inputClassifier)) {
+				id1 = index;
+			} else if (str.equals(outputClassifier)) {
+				id2 = index;
+			}
+			index++;
+		}
+
+		Target last = null;
+		for (int i = 1; i < lines.length; i++) {
+			String line = lines[i];
+			String tags[] = line.split("\t");
+			if (tags[0].isEmpty())
+				tags = Arrays.copyOfRange(tags, 1, tags.length);
+
+			switch (tags[0]) {
+			case "c":
+				Target t = new Target();
+				t.in = tags[id1 - 2];
+				t.out = tags[id2 - 2];
+				last = t;
+
+				mp.put(t.in, t);
+				break;
+			case "f":
+				String returnTypeF = tags[1];
+				Target field = new Target();
+				field.in = tags[id1 - 1];
+				field.out = tags[id2 - 1];
+				field.type = Fluid.parseDescriptor(returnTypeF);
+
+				last.fields.add(field);
+				break;
+			case "m":
+				String descriptor = tags[1];
+				String returnType = Fluid.parseDescriptor(descriptor.substring(descriptor.lastIndexOf(")") + 1));
+				String types = descriptor.substring(0, descriptor.lastIndexOf(")"));
+				types = types.substring(1);
+
+				String[] argTypes = Fluid.parseMultipleDescriptors(types);
+
+				Target method = new Target();
+				method.in = tags[id1 - 1];
+				method.out = tags[id2 - 1];
+				method.types = argTypes;
+				method.type = returnType;
+
+				last.methods.add(method);
+				break;
+			default:
+				break;
+			}
+		}
+
+		this.mappings = mp.values().stream().map(t -> {
+			@SuppressWarnings("rawtypes")
+			Mapping<?> map = new Mapping();
+
+			map.mappingType = MAPTYPE.CLASS;
+			map.obfuscated = t.in.replaceAll("/", ".");
+			map.name = t.out.replaceAll("/", ".");
+
+			ArrayList<Mapping<?>> localmappings = new ArrayList<Mapping<?>>();
+			for (Target meth : t.methods) {
+				@SuppressWarnings("rawtypes")
+				Mapping<?> methmap = new Mapping();
+
+				methmap.argumentTypes = meth.types;
+				methmap.name = meth.out;
+				methmap.obfuscated = meth.in;
+				methmap.type = meth.type;
+				methmap.mappingType = MAPTYPE.METHOD;
+
+				localmappings.add(methmap);
+			}
+			for (Target field : t.fields) {
+				@SuppressWarnings("rawtypes")
+				Mapping<?> fieldmap = new Mapping();
+
+				fieldmap.name = field.out;
+				fieldmap.obfuscated = field.in;
+				fieldmap.type = field.type;
 				fieldmap.mappingType = MAPTYPE.PROPERTY;
 
 				localmappings.add(fieldmap);
