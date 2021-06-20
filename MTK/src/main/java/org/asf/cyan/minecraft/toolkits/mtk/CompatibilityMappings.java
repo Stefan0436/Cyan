@@ -163,7 +163,7 @@ class CompatibilityMappings extends SimpleMappings {
 			strm = classLoader.getResourceAsStream(inconsistencyFile);
 		}
 		if (strm != null) {
-			LogManager.getLogger().info("Applying inconsistency mappings patch: <mtk-jar>/" + inconsistencyFile);
+			LogManager.getLogger(CompatibilityMappings.class).info("Applying inconsistency mappings patch: <mtk-jar>/" + inconsistencyFile);
 			SimpleMappings mappings = new SimpleMappings().readAll(new String(strm.readAllBytes()));
 			strm.close();
 			applyMappingsPatch(mappings);

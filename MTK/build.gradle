@@ -30,7 +30,7 @@ configurePublish {
 sourceCompatibility = '1.11'
 targetCompatibility = '1.11'
 
-version="1.0.0.A321"
+version="1.0.0.A32"
 jar.dependsOn('processResources')
 
 repositories {
