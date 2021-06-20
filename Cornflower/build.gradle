@@ -44,22 +44,20 @@ buildDir = '../build/Cornflower'
 task javaDocs(type: Javadoc) {
 	classpath = sourceSets.main.runtimeClasspath
 	source = sourceSets.main.allJava
-	
+
 	if (project.hasProperty("liteBuild")) {
 		exclude "**/tasks/CtcTask.**"
 		exclude "**/tasks/CmfTask.**"
 		exclude "**/gradle/utilities/modding/manifests/**"
 		exclude "**/flowerinternal/implementation/cyan/**"
 		exclude "**/gradle/utilities/modding/CyanModfileManifestGenerator.**"
-	}	
+	}
 }
 
 repositories {
 	mavenCentral()
 	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
-	maven { 
-		url 'https://repo.gradle.org/gradle/libs-releases-local/'
-	}
+	maven { name = "Gradle"; url = "https://repo.gradle.org/artifactory/libs-releases-local" }
 }
 
 configurations.implementation.setCanBeResolved(true)
@@ -75,6 +73,9 @@ dependencies {
 	implementation group: 'org.gradle', name: 'gradle-model-core', version: '6.1.1'
 	implementation group: 'org.gradle', name: 'gradle-base-services', version: '6.1.1'
 	implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.0-alpha1'
+
+	implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.0-alpha1'
+	implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.4.0-b180830.0359'
 	
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
@@ -86,31 +87,31 @@ dependencies {
 	implementation group: 'org.ow2.asm', name: 'asm-commons', version: '9.1'
 	implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
 	implementation 'org.javassist:javassist:3.27.1-ASF-SNAPSHOT-5'
-	
+
 	implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
 	implementation group: 'org.jboss.windup.decompiler.fernflower', name: 'windup-fernflower', version: '1.0.0.20171018'
 	implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-api', version: '5.1.2.Final'
 	implementation group: 'org.jboss.windup.utils', name: 'windup-utils', version: '5.1.2.Final'
-	
+
 	implementation 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.13'
-	
+
 	implementation project(":MTK")
 	implementation project(":CyanCore")
 	implementation project(":CyanComponents")
 	implementation project(":CyanUtil")
 	implementation project(":Fluid")
 	implementation project(":CCFG")
-	
+
 	if (!project.hasProperty("liteBuild")) {
 		implementation project(":ClassTrust")
 		implementation project(":CyanLoader")
 		implementation project(":TrustExplorer")
 		implementation (project(':ModKit')) {
-	        exclude group: '', module: 'server'
-	        exclude group: '', module: 'client'
+			exclude group: '', module: 'server'
+			exclude group: '', module: 'client'
 		}
 	}
-	
+
 	mavendependency group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.7'
 	mavendependency group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
 	mavendependency group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
@@ -122,21 +123,21 @@ dependencies {
 	mavendependency group: 'org.ow2.asm', name: 'asm-commons', version: '9.1'
 	mavendependency group: 'org.ow2.asm', name: 'asm-analysis', version: '9.1'
 	mavendependency 'org.javassist:javassist:3.27.1-ASF-SNAPSHOT-5'
-	
+
 	mavendependency group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
 	mavendependency group: 'org.jboss.windup.decompiler.fernflower', name: 'windup-fernflower', version: '1.0.0.20171018'
 	mavendependency group: 'org.jboss.windup.decompiler', name: 'decompiler-api', version: '5.1.2.Final'
 	mavendependency group: 'org.jboss.windup.utils', name: 'windup-utils', version: '5.1.2.Final'
-	
+
 	mavendependency 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.13'
-	
+
 	mavendependency project(":MTK")
 	mavendependency project(":CyanCore")
 	mavendependency project(":CyanComponents")
 	mavendependency project(":CyanUtil")
 	mavendependency project(":Fluid")
-	mavendependency project(":CCFG")	
-	
+	mavendependency project(":CCFG")
+
 	if (!project.hasProperty("liteBuild")) {
 		mavendependency project(":ClassTrust")
 		mavendependency project(":TrustExplorer")
@@ -166,7 +167,7 @@ jar {
 			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
 		])
 	}
-	
+
 	if (project.hasProperty("liteBuild")) {
 		archiveClassifier = "LiteCyan";
 	}
@@ -215,7 +216,7 @@ task javadocJar(type: Jar, dependsOn: 'javaDocs') {
 task cornflowerMTKJar(type: Jar, dependsOn: jar) {
 	from sourceSets.main.output
 	classifier = 'MTK'
-	
+
 	manifest {
 		attributes([
 			"Specification-Title": project.name+"-Utilities",
@@ -227,12 +228,12 @@ task cornflowerMTKJar(type: Jar, dependsOn: jar) {
 			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
 		])
 	}
-	
+
 	exclude "**/tests/**"
 	exclude "**/gradle/tasks/**"
 	exclude "**/gradle/flowerinternal/**"
 	exclude "**/gradle/flowerutil/**"
-	
+
 	includeEmptyDirs = false
 }
 
@@ -251,12 +252,12 @@ cornflowerMTKJavadocJar.dependsOn cornflowerMTKJar
 task cornflowerMTKSourcesJar(type: Jar, dependsOn: classes) {
 	classifier = 'MTK-sources'
 	from sourceSets.main.allSource
-	
+
 	exclude "**/tests/**"
 	exclude "**/gradle/tasks/**"
 	exclude "**/gradle/flowerinternal/**"
 	exclude "**/gradle/flowerutil/**"
-	
+
 	destinationDirectory = libsDirectory.dir("Source Jars")
 	includeEmptyDirs = false
 }
@@ -266,7 +267,7 @@ cornflowerMTKSourcesJar.dependsOn cornflowerMTKJar
 task cornflowerAPIJar(type: Jar, dependsOn: jar) {
 	from sourceSets.main.output
 	classifier = 'API'
-	
+
 	manifest {
 		attributes([
 			"Specification-Title": project.name,
@@ -306,7 +307,7 @@ cornflowerAPISourcesJar.dependsOn cornflowerAPIJar
 task cornflowerExtAPIJar(type: Jar, dependsOn: jar) {
 	from sourceSets.main.output
 	classifier = 'EXT-API'
-	
+
 	manifest {
 		attributes([
 			"Specification-Title": project.name,
@@ -318,7 +319,7 @@ task cornflowerExtAPIJar(type: Jar, dependsOn: jar) {
 			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
 		])
 	}
-	
+
 	include "**/flowerutil/**"
 	include "**/utilities/**"
 	include "**/log4j2.xml"
@@ -349,20 +350,20 @@ configurePublish {
 	description "$plugindescription"
 	page "https://aerialworks.ddns.net/maven"
 	address "https://aerialworks.ddns.net/maven"
-	
+
 	license {
 		license_name "GNU General Public License v2.0"
 		license_url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
 	}
-	
+
 	author {
 		name "$authorname"
 		id "ASF"
 	}
-	
+
 	artifact {
 		artifact_description "Cornflower API, only contains the gradle utilities"
-		
+
 		task {
 			artifact tasks.cornflowerAPIJar
 			classifier ""
@@ -375,16 +376,16 @@ configurePublish {
 			artifact tasks.cornflowerAPISourcesJar
 			classifier "sources"
 		}
-		
+
 		artifact_license {
 			license_name "GNU Lesser General Public License v3.0"
 			license_url "https://www.gnu.org/licenses/lgpl-3.0.txt"
 		}
 	}
-	
+
 	artifact {
 		artifact_description "Cornflower MTK, without any tasks, only the MTK"
-		
+
 		task {
 			artifact tasks.cornflowerMTKJar
 			classifier ""
@@ -397,16 +398,16 @@ configurePublish {
 			artifact tasks.cornflowerMTKSourcesJar
 			classifier "sources"
 		}
-		
+
 		artifact_license {
 			license_name "GNU General Public License v2.0"
 			license_url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
 		}
 	}
-	
+
 	artifact {
 		artifact_description "Cornflower API, with the Modloader Utilities included"
-		
+
 		task {
 			artifact tasks.cornflowerExtAPIJar
 			classifier ""
@@ -419,7 +420,7 @@ configurePublish {
 			artifact tasks.cornflowerExtAPISourcesJar
 			classifier "sources"
 		}
-		
+
 		artifact_license {
 			license_name "GNU General Public License v2.0"
 			license_url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
@@ -500,7 +501,7 @@ if (project.hasProperty("liteBuild")) {
 			copy {
 				from libsDirectory.dir("Required Libraries")
 				from tasks.jar.getArchiveFile()
-				
+
 				rename tasks.jar.getArchiveFile().get().getAsFile().getName(), "Cornflower.jar"
 				into file("../litelibs")
 			}
