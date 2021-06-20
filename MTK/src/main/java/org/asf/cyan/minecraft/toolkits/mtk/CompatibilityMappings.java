@@ -143,27 +143,27 @@ class CompatibilityMappings extends SimpleMappings {
 			majorVersion = majorVersion.substring(0, majorVersion.lastIndexOf("."));
 		}
 
-		ClassLoader classLoader = getClass().getClassLoader();
 		String inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-" + game.getVersion() + "-"
 				+ loaderVersion + ".ccfg";
-		InputStream strm = classLoader.getResourceAsStream(inconsistencyFile);
+		InputStream strm = Thread.currentThread().getContextClassLoader().getResourceAsStream(inconsistencyFile);
 		if (strm == null) {
 			inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-" + majorVersion + "-"
 					+ loaderVersion + ".ccfg";
-			strm = classLoader.getResourceAsStream(inconsistencyFile);
+			strm = Thread.currentThread().getContextClassLoader().getResourceAsStream(inconsistencyFile);
 		}
 		if (strm == null) {
 			inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-fallback-" + game.getVersion()
 					+ ".ccfg";
-			strm = classLoader.getResourceAsStream(inconsistencyFile);
+			strm = Thread.currentThread().getContextClassLoader().getResourceAsStream(inconsistencyFile);
 		}
 		if (strm == null) {
 			inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-fallback-" + majorVersion
 					+ ".ccfg";
-			strm = classLoader.getResourceAsStream(inconsistencyFile);
+			strm = Thread.currentThread().getContextClassLoader().getResourceAsStream(inconsistencyFile);
 		}
 		if (strm != null) {
-			LogManager.getLogger(CompatibilityMappings.class).info("Applying inconsistency mappings patch: <mtk-jar>/" + inconsistencyFile);
+			LogManager.getLogger(CompatibilityMappings.class)
+					.info("Applying inconsistency mappings patch: <mtk-jar>/" + inconsistencyFile);
 			SimpleMappings mappings = new SimpleMappings().readAll(new String(strm.readAllBytes()));
 			strm.close();
 			applyMappingsPatch(mappings);
