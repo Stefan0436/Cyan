@@ -173,7 +173,7 @@ platforms {
 		// Paper version:
 		//
 		// paperVersion = getSupportedPaperVersion(gameVersion, cyanVersion)
-		modloader "16" // paperVersion
+		modloader "17" // paperVersion
 
 		//
 		// SPIGOT mappings version, it is best to only use mappings that have been given a green light by the Cyan team.
