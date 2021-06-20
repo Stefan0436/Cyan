@@ -41,6 +41,10 @@ public class CrashReportModification {
 	@TargetName(target = "getDetails")
 	@InjectAt(location = InjectLocation.TAIL, targetCall = "append(java.lang.String)", targetOwner = "java.lang.StringBuilder", offset = 1)
 	public void getDetails1(StringBuilder var1) {
+		addCyanDetails(var1);
+	}
+
+	public void addCyanDetails(StringBuilder var1) {
 		if (uncategorizedStackTrace != null && uncategorizedStackTrace.length != 0) {
 			areCyanTransformersPresent = false;
 
