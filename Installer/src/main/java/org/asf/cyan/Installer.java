@@ -91,6 +91,8 @@ import javax.swing.JCheckBox;
 
 public class Installer extends CyanComponent {
 
+	private static final String version = "1.13";
+
 	private static Installer impl;
 
 	private static boolean init = false;
@@ -299,6 +301,10 @@ public class Installer extends CyanComponent {
 
 	private void installClient(File outputDir, File cache, ProjectConfig project, boolean interactive)
 			throws IOException {
+		logger.info("");
+		logger.info("KickStart Installer Version " + version + ".");
+		logger.info("For " + project.name + " " + project.version + ".");
+		logger.info("");
 		logger.info("Preparing...");
 		initializeComponents();
 		MinecraftToolkit.resetServerConnectionState();
@@ -350,6 +356,10 @@ public class Installer extends CyanComponent {
 
 	private void installServer(File outputDir, File cache, ProjectConfig project, boolean interactive)
 			throws IOException {
+		logger.info("");
+		logger.info("KickStart Installer Version " + version + ".");
+		logger.info("For " + project.name + " " + project.version + ".");
+		logger.info("");
 		logger.info("Preparing...");
 		initializeComponents();
 		MinecraftToolkit.resetServerConnectionState();
@@ -443,7 +453,7 @@ public class Installer extends CyanComponent {
 		lblNewLabel.setVerticalAlignment(SwingConstants.TOP);
 		lblNewLabel.setPreferredSize(new Dimension(200, 18));
 
-		JLabel lblKickstart = new JLabel("KickStart Installer 1.12 ");
+		JLabel lblKickstart = new JLabel("KickStart Installer " + version + " ");
 		panel.add(lblKickstart, BorderLayout.EAST);
 		lblKickstart.setFont(new Font("SansSerif", Font.BOLD, 12));
 		lblKickstart.setHorizontalAlignment(SwingConstants.TRAILING);
