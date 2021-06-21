@@ -868,6 +868,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 		if (!overwrite && areMappingsAvailable(suffix, identifier, version, side))
 			throw new IOException("File already exists and overwrite is set to false!");
 
+		info("Saving " + version + " " + side.toString().toLowerCase() + " mappings...");
 		String mappings_file = identifier + "-" + version.getVersion() + suffix + "-" + side.toString().toLowerCase()
 				+ ".mappings.ccfg";
 
