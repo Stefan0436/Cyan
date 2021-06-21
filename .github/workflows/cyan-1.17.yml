@@ -27,9 +27,9 @@ jobs:
         java-version: '16'
         distribution: 'adopt'
     - name: Setup git user email
-      run: git config user.email "autobuild@localhost"
+      run: git config --global user.email "autobuild@localhost"
     - name: Setup git user name
-      run: git config user.name autobuild
+      run: git config --global user.name autobuild
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Grant execute permissions to build script
