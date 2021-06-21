@@ -4,8 +4,8 @@
 The github repository mirrors to https://aerialworks.ddns.net/ASF/Cyan.git, you can fork Cyan on github, pull requests will be merged manually.
 
 # Paper 1.17 Support Not Ready
-We are not yet able to support for Paper 1.17, and it will take a lot of time before we can.
-PaperMC has decided to use a mix of yarn and mojang mappings, however the final server jar is still spigot-mapped, but not all mappings match.
+We are not yet able to support for Paper 1.17, and it will take a lot of time before we can.<br/>
+PaperMC has decided to use a mix of yarn and mojang mappings. The final server jar is still spigot-mapped, however not all mappings match.<br/>
 As a result, cyan cannot correctly apply it's transformers, we are working on a patch, but we estimate that will take a while.
 
 <br/>
