@@ -98,17 +98,17 @@ public class PaperCompatibilityMappings extends CompatibilityMappings {
 		try {
 			if (Version.fromString(info.getVersion()).isGreaterOrEqualTo(Version.fromString("1.17"))) {
 				MinecraftToolkit.infoLog("Loading paper support... Preparing PAPER mappings for compatibility...");
-				if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "paper", info, GameSide.SERVER)) {
+				if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "spigot", info, GameSide.SERVER)) {
 
 					if (msg)
 						MinecraftToolkit.infoLog("First time loading with paper support for version " + modloader
 								+ ", downloading PAPER mappings...");
 
 					MinecraftMappingsToolkit.downloadSpigotMappings(mappings, info, mappingsVersion);
-					MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "paper", info, GameSide.SERVER);
+					MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "spigot", info, GameSide.SERVER);
 				}
 
-				Mapping<?> paperMappings = MinecraftMappingsToolkit.loadMappings(mappingsId, "paper", info,
+				Mapping<?> paperMappings = MinecraftMappingsToolkit.loadMappings(mappingsId, "spigot", info,
 						GameSide.SERVER);
 				combine("PAPER", mappings, paperMappings, true);
 			} else {

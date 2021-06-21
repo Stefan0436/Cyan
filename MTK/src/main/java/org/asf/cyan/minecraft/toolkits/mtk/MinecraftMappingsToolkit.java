@@ -381,7 +381,8 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 	 * @return Mapping object representing the version mappings
 	 * @throws IOException If downloading fails
 	 */
-	public static SimpleMappings downloadPaperMappings(Mapping<?> fallback, MinecraftVersionInfo version,
+	public static SimpleMappings downloadPaperMappings(Mapping<?> fallback,
+			MinecraftVersionInfo version,
 			String mappingsVersion) throws IOException {
 		info("Resolving PAPER mappings of minecraft version " + version + "...");
 
@@ -492,6 +493,10 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 			info("Done.");
 		}
 
+
+		info("Mapping the PAPER mappings into CCFG format...");
+		trace("MAP version PAPER mappings into CCFG, caller: " + CallTrace.traceCallName());
+		
 		// load mojang+yarn-spigot-reobf.tiny
 		String mappingsFile = new String(Files.readAllBytes(mojangYarnSpigotReobf.toPath()));
 		SimpleMappings output = new SimpleMappings().parseTinyV2Mappings(mappingsFile, "mojang+yarn", "spigot");
@@ -503,6 +508,10 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 		// generate the combined mappings
 		SimpleMappings fullMappings = new SimpleMappings();
 		map(input, fallback, output, fullMappings);
+
+		trace("SET severMappings property, caller: " + CallTrace.traceCallName());
+		serverMappings = fullMappings;
+		serverMappingsVersion = version;
 
 		return fullMappings;
 	}
