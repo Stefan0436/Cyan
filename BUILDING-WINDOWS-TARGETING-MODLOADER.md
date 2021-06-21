@@ -1,3 +1,9 @@
+# NOTICE
+As of Minecraft 1.17, this guide is outdated and does not apply for Paper.
+We hope to update the guide, but that will take time.
+
+<br/>
+
 # Building for windows and targeting specific modloader.
 As stated in BUILDING, this process is a big rabbit hole, know what you are getting yourself into.
 
