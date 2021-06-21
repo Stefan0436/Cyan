@@ -592,6 +592,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 					if (member.mappingType == MAPTYPE.PROPERTY) {
 						if (!Stream.of(classMapping.mappings).anyMatch(t -> t.obfuscated.equals(member.obfuscated))) {
 							Mapping<?> mem = new SimpleMappings();
+							mem.mappingType = member.mappingType;
 							mem.obfuscated = member.name;
 							mem.name = member.obfuscated;
 							mem.type = mapClass(input, member.type);
@@ -601,6 +602,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 						if (!Stream.of(classMapping.mappings).anyMatch(t -> t.obfuscated.equals(member.obfuscated)
 								&& Arrays.equals(t.argumentTypes, member.argumentTypes))) {
 							Mapping<?> mem = new SimpleMappings();
+							mem.mappingType = member.mappingType;
 							mem.obfuscated = member.name;
 							mem.name = member.obfuscated;
 							mem.type = mapClass(input, member.type);
