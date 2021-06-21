@@ -28,4 +28,9 @@ public class ModKitServerHandshakeEvent extends AbstractExtendedEvent<ServerConn
 	public static ModKitServerHandshakeEvent getInstance() {
 		return implementation;
 	}
+
+	@Override
+	public boolean requiresSynchronizedListeners() {
+		return true;
+	}
 }

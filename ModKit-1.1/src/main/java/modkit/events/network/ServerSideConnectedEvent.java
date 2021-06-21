@@ -28,4 +28,10 @@ public class ServerSideConnectedEvent extends AbstractExtendedEvent<ServerConnec
 	public static ServerSideConnectedEvent getInstance() {
 		return implementation;
 	}
+
+	@Override
+	public boolean requiresSynchronizedListeners() {
+		return true;
+	}
+
 }
