@@ -530,8 +530,11 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 		for (int i = 1; i < lines.length; i++) {
 			String line = lines[i];
 			String tags[] = line.split("\t");
-			if (tags[0].isEmpty())
+			if (tags[0].isEmpty()) {
+				if (tags[1].equals("c"))
+					continue;
 				tags = Arrays.copyOfRange(tags, 1, tags.length);
+			}
 
 			switch (tags[0]) {
 			case "c":
@@ -957,6 +960,9 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 	}
 
 	public Mapping<?> mapClassToMapping(String input, Function<Mapping<?>, Boolean> fn, boolean obfuscated) {
+		if (input.contains("[]")) {
+			input = input.substring(0, input.indexOf("[]"));
+		}
 		for (Mapping<?> map : mappings) {
 			if ((obfuscated ? map.obfuscated : map.name).equals(input) && map.mappingType == MAPTYPE.CLASS) {
 				if (fn.apply(map))

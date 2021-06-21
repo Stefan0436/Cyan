@@ -362,10 +362,15 @@ public class Fluid extends CyanComponent {
 	 * @return Obfuscated class path or the input if not found
 	 */
 	public static String mapClass(String input) {
+		String suffix = "";
+		if (input.contains("[]")) {
+			suffix = input.substring(input.indexOf("[]"));
+			input = input.substring(0, input.indexOf("[]"));
+		}
 		Mapping<?> map = mapClassToMapping(input, t -> true);
 		if (map != null)
-			return map.obfuscated;
-		return input;
+			return map.obfuscated + suffix;
+		return input + suffix;
 	}
 
 	static Mapping<?> mapClassToMapping(String input, Function<Mapping<?>, Boolean> fn) {
