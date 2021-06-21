@@ -574,24 +574,38 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 			SimpleMappings fullMappings) {
 		for (Mapping<?> classMapping : output.mappings) {
 			String type = mapClass(input, classMapping.obfuscated);
-			Mapping<?> map = input.mapClassToMapping(classMapping.obfuscated, t -> true, true);
+			Mapping<?> map = null;
+			for (Mapping<?> classMapping2 : input.mappings) {
+				if (classMapping2.obfuscated.equals(classMapping.obfuscated)) {
+					map = classMapping2;
+					break;
+				}
+			}
 			if (!type.equals(classMapping.obfuscated))
 				classMapping.obfuscated = type;
 			else {
 				type = mapClass(helper, classMapping.obfuscated);
-				map = input.mapClassToMapping(classMapping.obfuscated, t -> true, true);
 				classMapping.obfuscated = type;
 			}
 			if (map != null) {
 				for (Mapping<?> member : map.mappings) {
 					if (member.mappingType == MAPTYPE.PROPERTY) {
 						if (!Stream.of(classMapping.mappings).anyMatch(t -> t.obfuscated.equals(member.obfuscated))) {
-							classMapping.mappings = ArrayUtil.append(classMapping.mappings, new Mapping[] { member });
+							Mapping<?> mem = new SimpleMappings();
+							mem.obfuscated = member.name;
+							mem.name = member.obfuscated;
+							mem.type = mapClass(input, member.type);
+							classMapping.mappings = ArrayUtil.append(classMapping.mappings, new Mapping[] { mem });
 						}
 					} else if (member.mappingType == MAPTYPE.METHOD) {
 						if (!Stream.of(classMapping.mappings).anyMatch(t -> t.obfuscated.equals(member.obfuscated)
 								&& Arrays.equals(t.argumentTypes, member.argumentTypes))) {
-							classMapping.mappings = ArrayUtil.append(classMapping.mappings, new Mapping[] { member });
+							Mapping<?> mem = new SimpleMappings();
+							mem.obfuscated = member.name;
+							mem.name = member.obfuscated;
+							mem.type = mapClass(input, member.type);
+							mem.argumentTypes = mapTypes(input, member.argumentTypes);
+							classMapping.mappings = ArrayUtil.append(classMapping.mappings, new Mapping[] { mem });
 						}
 					}
 				}
