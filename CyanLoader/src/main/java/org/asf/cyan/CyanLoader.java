@@ -2563,7 +2563,8 @@ public class CyanLoader extends ModkitModloader
 			"org.asf.cyan.api.modloader.Modloader", "org.asf.cyan.api.common.CyanComponent",
 			"org.asf.cyan.api.config.Configuration", "org.asf.cyan.api.util.EventUtil",
 			"org.asf.cyan.api.util.ContainerConditions", "org.asf.cyan.api.internal.CyanAPIComponent",
-			"org.asf.cyan.mods.config.CyanModfileManifest" };
+			"org.asf.cyan.mods.config.CyanModfileManifest", "org.asf.cyan.internal.modkitimpl.info.Protocols",
+			"org.asf.cyan.internal.modkitimpl.util.EventUtilImpl" };
 
 	public static boolean doNotTransform(String name) {
 		if (coremodTypes == null) {
