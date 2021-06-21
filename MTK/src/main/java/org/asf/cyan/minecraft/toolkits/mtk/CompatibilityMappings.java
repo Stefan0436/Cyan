@@ -166,25 +166,27 @@ class CompatibilityMappings extends SimpleMappings {
 					.info("Applying inconsistency mappings patch: <mtk-jar>/" + inconsistencyFile);
 			SimpleMappings mappings = new SimpleMappings().readAll(new String(strm.readAllBytes()));
 			strm.close();
-			applyMappingsPatch(mappings);
+			applyMappingsPatch(this, mappings, true);
 		}
 	}
 
-	protected void applyMappingsPatch(SimpleMappings reobf) {
-		for (Mapping<?> map : reobf.mappings) {
+	protected static void applyMappingsPatch(Mapping<?> target, Mapping<?> patchMappings, boolean overwrite) {
+		for (Mapping<?> map : patchMappings.mappings) {
 			if (map.mappingType == MAPTYPE.CLASS) {
 				Mapping<?> patch = map;
-				for (Mapping<?> ex : mappings) {
+				for (Mapping<?> ex : target.mappings) {
 					if (ex.mappingType == MAPTYPE.CLASS
 							&& (ex.name.equals(map.name) || ex.obfuscated.equals(map.obfuscated))) {
-						ex.name = map.name;
-						ex.obfuscated = map.obfuscated;
+						if (overwrite) {
+							ex.name = map.name;
+							ex.obfuscated = map.obfuscated;
+						}
 						map = ex;
 						break;
 					}
 				}
 				if (map == patch) {
-					mappings = ArrayUtil.append(mappings, new Mapping[] { map });
+					target.mappings = ArrayUtil.append(target.mappings, new Mapping[] { map });
 					continue;
 				}
 
@@ -203,7 +205,8 @@ class CompatibilityMappings extends SimpleMappings {
 							map.mappings = ArrayUtil.append(map.mappings, new Mapping[] { member });
 							continue;
 						}
-
+						if (!overwrite)
+							continue;
 						ex.name = member.name;
 						ex.obfuscated = member.obfuscated;
 						ex.argumentTypes = member.argumentTypes;
@@ -221,7 +224,8 @@ class CompatibilityMappings extends SimpleMappings {
 							map.mappings = ArrayUtil.append(map.mappings, new Mapping[] { member });
 							continue;
 						}
-
+						if (!overwrite)
+							continue;
 						ex.name = member.name;
 						ex.obfuscated = member.obfuscated;
 						ex.type = member.type;

@@ -7,8 +7,10 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -22,13 +24,17 @@ import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.versioning.Version;
+import org.asf.cyan.fluid.remapping.MAPTYPE;
 import org.asf.cyan.fluid.remapping.Mapping;
+import org.asf.cyan.fluid.remapping.SimpleMappings;
 import org.asf.cyan.minecraft.toolkits.mtk.internal.MappingsLoadEventProvider;
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import org.apache.logging.log4j.LogManager;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -367,6 +373,291 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 	}
 
 	/**
+	 * Download version mappings into ram (Paper 1.17+)
+	 * 
+	 * @param fallback        Fallback mappings
+	 * @param version         Minecraft version
+	 * @param mappingsVersion Mappings hash
+	 * @return Mapping object representing the version mappings
+	 * @throws IOException If downloading fails
+	 */
+	public static SimpleMappings downloadPaperMappings(Mapping<?> fallback, MinecraftVersionInfo version,
+			String mappingsVersion) throws IOException {
+		info("Resolving PAPER mappings of minecraft version " + version + "...");
+
+		if (!MinecraftToolkit.hasMinecraftDownloadConnection())
+			throw new IOException("No network connection");
+
+		String build = mappingsVersion.split(":")[1].substring(3);
+		String commit = mappingsVersion.split(":")[0];
+
+		File mappingsDir = new File(MinecraftInstallationToolkit.getMinecraftDirectory(),
+				"caches/mappings/paper-" + version.getVersion() + "-" + build);
+		if (!mappingsDir.exists())
+			mappingsDir.mkdirs();
+
+		File officialMojangYarn = new File(mappingsDir, "official-mojang+yarn.tiny");
+		File mojangYarnSpigotReobf = new File(mappingsDir, "mojang+yarn-spigot-reobf.tiny");
+
+		File tmpDir = new File(mappingsDir, "tmp");
+		if (tmpDir.exists())
+			deleteDir(tmpDir);
+
+		if (!officialMojangYarn.exists() || !mojangYarnSpigotReobf.exists()) {
+			info("");
+			info("");
+			info("As of Minecraft 1.17, Cyan will need to compile a part of the Paper server in order to generate compatible mappings.");
+			info("This can be lengthy process, please wait... This process will finish automatically...");
+			info("Please make sure you are running Cyan through Java JDK 16... The process will fail otherwise...");
+			info("");
+			info("Git needs to be installed on the path for this to work.");
+			info("");
+			info("");
+			info("Cloning Paper sources from GitHub... (Paper is owned by PaperMC, not by us)");
+			tmpDir.mkdirs();
+
+			ProcessBuilder builder = new ProcessBuilder("git", "clone", "-n", "https://github.com/PaperMC/Paper");
+			builder.directory(tmpDir);
+			Process proc = builder.start();
+			attachLog(proc);
+			try {
+				proc.waitFor();
+			} catch (InterruptedException e) {
+			}
+			if (proc.exitValue() != 0)
+				throw new IOException("Git exited with non-zero exit code: " + proc.exitValue());
+			tmpDir = new File(tmpDir, "Paper");
+
+			builder = new ProcessBuilder("git", "checkout", commit);
+			builder.directory(tmpDir);
+			proc = builder.start();
+			attachLog(proc);
+			try {
+				proc.waitFor();
+			} catch (InterruptedException e) {
+			}
+			if (proc.exitValue() != 0)
+				throw new IOException("Git exited with non-zero exit code: " + proc.exitValue());
+
+			info("");
+			info("Building Paper mappings using gradle...");
+			info("Applying patches...");
+			File jvm = new File(ProcessHandle.current().info().command().get()).getCanonicalFile();
+			String JAVA_HOME = jvm.getParentFile().getParent();
+			builder = new ProcessBuilder(jvm.getCanonicalPath(), "-cp", "gradle/wrapper/gradle-wrapper.jar",
+					"org.gradle.wrapper.GradleWrapperMain", "applyPatches", "--quiet");
+			builder.environment().put("JAVA_HOME", JAVA_HOME);
+			builder.directory(tmpDir);
+			proc = builder.start();
+			attachLog(proc);
+
+			try {
+				proc.waitFor();
+			} catch (InterruptedException e) {
+			}
+			if (proc.exitValue() != 0)
+				throw new IOException("Gradle exited with non-zero exit code: " + proc.exitValue());
+
+			info("");
+			info("Generating mappings...");
+			builder = new ProcessBuilder(jvm.getCanonicalPath(), "-cp", "gradle/wrapper/gradle-wrapper.jar",
+					"org.gradle.wrapper.GradleWrapperMain", "patchReobfMappings", "--quiet");
+			builder.environment().put("JAVA_HOME", JAVA_HOME);
+			builder.directory(tmpDir);
+			proc = builder.start();
+			attachLog(proc);
+
+			try {
+				proc.waitFor();
+			} catch (InterruptedException e) {
+			}
+			if (proc.exitValue() != 0)
+				throw new IOException("Gradle exited with non-zero exit code: " + proc.exitValue());
+
+			info("");
+			info("Copying mappings into Cyan cache...");
+			File gradleMappingsDir = new File(tmpDir, ".gradle/caches/paperweight/mappings/");
+			if (officialMojangYarn.exists())
+				officialMojangYarn.delete();
+			if (mojangYarnSpigotReobf.exists())
+				mojangYarnSpigotReobf.delete();
+			Files.copy(new File(gradleMappingsDir, officialMojangYarn.getName()).toPath(), officialMojangYarn.toPath());
+			Files.copy(new File(gradleMappingsDir, mojangYarnSpigotReobf.getName()).toPath(),
+					mojangYarnSpigotReobf.toPath());
+
+			info("");
+			info("Deleting temporary files...");
+			tmpDir = new File(mappingsDir, "tmp");
+			deleteDir(tmpDir);
+			info("Done.");
+		}
+
+		// load mojang+yarn-spigot-reobf.tiny
+		String mappingsFile = new String(Files.readAllBytes(mojangYarnSpigotReobf.toPath()));
+		SimpleMappings output = new SimpleMappings().parseTinyV2Mappings(mappingsFile, "mojang+yarn", "spigot");
+
+		// load official-mojang+yarn.tiny
+		mappingsFile = new String(Files.readAllBytes(officialMojangYarn.toPath()));
+		SimpleMappings input = new SimpleMappings().parseTinyV2Mappings(mappingsFile, "mojang+yarn", "official");
+
+		// generate the combined mappings
+		SimpleMappings fullMappings = new SimpleMappings();
+		map(input, fallback, output, fullMappings);
+
+		return fullMappings;
+	}
+
+	private static void attachLog(Process proc) {
+		new Thread(() -> {
+			try {
+				while (proc.isAlive()) {
+					String buffer = "";
+					while (true) {
+						int b = proc.getInputStream().read();
+						if (b == -1)
+							return;
+						char ch = (char) b;
+						if (ch == '\r')
+							continue;
+						else if (ch == '\n')
+							break;
+						buffer += ch;
+					}
+					LogManager.getLogger("PROCESS-LOG").info(buffer);
+				}
+			} catch (IOException e) {
+
+			}
+		}, "Process Logger").start();
+		new Thread(() -> {
+			try {
+				while (proc.isAlive()) {
+					String buffer = "";
+					while (true) {
+						int b = proc.getErrorStream().read();
+						if (b == -1)
+							return;
+						char ch = (char) b;
+						if (ch == '\r')
+							continue;
+						else if (ch == '\n')
+							break;
+						buffer += ch;
+					}
+					LogManager.getLogger("PROCESS-LOG").warn(buffer);
+				}
+			} catch (IOException e) {
+
+			}
+		}, "Process Logger").start();
+	}
+
+	private static void deleteDir(File dir) {
+		for (File f : dir.listFiles(t -> !t.isDirectory())) {
+			f.delete();
+		}
+		for (File d : dir.listFiles(t -> t.isDirectory())) {
+			deleteDir(d);
+		}
+		dir.delete();
+	}
+
+	private static void map(SimpleMappings input, Mapping<?> helper, SimpleMappings output,
+			SimpleMappings fullMappings) {
+		for (Mapping<?> classMapping : output.mappings) {
+			String type = mapClass(input, classMapping.obfuscated);
+			if (!type.equals(classMapping.obfuscated))
+				classMapping.obfuscated = type;
+			else {
+				type = mapClass(helper, classMapping.obfuscated);
+				classMapping.obfuscated = type;
+			}
+			for (Mapping<?> member : classMapping.mappings) {
+				if (member.mappingType == MAPTYPE.PROPERTY) {
+					member.obfuscated = mapProperty(input, classMapping.obfuscated, member.obfuscated, true);
+				}
+			}
+			for (Mapping<?> member : classMapping.mappings) {
+				if (member.mappingType == MAPTYPE.METHOD) {
+					member.obfuscated = mapMethod(input, classMapping.obfuscated, member.obfuscated, true,
+							mapTypes(input, member.argumentTypes));
+				}
+			}
+			fullMappings.add(classMapping);
+		}
+	}
+
+	private static String mapProperty(Mapping<?> mappings, String classPath, String propertyName, boolean obfuscated) {
+		final String pName = propertyName;
+		Mapping<?> map = mappings.mapClassToMapping(classPath, t -> Stream.of(t.mappings).anyMatch(
+				t2 -> t2.mappingType == MAPTYPE.PROPERTY && (!obfuscated ? t2.name : t2.obfuscated).equals(pName)),
+				false);
+		if (map != null) {
+			map = Stream.of(map.mappings).filter(
+					t2 -> t2.mappingType == MAPTYPE.PROPERTY && (!obfuscated ? t2.name : t2.obfuscated).equals(pName))
+					.findFirst().get();
+			if (!obfuscated)
+				propertyName = map.obfuscated;
+			else
+				propertyName = map.name;
+		}
+		return propertyName;
+	}
+
+	private static String mapMethod(Mapping<?> mappings, String classPath, String methodName, boolean obfuscated,
+			String... methodParameters) {
+		return mapMethod(mappings, classPath, methodName, obfuscated, false, methodParameters);
+	}
+
+	private static String mapMethod(Mapping<?> mappings, String classPath, String methodName, boolean obfuscated,
+			boolean getPath, String... methodParameters) {
+		final String mName = methodName;
+		Mapping<?> map = mappings.mapClassToMapping(classPath,
+				t -> Stream.of(t.mappings)
+						.anyMatch(t2 -> t2.mappingType.equals(MAPTYPE.METHOD)
+								&& (!obfuscated ? t2.name : t2.obfuscated).equals(mName)
+								&& Arrays.equals(t2.argumentTypes, methodParameters)),
+				false);
+		if (map != null) {
+			classPath = map.obfuscated;
+			map = Stream.of(map.mappings)
+					.filter(t2 -> t2.mappingType == MAPTYPE.METHOD
+							&& (!obfuscated ? t2.name : t2.obfuscated).equals(mName)
+							&& Arrays.equals(t2.argumentTypes, methodParameters))
+					.findFirst().get();
+			if (!obfuscated)
+				methodName = map.obfuscated;
+			else
+				methodName = map.name;
+		}
+		if (getPath)
+			return classPath + "." + methodName;
+		else
+			return methodName;
+	}
+
+	private static String mapClass(Mapping<?> mp, String input) {
+		String suffix = "";
+		if (input.contains("[]")) {
+			suffix = input.substring(input.indexOf("[]"));
+			input = input.substring(0, input.indexOf("[]"));
+		}
+		Mapping<?> map = mp.mapClassToMapping(input, t -> true, true);
+		if (map != null)
+			return map.name + suffix;
+		return input + suffix;
+	}
+
+	private static String[] mapTypes(Mapping<?> input, String[] argumentTypes) {
+		String[] newTypes = new String[argumentTypes.length];
+		int i = 0;
+		for (String type : argumentTypes) {
+			newTypes[i++] = mapClass(input, type);
+		}
+		return newTypes;
+	}
+
+	/**
 	 * Download version mappings into ram (SPIGOT)
 	 * 
 	 * @param fallback        Fallback mappings
@@ -375,8 +666,10 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 	 * @return Mapping object representing the version mappings
 	 * @throws IOException If downloading fails
 	 */
-	public static SpigotMappings downloadSpigotMappings(Mapping<?> fallback, MinecraftVersionInfo version,
+	public static Mapping<?> downloadSpigotMappings(Mapping<?> fallback, MinecraftVersionInfo version,
 			String mappingsVersion) throws IOException {
+		if (mappingsVersion.split(":")[1].startsWith("PB"))
+			return downloadPaperMappings(fallback, version, mappingsVersion);
 		info("Resolving SPIGOT mappings of minecraft version " + version + "...");
 
 		if (!MinecraftToolkit.hasMinecraftDownloadConnection())
