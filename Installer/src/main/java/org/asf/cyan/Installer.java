@@ -91,7 +91,7 @@ import javax.swing.JCheckBox;
 
 public class Installer extends CyanComponent {
 
-	private static final String version = "1.15";
+	private static final String version = "1.16";
 
 	private static Installer impl;
 
@@ -301,6 +301,10 @@ public class Installer extends CyanComponent {
 
 	private void installClient(File outputDir, File cache, ProjectConfig project, boolean interactive)
 			throws IOException {
+
+		if (project.loader.equals("fabric"))
+			project.loader = "fabric-loader";
+		
 		logger.info("");
 		logger.info("KickStart Installer Version " + version + ".");
 		logger.info("For " + project.name + " " + project.version + ".");
@@ -356,6 +360,10 @@ public class Installer extends CyanComponent {
 
 	private void installServer(File outputDir, File cache, ProjectConfig project, boolean interactive)
 			throws IOException {
+
+		if (project.loader.equals("fabric"))
+			project.loader = "fabric-loader";
+		
 		logger.info("");
 		logger.info("KickStart Installer Version " + version + ".");
 		logger.info("For " + project.name + " " + project.version + ".");
@@ -478,6 +486,10 @@ public class Installer extends CyanComponent {
 				+ (project.loader.isEmpty() ? ""
 						: ", " + project.loader.substring(0, 1).toUpperCase() + project.loader.substring(1)
 								+ (project.loaderVersion.isEmpty() ? "" : " " + project.loaderVersion)));
+		
+		if (project.loader.equals("fabric"))
+			project.loader = "fabric-loader";
+		
 		lblNewLabel_2.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel_2.setFont(new Font("SansSerif", Font.PLAIN, 16));
 		panel_1.add(lblNewLabel_2, BorderLayout.SOUTH);
