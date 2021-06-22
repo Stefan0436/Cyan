@@ -573,6 +573,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 	private static void map(SimpleMappings input, Mapping<?> helper, SimpleMappings output,
 			SimpleMappings fullMappings) {
 		for (Mapping<?> classMapping : output.mappings) {
+			String oldType = classMapping.obfuscated;
 			String type = mapClass(input, classMapping.obfuscated);
 			Mapping<?> map = null;
 			for (Mapping<?> classMapping2 : input.mappings) {
@@ -595,7 +596,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 							mem.mappingType = member.mappingType;
 							mem.obfuscated = member.name;
 							mem.name = member.obfuscated;
-							mem.type = mapClass(input, member.type);
+							mem.type = mapClass(input, member.type, false);
 							classMapping.mappings = ArrayUtil.append(classMapping.mappings, new Mapping[] { mem });
 						}
 					} else if (member.mappingType == MAPTYPE.METHOD) {
@@ -605,8 +606,8 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 							mem.mappingType = member.mappingType;
 							mem.obfuscated = member.name;
 							mem.name = member.obfuscated;
-							mem.type = mapClass(input, member.type);
-							mem.argumentTypes = mapTypes(input, member.argumentTypes);
+							mem.type = mapClass(input, member.type, false);
+							mem.argumentTypes = mapTypes(input, member.argumentTypes, false);
 							classMapping.mappings = ArrayUtil.append(classMapping.mappings, new Mapping[] { mem });
 						}
 					}
@@ -614,10 +615,10 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 			}
 			for (Mapping<?> member : classMapping.mappings) {
 				if (member.mappingType == MAPTYPE.PROPERTY) {
-					member.obfuscated = mapProperty(input, classMapping.obfuscated, member.obfuscated, true);
+					member.obfuscated = mapProperty(input, oldType, member.obfuscated, true);
 				} else if (member.mappingType == MAPTYPE.METHOD) {
-					member.obfuscated = mapMethod(input, classMapping.obfuscated, member.obfuscated, true,
-							mapTypes(input, member.argumentTypes));
+					member.obfuscated = mapMethod(input, oldType, member.obfuscated, true,
+							mapTypes(input, mapTypes(output, member.argumentTypes, false)));
 				}
 			}
 			fullMappings.add(classMapping);
@@ -628,7 +629,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 		final String pName = propertyName;
 		Mapping<?> map = mappings.mapClassToMapping(classPath, t -> Stream.of(t.mappings).anyMatch(
 				t2 -> t2.mappingType == MAPTYPE.PROPERTY && (!obfuscated ? t2.name : t2.obfuscated).equals(pName)),
-				false);
+				obfuscated);
 		if (map != null) {
 			map = Stream.of(map.mappings).filter(
 					t2 -> t2.mappingType == MAPTYPE.PROPERTY && (!obfuscated ? t2.name : t2.obfuscated).equals(pName))
@@ -654,7 +655,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 						.anyMatch(t2 -> t2.mappingType.equals(MAPTYPE.METHOD)
 								&& (!obfuscated ? t2.name : t2.obfuscated).equals(mName)
 								&& Arrays.equals(t2.argumentTypes, methodParameters)),
-				false);
+				obfuscated);
 		if (map != null) {
 			classPath = map.obfuscated;
 			map = Stream.of(map.mappings)
@@ -674,22 +675,30 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 	}
 
 	private static String mapClass(Mapping<?> mp, String input) {
+		return mapClass(mp, input, true);
+	}
+
+	private static String[] mapTypes(Mapping<?> input, String[] argumentTypes) {
+		return mapTypes(input, argumentTypes, true);
+	}
+
+	private static String mapClass(Mapping<?> mp, String input, boolean obfuscated) {
 		String suffix = "";
 		if (input.contains("[]")) {
 			suffix = input.substring(input.indexOf("[]"));
 			input = input.substring(0, input.indexOf("[]"));
 		}
-		Mapping<?> map = mp.mapClassToMapping(input, t -> true, true);
+		Mapping<?> map = mp.mapClassToMapping(input, t -> true, obfuscated);
 		if (map != null)
-			return map.name + suffix;
+			return (!obfuscated ? map.obfuscated : map.name) + suffix;
 		return input + suffix;
 	}
 
-	private static String[] mapTypes(Mapping<?> input, String[] argumentTypes) {
+	private static String[] mapTypes(Mapping<?> input, String[] argumentTypes, boolean obfuscated) {
 		String[] newTypes = new String[argumentTypes.length];
 		int i = 0;
 		for (String type : argumentTypes) {
-			newTypes[i++] = mapClass(input, type);
+			newTypes[i++] = mapClass(input, type, obfuscated);
 		}
 		return newTypes;
 	}
