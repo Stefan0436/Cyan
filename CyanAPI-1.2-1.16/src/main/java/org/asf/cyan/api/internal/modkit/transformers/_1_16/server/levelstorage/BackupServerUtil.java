@@ -148,7 +148,10 @@ public class BackupServerUtil extends CyanComponent implements LevelModDataReade
 	}
 
 	private static void ignoreMessage() {
+		if (hadPrompted)
+			return;
 		warn("Resuming server startup, no backup will be created.");
+		hadPrompted = true;
 	}
 
 	public static void cancelStartup() {
