@@ -132,6 +132,16 @@ public class ObjectSerializer {
 		}
 	}
 
+	private static Pattern deserializePtrn1 = Pattern.compile("([^\\\\])\\\\r");
+	private static Pattern deserializePtrn2 = Pattern.compile("([^\\\\])\\\\b");
+	private static Pattern deserializePtrn3 = Pattern.compile("([^\\\\])\\\\t");
+	private static Pattern deserializePtrn4 = Pattern.compile("([^\\\\])\\\\f");
+
+	private static Matcher dpMatcher1 = deserializePtrn1.matcher("");
+	private static Matcher dpMatcher2 = deserializePtrn2.matcher("");
+	private static Matcher dpMatcher3 = deserializePtrn3.matcher("");
+	private static Matcher dpMatcher4 = deserializePtrn4.matcher("");
+
 	/**
 	 * De-serialize CCFG-formatted element string
 	 * 
@@ -150,14 +160,14 @@ public class ObjectSerializer {
 		switch (cls.getTypeName()) {
 		case "java.lang.String":
 
-			input = input.replaceAll("([^\\\\])\\\\r", "$1\r");
-			input = input.replaceAll("\\\\r", "\\r");
-			input = input.replaceAll("([^\\\\])\\\\b", "$1\b");
-			input = input.replaceAll("\\\\b", "\\b");
-			input = input.replaceAll("([^\\\\])\\\\t", "$1\t");
-			input = input.replaceAll("\\\\t", "\\t");
-			input = input.replaceAll("([^\\\\])\\\\f", "$1\f");
-			input = input.replaceAll("\\\\f", "\\f");
+			input = dpMatcher1.reset(input).replaceAll("$1\r");
+			input = input.replace("\\\\r", "\\r");
+			input = dpMatcher2.reset(input).replaceAll("$1\b");
+			input = input.replace("\\\\b", "\\b");
+			input = dpMatcher3.reset(input).replaceAll("$1\t");
+			input = input.replace("\\\\t", "\\t");
+			input = dpMatcher4.reset(input).replaceAll("$1\f");
+			input = input.replace("\\\\f", "\\f");
 
 			int index = 0;
 			for (String ch : escapeCharSequences) {
@@ -422,6 +432,16 @@ public class ObjectSerializer {
 		return serialize(input, "");
 	}
 
+	private static Pattern pattern1 = Pattern.compile("\\\\([^rbft012'])");
+	private static Pattern pattern2 = Pattern.compile("\\\\([012][^0-9][^0-9])");
+	private static Pattern pattern3 = Pattern.compile("\\\\([012][0-9][^0-9])");
+	private static Pattern pattern4 = Pattern.compile("([^\\\\])'");
+
+	private static Matcher matcher1 = pattern1.matcher("");
+	private static Matcher matcher2 = pattern2.matcher("");
+	private static Matcher matcher3 = pattern3.matcher("");
+	private static Matcher matcher4 = pattern4.matcher("");
+
 	static <T> String serialize(T input, String indent) throws IOException {
 		Class<?> cls = input.getClass();
 
@@ -436,13 +456,13 @@ public class ObjectSerializer {
 				output = output.replace(ch, "\\" + seq);
 			}
 
-			output = output.replaceAll("\\\\([^rbft012'])", "\\\\$0");
-			output = output.replaceAll("\\\\([012][^0-9][^0-9])", "\\\\$0");
-			output = output.replaceAll("\\\\([012][0-9][^0-9])", "\\\\$0");
+			output = matcher1.reset(output).replaceAll("\\\\$0");
+			output = matcher2.reset(output).replaceAll("\\\\$0");
+			output = matcher3.reset(output).replaceAll("\\\\$0");
 
 			output = output.replace("\\'", "\\\\\\'");
-			output = output.replaceAll("([^\\\\])'", "$1\\\\'");
-			output = output.replaceAll("''", "'\\\\'");
+			output = matcher4.reset(output).replaceAll("$1\\\\'");
+			output = output.replace("''", "'\\'");
 
 			if (output.startsWith("'"))
 				output = "\\" + output;
