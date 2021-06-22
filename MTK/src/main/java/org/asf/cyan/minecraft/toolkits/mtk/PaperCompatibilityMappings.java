@@ -110,6 +110,7 @@ public class PaperCompatibilityMappings extends CompatibilityMappings {
 
 				Mapping<?> paperMappings = MinecraftMappingsToolkit.loadMappings(mappingsId, "spigot", info,
 						GameSide.SERVER);
+				ignoredTypes.add("net.minecraft.network.protocol.status.ServerStatus$Serializer");
 				combine("PAPER", mappings, paperMappings, true);
 			} else {
 				MinecraftToolkit.infoLog("Loading paper support... Preparing SPIGOT mappings for compatibility...");

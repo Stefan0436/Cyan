@@ -4,7 +4,6 @@
 #
 
 mappingType> TOPLEVEL
-mappingsVersion> '3cec511b16ffa31cb414997a14be313716882e12' 
 
 mappings> [ {
     mappingType> CLASS
@@ -15,5 +14,16 @@ mappings> [ {
         type> 'net.minecraft.core.BlockPosition'
         name> 'getSharedSpawnPos'
         obfuscated> 'getSharedSpawnPos'
+    } ]
+} {
+    mappingType> CLASS
+    name> 'net.minecraft.server.gui.MinecraftServerGui'
+    obfuscated> 'net.minecraft.server.gui.ServerGUI'
+    mappings> [ {
+        type> 'void'
+        name> 'print'
+        obfuscated> 'a'
+        mappingType> METHOD
+        argumentTypes> [ 'javax.swing.JTextArea' 'javax.swing.JScrollPane' 'java.lang.String' ]
     } ]
 } ]
