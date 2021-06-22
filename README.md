@@ -3,10 +3,12 @@
 # NOTICE
 The github repository mirrors to https://aerialworks.ddns.net/ASF/Cyan.git, you can fork Cyan on github, pull requests will be merged manually.
 
-# Paper 1.17 Support Not Ready
-We are not yet able to support for Paper 1.17, and it will take a lot of time before we can.<br/>
-PaperMC has decided to use a mix of yarn and mojang mappings. The final server jar is still spigot-mapped, however not all mappings match.
-As a result, cyan cannot correctly apply it's transformers, we are working on a patch, but we estimate that will take a while.
+# Paper 1.17 Support In Alpha Phase
+Paper 1.17 support is slowly coming together, the development is of Cyan is going faster than i initially expected.<br/>
+Paper can launch together with Cyan, but is still EXTREMELY BUGGY. We try to improve stability with each Cyan patch, but things can go wrong.
+
+In short: you can install CyanPaper, however, USE IT AT YOUR OWN RISK.<br/>
+The AerialWorks Software Foundation will not be held responsible for damaged server files.
 
 <br/>
 
@@ -62,7 +64,7 @@ If the '*' is present, the version is not ready for release
 | :----------: | :--------: | :---------: | :--------: | :----------: | :---------: | :---------: |
 | 1.0.0.A12    | 36.1.13    | 0.11.3      | 634        | Unsupported  | Unsupported | Unsupported |
 | 1.0.0.A13    | 36.1.23    | 0.11.3      | 703        | Unsupported  | Unsupported | Unsupported |
-| 1.0.0.A14    | 36.1.32    | 0.11.6      | 778        | Unknown      | 0.11.6      | 28          |
+| 1.0.0.A14    | 36.1.32    | 0.11.6      | 778        | Unknown      | 0.11.6      | 32          |
 
 # Projects used
 Please note that not a single project is actually distributed, the mappings are being generated (downloaded and re-formatted) by CYAN on launch, only version information is used.
