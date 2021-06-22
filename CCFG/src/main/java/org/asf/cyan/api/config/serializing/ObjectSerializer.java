@@ -35,9 +35,14 @@ public class ObjectSerializer {
 	static int[] manualEscapeChars = new int[] { '\t', '\n', '\b', '\r', '\f' };
 	static String[] escapeChars;
 	static String[] escapeCharSequences;
+	static Pattern[] escapeCharPatterns;
+	static Matcher[] escapeCharMatchers;
+
 	static {
 		ArrayList<String> chars = new ArrayList<String>();
 		ArrayList<String> chars2 = new ArrayList<String>();
+		ArrayList<Pattern> patterns = new ArrayList<Pattern>();
+		ArrayList<Matcher> matchers = new ArrayList<Matcher>();
 		for (int ch = 0; ch <= Character.MAX_VALUE; ch++) {
 			final int chf = ch;
 			if (Character.isISOControl(ch) && !IntStream.of(manualEscapeChars).anyMatch(t -> t == chf)) {
@@ -46,10 +51,15 @@ public class ObjectSerializer {
 					str = "0" + str;
 				chars.add(str);
 				chars2.add(Character.toString(ch));
+				Pattern ptrn = Pattern.compile("([^\\\\])\\\\" + str);
+				patterns.add(ptrn);
+				matchers.add(ptrn.matcher(""));
 			}
 		}
 		escapeCharSequences = chars.toArray(t -> new String[t]);
 		escapeChars = chars2.toArray(t -> new String[t]);
+		escapeCharPatterns = patterns.toArray(t -> new Pattern[t]);
+		escapeCharMatchers = matchers.toArray(t -> new Matcher[t]);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -171,10 +181,11 @@ public class ObjectSerializer {
 
 			int index = 0;
 			for (String ch : escapeCharSequences) {
+				Matcher matcher = escapeCharMatchers[index];
 				String chr = escapeChars[index++];
 				if (input.startsWith("\\" + ch))
 					input = input.substring(("\\" + ch).length()) + chr;
-				input = input.replaceAll("([^\\\\])\\\\" + ch, "$1" + chr);
+				input = matcher.reset(input).replaceAll("$1" + chr);
 				input = input.replace("\\\\" + ch, "\\" + ch);
 			}
 
