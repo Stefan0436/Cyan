@@ -10,6 +10,8 @@ import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Consumer;
+import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
 import org.asf.cyan.api.common.CyanComponent;
@@ -112,7 +114,18 @@ public class FluidAgent extends CyanComponent {
 
 	static boolean ranHooks = false;
 	private static boolean loadedAgents = false;
+	private static Instrumentation inst = null;
 
+	/**
+	 * Adds the given file to the system class path
+	 * 
+	 * @param f File to add
+	 * @throws IOException If adding the jar fails
+	 */
+	public static void addToClassPath(File f) throws IOException {
+		inst.appendToSystemClassLoaderSearch(new JarFile(f));
+	}
+	
 	/**
 	 * Main agent startup method
 	 * 
@@ -120,6 +133,8 @@ public class FluidAgent extends CyanComponent {
 	 * @param inst Java instrumentation
 	 */
 	public static void agentmain(final String args, final Instrumentation inst) {
+		if (FluidAgent.inst == null)
+			FluidAgent.inst = inst;
 		if (loaded)
 			return;
 
@@ -256,6 +271,7 @@ public class FluidAgent extends CyanComponent {
 							pool.readClass(className, classfileBuffer);
 						}
 					}
+					
 					return bytecode;
 				} catch (IOException ex) {
 					fatal("FLUID transformation failed! Class: " + className, ex);
@@ -271,5 +287,11 @@ public class FluidAgent extends CyanComponent {
 				return null;
 			}
 		});
+	}
+
+	public static void forAllClasses(Consumer<Class<?>> function) {
+		Class<?>[] classes = inst.getAllLoadedClasses();
+		for (Class<?> cls : classes)
+			function.accept(cls);
 	}
 }

@@ -280,23 +280,24 @@ public class MtkCLI extends CyanComponent {
 		System.err.println();
 		System.err.println("Tasks:");
 		System.err.println(
-				" - mappings <mojang/spigot/yarn/mcp> <version> [<client/server> (mojang/yarn/mcp only)] [<mappings-version> (mcp/spigot/yarn only)] - download mappings");
+				" - mappings <mojang/spigot/yarn/mcp> <version> [<client/server> (mojang/yarn/mcp only)]    - download mappings");
+		System.err.println("   [<mappings-version> (mcp/spigot/yarn only)");
 		System.err.println(
-				" - jar <version> <client/server>                                                                                                    - download game jars");
+				" - jar <version> <client/server>                                                           - download game jars");
 		System.err.println(
-				" - deobfuscate <version> <client/server>                                                                                            - deobfuscate game jars");
+				" - deobfuscate <version> <client/server>                                                   - deobfuscate game jars");
 		System.err.println(
-				" - libraries <version>                                                                                                              - download game library jars");
+				" - libraries <version>                                                                     - download game library jars");
 		System.err.println(
-				" - client <version>                                                                                                                 - download game libraries and asset files");
+				" - client <version>                                                                        - download game libraries and asset files");
 		System.err.println(
-				" - validate <version>                                                                                                               - validate client files (returns 1 if it fails)");
+				" - validate <version>                                                                      - validate client files (returns 1 if it fails)");
 		System.err.println(
-				" - manifest <version>                                                                                                               - download game version manifests");
+				" - manifest <version>                                                                      - download game version manifests");
 		System.err.println(
-				" - yggdrasil <authfile>                                                                                                             - authenticate a mojang user");
+				" - yggdrasil <authfile>                                                                    - authenticate a mojang user");
 		System.err.println(
-				" - runclient <version> <gamedir> <authfile>                                                                                         - runs the client");
+				" - runclient <version> <gamedir> <authfile>                                                - runs the client");
 		System.err.println();
 		System.err.println("The MTK and its CLI are licensed LGPL v3. Feel free to use these projects, as long");
 		System.err.println("as you give credit to the AerialWorks Software Foundation and its contributors.");

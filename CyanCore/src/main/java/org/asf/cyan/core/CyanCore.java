@@ -378,7 +378,7 @@ public class CyanCore extends CyanComponent {
 							}
 							i = new URL(newURL);
 						} else if (i.toString().startsWith("jar:")) {
-							i = new URL( i.toString().substring(4, i.toString().lastIndexOf("!/")));
+							i = new URL(i.toString().substring(4, i.toString().lastIndexOf("!/")));
 						}
 
 						if (rname.startsWith("org/asf/cyan/") || rname.equals("org/asf/cyan")
@@ -408,7 +408,7 @@ public class CyanCore extends CyanComponent {
 							}
 							i = new URL(newURL);
 						} else if (i.toString().startsWith("jar:")) {
-							i = new URL( i.toString().substring(4, i.toString().lastIndexOf("!/")));
+							i = new URL(i.toString().substring(4, i.toString().lastIndexOf("!/")));
 						}
 
 						if (rname.startsWith("org/asf/cyan/") || rname.equals("org/asf/cyan")

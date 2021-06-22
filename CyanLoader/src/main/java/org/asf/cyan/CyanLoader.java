@@ -59,6 +59,7 @@ import org.asf.cyan.core.CyanInfo;
 import org.asf.cyan.core.SimpleModloader;
 import org.asf.cyan.core.StartupWindow;
 import org.asf.cyan.fluid.Fluid;
+import org.asf.cyan.fluid.FluidAgent;
 import org.asf.cyan.fluid.api.ClassLoadHook;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.information.metadata.TransformerMetadata;
@@ -997,6 +998,8 @@ public class CyanLoader extends ModkitModloader
 		}
 	}
 
+	private ArrayList<File> addToSystemLater = new ArrayList<File>();
+
 	private void importCoremod(File ccmf) throws IOException {
 		String ccfg = null;
 		ArrayList<String> modClasses = new ArrayList<String>();
@@ -1236,6 +1239,7 @@ public class CyanLoader extends ModkitModloader
 					}
 					modJar.close();
 					CyanCore.addCoreUrl(output.toURI().toURL());
+					addToSystemLater.add(output);
 				}
 			}
 
@@ -2107,7 +2111,7 @@ public class CyanLoader extends ModkitModloader
 					Fluid.registerHook(hook);
 				}
 				for (Class<?> hook : findClasses(getMainImplementation(), ClassLoadHook.class,
-						getClass().getClassLoader())) {
+						CyanCore.getCoreClassLoader(), getClass().getClassLoader())) {
 					if (hook.isAnnotationPresent(SideOnly.class)
 							&& hook.getAnnotation(SideOnly.class).value() != getModloaderGameSide()) {
 						continue;
@@ -2374,6 +2378,15 @@ public class CyanLoader extends ModkitModloader
 		loadEvents();
 		StartupWindow.WindowAppender.increaseProgress();
 
+		info("Adding coremod paths to system classloader...");
+		addToSystemLater.forEach(t -> {
+			try {
+				FluidAgent.addToClassPath(t);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		addToSystemLater.clear();
 		info("Loading coremods...");
 		loadCoreMods(loader);
 		StartupWindow.WindowAppender.increaseProgress();
@@ -2561,11 +2574,10 @@ public class CyanLoader extends ModkitModloader
 			"org.asf.cyan.mods.IMod", "org.asf.cyan.mods.ICoreMod", "org.asf.cyan.mods.AbstractCoremod",
 			"org.asf.cyan.mods.AbstractMod", "org.asf.cyan.mods.IBaseMod", "org.asf.cyan.core.CyanCore",
 			"org.asf.cyan.api.modloader.Modloader", "org.asf.cyan.api.common.CyanComponent",
-			"org.asf.cyan.api.config.Configuration", "modkit.util.EventUtil",
-			"modkit.util.ContainerConditions", "org.asf.cyan.api.internal.CyanAPIComponent",
-			"org.asf.cyan.mods.config.CyanModfileManifest",
-			"org.asf.cyan.internal.modkitimpl.info.Protocols",
-			"org.asf.cyan.internal.modkitimpl.util.EventUtilImpl" };
+			"org.asf.cyan.api.config.Configuration", "modkit.util.EventUtil", "modkit.util.ContainerConditions",
+			"org.asf.cyan.api.internal.CyanAPIComponent", "org.asf.cyan.mods.config.CyanModfileManifest",
+			"org.asf.cyan.internal.modkitimpl.info.Protocols", "org.asf.cyan.internal.modkitimpl.util.EventUtilImpl" };
+	static String[] dntPackages = new String[] {};
 
 	public static boolean doNotTransform(String name) {
 		if (coremodTypes == null) {
@@ -2574,7 +2586,8 @@ public class CyanLoader extends ModkitModloader
 		}
 
 		return Stream.of(cyanClasses).anyMatch(t -> t.equals(name))
-				|| Stream.of(coremodTypes).anyMatch(t -> t.equals(name));
+				|| Stream.of(coremodTypes).anyMatch(t -> t.equals(name))
+				|| Stream.of(dntPackages).anyMatch(t -> name.startsWith(t + "."));
 	}
 
 	public static void setCallTraceClassLoader(ClassLoader loader) {

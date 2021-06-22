@@ -14,6 +14,7 @@ import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * 
@@ -68,7 +69,8 @@ public class DynamicClassLoader extends URLClassLoader {
 	public static final int OPTION_ALLOW_DEFINE = 0x1 << 1;
 
 	/**
-	 * Sets the class loader to force the parent to load classes instead of doing it itself.
+	 * Sets the class loader to force the parent to load classes instead of doing it
+	 * itself.
 	 */
 	public static final int OPTION_DENY_SELF_LOAD = 0x1 << 2;
 
@@ -328,6 +330,14 @@ public class DynamicClassLoader extends URLClassLoader {
 		return cl;
 	}
 
+	private ArrayList<Function<String, Boolean>> classRestrictions = new ArrayList<Function<String, Boolean>>();
+
+	public void addLoadRestriction(Function<String, Boolean> restriction) {
+		if (secured)
+			throw new IllegalStateException("Classloader has been secured! Cannot add restrictions!");
+		classRestrictions.add(restriction);
+	}
+
 	Class<?> doLoadClass(String name, boolean resolve) throws ClassNotFoundException {
 		if (!allowSelfToLoad) {
 			if (getParent() == null)
@@ -336,8 +346,9 @@ public class DynamicClassLoader extends URLClassLoader {
 				return getParent().loadClass(name);
 		}
 
-		if (!allowSelfToDefine)
+		if (!allowSelfToDefine || classRestrictions.stream().anyMatch(t -> t.apply(name))) {
 			return super.loadClass(name, resolve);
+		}
 
 		String path = name.replaceAll("\\.", "/") + ".class";
 		for (URL u : getURLs()) {
@@ -432,6 +443,19 @@ public class DynamicClassLoader extends URLClassLoader {
 			return resource.openStream();
 		} catch (IOException e) {
 			return null;
+		}
+	}
+
+	public void addDefaultCp() {
+		for (String entry : System.getProperty("java.class.path").split(File.pathSeparator)) {
+			try {
+				addUrl(new File(entry).toURI().toURL());
+			} catch (MalformedURLException e) {
+				try {
+					addUrl(new URL(entry));
+				} catch (MalformedURLException e2) {
+				}
+			}
 		}
 	}
 

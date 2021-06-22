@@ -416,7 +416,7 @@ if (project.hasProperty("overrideLaunchWrapperClient")) {
 if (project.hasProperty("overrideLaunchWrapperServer")) {
 	classWrapperServer=project.getProperty("overrideLaunchWrapperServer")
 }
-def wrapperVersion="1.0.0.A11"
+def wrapperVersion="1.0.0.A12"
 version=wrapperVersion+"-cyan-"+cyanversion
 
 def timeStartHuman=OffsetDateTime.parse("${timeStartDev}").withNano(0).toLocalDate().toString()+" at "+OffsetDateTime.parse("${timeStartDev}").withNano(0).toLocalTime().toString();

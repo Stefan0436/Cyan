@@ -7,7 +7,6 @@ import java.util.Scanner;
 
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.core.CyanCore;
-import org.asf.cyan.fluid.Fluid;
 
 public class CyanPaperServerWrapper extends CyanComponent {
 
@@ -41,15 +40,13 @@ public class CyanPaperServerWrapper extends CyanComponent {
 		sc.close();
 
 		CyanLoader.setPlatformVersion(mappingsVersion.toString());
-
-		Fluid.addAgent("io.papermc.paperclip.Agent", "premain");
 		CyanCore.setEntryMethod("CyanPaperWrapper Version " + builder.toString().trim());
 
 		CyanLoader.setupModloader("SERVER");
 		CyanLoader.disableVanillaMappings();
 		CyanLoader.addCompatibilityMappings(CyanLoader.getPaperCompatibilityMappings(mappingsVersion.toString()));
 		CyanLoader.initializeGame("SERVER");
-		String wrapper = System.getProperty("cyan.launcher.server.wrapper", "io.papermc.paperclip.Paperclip");
+		String wrapper = System.getProperty("cyan.launcher.server.wrapper", "org.bukkit.craftbukkit.Main");
 		CyanCore.startGame(wrapper, args);
 	}
 
