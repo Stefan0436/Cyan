@@ -2313,6 +2313,16 @@ public class CyanLoader extends ModkitModloader
 		CyanCore.addAllowedTransformerAutoDetectClass("org.asf.cyan.api.internal.CyanAPIComponent");
 		CyanCore.initializeComponents();
 
+		info("Adding coremod paths to system classloader...");
+		addToSystemLater.forEach(t -> {
+			try {
+				FluidAgent.addToClassPath(t);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		addToSystemLater.clear();
+		
 		info("Downloading coremod maven dependencies...");
 		downloadMavenDependencies(coremodMavenDependencies);
 
@@ -2378,15 +2388,6 @@ public class CyanLoader extends ModkitModloader
 		loadEvents();
 		StartupWindow.WindowAppender.increaseProgress();
 
-		info("Adding coremod paths to system classloader...");
-		addToSystemLater.forEach(t -> {
-			try {
-				FluidAgent.addToClassPath(t);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		});
-		addToSystemLater.clear();
 		info("Loading coremods...");
 		loadCoreMods(loader);
 		StartupWindow.WindowAppender.increaseProgress();
