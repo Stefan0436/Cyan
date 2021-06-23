@@ -84,16 +84,17 @@ public class Version {
 				continue;
 			}
 
+			if (last.data == null) {
+				last.data = "";
+			}
+
 			if (Character.isAlphabetic(ch) && lastWasAlpha) {
 				if (last.value == -1)
 					last.value = last.data.charAt(0);
 				last.data += ch;
 				continue;
 			}
-
-			if (last.data == null) {
-				last.data = "";
-			}
+			
 			last.data += ch;
 
 			lastWasAlpha = Character.isAlphabetic(ch);
