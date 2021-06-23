@@ -140,9 +140,9 @@ class CompatibilityMappings extends SimpleMappings {
 					}
 					m.obfuscated = map;
 				}
-				mapping.mappings = newMembers.toArray(t -> new Mapping<?>[t]);
-				mapping.mappings[ind++] = m;
+				ind++;
 			}
+			mapping.mappings = newMembers.toArray(t -> new Mapping<?>[t]);
 		}
 		this.mappings = mappingsLst.toArray(t -> new Mapping<?>[t]);
 	}
