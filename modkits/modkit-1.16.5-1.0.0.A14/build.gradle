@@ -6,7 +6,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A45'
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A46'
 	}
 }
 
@@ -139,12 +139,11 @@ platforms {
 		modloader "36.1.32"
 	}
 
-	// Yarn Platform, for fabric support
-	YARN {
-		// Build version for YARN,
-		// Search for matching game version in http://maven.modmuss50.me/net/fabricmc/yarn/maven-metadata.xml
-		// Or use getSupportedYarnVersion("game-version", "cyan-version") to do so automatically
-		version "1.16.5+build.10" // getSupportedYarnVersion(gameVersion, cyanVersion)
+	// Intermediary Platform, for fabric support
+	INTERMEDIARY {
+        // Intermediary version.
+        // It should match the game version.
+		version gameVersion
 
 		// Fabric version
 		// For latest, use getLatestFabricVersion("game-version")
