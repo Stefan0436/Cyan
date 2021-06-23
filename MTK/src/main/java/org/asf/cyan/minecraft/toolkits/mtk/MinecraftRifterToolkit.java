@@ -23,7 +23,7 @@ import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
  * mappings for remapping jars: (separate the client and server chains)<br />
  * <b>1.</b> Make sure the client installation is completely verified and that
  * the server jar is available.<br />
- * <b>2.</b> Download MCP, YARN and the vanilla mappings if not done so. (load
+ * <b>2.</b> Download MCP, INTERMEDIARY and the vanilla mappings if not done so. (load
  * the vanilla mappings last)<br />
  * <b>2.</b> Deobfuscate both the client and server jars.<br />
  * <b>3.</b> Generate the RIFT mappings.<br />
