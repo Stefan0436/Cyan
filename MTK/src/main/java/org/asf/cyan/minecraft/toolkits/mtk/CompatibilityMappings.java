@@ -94,9 +94,19 @@ class CompatibilityMappings extends SimpleMappings {
 		for (Mapping<?> mapping : mappingsLst) {
 			Mapping<?> tMap = tempMappings.get(index++);
 			int ind = 0;
-			for (Mapping<?> m : mapping.mappings) {
+			Mapping<?>[] members = mapping.mappings.clone();
+			ArrayList<Mapping<?>> newMembers = new ArrayList<Mapping<?>>();
+			for (Mapping<?> m : members) {
 				if (m.mappingType == MAPTYPE.PROPERTY) {
-					m.obfuscated = mapProperty(combine, mapping.obfuscated, m.obfuscated, true);
+					boolean remap = true;
+					String map = mapProperty(combine, mapping.obfuscated, m.obfuscated, true);
+					if (!map.equals(m.obfuscated)) {
+						m.obfuscated = map;
+					} else {
+						remap = false;
+					}
+					if (remap || alwaysAllowRemap)
+						newMembers.add(m);
 				} else if (m.mappingType == MAPTYPE.METHOD) {
 					Mapping<?> argMap = tMap.mappings[ind];
 					boolean remap = true;
@@ -126,10 +136,11 @@ class CompatibilityMappings extends SimpleMappings {
 							} else
 								i++;
 						}
+						newMembers.add(m);
 					}
 					m.obfuscated = map;
-
 				}
+				mapping.mappings = newMembers.toArray(t -> new Mapping<?>[t]);
 				mapping.mappings[ind++] = m;
 			}
 		}

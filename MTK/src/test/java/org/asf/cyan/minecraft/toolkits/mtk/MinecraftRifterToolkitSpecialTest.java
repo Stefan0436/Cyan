@@ -179,15 +179,13 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 					new URL("file:////tmp"), OffsetDateTime.now());
 		}
 
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-mtktest", "yarn", info, GameSide.CLIENT)) {
-			MinecraftMappingsToolkit.downloadYarnMappings(info, GameSide.CLIENT,
-					MinecraftMappingsToolkit.getLatestYarnVersion(info));
-			MinecraftMappingsToolkit.saveMappingsToDisk("-mtktest", "yarn", info, GameSide.CLIENT);
+		if (!MinecraftMappingsToolkit.areMappingsAvailable("-mtktest", "intermediary", info, GameSide.CLIENT)) {
+			MinecraftMappingsToolkit.downloadIntermediaryMappings(info, GameSide.CLIENT);
+			MinecraftMappingsToolkit.saveMappingsToDisk("-mtktest", "intermediary", info, GameSide.CLIENT);
 		}
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-mtktest", "yarn", info, GameSide.SERVER)) {
-			MinecraftMappingsToolkit.downloadYarnMappings(info, GameSide.SERVER,
-					MinecraftMappingsToolkit.getLatestYarnVersion(info));
-			MinecraftMappingsToolkit.saveMappingsToDisk("-mtktest", "yarn", info, GameSide.SERVER);
+		if (!MinecraftMappingsToolkit.areMappingsAvailable("-mtktest", "intermediary", info, GameSide.SERVER)) {
+			MinecraftMappingsToolkit.downloadIntermediaryMappings(info, GameSide.SERVER);
+			MinecraftMappingsToolkit.saveMappingsToDisk("-mtktest", "intermediary", info, GameSide.SERVER);
 		}
 
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(info, GameSide.CLIENT)) {
@@ -200,16 +198,16 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 			MinecraftMappingsToolkit.saveMappingsToDisk(info, GameSide.SERVER);
 		}
 
-		MinecraftMappingsToolkit.loadMappings("-mtktest", "yarn", info, GameSide.CLIENT);
-		MinecraftMappingsToolkit.loadMappings("-mtktest", "yarn", info, GameSide.SERVER);
+		MinecraftMappingsToolkit.loadMappings("-mtktest", "intermediary", info, GameSide.CLIENT);
+		MinecraftMappingsToolkit.loadMappings("-mtktest", "intermediary", info, GameSide.SERVER);
 
 		MinecraftMappingsToolkit.loadMappings(info, GameSide.CLIENT);
 		MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER);
 
 		SimpleMappings riftClient = (SimpleMappings) MinecraftRifterToolkit.generateCyanFabricRiftTargets(info,
-				GameSide.CLIENT, "mtktest", MinecraftMappingsToolkit.getLatestYarnVersion(info));
+				GameSide.CLIENT, "mtktest");
 		SimpleMappings riftServer = (SimpleMappings) MinecraftRifterToolkit.generateCyanFabricRiftTargets(info,
-				GameSide.SERVER, "mtktest", MinecraftMappingsToolkit.getLatestYarnVersion(info));
+				GameSide.SERVER, "mtktest");
 
 		testMappings(riftClient, MinecraftRifterToolkit.getFabricClientMappings(), riftServer,
 				MinecraftRifterToolkit.getFabricServerMappings());

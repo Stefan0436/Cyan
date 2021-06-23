@@ -5,7 +5,7 @@ import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.cornflower.gradle.utilities.modding.IPlatformConfiguration;
 import org.asf.cyan.cornflower.gradle.utilities.modding.PlatformClosureOwner;
 
-public class YarnPlatform implements IPlatformConfiguration {
+public class IntermediaryPlatform implements IPlatformConfiguration {
 
 	public String version = null;
 	public String modloader = null;
@@ -19,7 +19,7 @@ public class YarnPlatform implements IPlatformConfiguration {
 
 	@Override
 	public LaunchPlatform getPlatform() {
-		return LaunchPlatform.YARN;
+		return LaunchPlatform.INTERMEDIARY;
 	}
 
 	@Override

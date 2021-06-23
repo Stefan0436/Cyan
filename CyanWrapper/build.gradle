@@ -82,7 +82,7 @@ if (!cyanCache.exists()) cyanCache.mkdirs();
 
 ext.forgeVersions = [:]
 ext.paperVersions = [:]
-ext.fabricVersions = [:]
+ext.fabricVersions = []
 
 def majorversion = minecraft
 if (majorversion.split("\\.").length >= 3)
@@ -148,8 +148,8 @@ if (buildfile.exists()) {
 		paperVersions.putAll(t);
 	}
 	
-	ext.fabric = { Map t ->
-		fabricVersions.putAll(t);
+	ext.fabric = { ... t ->
+		fabricVersions.addAll(t);
 	}
 	
 	apply from: buildfile.getAbsolutePath()
@@ -189,7 +189,6 @@ public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 	public HashMap<String, String> spigotLatestMappings = new HashMap<String, String>();
 	public HashMap<String, String> spigotTestingMappings = new HashMap<String, String>();
 	
-	public HashMap<String, String> yarnMappings = new HashMap<String, String>();
 	public HashMap<String, String> spigotMappings = new HashMap<String, String>();
 
 	public CyanUpdateInfo(String content) {
@@ -208,37 +207,6 @@ public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 }
 
 def infoPath = "/org/asf/cyan/CyanVersionHolder/generic/CyanVersionHolder-generic-versions.ccfg";
-
-public String getLatestYarnVersion(String version) throws IOException {
-	if (!MinecraftToolkit.hasMinecraftDownloadConnection())
-		throw new IOException("No network connection");
-
-	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-	DocumentBuilder builder;
-	String mappingsVersion = "";
-	try {
-		String mapping = "";
-		builder = factory.newDocumentBuilder();
-		Document document = builder.parse(new URL("https://maven.modmuss50.me/net/fabricmc/yarn/maven-metadata.xml").openStream());
-		Element root = document.getDocumentElement();
-		NodeList versions = ((Element) root.getElementsByTagName("versioning").item(0))
-				.getElementsByTagName("versions").item(0).getChildNodes();
-		for (int i = 0; i < versions.getLength(); i++) {
-			if (!versions.item(i).hasChildNodes())
-				continue;
-			String mapVer = versions.item(i).getFirstChild().getNodeValue();
-			if (mapVer.startsWith(version + ".") || mapVer.startsWith(version + "+")) {
-				mapping = mapVer;
-			}
-		}
-		if (mapping != "") {
-			mappingsVersion = mapping;
-		}
-	} catch (ParserConfigurationException | SAXException | IOException e) {
-		throw new IOException(e);
-	}
-	return mappingsVersion;
-}
 
 if (!ext.hasProperty("mappingsVersion"))
 	ext.mappingsVersion = minecraft
@@ -324,38 +292,6 @@ if (modloader.startsWith("forge-")) {
     installerZip.close();
     if (!project.hasProperty("overrideMappingsVersion"))
         mappingsVersion = mcpVersion;
-} else if (modloader.startsWith("fabric-loader-")) {
-    if (!project.hasProperty("overrideMappingsVersion")) {
-		def loaderVersion = modloader.substring("fabric-loader-".length())
-        println "Resolving latest YARN mappings..."
-		def mappingsASFSupported = null		
-		
-		def useurl = fallback_url
-		if (fallback_url.equals(""))
-			useurl = netTestUrl
-	
-		try {
-			StringBuilder conf = new StringBuilder();
-			URL u = new URL(useurl + infoPath);
-			Scanner sc = new Scanner(u.openStream());
-			while (sc.hasNext())
-				conf.append(sc.nextLine() + System.lineSeparator());
-			sc.close();
-	
-			CyanUpdateInfo info = new CyanUpdateInfo(conf.toString())
-			if (info.yarnMappings.containsKey(minecraft+"-"+loaderVersion))
-				mappingsASFSupported = info.yarnMappings.get(minecraft+"-"+oaderVersion)
-		} catch (Exception e) {
-			
-		}
-		
-		if (mappingsASFSupported == null) {
-		    String version = getLatestYarnVersion(minecraft)
-		    mappingsVersion = version
-		} else {
-			mappingsVersion = mappingsASFSupported
-		}
-    }
 }
 
 private JsonObject getRefs(String version) throws IOException {
@@ -1404,7 +1340,6 @@ processResources {
 	def spigotLatestMappings = ""
 	def spigotTestingMappings = ""
 	
-	def yarnMappings = ""
 	def spigotMappings = ""
 
 	def lateststable = ""
@@ -1426,7 +1361,6 @@ processResources {
 	HashMap<String, String> latestSpigotMappings = new HashMap<String, String>();
 	HashMap<String, String> testingSpigotMappings = new HashMap<String, String>();
 	
-	HashMap<String, String> yarnMappingVersions = new HashMap<String, String>();
 	HashMap<String, String> spigotMappingVersions = new HashMap<String, String>();
 
 	try {
@@ -1512,11 +1446,6 @@ processResources {
 		for (def ver : info.spigotTestingMappings.keySet()) {
 			def val = info.spigotTestingMappings.get(ver)
 			testingSpigotMappings.put(ver, val)
-		}
-		
-		for (def ver : info.yarnMappings.keySet()) {
-			def val = info.yarnMappings.get(ver)
-			yarnMappingVersions.put(ver, val)
 		}
 		
 		for (def ver : info.spigotMappings.keySet()) {
@@ -1733,7 +1662,7 @@ processResources {
 			forgeSupportVersions.put(minecraft + "-" + version + "-testing", cyanversion);
 		}
 		
-		fabricVersions.keySet().stream().sorted({ t1, t2 ->
+		fabricVersions.stream().sorted({ t1, t2 ->
 			return Version.fromString(t1).compareTo(Version.fromString(t2));	
 		}).forEach { version ->
 			fabricSupportVersions.put("testing-fabric", minecraft + "-" + version)
@@ -1803,7 +1732,7 @@ processResources {
 			forgeSupportVersions.put(minecraft + "-" + version + "-latest", cyanversion);
 		}
 		
-		fabricVersions.keySet().stream().sorted({ t1, t2 ->
+		fabricVersions.stream().sorted({ t1, t2 ->
 			return -Version.fromString(t1).compareTo(Version.fromString(t2));
 		}).forEach { version ->
 			fabricSupportVersions.put("latest-fabric", minecraft + "-" + version)
@@ -1879,7 +1808,7 @@ processResources {
 			forgeSupportVersions.put(minecraft + "-" + version + "-latest", cyanversion);
 		}
 		
-		fabricVersions.keySet().stream().sorted({ t1, t2 ->
+		fabricVersions.stream().sorted({ t1, t2 ->
 			return -Version.fromString(t1).compareTo(Version.fromString(t2));
 		}).forEach { version ->
 			fabricSupportVersions.put("stable-fabric", minecraft + "-" + version)
@@ -1936,7 +1865,7 @@ processResources {
 				forgeSupportVersions.put(minecraft + "-" + version + "-lts-"+cyanversion, cyanversion);
 			}
 			
-			fabricVersions.keySet().stream().sorted({ t1, t2 ->
+			fabricVersions.stream().sorted({ t1, t2 ->
 				return -Version.fromString(t1).compareTo(Version.fromString(t2));
 			}).forEach { version ->
 				fabricSupportVersions.put("lts-"+cyanversion+"-fabric-" + minecraft, version);
@@ -2017,25 +1946,7 @@ processResources {
 	if ((project.hasProperty("LTS") && project.getProperty("LTS").equals("true")) || (wasLTS && (!project.hasProperty("LTS") || project.getProperty("LTS").equals("true")))) {
 		ltscyanversions.add(cyanversion)
 	}
-	
-	if (modloader.startsWith("fabric-loader-")) {
-		yarnMappingVersions.put("fabric-"+minecraft+"-"+modloader.substring("fabric-loader-".length()), mappingsVersion)
-		yarnMappingVersions.put("cyan-"+minecraft+"-"+cyanversion, mappingsVersion)
-	}
 
-	
-	fabricVersions.keySet().stream().sorted({ t1, t2 ->
-        return -Version.fromString(t1).compareTo(Version.fromString(t2));
-    }).forEach { version ->        
-        yarnMappingVersions.put("fabric-"+minecraft+"-"+version, fabricVersions.get(version));
-        fabricSupportVersions.put("cyan-"+minecraft+"-"+cyanversion, fabricVersions.get(version));
-    }
-
-	for (String key : yarnMappingVersions.keySet()) {
-		def val = yarnMappingVersions.get(key).replaceAll("\n", "\n    ")
-		yarnMappings += "    $key> '${val}'\n"
-	}
-	
 	for (String key : spigotMappingVersions.keySet()) {
 		def val = spigotMappingVersions.get(key).replaceAll("\n", "\n    ")
 		spigotMappings += "    $key> '${val}'\n"
@@ -2128,7 +2039,6 @@ processResources {
 	inputs.property "cyanforgesupportversions", "${cyanforgesupportversions}"
 	inputs.property "cyanfabricsupportversions", "${cyanfabricsupportversions}"
 	inputs.property "cyanpapersupportversions", "${cyanpapersupportversions}"
-	inputs.property "yarnMappings", "${yarnMappings}"
 	inputs.property "spigotMappings", "${spigotMappings}"
 
 	project(":CyanAPI").afterEvaluate {
@@ -2292,7 +2202,6 @@ processResources {
 			"spigotStableMappings": "${spigotStableMappings}",
 			"spigotLatestMappings": "${spigotLatestMappings}",
 			"spigotTestingMappings": "${spigotTestingMappings}",
-			"yarnMappings": "${yarnMappings}",
 			"spigotMappings": "${spigotMappings}"
 		]
 
@@ -2769,7 +2678,7 @@ if (buildfile.exists()) {
 	
 	forgeVersions.forEach { version, mappings ->
 		tasks.register('forge_' + version.replaceAll('[^A-Za-z0-9_]', "_") + '_Installer', KickStartInstallerTask) {
-			project(cyanManifest 'CyanForgeServerWrapper', 'CyanForgeClientWrapper', 'Cyan %gv (Forge ' + version + ')', 'Furnace', 'forge', version, minecraft + '-forge-' + version, mappings, 'MCP')			
+			project(cyanManifest 'CyanForgeServerWrapper', 'CyanForgeClientWrapper', 'Cyan %gv (Forge ' + version + ')', 'Furnace', 'forge', version, minecraft + '-forge-' + version, mappings, 'MCP')
 			destinationDirectory = file("${buildDir}/Installers/")
 			archiveBaseName = "$minecraft-forge-$version-cyan"
 			archiveVersion = "$cyanversion"
@@ -2780,9 +2689,9 @@ if (buildfile.exists()) {
 		serverDownloads.finalizedBy installer
 	}
 	
-	fabricVersions.forEach { version, mappings ->
+	fabricVersions.forEach { version ->
 		tasks.register('fabric_' + version.replaceAll('[^A-Za-z0-9_]', "_") + '_Installer', KickStartInstallerTask) {
-			project(cyanManifest 'CyanFabricServerWrapper', 'CyanFabricClientWrapper', 'Cyan %gv (Fabric ' + version + ')', 'Lectern_Book', 'fabric', version, 'fabric-loader-' + version + '-' + minecraft, mappings, 'YARN')			
+			project(cyanManifest 'CyanFabricServerWrapper', 'CyanFabricClientWrapper', 'Cyan %gv (Fabric ' + version + ')', 'Lectern_Book', 'fabric', version, 'fabric-loader-' + version + '-' + minecraft, "", 'INTERMEDIARY')			
 			destinationDirectory = file("${buildDir}/Installers/")
 			archiveBaseName = "$minecraft-fabric-$version-cyan"
 			archiveVersion = "$cyanversion"

@@ -9,7 +9,7 @@ import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
 @FluidTransformer
-@PlatformOnly(LaunchPlatform.YARN)
+@PlatformOnly(LaunchPlatform.INTERMEDIARY)
 @TargetClass(target = "net.fabricmc.loader.launch.knot.KnotClassLoader")
 public class KnotClassLoaderModification {
 

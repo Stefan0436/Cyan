@@ -112,8 +112,8 @@ platforms {
             modloader loaderversion
         }
     } else if (modloader.startsWith("fabric-loader-")) {
-        targetplatform = LaunchPlatform.YARN
-        YARN {
+        targetplatform = LaunchPlatform.INTERMEDIARY
+        INTERMEDIARY {
             version mappingsVersion
             modloader loaderversion
         }

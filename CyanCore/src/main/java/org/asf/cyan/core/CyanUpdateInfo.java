@@ -38,8 +38,6 @@ public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 	public HashMap<String, String> spigotLatestMappings = new HashMap<String, String>();
 	public HashMap<String, String> spigotTestingMappings = new HashMap<String, String>();
 
-	public HashMap<String, String> yarnMappings = new HashMap<String, String>();
-	
 	public CyanUpdateInfo(String content) {
 		readAll(content);
 	}

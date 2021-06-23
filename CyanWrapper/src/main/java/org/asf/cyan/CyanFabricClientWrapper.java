@@ -9,19 +9,21 @@ import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.core.CyanCore;
 
 public class CyanFabricClientWrapper {
-	
+
 	/**
 	 * Main initialization method
+	 * 
 	 * @param args Arguments
-	 * @throws IllegalAccessException If starting fails
-	 * @throws IllegalArgumentException If starting fails
+	 * @throws IllegalAccessException    If starting fails
+	 * @throws IllegalArgumentException  If starting fails
 	 * @throws InvocationTargetException If starting fails
-	 * @throws NoSuchMethodException If starting fails
-	 * @throws SecurityException If starting fails
-	 * @throws ClassNotFoundException If starting fails
-	 * @throws IOException If closing the class loader fails
+	 * @throws NoSuchMethodException     If starting fails
+	 * @throws SecurityException         If starting fails
+	 * @throws ClassNotFoundException    If starting fails
+	 * @throws IOException               If closing the class loader fails
 	 */
-	public static void main(String[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException, IOException {
+	public static void main(String[] args) throws IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException, IOException {
 		URL info = CyanClientWrapper.class.getResource("/wrapper.info");
 		StringBuilder builder = new StringBuilder();
 		Scanner sc = new Scanner(info.openStream());
@@ -35,14 +37,15 @@ public class CyanFabricClientWrapper {
 		while (sc.hasNext())
 			mappingsVersion.append(sc.nextLine());
 		sc.close();
-		
+
 		CyanLoader.setPlatformVersion(mappingsVersion.toString());
-		
+
 		CyanCore.setEntryMethod("CyanFabricWrapper Version " + builder.toString().trim());
 		CyanLoader.disableVanillaMappings();
-		CyanLoader.addCompatibilityMappings(CyanLoader.getFabricCompatibilityMappings(GameSide.CLIENT, mappingsVersion.toString()));
+		CyanLoader.addCompatibilityMappings(CyanLoader.getFabricCompatibilityMappings(GameSide.CLIENT));
 		CyanLoader.initializeGame("CLIENT");
-		String wrapper = System.getProperty("cyan.launcher.client.wrapper", "net.fabricmc.loader.launch.knot.KnotClient");
+		String wrapper = System.getProperty("cyan.launcher.client.wrapper",
+				"net.fabricmc.loader.launch.knot.KnotClient");
 		CyanCore.startGame(wrapper, args);
 	}
 }

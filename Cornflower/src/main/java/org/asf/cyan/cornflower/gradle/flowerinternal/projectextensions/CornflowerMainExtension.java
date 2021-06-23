@@ -16,9 +16,9 @@ import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.McpPlatform;
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.SpigotPlatform;
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.VanillaPlatform;
-import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.YarnPlatform;
+import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.IntermediaryPlatform;
 import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.closureowners.SpigotPlatformClosureOwner;
-import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.closureowners.YarnPlatformClosureOwner;
+import org.asf.cyan.cornflower.gradle.flowerinternal.implementation.shared.closureowners.IntermediaryPlatformClosureOwner;
 import org.asf.cyan.cornflower.gradle.tasks.RiftJarTask;
 import org.asf.cyan.cornflower.gradle.utilities.IProjectExtension;
 import org.asf.cyan.cornflower.gradle.utilities.modding.ApiDependency;
@@ -59,8 +59,8 @@ public class CornflowerMainExtension implements IProjectExtension {
 			all.add(new VanillaPlatform().importClosure(PlatformClosureOwner.fromClosure(closure)));
 		}
 
-		public void YARN(Closure<?> closure) {
-			all.add(new YarnPlatform().importClosure(YarnPlatformClosureOwner.fromClosure(closure)));
+		public void INTERMEDIARY(Closure<?> closure) {
+			all.add(new IntermediaryPlatform().importClosure(IntermediaryPlatformClosureOwner.fromClosure(closure)));
 		}
 	}
 
@@ -99,7 +99,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 	public static final LaunchPlatform UNKNOWN = LaunchPlatform.UNKNOWN;
 	public static final LaunchPlatform VANILLA = LaunchPlatform.VANILLA;
 	public static final LaunchPlatform SPIGOT = LaunchPlatform.SPIGOT;
-	public static final LaunchPlatform YARN = LaunchPlatform.YARN;
+	public static final LaunchPlatform INTERMEDIARY = LaunchPlatform.INTERMEDIARY;
 	public static final LaunchPlatform MCP = LaunchPlatform.MCP;
 
 	public static final GameSide SERVER = GameSide.SERVER;

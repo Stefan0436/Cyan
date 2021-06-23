@@ -19,22 +19,19 @@ public class RiftFabricToolchainProvider implements IRiftToolchainProvider {
 	private MinecraftVersionInfo version;
 	private GameSide side;
 	private String modloaderVersion;
-	private String mappingsVersion;
 
-	public RiftFabricToolchainProvider(MinecraftVersionInfo version, GameSide side, String modloaderVersion,
-			String mappingsVersion) {
+	public RiftFabricToolchainProvider(MinecraftVersionInfo version, GameSide side, String modloaderVersion) {
 		this.version = version;
 		this.side = side;
 		this.modloaderVersion = modloaderVersion;
-		this.mappingsVersion = mappingsVersion;
 	}
 
 	@Override
 	public Mapping<?> getRiftMappings() throws IOException {
-		String mappingsId = "-" + mappingsVersion.replaceAll("[!?/:\\\\]", "-") + "-" + modloaderVersion;
-		if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "yarn", version, side)) {
-			MinecraftMappingsToolkit.downloadYarnMappings(version, side, mappingsVersion);
-			MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "yarn", version, side);
+		String mappingsId = "-" + modloaderVersion;
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "intermediary", version, side)) {
+			MinecraftMappingsToolkit.downloadIntermediaryMappings(version, side);
+			MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "intermediary", version, side);
 		}
 
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, side)) {
@@ -42,13 +39,13 @@ public class RiftFabricToolchainProvider implements IRiftToolchainProvider {
 			MinecraftMappingsToolkit.saveMappingsToDisk(version, side);
 		}
 
-		MinecraftMappingsToolkit.loadMappings(mappingsId, "yarn", version, side);
+		MinecraftMappingsToolkit.loadMappings(mappingsId, "intermediary", version, side);
 		MinecraftMappingsToolkit.loadMappings(version, side);
 
 		if (side == GameSide.CLIENT)
 			verify();
 
-		return MinecraftRifterToolkit.generateCyanFabricRiftTargets(version, side, modloaderVersion, mappingsVersion);
+		return MinecraftRifterToolkit.generateCyanFabricRiftTargets(version, side, modloaderVersion);
 	}
 
 	@Override

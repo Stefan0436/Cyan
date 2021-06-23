@@ -213,20 +213,19 @@ public class MinecraftRifterToolkit extends CyanComponent {
 	 * @param version          Minecraft version
 	 * @param side             Which side (client or server)
 	 * @param modloaderVersion Modloader version
-	 * @param mappingsVersion  Mappings version
 	 * @return Mapping object representing the rift targets.
 	 * @throws IOException If the mappings don't match the version given
 	 */
 	public static Mapping<?> generateCyanFabricRiftTargets(MinecraftVersionInfo version, GameSide side,
-			String modloaderVersion, String mappingsVersion) throws IOException {
-		String mappingsId = "-" + mappingsVersion.replaceAll("[!?/:\\\\]", "-") + "-" + modloaderVersion;
+			String modloaderVersion) throws IOException {
+		String mappingsId = "-" + modloaderVersion;
 
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, side))
 			throw new IOException("No mappings are present for the " + version + " " + side.toString().toLowerCase());
 
-		if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "yarn", version, side))
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "intermediary", version, side))
 			throw new IOException(
-					"No YARN mappings are present for the " + version + " " + side.toString().toLowerCase());
+					"No INTERMEDIARY mappings are present for the " + version + " " + side.toString().toLowerCase());
 
 		if (MinecraftMappingsToolkit.getLoadedMappingsVersion(side) == null)
 			throw new IOException("Mappings not loaded, please load the version mappings before deobfuscating.");
@@ -240,17 +239,17 @@ public class MinecraftRifterToolkit extends CyanComponent {
 			if (fabricMappingsVersionClient == null || !fabricMappingsVersionClient.equals(version)) {
 				fabricMappingsVersionClient = version;
 				fabricMappingsClient = new FabricCompatibilityMappings(MinecraftMappingsToolkit.getMappings(side),
-						modloaderVersion, version, side, false, mappingsVersion);
+						modloaderVersion, version, side, false);
 			}
 		} else {
 			if (fabricMappingsVersionServer == null || !fabricMappingsVersionServer.equals(version)) {
 				fabricMappingsVersionServer = version;
 				fabricMappingsServer = new FabricCompatibilityMappings(MinecraftMappingsToolkit.getMappings(side),
-						modloaderVersion, version, side, false, mappingsVersion);
+						modloaderVersion, version, side, false);
 			}
 		}
 
-		info("Generating YARN RIFT reverse targeting mappings for " + side.toString().toLowerCase() + " version "
+		info("Generating INTERMEDIARY RIFT reverse targeting mappings for " + side.toString().toLowerCase() + " version "
 				+ version + "...");
 		return generateRiftTargets((side == GameSide.CLIENT ? fabricMappingsClient : fabricMappingsServer));
 	}

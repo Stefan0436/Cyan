@@ -11,40 +11,38 @@ import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType;
 
 /**
  * 
- * Remaps the Yarn mappings to allow Fabric to run Cyan, credits to FabricMC
+ * Remaps the Intermediary mappings to allow Fabric to run Cyan, credits to
+ * FabricMC
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
 public class FabricCompatibilityMappings extends CompatibilityMappings {
-	public FabricCompatibilityMappings(Mapping<?> mappings, GameSide side, String mappingsVersion) {
+	public FabricCompatibilityMappings(Mapping<?> mappings, GameSide side) {
 		this(mappings, CyanInfo.getModloaderVersion(),
 				MinecraftVersionToolkit.createOrGetVersion(CyanInfo.getMinecraftVersion(), MinecraftVersionType.UNKNOWN,
 						null, CyanInfo.getReleaseDate()),
-				side, true, mappingsVersion);
+				side, true);
 	}
 
 	public FabricCompatibilityMappings(Mapping<?> mappings, String modloader, MinecraftVersionInfo info, GameSide side,
-			boolean msg, String mappingsVersion) {
-		String mappingsId = "-" + mappingsVersion.replaceAll("[!?/:\\\\]", "-")
-				+ (modloader.isEmpty() ? "" : "-" + modloader);
+			boolean msg) {
+		String mappingsId = (modloader.isEmpty() ? "" : "-" + modloader);
 		try {
-			MinecraftToolkit.infoLog("Loading fabric support... Preparing YARN mappings for compatibility...");
-			if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "yarn",
-					info, side)) {
+			MinecraftToolkit.infoLog("Loading fabric support... Preparing INTERMEDIARY mappings for compatibility...");
+			if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "intermediary", info, side)) {
 
 				if (msg)
 					MinecraftToolkit.infoLog("First time loading with fabric support for version " + modloader
-							+ ", downloading YARN mappings...");
+							+ ", downloading INTERMEDIARY mappings...");
 
-				MinecraftMappingsToolkit.downloadYarnMappings(info, side, mappingsVersion);
-				MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "yarn", info,
-						side);
+				MinecraftMappingsToolkit.downloadIntermediaryMappings(info, side);
+				MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "intermediary", info, side);
 			}
 
-			Mapping<?> yarnMappings = MinecraftMappingsToolkit
-					.loadMappings(mappingsId, "yarn", info, side);
-			combine("YARN", mappings, yarnMappings);
+			Mapping<?> intermediaryMappings = MinecraftMappingsToolkit.loadMappings(mappingsId, "intermediary", info,
+					side);
+			combine("INTERMEDIARY", mappings, intermediaryMappings);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException | IOException e) {
 			throw new RuntimeException(e);

@@ -1735,14 +1735,14 @@ public class CyanLoader extends ModkitModloader
 		}
 	}
 
-	public static Mapping<?> getFabricCompatibilityMappings(GameSide side, String mappingsVersion) {
+	public static Mapping<?> getFabricCompatibilityMappings(GameSide side) {
 		try {
 			if (!loaded)
 				prepare(side.toString());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		return new FabricCompatibilityMappings(mappings, side, mappingsVersion);
+		return new FabricCompatibilityMappings(mappings, side);
 	}
 
 	public static Mapping<?> getForgeCompatibilityMappings(GameSide side, String mcpVersion) {

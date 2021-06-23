@@ -152,7 +152,7 @@ public class CyanInfo extends Configuration<CyanInfo> {
 
 						modloaderVersion = modloaderVersion.substring(modloaderVersion.indexOf("-") + 1);
 					} else if (modloaderVersion.toLowerCase().startsWith("fabric-loader-")) {
-						platform = LaunchPlatform.YARN;
+						platform = LaunchPlatform.INTERMEDIARY;
 						modloaderName = "Fabric";
 
 						modloaderVersion = modloaderVersion.substring(modloaderVersion.indexOf("-") + 1);

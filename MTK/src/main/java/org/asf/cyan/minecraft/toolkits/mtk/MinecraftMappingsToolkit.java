@@ -69,8 +69,9 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 
 	// Yarn
 	private static String yarnClassifierInput = "official";
-	private static String yarnClassifierOutput = "intermediary";
+	private static String yarnClassifierOutput = "named";
 	private static String yarnUrl = "https://maven.modmuss50.me/net/fabricmc/yarn/%version%/yarn-%version%-tiny.gz";
+	private static String intermediaryUrl = "https://maven.modmuss50.me/net/fabricmc/intermediary/%version%/intermediary-%version%-v2.jar";
 	private static URL yarnMetaDataURL;
 
 	// Spigot
@@ -107,6 +108,68 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 			GameSide side) {
 		return new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/mappings/" + identifier + "-"
 				+ version.getVersion() + suffix + "-" + side.toString().toLowerCase() + ".mappings.ccfg").exists();
+	}
+
+	/**
+	 * Download version mappings into ram (fabric intermediary)
+	 * 
+	 * @param version Minecraft version
+	 * @param side    Which side (server or client)
+	 * @return Mapping object representing the version mappings
+	 * @throws IOException If downloading fails
+	 */
+	public static IntermediaryMappings downloadIntermediaryMappings(MinecraftVersionInfo version, GameSide side)
+			throws IOException {
+		if (!MinecraftToolkit.hasMinecraftDownloadConnection())
+			throw new IOException("No network connection");
+
+		info("Resolving INTERMEDIARY " + side.toString().toLowerCase() + " mappings of minecraft version " + version
+				+ "...");
+		String url = intermediaryUrl.replace("%version%", version.getVersion());
+
+		trace("CREATE StringBuilder for holding the INTERMEDIARY mappings, caller: " + CallTrace.traceCallName());
+		StringBuilder mappings_text = new StringBuilder();
+
+		trace("CREATE ZipInputStream with InputStream connection to URL " + url + ", caller: "
+				+ CallTrace.traceCallName());
+		InputStream strm = new URL("jar:" + url + "!/mappings/mappings.tiny").openStream();
+
+		trace("CREATE scanner for MAPPINGS, caller: " + CallTrace.traceCallName());
+		Scanner sc = new Scanner(strm);
+
+		trace("SCAN version mappings, caller: " + CallTrace.traceCallName());
+		while (sc.hasNext())
+			mappings_text.append(sc.nextLine()).append(System.lineSeparator());
+		trace("CLOSE mappings scanner, caller: " + CallTrace.traceCallName());
+		sc.close();
+		trace("CLOSE ZipInputStream, caller: " + CallTrace.traceCallName());
+		strm.close();
+
+		info("Mapping the " + side.toString().toLowerCase() + " INTERMEDIARY mappings into CCFG format...");
+		trace("MAP version " + side + " INTERMEDIARY mappings into CCFG, caller: " + CallTrace.traceCallName());
+		IntermediaryMappings mappings = new IntermediaryMappings().parseTinyV2Mappings(mappings_text.toString(),
+				"official", "intermediary");
+		mappings.mappingsVersion = version.toString();
+
+		if (MappingsLoadEventProvider.isAccepted()) {
+			try {
+				Modloader.getModloader().dispatchEvent("mtk.mappings.downloaded", "intermediary", version, side,
+						mappings, version.toString());
+			} catch (Exception e) {
+
+			}
+		}
+
+		trace("SET " + side.toString().toLowerCase() + "Mappings property, caller: " + CallTrace.traceCallName());
+		if (side.equals(GameSide.CLIENT)) {
+			clientMappings = mappings;
+			clientMappingsVersion = version;
+		} else if (side.equals(GameSide.SERVER)) {
+			serverMappings = mappings;
+			serverMappingsVersion = version;
+		}
+
+		return mappings;
 	}
 
 	/**
@@ -189,7 +252,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 				if (!versions.item(i).hasChildNodes())
 					continue;
 				String mapVer = versions.item(i).getFirstChild().getNodeValue();
-				if (mapVer.startsWith(version + ".") || mapVer.startsWith(version + "+")) {
+				if (mapVer.startsWith(version + "+")) {
 					mapping = mapVer;
 				}
 			}

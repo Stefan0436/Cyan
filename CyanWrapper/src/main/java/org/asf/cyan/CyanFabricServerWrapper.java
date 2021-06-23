@@ -21,7 +21,8 @@ public class CyanFabricServerWrapper {
 	 * @throws ClassNotFoundException    If starting fails
 	 * @throws IOException               If closing the class loader fails
 	 */
-	public static void main(String[] args) throws IOException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+	public static void main(String[] args) throws IOException, ClassNotFoundException, NoSuchMethodException,
+			SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		URL info = CyanClientWrapper.class.getResource("/wrapper.info");
 		StringBuilder builder = new StringBuilder();
 		Scanner sc = new Scanner(info.openStream());
@@ -38,12 +39,13 @@ public class CyanFabricServerWrapper {
 
 		CyanLoader.setPlatformVersion(mappingsVersion.toString());
 		CyanCore.setEntryMethod("CyanFabricWrapper Version " + builder.toString().trim());
-		
+
 		CyanLoader.disableVanillaMappings();
-		CyanLoader.addCompatibilityMappings(CyanLoader.getFabricCompatibilityMappings(GameSide.SERVER, mappingsVersion.toString()));
+		CyanLoader.addCompatibilityMappings(CyanLoader.getFabricCompatibilityMappings(GameSide.SERVER));
 		CyanLoader.initializeGame("SERVER");
-		
-		String wrapper = System.getProperty("cyan.launcher.server.wrapper", "net.fabricmc.loader.launch.knot.KnotServer");
+
+		String wrapper = System.getProperty("cyan.launcher.server.wrapper",
+				"net.fabricmc.loader.launch.knot.KnotServer");
 		CyanCore.startGame(wrapper, args);
 	}
 }

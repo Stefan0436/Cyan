@@ -43,6 +43,7 @@ public class SimpleRiftBuilder implements Closeable {
 	 * @param mappingsVersion  Mappings version
 	 * @return Toolchain provider for the given platform or null.
 	 */
+	@SuppressWarnings("deprecation")
 	public static IRiftToolchainProvider getProviderForPlatform(LaunchPlatform platform, MinecraftVersionInfo version,
 			GameSide side, String modloaderVersion, String mappingsVersion) {
 		switch (platform) {
@@ -52,8 +53,9 @@ public class SimpleRiftBuilder implements Closeable {
 			return new RiftVanillaToolchainProvider(version, side);
 		case MCP:
 			return new RiftForgeToolchainProvider(version, side, modloaderVersion, mappingsVersion);
+		case INTERMEDIARY:
 		case YARN:
-			return new RiftFabricToolchainProvider(version, side, modloaderVersion, mappingsVersion);
+			return new RiftFabricToolchainProvider(version, side, modloaderVersion);
 		case SPIGOT:
 			if (side != GameSide.SERVER)
 				return null;

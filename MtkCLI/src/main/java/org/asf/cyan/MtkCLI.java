@@ -54,6 +54,14 @@ public class MtkCLI extends CyanComponent {
 								"yarn", MinecraftVersionToolkit.getVersion(version), gameSide, true);
 						info("Downloaded " + version + " " + args[4] + " yarn mappings to cache.");
 						return;
+					} else if (type.equalsIgnoreCase("intermediary") && args.length >= 4) {
+						MinecraftInstallationToolkit.saveVersionManifest(MinecraftVersionToolkit.getVersion(version));
+						MinecraftMappingsToolkit
+								.downloadIntermediaryMappings(MinecraftVersionToolkit.getVersion(version), gameSide);
+						MinecraftMappingsToolkit.saveMappingsToDisk("", "intermediary",
+								MinecraftVersionToolkit.getVersion(version), gameSide, true);
+						info("Downloaded " + version + " " + args[4] + " intermediary mappings to cache.");
+						return;
 					} else if (type.equalsIgnoreCase("mcp") && args.length >= 5) {
 						MinecraftInstallationToolkit.saveVersionManifest(MinecraftVersionToolkit.getVersion(version));
 						MinecraftMappingsToolkit.downloadMCPMappings(MinecraftVersionToolkit.getVersion(version),
@@ -280,8 +288,8 @@ public class MtkCLI extends CyanComponent {
 		System.err.println();
 		System.err.println("Tasks:");
 		System.err.println(
-				" - mappings <mojang/spigot/yarn/mcp> <version> [<client/server> (mojang/yarn/mcp only)]    - download mappings");
-		System.err.println("   [<mappings-version> (mcp/spigot/yarn only)");
+				" - mappings <mojang/spigot/yarn/mcp/intermediary> <version>                                - download mappings");
+		System.err.println("   [<client/server> (mojang/yarn/mcp only)] [<mappings-version> (mcp/spigot/yarn only)");
 		System.err.println(
 				" - jar <version> <client/server>                                                           - download game jars");
 		System.err.println(
