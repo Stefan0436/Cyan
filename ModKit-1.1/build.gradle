@@ -130,7 +130,7 @@ if (!modloader.startsWith("paper-")) {
         provider getRiftProviderForLaunchPlatform(targetplatform, CLIENT)
         from tasks.jar.getArchiveFile()
     
-        mappings_identifier targetplatform.toString().toLowerCase() + "-" + config.getDisplayVersion() + "-" + config.getPlatform().toString().toLowerCase()
+        mappings_identifier targetplatform.toString().toLowerCase() + "-" + config.getDisplayVersion() + "-client"
         archiveClassifier = "RIFT-" + config.getPlatform().toString().toUpperCase() + "-" + config.getCommonMappingsVersion().replaceAll("[!?/:\\\\]", "-") + "-CLIENT"
         
         destinationDirectory = file("../build/ModKit-$specVersion/Jars")
@@ -162,8 +162,7 @@ task platformRiftJarServer (type: RiftJar, dependsOn: jar) {
     provider getRiftProviderForLaunchPlatform(targetplatform, SERVER)
     from tasks.jar.getArchiveFile()
     
-    mappings_identifier targetplatform.toString().toLowerCase() + "-" + config.getDisplayVersion() + "-" + config.getPlatform().toString().toLowerCase()
-    mappings_identifier targetplatform.toString().toLowerCase() + "-" + config.getDisplayVersion()
+    mappings_identifier targetplatform.toString().toLowerCase() + "-" + config.getDisplayVersion() + "-server"
     archiveClassifier = "RIFT-" + config.getPlatform().toString().toUpperCase() + "-" + config.getCommonMappingsVersion().replaceAll("[!?/:\\\\]", "-") + "-SERVER"
     
     destinationDirectory = file("./build/ModKit-$specVersion/Jars")
