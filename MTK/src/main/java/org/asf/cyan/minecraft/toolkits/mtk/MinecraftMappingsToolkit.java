@@ -24,7 +24,6 @@ import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
-import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.fluid.remapping.MAPTYPE;
 import org.asf.cyan.fluid.remapping.Mapping;
 import org.asf.cyan.fluid.remapping.SimpleMappings;
