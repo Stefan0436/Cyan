@@ -460,7 +460,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 			mappingsDir.mkdirs();
 
 		File officialMojangYarn = new File(mappingsDir, "official-mojang+yarn.tiny");
-		File mojangYarnSpigotReobf = new File(mappingsDir, "mojang+yarn-spigot-reobf.tiny");
+		File mojangYarnSpigotReobf = new File(mappingsDir, "mojang+yarn-spigot-reobf-patched.tiny");
 
 		File tmpDir = new File(mappingsDir, "tmp");
 		if (tmpDir.exists())
@@ -558,7 +558,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 		info("Mapping the PAPER mappings into CCFG format...");
 		trace("MAP version PAPER mappings into CCFG, caller: " + CallTrace.traceCallName());
 
-		// load mojang+yarn-spigot-reobf.tiny
+		// load mojang+yarn-spigot-reobf-patched.tiny
 		String mappingsFile = new String(Files.readAllBytes(mojangYarnSpigotReobf.toPath()));
 		SimpleMappings output = new SimpleMappings().parseTinyV2Mappings(mappingsFile, "mojang+yarn", "spigot");
 
