@@ -91,7 +91,7 @@ import javax.swing.JCheckBox;
 
 public class Installer extends CyanComponent {
 
-	private static final String version = "1.16";
+	private static final String version = "1.18";
 
 	private static Installer impl;
 
@@ -304,7 +304,7 @@ public class Installer extends CyanComponent {
 
 		if (project.loader.equals("fabric"))
 			project.loader = "fabric-loader";
-		
+
 		logger.info("");
 		logger.info("KickStart Installer Version " + version + ".");
 		logger.info("For " + project.name + " " + project.version + ".");
@@ -363,7 +363,7 @@ public class Installer extends CyanComponent {
 
 		if (project.loader.equals("fabric"))
 			project.loader = "fabric-loader";
-		
+
 		logger.info("");
 		logger.info("KickStart Installer Version " + version + ".");
 		logger.info("For " + project.name + " " + project.version + ".");
@@ -486,10 +486,10 @@ public class Installer extends CyanComponent {
 				+ (project.loader.isEmpty() ? ""
 						: ", " + project.loader.substring(0, 1).toUpperCase() + project.loader.substring(1)
 								+ (project.loaderVersion.isEmpty() ? "" : " " + project.loaderVersion)));
-		
+
 		if (project.loader.equals("fabric"))
 			project.loader = "fabric-loader";
-		
+
 		lblNewLabel_2.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel_2.setFont(new Font("SansSerif", Font.PLAIN, 16));
 		panel_1.add(lblNewLabel_2, BorderLayout.SOUTH);
@@ -680,7 +680,8 @@ public class Installer extends CyanComponent {
 		}
 
 		logger.info("Resolving platform mappings...");
-		if (!project.platform.equals("VANILLA") && (project.mappings == null || project.mappings.isEmpty())) {
+		if (!project.platform.equals("VANILLA") && !project.platform.equals("INTERMEDIARY")
+				&& (project.mappings == null || project.mappings.isEmpty())) {
 			logger.info("Determining mappings version by modloader...");
 			if (project.loader.equalsIgnoreCase("forge")) {
 				File forgeInstaller = downloadForgeInstaller(project, cache);
@@ -703,13 +704,8 @@ public class Installer extends CyanComponent {
 				installerZip.close();
 				project.mappings = mcpVersion;
 				logger.info("");
-			} else if (project.loader.equalsIgnoreCase("fabric-loader")) {
-				logger.warn(
-						"Auto-resolving YARN mappings is NOT recommended, please re-build the installer with a specified mappings version.");
-				project.mappings = MinecraftMappingsToolkit.getLatestYarnVersion(version);
-				logger.info("");
 			} else {
-				throw new IOException("Cannot resolve mappings version if not using forge or fabric");
+				throw new IOException("Cannot resolve mappings version if not using forge");
 			}
 		}
 		if (!project.platform.equals("VANILLA")) {
@@ -717,8 +713,8 @@ public class Installer extends CyanComponent {
 			if (!MinecraftMappingsToolkit.areMappingsAvailable(suffix, project.platform.toLowerCase(), version, side)) {
 				if (project.platform.equals("MCP")) {
 					MinecraftMappingsToolkit.downloadMCPMappings(version, side, project.mappings);
-				} else if (project.platform.equals("YARN")) {
-					MinecraftMappingsToolkit.downloadYarnMappings(version, side, project.mappings);
+				} else if (project.platform.equals("INTERMEDIARY")) {
+					MinecraftMappingsToolkit.downloadIntermediaryMappings(version, side);
 				} else if (project.platform.equals("SPIGOT")) {
 					MinecraftMappingsToolkit.downloadSpigotMappings(vanillaMappings, version, project.mappings);
 				}
