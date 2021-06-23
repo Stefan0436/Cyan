@@ -2015,6 +2015,7 @@ processResources {
 
 	allcyan += "    ${cyanversion}> '${cyantype}'"
 
+	inputs.property "mappingsVersion", mappingsVersion
 	inputs.property "paperByMappings", "${paperByMappings}"
 	inputs.property "spigotStableMappings", "${spigotStableMappings}"
 	inputs.property "spigotTestingMappings", "${spigotTestingMappings}"
