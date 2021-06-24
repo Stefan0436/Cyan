@@ -30,6 +30,14 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 		return (T) new Mapping<T>();
 	}
 
+	/**
+	 * If this returns true, createTargetMap will allow supertypes to override
+	 * methods in classes.
+	 */
+	public boolean allowSupertypeFinalOverride() {
+		return false;
+	}
+
 	@Override
 	public String filename() {
 		return null;
