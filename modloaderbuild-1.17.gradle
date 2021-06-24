@@ -7,5 +7,6 @@ fabric(
 )
 
 paper([
-    '42': '4e2f0be270dc4bed68357e8b4f02017146a77f4e:PB_42'
+    '42': '4e2f0be270dc4bed68357e8b4f02017146a77f4e:PB_42',
+    '45': '0be7cdbd1715c4c98b88cb7535cfcdcb07f4d678:PB_45'
 ])
