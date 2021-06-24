@@ -23,8 +23,8 @@ import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
  * mappings for remapping jars: (separate the client and server chains)<br />
  * <b>1.</b> Make sure the client installation is completely verified and that
  * the server jar is available.<br />
- * <b>2.</b> Download MCP, INTERMEDIARY and the vanilla mappings if not done so. (load
- * the vanilla mappings last)<br />
+ * <b>2.</b> Download MCP, INTERMEDIARY and the vanilla mappings if not done so.
+ * (load the vanilla mappings last)<br />
  * <b>2.</b> Deobfuscate both the client and server jars.<br />
  * <b>3.</b> Generate the RIFT mappings.<br />
  * <b>4.</b> Create a new class pool and somehow load all classes for either the
@@ -91,6 +91,8 @@ public class MinecraftRifterToolkit extends CyanComponent {
 
 		info("Generating RIFT reverse class targeting mappings...");
 		for (Mapping<?> root : mappings) {
+			if (root.allowSupertypeFinalOverride())
+				newMappings.setAllowSupertypeFinalOverride(true);
 			for (Mapping<?> clsMapping : root.mappings) {
 				if (clsMapping.mappingType.equals(MAPTYPE.CLASS)) {
 					trace("Generating class targets for class " + clsMapping.name);
@@ -249,8 +251,8 @@ public class MinecraftRifterToolkit extends CyanComponent {
 			}
 		}
 
-		info("Generating INTERMEDIARY RIFT reverse targeting mappings for " + side.toString().toLowerCase() + " version "
-				+ version + "...");
+		info("Generating INTERMEDIARY RIFT reverse targeting mappings for " + side.toString().toLowerCase()
+				+ " version " + version + "...");
 		return generateRiftTargets((side == GameSide.CLIENT ? fabricMappingsClient : fabricMappingsServer));
 	}
 

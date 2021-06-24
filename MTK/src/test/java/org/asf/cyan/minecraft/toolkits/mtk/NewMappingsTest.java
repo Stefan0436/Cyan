@@ -22,19 +22,19 @@ public class NewMappingsTest {
 			MinecraftToolkit.initializeMTK();
 		}
 
-		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion("1.17");
+		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion("1.16.5");
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, GameSide.SERVER)) {
 			MinecraftMappingsToolkit.downloadVanillaMappings(version, GameSide.SERVER);
 			MinecraftMappingsToolkit.saveMappingsToDisk(version, GameSide.SERVER);
 		}
 
 		Mapping<?> vanillaMappings = MinecraftMappingsToolkit.loadMappings(version, GameSide.SERVER);
-		Mapping<?> paperMappings = MinecraftMappingsToolkit.downloadPaperMappings(vanillaMappings, version,
-				"4e2f0be270dc4bed68357e8b4f02017146a77f4e:PB_42");
+		Mapping<?> paperMappings = MinecraftMappingsToolkit.downloadSpigotMappings(vanillaMappings, version,
+				"f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3");
 		Files.write(Path.of("/tmp/paper.ccfg"), paperMappings.toString().getBytes());
 
-		PaperCompatibilityMappings compat = new PaperCompatibilityMappings(vanillaMappings, "paper-42", version, false,
-				"4e2f0be270dc4bed68357e8b4f02017146a77f4e:PB_42");
+		PaperCompatibilityMappings compat = new PaperCompatibilityMappings(vanillaMappings, "paper-778", version, false,
+				"f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3");
 		Files.write(Path.of("/tmp/compatibility.ccfg"), compat.toString().getBytes());
 
 		compat = compat;

@@ -89,6 +89,11 @@ public class PaperCompatibilityMappings extends CompatibilityMappings {
 				ownerClass.mappings = ArrayUtil.append(ownerClass.mappings, new Mapping<?>[] { map });
 		}
 	}
+	
+	@Override
+	public boolean allowSupertypeFinalOverride() {
+		return true;
+	}
 
 	public PaperCompatibilityMappings(Mapping<?> mappings, String modloader, MinecraftVersionInfo info, boolean msg,
 			String mappingsVersion) {

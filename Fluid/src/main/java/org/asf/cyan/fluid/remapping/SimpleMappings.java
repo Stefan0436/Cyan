@@ -3,6 +3,18 @@ package org.asf.cyan.fluid.remapping;
 import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
 
 public class SimpleMappings extends Mapping<SimpleMappings> {
+
+	private boolean allowSupertypeFinalOverride = false;
+
+	public void setAllowSupertypeFinalOverride(boolean value) {
+		allowSupertypeFinalOverride = value;
+	}
+
+	@Override
+	public boolean allowSupertypeFinalOverride() {
+		return allowSupertypeFinalOverride;
+	}
+
 	public SimpleMappings() {
 	}
 
@@ -31,11 +43,12 @@ public class SimpleMappings extends Mapping<SimpleMappings> {
 
 	public SimpleMappings getClassMapping(String name) {
 		for (Mapping<?> mapping : mappings) {
-			if (mapping instanceof SimpleMappings && mapping.mappingType == MAPTYPE.CLASS && mapping.name.equals(name)) {
-				return (SimpleMappings)mapping;
+			if (mapping instanceof SimpleMappings && mapping.mappingType == MAPTYPE.CLASS
+					&& mapping.name.equals(name)) {
+				return (SimpleMappings) mapping;
 			}
 		}
-	
+
 		return null;
 	}
 
@@ -45,7 +58,7 @@ public class SimpleMappings extends Mapping<SimpleMappings> {
 				return mapping.obfuscated;
 			}
 		}
-	
+
 		return name;
 	}
 
@@ -55,7 +68,7 @@ public class SimpleMappings extends Mapping<SimpleMappings> {
 				return mapping.name;
 			}
 		}
-	
+
 		return obfus;
 	}
 
@@ -71,7 +84,7 @@ public class SimpleMappings extends Mapping<SimpleMappings> {
 		this.mappings = ArrayUtil.append(this.mappings, new Mapping<?>[] { mappings });
 		return mappings;
 	}
-	
+
 	public void add(Mapping<?> map) {
 		this.mappings = ArrayUtil.append(this.mappings, new Mapping<?>[] { map });
 	}
