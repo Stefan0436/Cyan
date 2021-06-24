@@ -65,6 +65,7 @@ public class DownloadsBackend extends JWebService {
 	private static boolean ready = false;
 
 	private static String maven = "https://aerialworks.ddns.net/maven/";
+	private static String releases = "https://aerialworks.ddns.net/cyan/releases/";
 	private static String url = maven
 			+ "/org/asf/cyan/CyanVersionHolder/generic/CyanVersionHolder-generic-versions.ccfg";
 
@@ -239,8 +240,7 @@ public class DownloadsBackend extends JWebService {
 			manifest = new UpdateInfo(new String(strm.toByteArray()));
 
 			info.status = "Downloading sources...";
-			url = maven + "/org/asf/cyan/CyanLoader-Sources/" + info.cyanVersion + "/CyanLoader-Sources-"
-					+ info.cyanVersion + "-full.zip";
+			url = releases + "/" + info.cyanVersion + "/sources.zip";
 			download(new URL(url), new File(tmp, "sources.zip"), info, output);
 
 			info.status = "Extracting sources...";
