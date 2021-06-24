@@ -71,8 +71,8 @@ public class NewsBackend extends JWebService {
 		int i = 0;
 		while (!refreshNow) {
 			i++;
-			Thread.sleep(1);
-			if (i == 1000 * 60 * 10)
+			Thread.sleep(1000);
+			if (i == 600)
 				break;
 		}
 
@@ -95,7 +95,7 @@ public class NewsBackend extends JWebService {
 		}
 		while (refreshing) {
 			try {
-				Thread.sleep(1);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				break;
 			}

@@ -451,8 +451,8 @@ public class DownloadsBackend extends JWebService {
 			int i = 0;
 			while (true) {
 				i++;
-				Thread.sleep(1);
-				if (i == 1000 * 60 * 10)
+				Thread.sleep(1000);
+				if (i == 600)
 					break;
 			}
 		}

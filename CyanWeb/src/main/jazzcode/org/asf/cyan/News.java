@@ -51,13 +51,15 @@ public class News extends AbstractWebComponent {
 		} catch (IOException e) {
 		}
 		Map<String, String> query = QueryUtil.parseQuery(function.getRequest().query);
-		if (query.containsKey("viewsingle")) {
+		function = new FunctionInfo(function);
+		function.setNamedParams(Map.of());
+		if (query.containsKey("viewfirst")) {
 			function.addNamedParams(Map.of("viewstart", "0"));
-			function.addNamedParams(Map.of("viewend", "3"));
+			function.addNamedParams(Map.of("viewend", query.get("viewfirst")));
 		}
-		
+
 		if (ready) {
-			backend.getNews(new FunctionInfo(function).setNamedParams(Map.of("execPath", getRequest().path)));
+			backend.getNews(function.addNamedParams(Map.of("execPath", getRequest().path)));
 		} else {
 			function.writeLine("<script>");
 			function.writeLine("\tfunction checkBackend() {");

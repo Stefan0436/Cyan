@@ -61,7 +61,7 @@ dependencies {
 	implementation group: 'org.asf.jazzcode', name: 'JazzCode', version: '1.0.0.A15'
 	implementation group: 'org.asf.cyan', name: 'CyanComponents', version: '1.0.0.A4'
 	implementation group: 'org.asf.cyan', name: 'CCFG', version: '1.0.0.A12'
-	implementation group: 'org.asf.cyan', name: 'CyanUtil', version: '1.0.0.A10'
+	implementation group: 'org.asf.cyan', name: 'CyanUtil', version: '1.0.0.A16'
 	implementation group: 'org.asf.connective.usermanager', name: 'UserManager', version: '1.0.0.A9'
 }
 

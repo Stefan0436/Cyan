@@ -30,7 +30,6 @@ processors> '
 
 # Rewrite tasks for the rewrite contextfile instruction
 tasks> {
-
 }
 
 # Module configuration, modules should use this map for configuration.
@@ -84,11 +83,9 @@ modules> {
     }
     
     UserManager-AuthServices> {
-    
     }
     
     JazzCode> {
-    
     }
     
     newsConfiguration> {
