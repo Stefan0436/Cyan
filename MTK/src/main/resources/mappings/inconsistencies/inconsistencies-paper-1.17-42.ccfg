@@ -8,6 +8,16 @@ mappingsVersion> '4e2f0be270dc4bed68357e8b4f02017146a77f4e'
 
 mappings> [ {
     mappingType> CLASS
+    name> 'net.minecraft.server.level.ServerLevel'
+    obfuscated> 'net.minecraft.server.level.WorldServer'
+    mappings> [ {
+        mappingType> METHOD
+        type> 'net.minecraft.core.BlockPosition'
+        name> 'getSharedSpawnPos'
+        obfuscated> 'getSpawn'
+    } ]
+} {
+    mappingType> CLASS
     name> 'net.minecraft.server.gui.MinecraftServerGui'
     obfuscated> 'net.minecraft.server.gui.ServerGUI'
     mappings> [ {

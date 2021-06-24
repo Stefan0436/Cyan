@@ -12,5 +12,10 @@ class SpigotMappings extends Mapping<SpigotMappings> {
 	public SpigotMappings() {
 		super();
 	}
+	
+	@Override
+	public boolean allowSupertypeFinalOverride() {
+		return true;
+	}
 
 }

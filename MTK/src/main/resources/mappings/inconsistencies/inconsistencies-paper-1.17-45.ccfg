@@ -1,9 +1,10 @@
 #
-# Cyan Inconsistency Mappings, for Paper 1.17 compatibility. (fallback mappings)
+# Cyan Inconsistency Mappings, for Paper 1.17 compatibility.
 # Written by hand, Copyright(c) 2021 Sky Swimmer, LGPL-3.0.
 #
 
 mappingType> TOPLEVEL
+mappingsVersion> '0be7cdbd1715c4c98b88cb7535cfcdcb07f4d678'
 
 mappings> [ {
     mappingType> CLASS

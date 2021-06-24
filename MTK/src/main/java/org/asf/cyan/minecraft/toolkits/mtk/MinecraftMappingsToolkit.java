@@ -460,7 +460,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 			mappingsDir.mkdirs();
 
 		File officialMojangYarn = new File(mappingsDir, "official-mojang+yarn.tiny");
-		File mojangYarnSpigotReobf = new File(mappingsDir, "mojang+yarn-spigot-reobf-patched.tiny");
+		File mojangYarnSpigotReobf = new File(mappingsDir, "mojang+yarn-spigot-reobf.tiny");
 
 		File tmpDir = new File(mappingsDir, "tmp");
 		if (tmpDir.exists())
@@ -558,7 +558,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 		info("Mapping the PAPER mappings into CCFG format...");
 		trace("MAP version PAPER mappings into CCFG, caller: " + CallTrace.traceCallName());
 
-		// load mojang+yarn-spigot-reobf-patched.tiny
+		// load mojang+yarn-spigot-reobf.tiny
 		String mappingsFile = new String(Files.readAllBytes(mojangYarnSpigotReobf.toPath()));
 		SimpleMappings output = new SimpleMappings().parseTinyV2Mappings(mappingsFile, "mojang+yarn", "spigot");
 
@@ -650,6 +650,14 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 				type = mapClass(helper, classMapping.obfuscated);
 				classMapping.obfuscated = type;
 			}
+			for (Mapping<?> member : classMapping.mappings) {
+				if (member.mappingType == MAPTYPE.PROPERTY) {
+					member.obfuscated = mapProperty(input, oldType, member.obfuscated, true);
+				} else if (member.mappingType == MAPTYPE.METHOD) {
+					member.obfuscated = mapMethod(input, oldType, member.obfuscated, true,
+							mapTypes(input, mapTypes(output, member.argumentTypes, false)));
+				}
+			}
 			if (map != null) {
 				for (Mapping<?> member : map.mappings) {
 					if (member.mappingType == MAPTYPE.PROPERTY) {
@@ -673,14 +681,6 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 							classMapping.mappings = ArrayUtil.append(classMapping.mappings, new Mapping[] { mem });
 						}
 					}
-				}
-			}
-			for (Mapping<?> member : classMapping.mappings) {
-				if (member.mappingType == MAPTYPE.PROPERTY) {
-					member.obfuscated = mapProperty(input, oldType, member.obfuscated, true);
-				} else if (member.mappingType == MAPTYPE.METHOD) {
-					member.obfuscated = mapMethod(input, oldType, member.obfuscated, true,
-							mapTypes(input, mapTypes(output, member.argumentTypes, false)));
 				}
 			}
 			fullMappings.add(classMapping);
