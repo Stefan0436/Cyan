@@ -91,7 +91,7 @@ import javax.swing.JCheckBox;
 
 public class Installer extends CyanComponent {
 
-	private static final String version = "2.6";
+	private static final String version = "2.7";
 
 	private static Installer impl;
 
@@ -618,11 +618,6 @@ public class Installer extends CyanComponent {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void runInstaller(File dest, MinecraftVersionInfo version, MinecraftVersionInfo modloader, File cache,
 			ProjectConfig project, GameSide side, boolean interactive) throws IOException {
-		String suffix = "";
-		if (!project.loader.isEmpty())
-			suffix += "-" + project.loader;
-		if (!project.loaderVersion.isEmpty())
-			suffix += "-" + project.loaderVersion;
 		logger.info("Determining progress...");
 
 		int progressMax = 0;
@@ -708,6 +703,15 @@ public class Installer extends CyanComponent {
 				throw new IOException("Cannot resolve mappings version if not using forge");
 			}
 		}
+		
+		String suffix = "";
+		if (!project.loader.isEmpty())
+			suffix += "-" + project.loader;
+		if (project.mappings != null && !project.mappings.isEmpty())
+			suffix += "-" + project.mappings.replaceAll("[^A-Za-z0-9.-]", "-");
+		if (!project.loaderVersion.isEmpty())
+			suffix += "-" + project.loaderVersion;
+		
 		if (!project.platform.equals("VANILLA")) {
 			logger.info("Preparing " + project.platform + " " + project.mappings + " mappings...");
 			if (!MinecraftMappingsToolkit.areMappingsAvailable(suffix, project.platform.toLowerCase(), version, side)) {
