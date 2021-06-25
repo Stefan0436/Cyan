@@ -2692,7 +2692,7 @@ if (buildfile.exists()) {
 	
 	fabricVersions.forEach { version ->
 		tasks.register('fabric_' + version.replaceAll('[^A-Za-z0-9_]', "_") + '_Installer', KickStartInstallerTask) {
-			project(cyanManifest 'CyanFabricServerWrapper', 'CyanFabricClientWrapper', 'Cyan %gv (Fabric ' + version + ')', 'Lectern_Book', 'fabric', version, 'fabric-loader-' + version + '-' + minecraft, "", 'INTERMEDIARY')			
+			project(cyanManifest 'CyanFabricServerWrapper', 'CyanFabricClientWrapper', 'Cyan %gv (Fabric ' + version + ')', 'Lectern_Book', 'fabric', version, 'fabric-loader-' + version + '-' + minecraft, minecraft, 'INTERMEDIARY')			
 			destinationDirectory = file("${buildDir}/Installers/")
 			archiveBaseName = "$minecraft-fabric-$version-cyan"
 			archiveVersion = "$cyanversion"
