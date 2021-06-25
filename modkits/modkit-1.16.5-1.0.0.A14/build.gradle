@@ -117,7 +117,7 @@ dependencies {
 	// Selects game dependencies
 	implementation Game.forGame("Minecraft", gameVersion)
 
-	// Adds the ModKit API, Cyan 1.0.0.A13 only provides specification 1.0
+	// Adds the ModKit API, Cyan 1.0.0.A14 provides specification 1.0 and 1.1
 	implementation API.forAPI("ModKit", modkitVersion)
 }
 
@@ -169,7 +169,7 @@ platforms {
 		//
 		// Paper version:
 		//
-		// paperVersion = getSupportedPaperVersion(gameVersion, cyanVersion)
+		// def paperVersion = getSupportedPaperVersion(gameVersion, cyanVersion)
 		modloader "778" // paperVersion
 
 		//
@@ -190,7 +190,7 @@ platforms {
 		//
 		//
 		// Commit hash and craftbukkit build for mappings version (commit:craftbukkit)
-		version "f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3" // getSpigotMappingsByPaperVersion(paperVersion)
+		version "f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3" // getSpigotMappingsByPaperVersion(gameVersion, paperVersion)
 	}
 }
 
