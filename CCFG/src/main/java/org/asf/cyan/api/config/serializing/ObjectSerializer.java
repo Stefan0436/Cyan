@@ -170,27 +170,36 @@ public class ObjectSerializer {
 		switch (cls.getTypeName()) {
 		case "java.lang.String":
 
-			input = dpMatcher1.reset(input).replaceAll("$1\r");
+			if (input.contains("\\r"))
+				input = dpMatcher1.reset(input).replaceAll("$1\r");
 			input = input.replace("\\\\r", "\\r");
-			input = dpMatcher2.reset(input).replaceAll("$1\b");
+
+			if (input.contains("\\b"))
+				input = dpMatcher2.reset(input).replaceAll("$1\b");
 			input = input.replace("\\\\b", "\\b");
-			input = dpMatcher3.reset(input).replaceAll("$1\t");
+
+			if (input.contains("\\t"))
+				input = dpMatcher3.reset(input).replaceAll("$1\t");
 			input = input.replace("\\\\t", "\\t");
-			input = dpMatcher4.reset(input).replaceAll("$1\f");
+
+			if (input.contains("\\f"))
+				input = dpMatcher4.reset(input).replaceAll("$1\f");
 			input = input.replace("\\\\f", "\\f");
 
 			int index = 0;
 			for (String ch : escapeCharSequences) {
-				Matcher matcher = escapeCharMatchers[index];
-				String chr = escapeChars[index++];
-				if (input.startsWith("\\" + ch))
-					input = input.substring(("\\" + ch).length()) + chr;
-				input = matcher.reset(input).replaceAll("$1" + chr);
-				input = input.replace("\\\\" + ch, "\\" + ch);
+				if (input.contains("\\" + ch)) {
+					Matcher matcher = escapeCharMatchers[index];
+					String chr = escapeChars[index++];
+					if (input.startsWith("\\" + ch))
+						input = input.substring(("\\" + ch).length()) + chr;
+					input = matcher.reset(input).replaceAll("$1" + chr);
+					input = input.replace("\\\\" + ch, "\\" + ch);
+				}
 			}
 
-			input = input.replace("\\\\", "\\");
 			input = input.replace("\\'", "'");
+			input = input.replace("\\\\", "\\");
 
 			return (T) input;
 		case "java.net.URL":
@@ -467,12 +476,16 @@ public class ObjectSerializer {
 				output = output.replace(ch, "\\" + seq);
 			}
 
-			output = matcher1.reset(output).replaceAll("\\\\$0");
-			output = matcher2.reset(output).replaceAll("\\\\$0");
-			output = matcher3.reset(output).replaceAll("\\\\$0");
+			if (output.contains("\\")) {
+				output = matcher1.reset(output).replaceAll("\\\\$0");
+				output = matcher2.reset(output).replaceAll("\\\\$0");
+				output = matcher3.reset(output).replaceAll("\\\\$0");
+			}
 
 			output = output.replace("\\'", "\\\\\\'");
-			output = matcher4.reset(output).replaceAll("$1\\\\'");
+			if (output.contains("'")) {
+				output = matcher4.reset(output).replaceAll("$1\\\\'");
+			}
 			output = output.replace("''", "'\\'");
 
 			if (output.startsWith("'"))
@@ -482,10 +495,13 @@ public class ObjectSerializer {
 
 			output = output.replace("\\r", "\\\\r");
 			output = output.replace("\r", "\\r");
+
 			output = output.replace("\\b", "\\\\b");
 			output = output.replace("\b", "\\b");
+
 			output = output.replace("\\t", "\\\\t");
 			output = output.replace("\t", "\\t");
+
 			output = output.replace("\\f", "\\\\f");
 			output = output.replace("\f", "\\f");
 

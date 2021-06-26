@@ -817,12 +817,17 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 			packageMapppings.append(sc.nextLine()).append(System.lineSeparator());
 		trace("CLOSE mappings scanner, caller: " + CallTrace.traceCallName());
 		sc.close();
+		
+		if (packageMapppings.toString().startsWith("<!DOCTYPE html>")) {
+			packageMapppings = new StringBuilder();
+		}
 
 		info("Mapping the SPIGOT mappings into CCFG format...");
 		trace("MAP version SPIGOT mappings into CCFG, caller: " + CallTrace.traceCallName());
 		SpigotMappings mappings = new SpigotMappings().parseMultiMappings(fallback, classMappings.toString(),
 				memberMapppings.toString(), packageMapppings.toString(),
-				Map.of("net.minecraft.**", "net.minecraft.server.v" + craftBukkitVersion));
+				packageMapppings.toString().isEmpty() ? Map.of()
+						: Map.of("net.minecraft.**", "net.minecraft.server.v" + craftBukkitVersion));
 		mappings.mappingsVersion = commit;
 
 		if (MappingsLoadEventProvider.isAccepted()) {

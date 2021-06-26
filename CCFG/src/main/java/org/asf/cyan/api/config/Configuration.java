@@ -257,13 +257,16 @@ public abstract class Configuration<T extends Configuration<T>> {
 	 * @return CCFG String
 	 */
 	protected String toString(boolean newfile, String oldContent) {
+		if (oldContent == null && newfile) {
+			return ObjectSerializer.getCCFGString(this, new CCFGConfigGenerator<T>(this, newfile, oldContent));
+		}
 		if (!hasChanges() && !newfile) {
 			return oldContent;
 		}
-
 		if (!newfile && hasChanges() && hasChanges(false)) { // FIXME: change when value overwriting is implemented
 			return toString(true, null);
 		}
+		
 		String value = ObjectSerializer.getCCFGString(this, new CCFGConfigGenerator<T>(this, newfile, oldContent));
 		if (!newfile) {
 			if (!value.isEmpty())
