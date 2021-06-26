@@ -7,7 +7,7 @@ function greaterOrEqualToVersion() {
     else return 1; fi
 }
 
-if greaterOrEqualToVersion 1.17 "$minecraft"; then
+if greaterOrEqualToVersion 1.17 "$minecraft" && [ "$1" != "spigotonly" ]; then
     paper="$(curl -s "https://papermc.io/api/v2/projects/paper/versions/$minecraft/" | jq '.builds[-1]')"
     commit="$(curl -s "https://papermc.io/api/v2/projects/paper/versions/$minecraft/builds/$paper" | jq '.changes[0].commit' -r)"
     
