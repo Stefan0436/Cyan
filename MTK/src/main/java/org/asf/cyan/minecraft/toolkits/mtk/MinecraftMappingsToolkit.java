@@ -817,7 +817,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 			packageMapppings.append(sc.nextLine()).append(System.lineSeparator());
 		trace("CLOSE mappings scanner, caller: " + CallTrace.traceCallName());
 		sc.close();
-		
+
 		if (packageMapppings.toString().startsWith("<!DOCTYPE html>")) {
 			packageMapppings = new StringBuilder();
 		}
@@ -880,7 +880,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 				"caches/mappings/" + identifier + "-" + version.getVersion() + suffix + "-"
 						+ side.toString().toLowerCase() + ".mappings.ccfg");
 
-		VanillaMappings mappings = new VanillaMappings().readAll(Files.readString(mappingsFile.toPath()));
+		SimpleMappings mappings = new SimpleMappings().readAll(Files.readString(mappingsFile.toPath()));
 
 		if (MappingsLoadEventProvider.isAccepted()) {
 			try {
@@ -1034,6 +1034,24 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 			return serverMappings;
 		else
 			return null; // Can't happen yet, no other sides
+	}
+
+	/**
+	 * Retrieves the mappings file name of the given mappings
+	 * 
+	 * @param suffix     Mappings suffix
+	 * @param identifier Mappings identifier
+	 * @param version    Minecraft version
+	 * @param side       Which side (server or client)
+	 * @return Mappings file object
+	 */
+	public static File getMappingsFile(String suffix, String identifier, MinecraftVersionInfo version, GameSide side) {
+		String mappings_file = identifier + "-" + version.getVersion() + suffix + "-" + side.toString().toLowerCase()
+				+ ".mappings.ccfg";
+		File mappingsDir = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/mappings");
+		if (!mappingsDir.exists())
+			mappingsDir.mkdirs();
+		return new File(mappingsDir, mappings_file);
 	}
 
 }

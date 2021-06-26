@@ -1,15 +1,18 @@
 package org.asf.cyan.minecraft.toolkits.mtk;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
+import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.fluid.remapping.MAPTYPE;
 import org.asf.cyan.fluid.remapping.Mapping;
 import org.asf.cyan.fluid.remapping.SimpleMappings;
@@ -17,6 +20,11 @@ import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionInfo;
 
 class CompatibilityMappings extends SimpleMappings {
 	protected ArrayList<String> ignoredTypes = new ArrayList<String>();
+	private int build = 0;
+
+	protected void setBuild(int build) {
+		this.build = build;
+	}
 
 	protected Mapping<?> createMapping(String in, String out, MAPTYPE type, String returnType, String... argumentTypes)
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
@@ -29,6 +37,34 @@ class CompatibilityMappings extends SimpleMappings {
 		m.type = returnType;
 		m.argumentTypes = argumentTypes;
 		return m;
+	}
+
+	protected boolean loadWhenPossible(String prefix, String suffix, MinecraftVersionInfo version, GameSide side)
+			throws IOException {
+		prefix = "compatibility-" + prefix;
+		if (MinecraftMappingsToolkit.areMappingsAvailable(suffix, prefix, version, side)) {
+			MinecraftToolkit.infoLog("Loading compatibility mappings...");
+			File mappingsFile = MinecraftMappingsToolkit.getMappingsFile(suffix, prefix, version, side);
+			readAll(Files.readString(mappingsFile.toPath()));
+			try {
+				int lastBuild = Integer.valueOf(this.mappingsVersion);
+				if (lastBuild != build) {
+					MinecraftToolkit.infoLog("Updating compatibility mappings...");
+				}
+				return build == lastBuild;
+			} catch (NumberFormatException e) {
+			}
+		}
+		return false;
+	}
+
+	protected void saveToDisk(String prefix, String suffix, MinecraftVersionInfo version, GameSide side)
+			throws IOException {
+		prefix = "compatibility-" + prefix;
+		MinecraftToolkit.infoLog("Saving compatibility mappings...");
+		File mappingsFile = MinecraftMappingsToolkit.getMappingsFile(suffix, prefix, version, side);
+		mappingsVersion = Integer.toString(build);
+		Files.write(mappingsFile.toPath(), toString().getBytes());
 	}
 
 	protected Mapping<?> setMappings(Mapping<?> input, Mapping<?>... add) {
