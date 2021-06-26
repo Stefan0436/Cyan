@@ -3,13 +3,17 @@ package org.asf.cyan;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.fluid.remapping.Mapping;
+import org.asf.cyan.fluid.remapping.SimpleMappings;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftMappingsToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftModdingToolkit;
@@ -251,6 +255,19 @@ public class MtkCLI extends CyanComponent {
 						return;
 					}
 				}
+			} else if (args[0].equals("deobfuscate") && args.length >= 3 && new File(args[1]).exists()
+					&& args[1].endsWith(".jar")) {
+				File jarfile = new File(args[1]);
+				ArrayList<Mapping<?>> mappings = new ArrayList<Mapping<?>>();
+
+				String[] mappingArguments = Arrays.copyOfRange(args, 2, args.length);
+				for (String arg : mappingArguments) {
+					info("Loading mappings: " + arg);
+					mappings.add(new SimpleMappings().readAll(Files.readString(Path.of(arg))));
+				}
+
+				MinecraftModdingToolkit.deobfuscateJar(jarfile, mappings.toArray(t -> new Mapping[t]));
+				return;
 			} else if (args[0].equals("deobfuscate") && args.length >= 3) {
 				String version = args[1];
 				String side = args[2].toUpperCase();
@@ -289,9 +306,11 @@ public class MtkCLI extends CyanComponent {
 		System.err.println("Tasks:");
 		System.err.println(
 				" - mappings <mojang/spigot/yarn/mcp/intermediary> <version>                                - download mappings");
-		System.err.println("   [<client/server> (mojang/yarn/mcp only)] [<mappings-version> (mcp/spigot/yarn only)");
+		System.err.println("   [<client/server> (mojang/yarn/mcp only)] [<mappings-version> (mcp/spigot/yarn only)]");
 		System.err.println(
 				" - jar <version> <client/server>                                                           - download game jars");
+		System.err.println(
+				" - deobfuscate <jar-file> <mappings-ccfg-files>...                                         - deobfuscate jars");
 		System.err.println(
 				" - deobfuscate <version> <client/server>                                                   - deobfuscate game jars");
 		System.err.println(
