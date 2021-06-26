@@ -181,7 +181,7 @@ task compileAgent(type: Jar, dependsOn: classes) {
 	from sourceSets.main.output
 	includeEmptyDirs = false
 	include "**/tests/**"
-	destinationDirectory = buildDirectory.dir("Interactive test agent")
+	destinationDirectory = layout.buildDirectory.dir("Interactive test agent")
 	manifest {
 		attributes([
 			"Specification-Title": project.name,
