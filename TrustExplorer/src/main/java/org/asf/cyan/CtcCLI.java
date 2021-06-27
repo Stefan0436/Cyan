@@ -494,9 +494,9 @@ public class CtcCLI {
 			System.out.println("       maven { name = \"AerialWorks\"; url = \"https://aerialworks.ddns.net/maven\" }");
 			System.out.println("   }");
 			System.out.println("");
-			System.out.println("2. Add the class trust dependency: (latest version is alpha 3)");
+			System.out.println("2. Add the class trust dependency: (latest version is alpha 5)");
 			System.out.println("   dependencies {");
-			System.out.println("       implementation 'org.asf.cyan:ClassTrust:1.0.0.A3'");
+			System.out.println("       implementation 'org.asf.cyan:ClassTrust:1.0.0.A5'");
 			System.out.println("   }");
 			System.out.println("");
 			System.out.println("");
@@ -507,11 +507,11 @@ public class CtcCLI {
 			System.out.println("     <url>https://aerialworks.ddns.net/maven</url>");
 			System.out.println("   </repository>");
 			System.out.println("");
-			System.out.println("2. Add the class trust dependency: (latest version is alpha 3)");
+			System.out.println("2. Add the class trust dependency: (latest version is alpha 5)");
 			System.out.println("   <dependency>");
 			System.out.println("     <groupId>org.asf.cyan</groupId>");
 			System.out.println("     <artifactId>ClassTrust</artifactId>");
-			System.out.println("     <version>1.0.0.A3</version>");
+			System.out.println("     <version>1.0.0.A5</version>");
 			System.out.println("   <dependency>");
 			System.out.println("");
 			System.out.println("");
