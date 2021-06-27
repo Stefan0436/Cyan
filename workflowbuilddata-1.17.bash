@@ -1,5 +1,5 @@
 forge=
 fabric=0.11.6
-paper=45
+paper=53
 
-mappings_paper=0be7cdbd1715c4c98b88cb7535cfcdcb07f4d678:PB_45
+mappings_paper=0ad55267a387bf9cea3b6d0caeb843b3253cca65:PB_53
