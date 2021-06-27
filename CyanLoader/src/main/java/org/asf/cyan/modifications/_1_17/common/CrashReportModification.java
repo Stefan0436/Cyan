@@ -7,6 +7,7 @@ import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.fluid.api.FluidTransformer;
 import org.asf.cyan.fluid.api.transforming.Constructor;
 import org.asf.cyan.fluid.api.transforming.InjectAt;
+import org.asf.cyan.fluid.api.transforming.LocalVariable;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.TargetName;
 import org.asf.cyan.fluid.api.transforming.TargetType;
@@ -42,6 +43,13 @@ public class CrashReportModification {
 	@InjectAt(location = InjectLocation.TAIL, targetCall = "append(java.lang.String)", targetOwner = "java.lang.StringBuilder", offset = 1)
 	public void getDetails1(StringBuilder var1) {
 		addCyanDetails(var1);
+	}
+
+	@TargetType(target = "java.lang.String")
+	@InjectAt(location = InjectLocation.HEAD, targetCall = "getExceptionMessage()")
+	public void getFriendlyReport(@LocalVariable StringBuilder var1) {
+		addCyanDetails(var1);
+		var1.append("Exception: ");
 	}
 
 	public void addCyanDetails(StringBuilder var1) {
