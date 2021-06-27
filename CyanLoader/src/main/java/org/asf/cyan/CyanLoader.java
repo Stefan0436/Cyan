@@ -1867,7 +1867,7 @@ public class CyanLoader extends ModkitModloader
 						+ component.getTypeName());
 				fatal("");
 				fatal("");
-				StartupWindow.WindowAppender.fatalError("A coremod might havev been tampered with!\nPlease check log!");
+				StartupWindow.WindowAppender.fatalError("A coremod might have been tampered with!\nPlease check log!");
 				System.exit(-1);
 			} else if (result == 0) {
 				found = true;

@@ -33,6 +33,7 @@ public class TrustContainer {
 
 	/**
 	 * Retrieves the container name
+	 * 
 	 * @return Container name
 	 */
 	public String getContainerName() {
@@ -41,6 +42,7 @@ public class TrustContainer {
 
 	/**
 	 * Retrieves the container version timestamp
+	 * 
 	 * @return Container version
 	 */
 	public String getVersion() {
@@ -49,6 +51,7 @@ public class TrustContainer {
 
 	/**
 	 * Retrieves the container entries
+	 * 
 	 * @return Container entry array
 	 */
 	public PackageTrustEntry[] getEntries() {
@@ -136,18 +139,20 @@ public class TrustContainer {
 	 * @throws IOException If validating fails
 	 */
 	public int validateClass(Class<?> cls) throws IOException {
+		String name = cls.getTypeName();
+		if (name.contains("."))
+			name = name.substring(name.lastIndexOf(".") + 1);
+		final String nameFinal = name;
 		if (!Stream.of(entries).anyMatch(t -> t.getName().equals(cls.getPackageName())
-				&& Stream.of(t.getEntries()).anyMatch(t2 -> t2.getName().equals(cls.getSimpleName())))) {
+				&& Stream.of(t.getEntries()).anyMatch(t2 -> t2.getName().equals(nameFinal)))) {
 			return 2;
 		}
 
-		PackageTrustEntry pkg = Stream.of(entries)
-				.filter(t -> t.getName().equals(cls.getPackageName())
-						&& Stream.of(t.getEntries()).anyMatch(t2 -> t2.getName().equals(cls.getSimpleName())))
-				.findFirst().get();
+		PackageTrustEntry pkg = Stream.of(entries).filter(t -> t.getName().equals(cls.getPackageName())
+				&& Stream.of(t.getEntries()).anyMatch(t2 -> t2.getName().equals(nameFinal))).findFirst().get();
 
-		ClassTrustEntry ent = Stream.of(pkg.getEntries()).filter(t2 -> t2.getName().equals(cls.getSimpleName()))
-				.findFirst().get();
+		ClassTrustEntry ent = Stream.of(pkg.getEntries()).filter(t2 -> t2.getName().equals(nameFinal)).findFirst()
+				.get();
 
 		URL location = cls.getProtectionDomain().getCodeSource().getLocation();
 
