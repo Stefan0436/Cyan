@@ -226,7 +226,7 @@ task ctcPublish(type: CtcUtil, dependsOn: ctcPack) {
 	}
 
 	method publish
-	destination connectiveHttpURLScheme("https://aerialworks.ddns.net/", mod_group, mod_id, project.version, mod_group + " " + mod_id + " Main Trust")
+	destination connectiveHttpURLScheme("https://aerialworks.ddns.net/", mod_group, mod_id, project.version, "Main Trust " + mod_id + " " + mod_group)
 
 	//
 	// Publishing credentials are needed for the ASF server
