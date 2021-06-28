@@ -2043,7 +2043,9 @@ processResources {
 	inputs.property "spigotMappings", "${spigotMappings}"
 
 	project(":CyanAPI").afterEvaluate {
-		libraryVersionMap.put("ModKit-" + modkit, project(":CyanAPI").version);
+		def cyanAPI = project(":CyanAPI")
+		def cyanAPIVersion = cyanAPI.version.substring(0, cyanAPI.version.lastIndexOf("-" + cyanAPI.ext.minecraft + "-" + cyanAPI.ext.specVersion))
+		libraryVersionMap.put("ModKit-" + modkit, cyanAPIVersion);
 		
 		for (String key : libraryVersionMap.keySet()) {
 			def val = libraryVersionMap.get(key).replaceAll("\n", "\n    ")
