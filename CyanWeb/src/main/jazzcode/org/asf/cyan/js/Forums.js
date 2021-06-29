@@ -55,7 +55,7 @@ function resetAccount() {
 	$.ajax({
 		method: "GET",
         dataType: "json",
-		url: "/org.asf.cyan.Forums/jz:pullUserInfo()",
+		url: "/org.asf.cyan.FologoutConfirmBtnrums/jz:pullUserInfo()",
 		success: function(json) {
 			document.getElementById("usernameBox").value = json.username;
 			document.getElementById("nicknameBox").value = json.nickname;
@@ -169,6 +169,28 @@ function changeAccountInfo() {
 	}
 }
 
+function changePasswd() {
+	account()
+	document.getElementsByClassName("account-details")[0].onclick = function(){}
+	toggleChangePassword()
+}
+
+function confirmChangePassword() {
+	document.getElementById("changePassForm").submit()
+	document.getElementsByClassName("account-details")[0].onclick = function(){
+		accountCheck();
+	}
+	toggleChangePassword()
+}
+
+function cancelChangePasswd() {
+	document.getElementById("changePassForm").reset()
+	document.getElementsByClassName("account-details")[0].onclick = function(){
+		accountCheck();
+	}
+	toggleChangePassword()
+}
+
 function logoutBtn() {
 	account();
 	toggleLogout();
@@ -188,6 +210,23 @@ function toggleLogout() {
 	document.getElementById("cancelLogout").classList.toggle("cancelLogoutActive");
 	document.getElementById("confirmLogoutBtn").classList.toggle("confirmLogoutBtnInactive");
 	document.getElementById("confirmLogoutBtn").classList.toggle("confirmLogoutBtnActive");
+}
+
+$(document).ready(function(){ 
+	elements = document.getElementById("changePassword").children
+	for (ele of elements) {
+		ele.classList.toggle("inactiveUIElement");
+	}
+})
+
+function toggleChangePassword() {
+	document.getElementById("changePassword").classList.toggle("activeChangePassword");
+	document.getElementById("changePassword").classList.toggle("inactiveUI");
+	elements = document.getElementById("changePassword").children
+	for (ele of elements) {
+		ele.classList.toggle("inactiveUIElement");
+		ele.classList.toggle("activeUIElement");
+	}
 }
 
 function cancelLogin() {

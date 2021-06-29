@@ -51,7 +51,31 @@ window.navDirect = function(target) {
 				<a id="logoutTitle" class="inactiveLogoutTitle">Are you sure you want to log out?</a>
 				<hr class="ln" style="margin-top:0">
 				<button id="cancelLogout" class="cancelLogoutInactive" onclick="toggleLogout()">Cancel</button>
-				<button id="confirmLogoutBtn" class="confirmLogoutBtnInactive" onclick="logoutConfirmBtn()">Logout</button>
+				<button id="confirmLogoutBtn" class="confirmLogoutBtnInactive" onclick="logoutConfirmBtn()">Log out</button>
+			</div>
+			<div id="changePassword" class="inactiveUI">
+				<a id="changePasswdTitle">Change password</a>
+				<hr class="ln" style="margin-top:0">
+				<form id="changePassForm" action="jc:changePassword()" method="post" enctype="multipart/form-data">
+					<a id="oldpasswdLbl">Old password:</a>
+					<br/>
+					<input type="password" id="passwordInput" name="oldpass" required></input>
+					<br/>
+					<br/>
+					<a id="newpasswdLbl">New password:</a>
+					<br/>
+					<input type="password" id="passwordInput" name="newpass" required></input>
+					<a id="newpasswdLbl">Repeat new password:</a>
+					<br/>
+					<input type="password" id="passwordInput" name="repeatpass" required></input>
+					<br/>
+					<br/>
+					<br/>
+				</form>
+				<div id="changePassForm" style="margin-top: -5">
+					<button id="cancelChangePassword" onclick="cancelChangePasswd()">Cancel</button>
+					<button id="confirmChangePassword" onclick="confirmChangePassword()">Confirm</button>
+				</div>
 			</div>
 			<div class="accountbar">
 				<div class="account-details" onclick="accountCheck()">
@@ -60,9 +84,11 @@ window.navDirect = function(target) {
 						<a id="nickname">Not Logged In</a>
 					</div>
 					<div id="account-image">
-						<?jcil
-						run accountImage()
-						?>
+						<div id="account-image-container">
+							<?jcil
+							run accountImage()
+							?>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -76,9 +102,12 @@ window.navDirect = function(target) {
 					<input type="text" id="nicknameBox"></input>
 					<br/>
 					<br/>
+					<button style="width:100%" onclick="changePasswd()">Change account password</button>
+					<br/>
+					<br/>
 					Image:<br/>
 					<form id="imageUpload" action="jc:changeProfileIcon()" method="post" enctype="multipart/form-data">
-						<input id="image" type="file" onchange="selectFile()" accept=".jpg;.jpeg" style="display:none;" name="avatar"></input>
+						<input id="image" type="file" onchange="selectFile()" accept="image/jpeg" style="display:none;" name="avatar"></input>
 						<label id="imageBtn" for="image">Select file...</label>
 					</form>
 					<button style="float:right;width:50%" onclick="changeAccountInfo()">Save</button>

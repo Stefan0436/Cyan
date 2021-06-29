@@ -205,7 +205,7 @@ button:active {
 	background-color: grey;
 	
 	width: 248px;
-	height: 278px;
+	height: 316px;
 	
 	border: 2px solid white;
 	border-radius: 5px;
@@ -272,6 +272,110 @@ button:active {
 	background-color: grey;
  	background-repeat: no-repeat;
  	background-size: cover;
+}
+
+#changePasswdTitle {
+	margin: 5px;
+}
+
+#changePasswdTitle.activeUIElement {
+	font-size: 24;
+	transition: 0.4s;
+}
+
+#changePasswdTitle.inactiveUIElement {
+	font-size: 0;
+	transition: 0.4s;	
+}
+
+#changePassForm {
+	margin: 5px;
+	width: 98.8%;
+}
+
+.activeUIElement #passwordInput {
+	height: auto;
+	width: 100%;
+	transition: 0.4s;
+}
+
+.inactiveUIElement #passwordInput {
+	width: 0px;
+	height: 0px;
+	transition: 0.4s;
+}
+
+.activeUIElement #cancelChangePassword {
+	height: auto;
+	width: 100px;
+	transition: 0.4s;
+}
+
+.inactiveUIElement #cancelChangePassword {
+	width: 0px;
+	height: 0px;
+	transition: 0.4s;
+}
+
+#confirmChangePassword {
+	float: right;
+}
+
+.activeUIElement #confirmChangePassword {
+	height: auto;
+	width: 100px;
+	transition: 0.4s;
+}
+
+.inactiveUIElement #confirmChangePassword {
+	width: 0px;
+	height: 0px;
+	transition: 0.4s;
+}
+
+.activeChangePassword {
+	top: calc(50% - 115px);
+	left: calc(50% - 400px);
+	width: 800px;
+	height: 235px;
+	opacity: 1;
+	transition: 0.4s;
+	visibility: visible;
+}
+
+#changePassword {
+	position: absolute;
+	
+	border: 0.5px inset black;
+	background-color: lightgrey;
+	
+	user-select: none;
+}
+
+.inactiveUI {
+	top: 50%;
+	left: 50%;
+	width: 0px;
+	height: 0px;
+	opacity: 0;
+	transition: 0.4s;
+	visibility: hidden;
+}
+
+.inactiveUIElement {
+	width: 0;
+	height: 0;
+	opacity: 0;
+	transition: 0.4s;
+}
+
+.activeUIElement {
+	opacity: 1;
+	transition: 0.4s;	
+}
+
+#account-image-container {
+	margin-top: 2.5px;
 }
 
 .change .accountbar {
