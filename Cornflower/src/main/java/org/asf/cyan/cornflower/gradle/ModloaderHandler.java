@@ -172,7 +172,7 @@ public class ModloaderHandler extends CyanComponent {
 				}
 			});
 			addDependency(proj, mod.getModDepGroup(), mod.getModDepName(), mod.getVersion());
-			deps.add(mod.getModDepGroup() + ":" + mod.getModDepName());
+			deps.add(mod.getModDepGroup() + ":" + mod.getModDepName() + ":" + mod.getVersion());
 		});
 
 		for (IModloader modloader : (ArrayList<IModloader>) proj.getExtensions().getExtraProperties()
@@ -183,7 +183,7 @@ public class ModloaderHandler extends CyanComponent {
 				deps.add(dep);
 		}
 		for (Project project : proj.getRootProject().getAllprojects()) {
-			deps.add(project.getGroup() + ":" + project.getName());
+			deps.add(project.getGroup() + ":" + project.getName() + ":" + project.getVersion());
 		}
 
 		for (IAPIDependency api : (ArrayList<IAPIDependency>) proj.getExtensions().getExtraProperties()
