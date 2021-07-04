@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
@@ -189,6 +191,44 @@ class CompatibilityMappings extends SimpleMappings {
 		this.mappings = mappingsLst.toArray(t -> new Mapping<?>[t]);
 	}
 
+	private InputStream getResourceStream(String resource) {
+		Object[] o = getResourceData(resource);
+		if (o == null)
+			return null;
+		else
+			return (InputStream) o[0];
+	}
+
+	private Object[] getResourceData(String resource) {
+		String base = getClass().getProtectionDomain().getCodeSource().getLocation().toString();
+		if (base.toString().startsWith("jar:"))
+			base = base.substring(0, base.lastIndexOf("!")) + "!";
+		else if (base.endsWith("/" + getClass().getTypeName().replace(".", "/") + ".class")) {
+			base = base.substring(0,
+					base.length() - ("/" + getClass().getTypeName().replace(".", "/") + ".class").length());
+		}
+		if (base.endsWith(".jar") || base.endsWith(".zip"))
+			base = "jar:" + base + "!";
+		try {
+			URL u = new URL(base + "/" + resource);
+			return new Object[] { u.openStream(), u };
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+//
+//	private URL getResourceURL(String resource) {
+//		Object[] o = getResourceData(resource);
+//		if (o == null)
+//			return null;
+//		try {
+//			((InputStream) o[0]).close();
+//		} catch (IOException e) {
+//		}
+//		return (URL) o[1];
+//	}
+//
 	public void applyInconsistencyMappings(MinecraftVersionInfo game, String loader, String loaderVersion)
 			throws IOException {
 		String majorVersion = game.getVersion();
@@ -196,31 +236,48 @@ class CompatibilityMappings extends SimpleMappings {
 			majorVersion = majorVersion.substring(0, majorVersion.lastIndexOf("."));
 		}
 
-		String inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-" + game.getVersion() + "-"
-				+ loaderVersion + ".ccfg";
-		InputStream strm = Thread.currentThread().getContextClassLoader().getResourceAsStream(inconsistencyFile);
-		if (strm == null) {
-			inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-" + majorVersion + "-"
-					+ loaderVersion + ".ccfg";
-			strm = Thread.currentThread().getContextClassLoader().getResourceAsStream(inconsistencyFile);
-		}
-		if (strm == null) {
-			inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-fallback-" + game.getVersion()
-					+ ".ccfg";
-			strm = Thread.currentThread().getContextClassLoader().getResourceAsStream(inconsistencyFile);
-		}
-		if (strm == null) {
-			inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-fallback-" + majorVersion
-					+ ".ccfg";
-			strm = Thread.currentThread().getContextClassLoader().getResourceAsStream(inconsistencyFile);
-		}
-		if (strm != null) {
+		Object[] strmd = getMappingsStrm(loader, game, loaderVersion, majorVersion, this::getResourceStream);
+		if (strmd == null)
+			strmd = getMappingsStrm(loader, game, loaderVersion, majorVersion,
+					str -> Thread.currentThread().getContextClassLoader().getResourceAsStream(str));
+		if (strmd == null)
+			strmd = getMappingsStrm(loader, game, loaderVersion, majorVersion,
+					str -> getClass().getResourceAsStream(str));
+		if (strmd != null) {
+			InputStream strm = (InputStream) strmd[0];
+
 			LogManager.getLogger(CompatibilityMappings.class)
-					.info("Applying inconsistency mappings patch: <mtk-jar>/" + inconsistencyFile);
+					.info("Applying inconsistency mappings patch: <mtk-jar>/" + strmd[1]);
 			SimpleMappings mappings = new SimpleMappings().readAll(new String(strm.readAllBytes()));
 			strm.close();
 			applyMappingsPatch(this, mappings, true);
 		}
+	}
+
+	private Object[] getMappingsStrm(String loader, MinecraftVersionInfo game, String loaderVersion,
+			String majorVersion, Function<String, InputStream> streamSupplier) {
+		String inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-" + game.getVersion() + "-"
+				+ loaderVersion + ".ccfg";
+		InputStream strm = getResourceStream(inconsistencyFile);
+		if (strm == null) {
+			inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-" + majorVersion + "-"
+					+ loaderVersion + ".ccfg";
+			strm = getResourceStream(inconsistencyFile);
+		}
+		if (strm == null) {
+			inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-fallback-" + game.getVersion()
+					+ ".ccfg";
+			strm = getResourceStream(inconsistencyFile);
+		}
+		if (strm == null) {
+			inconsistencyFile = "mappings/inconsistencies/inconsistencies-" + loader + "-fallback-" + majorVersion
+					+ ".ccfg";
+			strm = getResourceStream(inconsistencyFile);
+		}
+		if (strm != null)
+			return new Object[] { strm, inconsistencyFile };
+		else
+			return null;
 	}
 
 	protected static void applyMappingsPatch(Mapping<?> target, Mapping<?> patchMappings, boolean overwrite) {

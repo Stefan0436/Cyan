@@ -54,9 +54,10 @@ public class CrashReportModification {
 		var1.append("Exception: ");
 	}
 
-	private void addCyanDetails(StringBuilder var1) {
+	public void addCyanDetails(StringBuilder var1) {
 		if (uncategorizedStackTrace != null && uncategorizedStackTrace.length != 0) {
 			areCyanTransformersPresent = false;
+			StackTraceElement[] stacktrace = uncategorizedStackTrace;
 
 			TransformerMetadata.createStackTrace(uncategorizedStackTrace, t -> {
 
@@ -78,12 +79,32 @@ public class CrashReportModification {
 
 			});
 
+			if (!areCyanTransformersPresent) {
+				TransformerMetadata.createStackTrace(exception.getStackTrace(), t -> {
+
+					if (!areCyanTransformersPresent) {
+						var1.append("Transformers:").append("\n");
+					}
+
+					var1.append("\t").append(t).append("\n");
+					areCyanTransformersPresent = true;
+				}, t -> {
+
+					if (!areCyanTransformersPresent) {
+						var1.append("Transformers:").append("\n");
+					}
+
+					var1.append("\t- ").append(t).append("\n");
+					areCyanTransformersPresent = true;
+				});
+				stacktrace = exception.getStackTrace();
+			}
+
 			if (areCyanTransformersPresent) {
 				File output = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "transformer-backtrace");
 				try {
 					TransformerMetadata.dumpErrorBacktrace(
-							exception.getClass().getTypeName() + ": " + exception.getMessage(), uncategorizedStackTrace,
-							output);
+							exception.getClass().getTypeName() + ": " + exception.getMessage(), stacktrace, output);
 
 					var1.append("Additional information:\n");
 					var1.append("\tTransformer metadata dumped in " + output.getCanonicalPath());
