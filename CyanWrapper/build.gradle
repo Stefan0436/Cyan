@@ -2824,9 +2824,9 @@ task createModkitTarGz(type: Tar) {
 serverDownloads.finalizedBy createModkitTarGz
 
 task createCoreModKitZip(type: Zip) {
-	from file("../modkits/modkit-$minecraft-$cyanversion")
-	destinationDirectory = file("$buildDir/serverdata/$cyanversion/modkits/$minecraft")
-	archiveBaseName = 'modkit'
+	from file("../coremodkits/coremodkits-$minecraft-$cyanversion")
+	destinationDirectory = file("$buildDir/serverdata/$cyanversion/coremodkits/$minecraft")
+	archiveBaseName = 'coremodkit'
 	archiveVersion = "$minecraft-$cyanversion"
 }
 serverDownloads.finalizedBy createCoreModKitZip
