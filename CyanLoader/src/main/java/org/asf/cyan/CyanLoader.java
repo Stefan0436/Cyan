@@ -695,7 +695,7 @@ public class CyanLoader extends ModkitModloader
 			String cVersion = (optManifest.isEmpty()
 					? Stream.of(mods).filter(t -> t.getManifest().id().equals(id)).findFirst().get().getManifest()
 							.version().toString()
-					: manifest.version);
+					: optManifest.get().version);
 
 			Version ver = Version.fromString(cVersion);
 			checkDependencyVersion(version, ver, "Missing mod dependency for " + manifest.displayName + ": " + id);
@@ -716,7 +716,7 @@ public class CyanLoader extends ModkitModloader
 				String cVersion = (optManifest.isEmpty()
 						? Stream.of(mods).filter(t -> t.getManifest().id().equals(id)).findFirst().get().getManifest()
 								.version().toString()
-						: manifest.version);
+						: optManifest.get().version);
 
 				Version ver = Version.fromString(cVersion);
 				checkDependencyVersion(version, ver, "Missing mod dependency for " + manifest.displayName + ": " + id);
@@ -2322,7 +2322,7 @@ public class CyanLoader extends ModkitModloader
 			}
 		});
 		addToSystemLater.clear();
-		
+
 		info("Downloading coremod maven dependencies...");
 		downloadMavenDependencies(coremodMavenDependencies);
 
