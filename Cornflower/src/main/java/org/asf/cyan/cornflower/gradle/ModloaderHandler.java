@@ -13,6 +13,7 @@ import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IGame;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IGameExecutionContext;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IModloader;
 import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender;
+import org.asf.cyan.cornflower.gradle.utilities.modding.ModDependency;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
@@ -160,12 +161,29 @@ public class ModloaderHandler extends CyanComponent {
 		});
 
 		ArrayList<String> deps = new ArrayList<String>();
+		findDeps(proj, "mod", (dep) -> {
+			ModDependency mod = (ModDependency) dep;
+			mod.getRepositories().forEach((name, url) -> {
+				if (proj.getRepositories().findByName(name) == null) {
+					proj.getRepositories().maven(repo -> {
+						repo.setName(name);
+						repo.setUrl(url);
+					});
+				}
+			});
+			addDependency(proj, mod.getModDepGroup(), mod.getModDepName(), mod.getVersion());
+			deps.add(mod.getModDepGroup() + ":" + mod.getModDepName());
+		});
+
 		for (IModloader modloader : (ArrayList<IModloader>) proj.getExtensions().getExtraProperties()
 				.get("cornflowermodloaders")) {
 			modloader.addRepositories(proj.getRepositories());
 
 			for (String dep : modloader.addDependencies(proj.getConfigurations()))
 				deps.add(dep);
+		}
+		for (Project project : proj.getRootProject().getAllprojects()) {
+			deps.add(project.getGroup() + ":" + project.getName());
 		}
 
 		for (IAPIDependency api : (ArrayList<IAPIDependency>) proj.getExtensions().getExtraProperties()
@@ -223,6 +241,10 @@ public class ModloaderHandler extends CyanComponent {
 		Log4jToGradleAppender.noLogInfo();
 	}
 
+	private static void addDependency(Project project, String group, String name, String version) {
+		project.getDependencies().add("implementation", group + ":" + name + ":" + version);
+	}
+
 	private static void scanDeps(Collection<ResolvedDependency> dependencies, ArrayList<String> remoteDependencies,
 			ArrayList<String> deps, ArrayList<File> depOut, ArrayList<File> srcOut) {
 		for (ResolvedDependency dep : dependencies) {
@@ -234,6 +256,7 @@ public class ModloaderHandler extends CyanComponent {
 						&& !deps.stream()
 								.anyMatch(t -> t.startsWith(dep.getModuleGroup() + ":" + dep.getModuleName() + ":"))) {
 					boolean containsNormalArtifact = false;
+
 					for (ResolvedArtifact arti : dep.getModuleArtifacts()) {
 						if (arti.getExtension().equals("jar")
 								&& (arti.getClassifier() == null || arti.getClassifier().isEmpty())) {

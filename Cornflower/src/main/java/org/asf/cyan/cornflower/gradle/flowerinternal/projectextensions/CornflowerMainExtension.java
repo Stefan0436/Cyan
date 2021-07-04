@@ -24,6 +24,7 @@ import org.asf.cyan.cornflower.gradle.utilities.IProjectExtension;
 import org.asf.cyan.cornflower.gradle.utilities.modding.ApiDependency;
 import org.asf.cyan.cornflower.gradle.utilities.modding.GameDependency;
 import org.asf.cyan.cornflower.gradle.utilities.modding.IPlatformConfiguration;
+import org.asf.cyan.cornflower.gradle.utilities.modding.ModDependency;
 import org.asf.cyan.cornflower.gradle.utilities.modding.ModloaderDependency;
 import org.asf.cyan.cornflower.gradle.utilities.modding.PlatformClosureOwner;
 import org.asf.cyan.fluid.bytecode.sources.FileClassSourceProvider;
@@ -94,6 +95,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 	public static final ModloaderDependency Modloader = new ModloaderDependency();
 	public static final GameDependency Game = new GameDependency();
 	public static final ApiDependency API = new ApiDependency();
+	public static final ModDependency Mod = new ModDependency();
 
 	public static final LaunchPlatform DEOBFUSCATED = LaunchPlatform.DEOBFUSCATED;
 	public static final LaunchPlatform UNKNOWN = LaunchPlatform.UNKNOWN;
