@@ -121,7 +121,8 @@ public class CyanBytecodeExporter extends BytecodeExporter {
 			break;
 		case "TypeInsnNode":
 			type = "TypeNode";
-			value = "type: \"" + ((TypeInsnNode) insn).desc + "\"";
+			value = "type: \"" + ((TypeInsnNode) insn).desc + "\", opcode: "
+					+ getOpcodeName(insn.getOpcode(), OpcodeUseCase.JVM_OPCODE).toLowerCase();
 			break;
 		case "MethodInsnNode":
 			type = "MethodNode";
