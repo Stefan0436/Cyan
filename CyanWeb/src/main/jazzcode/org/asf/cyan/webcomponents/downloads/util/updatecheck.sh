@@ -28,7 +28,7 @@ MANIFEST="$(curl https://aerialworks.ddns.net/maven/org/asf/cyan/CyanVersionHold
 NEWVER=$(echo "$MANIFEST" | cq org.asf.cyan.core.CyanUpdateInfo --source-jar CyanCore.jar - "$loaderInfo" --raw)
 NEWCYAN=$(echo "$MANIFEST" | cq org.asf.cyan.core.CyanUpdateInfo --source-jar CyanCore.jar - "${versionInfo//&newver/$NEWVER}" --raw)
 OLDINSTALLER=$(sha256sum installer.jar | sed "s/ .*//g")
-NEWINSTALLER=$(curl https://aerialworks.ddns.net/cyan/releases/$NEWCYAN/installers/$minecraft/$minecraft${loadertemplate//&ver/$NEWVER}-cyan-$NEWCYAN-installer.jar -s --output - | sha256sum | sed "s/ .*//g")
+NEWINSTALLER=$(curl https://aerialworks.ddns.net/cyan/releases/$NEWCYAN/installers/$minecraft/$minecraft$loader${loadertemplate//&ver/$NEWVER}-cyan-$NEWCYAN-installer.jar -s --output - | sha256sum | sed "s/ .*//g")
 
 echo "Remote version: $NEWVER"
 echo "Remote cyan version: $NEWCYAN"

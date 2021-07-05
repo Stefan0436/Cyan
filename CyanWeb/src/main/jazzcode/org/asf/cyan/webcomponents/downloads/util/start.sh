@@ -1,4 +1,5 @@
 #!/bin/bash
+chmod +x updatecheck.sh
 ./updatecheck.sh || exit 1
 echo Starting minecraft...
 
