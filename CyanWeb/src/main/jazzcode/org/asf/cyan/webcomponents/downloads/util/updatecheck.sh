@@ -47,7 +47,7 @@ fi
 
 echo Installing server...
 rm -f server.jar
-mv "minecraft-$minecraft$loader"-*.jar server.jar
+mv minecraft-*.jar server.jar
 echo "$NEWVER" > oldver
 echo "$NEWCYAN" > oldcyanver
 echo Updated to $NEWVER.
