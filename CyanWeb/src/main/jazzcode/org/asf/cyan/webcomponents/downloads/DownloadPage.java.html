@@ -8,6 +8,17 @@ install "org.asf.cyan.webcomponents.downloads.DownloadPage"
 	margin-top: 8%;
 }
 
+#downloads-btn-preparing {
+	height: 3%;
+	border: 1px inset;
+	transition: 0.1s;
+	border-radius: 10px;
+	background-color: #006aa3;
+	height: 30px;
+	width: 250px;
+	font-size: 20px;
+}
+
 #downloads-btn {
 	height: 3%;
 	border: 1px outset;
@@ -17,6 +28,7 @@ install "org.asf.cyan.webcomponents.downloads.DownloadPage"
 	height: 30px;
 	width: 250px;
 	font-size: 20px;
+	margin-top: 2px;
 }
 
 #downloads-btn:hover {
@@ -64,33 +76,34 @@ install "org.asf.cyan.webcomponents.downloads.DownloadPage"
 
 <div id="contentd">	
 	<a id="compiler-info" data-platform="${platform}" data-version="${version}" data-modloader="${modloaderversion}" data-repository="${repository}" />
-	<div id="compiler" style="${style.compiler}">
+	<!-- <div id="compiler" style="${style.compiler}">
 	
 		${elements}
 		<h1 id="compilestatus">Compiler status: ${compile.status}</h1>
-
-		<?jcil
-		run init()
-		?>
-
 		<textarea id="log" readonly></textarea>
 
 		<br /> <br />
-	</div>
+	</div> -->
+	<?jcil
+	run init()
+	?>
+
 	<div id="download" style="${style.download}">
 		<h1>Download Cyan (${platform} ${modloaderversion}):</h1>
-		<button onclick="window.location.href='${downloadlink}/cyan-client-${version}-${platform}-${modloaderversion}-${cyanversion}.zip'" id="downloads-btn" class="clientbtn">Download client</button>
-		<button onclick="window.location.href='https://aerialworks.ddns.net/maven/org/asf/cyan/CyanLoader-Sources/${cyanversion}/CyanLoader-Sources-${cyanversion}-full.zip'" id="downloads-btn" class="sourcesrbtn">Download sources</button>
-		<button onclick="window.location.href='${downloadlink}/cyan-server-${version}-${platform}-${modloaderversion}-${cyanversion}.zip'" id="downloads-btn" class="serverbtn">Download server</button>
+		<button onclick="window.location.href='${installerlink}'" id="downloads-btn" class="installerbtn">Download installer</button>
+		<button data-url="${filedir}/cyan-sources-${cyanversion}.zip" id="downloads-btn-preparing" class="sourcesbtn">Preparing sources...</button>
 		<div id="modkits" style="${style.modkits}">
-			<button onclick="window.location.href='${downloadlink}/cyan-modkit-${version}-${platform}-${modloaderversion}-${cyanversion}.zip'" id="downloads-btn" class="modkitbtn">Download ModKit</button>
-			<button onclick="window.location.href='${downloadlink}/cyan-coremodkit-${version}-${platform}-${modloaderversion}-${cyanversion}.zip'" id="downloads-btn" class="coremodkitbtn">Download CoreModKit</button>
+			<button onclick="window.location.href='${filedir}/modkits/cyan-modkit-${version}-${platform}-${modloaderversion}-${cyanversion}.zip'" id="downloads-btn" class="modkitbtn">Download ModKit</button>
+			<button onclick="window.location.href='${filedir}/modkits/cyan-coremodkit-${version}-${platform}-${modloaderversion}-${cyanversion}.zip'" id="downloads-btn" class="coremodkitbtn">Download CoreModKit</button>
 		</div>
-		<br/>
+		<div class="updatekitbtn">
+			<button onclick="window.location.href='jc:downloadAutoUpdateKit(platform: ${platform}, version: ${version}, modloader: ${modloaderversion}, repository: ${repository}, execPath: ${execPathEncoded})'" id="downloads-btn" style="width: 375px; margin-top: 5px">Download server auto-update kit</button>
+			<br/>
+		</div>
 		<br/>
 	</div>
 	
-	<button onclick="javascript:goNav('${repository}, page: ${targetpage}, version: ${version}, platform: ${platform}, backpage: ${backpage}')" id="downloads-btn">Go
+	<button onclick="javascript:goNav('${repository}, page: ${targetpage}, version: ${version}, platform: ${platform}, backpage: ${backpage}')" id="downloads-btn" style="margin-top: 10px">Go
 		back</button>
 	<br/>
 </div>

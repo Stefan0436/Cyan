@@ -4,71 +4,71 @@ run init()
 ?>
 
 <style>
-#downloadselect {
-	text-align: center;
-	margin-top: 16%;
-}
+	#downloadselect {
+		text-align: center;
+		margin-top: 16%;
+	}
 
-#downloads-btn {
-	height: 3%;
-	border: 1px outset;
-	transition: 0.1s;
-	border-radius: 10px;
-	background-color: cyan;
-	height: 30px;
-	width: 250px;
-	font-size: 20px;
-}
+	#downloads-btn {
+		height: 3%;
+		border: 1px outset;
+		transition: 0.1s;
+		border-radius: 10px;
+		background-color: cyan;
+		height: 30px;
+		width: 250px;
+		font-size: 20px;
+	}
 
-#downloads-btn:hover {
-	border: 1px inset;
-}
+	#downloads-btn:hover {
+		border: 1px inset;
+	}
 
-#downloads-btn:active {
-	border: 2px inset;
-	background-color: blue;
-}
+	#downloads-btn:active {
+		border: 2px inset;
+		background-color: blue;
+	}
 
-#downloads-btn-compiling {
-	height: 3%;
-	border: 1px outset;
-	transition: 0.1s;
-	border-radius: 10px;
-	background-color: magenta;
-	height: 30px;
-	width: 250px;
-	font-size: 20px;
-}
+	#downloads-btn-supported {
+		height: 3%;
+		border: 1px outset;
+		transition: 0.1s;
+		border-radius: 10px;
+		background-color: magenta;
+		height: 30px;
+		width: 250px;
+		font-size: 20px;
+	}
 
-#downloads-btn-compiling:hover {
-	border: 1px inset;
-}
+	#downloads-btn-supported:hover {
+		border: 1px inset;
+	}
 
-#downloads-btn-compiling:active {
-	border: 2px inset;
-	background-color: #a303a1;
-}
+	#downloads-btn-supported:active {
+		border: 2px inset;
+		background-color: #a303a1;
+	}
 
-#downloads-btn-noncompiled {
-	height: 3%;
-	border: 1px outset;
-	transition: 0.1s;
-	border-radius: 10px;
-	background-color: #0718f2;
-	height: 30px;
-	width: 250px;
-	font-size: 20px;
-	color: white;
-}
+	#downloads-btn-dated {
+		height: 3%;
+		border: 1px outset;
+		transition: 0.1s;
+		border-radius: 10px;
+		background-color: #0718f2;
+		height: 30px;
+		width: 250px;
+		font-size: 20px;
+		color: white;
+	}
 
-#downloads-btn-noncompiled:hover {
-	border: 1px inset;
-}
+	#downloads-btn-dated:hover {
+		border: 1px inset;
+	}
 
-#downloads-btn-noncompiled:active {
-	border: 2px inset;
-	background-color: #020fbd;
-}
+	#downloads-btn-dated:active {
+		border: 2px inset;
+		background-color: #020fbd;
+	}
 </style>
 
 <div id="downloadselect">
@@ -77,11 +77,12 @@ run init()
 	<br />
 	<br />
 	<br />
-	<a>If the button is dark-blue, it means the version has not been compiled.</a>
+	<a>If the button is magenta, it means the version has the most support.</a>
 	<br />
-	<a>If the button is magenta, it means the version is still compiling and can be downloaded later.</a>
+	<a>If the button is dark-blue, the version is a bit older and might not be compatible with all mods.</a>
 	<br />
-	<a>Selecting those versions will either start the compilation process or view it.</a>
+	<br />
+	<a><b>However, it is always a good idea to stay up-to-date.</b></a>
 	<br />
 	<br />
 	<br />

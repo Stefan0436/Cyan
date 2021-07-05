@@ -49,39 +49,24 @@ public class ModloaderVersionSelection extends AbstractWebComponent {
 				+ DownloadsBackend.jcEncode(", version: " + function.variables.get("version") + ", platform: "
 						+ function.variables.get("platform") + ", backpage: " + DownloadsBackend.jcEncode(backpage));
 
-		String button = "\t<button onclick=\"javascript:goNav('" + dest + "')\" id=\"downloads-btn\">#%v</button>\n";
-		String buttonCompiling = "\t<button onclick=\"javascript:goNav('" + dest
-				+ "')\" id=\"downloads-btn-compiling\">#%v</button>\n";
-		String buttonNonCompiled = "\t<button onclick=\"javascript:goNav('" + dest
-				+ "')\" id=\"downloads-btn-noncompiled\">#%v</button>\n";
+		String buttonSupported = "\t<button onclick=\"javascript:goNav('" + dest
+				+ "')\" id=\"downloads-btn-supported\">#%v</button>\n";
+		String buttonDated = "\t<button onclick=\"javascript:goNav('" + dest
+				+ "')\" id=\"downloads-btn-dated\">#%v</button>\n";
 
 		StringBuilder versionString = new StringBuilder();
 		for (String version : new ArrayList<String>(versions)) {
 			FunctionInfo inter = new FunctionInfo(function).setParams(function.variables.get("platform"),
 					function.variables.get("repository"), function.variables.get("version"), version);
 
-			if (backend.getCompilingVersion(inter) == null && backend.getCompiledVersion(inter) != null) {
-				versionString.append(button.replace("%v", version));
+			if (backend.hasHighSupport(inter)) {
+				versionString.append(buttonSupported.replace("%v", version));
 				versions.remove(version);
 			}
 		}
 		for (String version : new ArrayList<String>(versions)) {
-			FunctionInfo inter = new FunctionInfo(function).setParams(function.variables.get("platform"),
-					function.variables.get("repository"), function.variables.get("version"), version);
-
-			if (backend.getCompilingVersion(inter) != null && backend.getCompiledVersion(inter) == null) {
-				versionString.append(buttonCompiling.replace("%v", version));
-				versions.remove(version);
-			}
-		}
-		for (String version : new ArrayList<String>(versions)) {
-			FunctionInfo inter = new FunctionInfo(function).setParams(function.variables.get("platform"),
-					function.variables.get("repository"), function.variables.get("version"), version);
-
-			if (backend.getCompilingVersion(inter) == null && backend.getCompiledVersion(inter) == null) {
-				versionString.append(buttonNonCompiled.replace("%v", version));
-				versions.remove(version);
-			}
+			versionString.append(buttonDated.replace("%v", version));
+			versions.remove(version);
 		}
 		function.variables.put("versionbuttons", versionString.toString());
 	}

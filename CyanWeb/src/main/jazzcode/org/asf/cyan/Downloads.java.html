@@ -64,7 +64,7 @@
 					url : "jc:pullDownloads(" + dest + ", execPath: ${http.path})",
 					success : function(result) {						
 						document.getElementById("downloadcontent").innerHTML = result;
-						if (document.getElementById("compiler") != null) {
+						if (document.getElementById("compiler-info") != null) {
 							runDownloadScripts();
 						}
 						$("#downloadcontent").animate({opacity: 1}, 1000);
