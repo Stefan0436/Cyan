@@ -66,10 +66,7 @@ public class CqMain {
 								} else if (key.equals("viewmode")) {
 									view = true;
 									continue;
-								} else if (key.equals("ccfg-output")) {
-									outputCCFG = true;
-									continue;
-								} else if (key.equals("ccfg")) {
+								} else if (key.equals("ccfg-output") || key.equals("ccfg")) {
 									outputCCFG = true;
 									continue;
 								}
@@ -372,7 +369,12 @@ public class CqMain {
 					else
 						out.append("[\\\"");
 				}
-				out.append(serialize(k, raw, indent + 2, false));
+				String key = serialize(k, raw, indent + 2, false);
+				if (indent != 0 && raw) {
+					key = key.replace("\\\"", "\\\\\"").replace("\\n", "\\\\n");
+					key = key.replace("\"", "\\\"").replace("\n", "\\n");
+				}
+				out.append(key);
 
 				if (!raw) {
 					out.append(": ");
@@ -384,7 +386,8 @@ public class CqMain {
 				}
 				String val = serialize(v, raw, indent + 2, false);
 				if (indent != 0 && raw) {
-					val = val.replace("\"", "\\\"").replace("\n", "\\n");
+					val = val.replace("\\\"", "\\\\\"");
+					val = val.replace("\"", "\\\"");
 				}
 				out.append(val);
 				if (val.isEmpty() && raw)
@@ -451,7 +454,12 @@ public class CqMain {
 					else
 						out.append("[\\\"");
 				}
-				out.append(serialize(k, raw, indent + 2, false));
+				String key = serialize(k, raw, indent + 2, false);
+				if (indent != 0 && raw) {
+					key = key.replace("\\\"", "\\\\\"").replace("\\n", "\\\\n");
+					key = key.replace("\"", "\\\"").replace("\n", "\\n");
+				}
+				out.append(key);
 				if (!raw) {
 					out.append(": ");
 				} else {
@@ -462,7 +470,8 @@ public class CqMain {
 				}
 				String val = serialize(v, raw, indent + 2, false);
 				if (indent != 0 && raw) {
-					val = val.replace("\"", "\\\"").replace("\n", "\\n");
+					val = val.replace("\\\"", "\\\\\"");
+					val = val.replace("\"", "\\\"");
 				}
 				out.append(val);
 				if (val.isEmpty() && raw)
@@ -544,14 +553,17 @@ public class CqMain {
 			outputTxt = out.toString();
 		} else {
 			StringBuilder out = new StringBuilder();
-			if (!view && (!raw || value.toString().contains(" ")))
+			if (!view && (!raw || value.toString().contains(" ") || value.toString().contains("\n")
+					|| value.toString().contains("\r")))
 				out.append("\"");
 			String val = (!view && !raw ? value.toString().replace("\n", "\\n") : value.toString());
-			if (indent == 0 && !raw) {
+			if (indent == 0 || !raw || (raw && indent != 0)) {
+				val = val.replace("\\\"", "\\\\\"");
 				val = val.replace("\"", "\\\"");
 			}
 			out.append(val);
-			if (!view && (!raw || value.toString().contains(" ")))
+			if (!view && (!raw || value.toString().contains(" ") || value.toString().contains(" ")
+					|| value.toString().contains("\n") || value.toString().contains("\r")))
 				out.append("\"");
 			outputTxt = out.toString();
 		}
