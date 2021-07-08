@@ -1,8 +1,8 @@
-package modkit.events.ingame.entities;
+package modkit.events.ingame.rendering.entity;
 
 import org.asf.cyan.api.events.extended.AbstractExtendedEvent;
 
-import modkit.events.objects.ingame.entities.EntityRendererRegistryEventObject;
+import modkit.events.objects.ingame.rendering.entity.EntityRendererRegistryEventObject;
 
 /**
  * 

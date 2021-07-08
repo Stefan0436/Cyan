@@ -39,7 +39,7 @@ public class LegacyModKitSupportHook extends ClassLoadHook {
 		public String map(String internal) {
 			if (types.containsKey(internal.replace("/", "."))) {
 				if (!ran) {
-					log.warn("Applying support remappers for ModKit " + name + " Mods (LEGACY MODS PRESENT)");
+					log.warn("Applying support remappers for ModKit " + name + " Mods (OLDER MODS PRESENT)");
 				}
 				ran = true;
 				internal = types.get(internal.replace("/", ".")).replace(".", "/");
@@ -52,7 +52,7 @@ public class LegacyModKitSupportHook extends ClassLoadHook {
 			}
 			if (packages.keySet().stream().anyMatch(t -> t.equals(pkg) || pkg.startsWith(t + "."))) {
 				if (!ran) {
-					log.warn("Applying support remappers for ModKit " + name + " Mods (LEGACY MODS PRESENT)");
+					log.warn("Applying support remappers for ModKit " + name + " Mods (OLDER MODS PRESENT)");
 				}
 				ran = true;
 
@@ -82,6 +82,7 @@ public class LegacyModKitSupportHook extends ClassLoadHook {
 
 	@Override
 	public void build() {
+		// ModKit 1.0 support
 		HashMap<String, String> packages = new HashMap<String, String>();
 		HashMap<String, String> types = new HashMap<String, String>();
 		packages.put("org.asf.cyan.api.advanced", "modkit.advanced");
@@ -107,6 +108,23 @@ public class LegacyModKitSupportHook extends ClassLoadHook {
 		types.put("org.asf.cyan.api.events.network.CyanServerHandshakeEvent",
 				"org.asf.cyan.api.events.network.ModKitServerHandshakeEvent");
 		remappers.add(new ModKitClassRemapper(packages, types, "1.0"));
+
+		// ModKit 1.1 support
+		types = new HashMap<String, String>();
+		packages = new HashMap<String, String>();
+		types.put("modkit.events.ingame.entities.EntityRendererRegistryEvent",
+				"modkit.events.ingame.rendering.entity.EntityRendererRegistryEvent");
+		types.put("modkit.events.ingame.blocks.BlockEntityRendererRegistryEvent",
+				"modkit.events.ingame.rendering.blockentity.BlockEntityRendererRegistryEvent");
+		types.put("modkit.events.objects.ingame.entities.EntityRendererContext",
+				"modkit.events.objects.ingame.rendering.context.EntityRendererContext");
+		types.put("modkit.events.objects.ingame.blocks.BlockEntityRendererContext",
+				"modkit.events.objects.ingame.rendering.context.BlockEntityRendererContext");
+		types.put("modkit.events.objects.ingame.entities.EntityRendererRegistryEventObject",
+				"modkit.events.objects.ingame.rendering.entity.BlockEntityRendererRegistryEventObject");
+		types.put("modkit.events.objects.ingame.blocks.BlockEntityRendererRegistryEventObject",
+				"modkit.events.objects.ingame.rendering.entity.EntityRendererRegistryEventObject");
+		remappers.add(new ModKitClassRemapper(packages, types, "1.1"));
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package modkit.threading;
 
 /**
  * 
- * Mod Thread Manager -- Not yet implemented, ModKit 1.1
+ * Mod Thread Manager -- Not yet implemented, ModKit 1.2
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
  *

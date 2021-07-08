@@ -1,4 +1,4 @@
-package modkit.events.objects.ingame.entities;
+package modkit.events.objects.ingame.rendering.entity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +8,7 @@ import org.asf.cyan.api.events.extended.EventObject;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.versioning.Version;
 
+import modkit.events.objects.ingame.rendering.context.EntityRendererContext;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;

@@ -1,8 +1,8 @@
-package modkit.events.ingame.blocks;
+package modkit.events.ingame.rendering.blockentity;
 
 import org.asf.cyan.api.events.extended.AbstractExtendedEvent;
 
-import modkit.events.objects.ingame.blocks.BlockEntityRendererRegistryEventObject;
+import modkit.events.objects.ingame.rendering.blockentity.BlockEntityRendererRegistryEventObject;
 
 /**
  * 

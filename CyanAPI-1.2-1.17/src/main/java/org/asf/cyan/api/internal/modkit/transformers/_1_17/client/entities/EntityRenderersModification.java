@@ -9,9 +9,9 @@ import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
-import modkit.events.ingame.entities.EntityRendererRegistryEvent;
-import modkit.events.objects.ingame.entities.EntityRendererContext;
-import modkit.events.objects.ingame.entities.EntityRendererRegistryEventObject;
+import modkit.events.ingame.rendering.entity.EntityRendererRegistryEvent;
+import modkit.events.objects.ingame.rendering.context.EntityRendererContext;
+import modkit.events.objects.ingame.rendering.entity.EntityRendererRegistryEventObject;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.entity.Entity;

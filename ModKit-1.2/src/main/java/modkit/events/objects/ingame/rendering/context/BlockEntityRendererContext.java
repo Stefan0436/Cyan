@@ -1,4 +1,4 @@
-package modkit.events.objects.ingame.blocks;
+package modkit.events.objects.ingame.rendering.context;
 
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.Font;
