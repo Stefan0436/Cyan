@@ -1,0 +1,48 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Build (1.17.1)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Cache
+      uses: actions/cache@v2.1.6
+      with:
+        path: |
+            ~/.gradle/caches/Cornflower
+        key: ${{ runner.os }}-117-${{ hashFiles('./config.gradle') }}-${{ hashFiles('./modloaderbuild-1.17.1.gradle') }}
+    - name: Set up JDK 16
+      uses: actions/setup-java@v2
+      with:
+        java-version: '16'
+        distribution: 'adopt'
+    - name: Setup git user email
+      run: git config --global user.email "autobuild@localhost"
+    - name: Setup git user name
+      run: git config --global user.name autobuild
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Grant execute permissions to build script
+      run: chmod +x buildlocal.sh
+    - name: Grant execute permissions to workflow build script
+      run: chmod +x buildworkflow.sh
+    - name: Setup LiteCyan libraries for build
+      run: ./gradlew -c settings.lite.gradle installLiteLibs
+    - name: Build for 1.17.1
+      run: ./buildworkflow.sh 1.17.1
+    - name: Build for 1.17.1 with Paper support
+      run: ./buildworkflow.sh 1.17.1 paper
+    - name: Build for 1.17.1 with Fabric support
+      run: ./buildworkflow.sh 1.17.1 fabric
+#    - name: Build for 1.17.1 with Forge support
+#      run: ./buildworkflow.sh 1.17.1 forge

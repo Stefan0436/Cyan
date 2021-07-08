@@ -1,0 +1,9 @@
+stability 'testing'
+
+fabric(
+    '0.11.6'
+)
+
+paper([
+    '90': 'bb44da8420a5300c53e63843da8e7bb44cf45d2a:PB_90'
+])

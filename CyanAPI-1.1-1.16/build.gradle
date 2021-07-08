@@ -28,7 +28,6 @@ apply from: '../config.gradle'
 
 version="1.0.0.A2"
 ext.specVersion = "1.1"
-ext.minecraft = "1.16.5"
 
 buildDir = "../build/CyanAPI-$minecraft-$specVersion"
 version="$version-$minecraft-$specVersion"
