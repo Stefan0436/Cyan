@@ -105,6 +105,7 @@ public abstract class Transformer extends CyanComponent {
 						if (AnnotationInfo.isAnnotationPresent(Exclude.class, method))
 							continue;
 
+						final String methNameFinal = method.name;
 						boolean found = false;
 						ArrayList<String> types = new ArrayList<String>();
 						FluidMethodInfo info = FluidMethodInfo.create(method);
@@ -164,8 +165,8 @@ public abstract class Transformer extends CyanComponent {
 									+ ", could not apply method: " + method.name
 									+ ", its counterpart could not be found.");
 
-						transformedMethods.add(info.name + " " + info.toDescriptor() + " " + clName + " " + method.name
-								+ "&" + method.desc + " " + oldMod + " " + newMod);
+						transformedMethods.add(info.name + " " + info.toDescriptor() + " " + clName + " "
+								+ methNameFinal + "&" + method.desc + " " + oldMod + " " + newMod);
 					}
 					target.interfaces.add(transformer.name);
 				} else {
@@ -198,6 +199,7 @@ public abstract class Transformer extends CyanComponent {
 										+ clName + " as it could not be found, transformer: " + typeName);
 							}
 
+							final String oMethName = meth.name;
 							MethodNode targetNode = target.methods.stream()
 									.filter(t -> t.name.equals(methNameFinal) && t.desc.equals(descFinal)).findFirst()
 									.get();
@@ -216,7 +218,7 @@ public abstract class Transformer extends CyanComponent {
 							ninfo.remap(clName, transformer, ninfo, false, ctx.programPool);
 
 							transformedMethods.add(ninfo.name + " " + ninfo.toDescriptor() + " " + clName + " "
-									+ meth.name + "&" + originalDesc + " " + newMod + " " + newMod);
+									+ oMethName + "&" + originalDesc + " " + newMod + " " + newMod);
 						} else if (AnnotationInfo.isAnnotationPresent(InjectAt.class, meth)) {
 							if (!target.methods.stream()
 									.anyMatch(t -> t.name.equals(methNameFinal) && t.desc.equals(descFinal))) {
@@ -231,6 +233,8 @@ public abstract class Transformer extends CyanComponent {
 							debug("Transforming method: " + targetNode.name + "... (using transformer method: "
 									+ meth.name + ")");
 
+							final String oMethName = meth.name;
+							
 							AnnotationInfo targetData = AnnotationInfo.getAnnotation(InjectAt.class, meth);
 							String targetMethName = null;
 							String targetMethTypes[] = null;
@@ -311,11 +315,12 @@ public abstract class Transformer extends CyanComponent {
 							FluidMethodInfo ninfo = FluidMethodInfo.create(meth);
 							ninfo.remap(clName, transformer, ninfo, false, ctx.programPool);
 							transformedMethods.add(ninfo.name + " " + ninfo.toDescriptor() + " " + clName + " "
-									+ meth.name + "&" + meth.desc + " " + oldMod + " " + newMod);
+									+ oMethName + "&" + meth.desc + " " + oldMod + " " + newMod);
 						} else {
 							if (meth.name.equals("<init>"))
 								continue;
 
+							final String oMethName = meth.name;
 							if (target.methods.stream()
 									.anyMatch(t -> t.name.equals(methNameFinal) && t.desc.equals(descFinal))) {
 								if (!meth.name.equals("<clinit>"))
@@ -346,7 +351,7 @@ public abstract class Transformer extends CyanComponent {
 
 							debug("Created method " + ninfo.name);
 							transformedMethods.add(ninfo.name + " " + ninfo.toDescriptor() + " " + clName + " "
-									+ meth.name + "&" + originalDesc + " " + oldMod + " " + newMod + " true");
+									+ oMethName + "&" + originalDesc + " " + oldMod + " " + newMod + " true");
 						}
 					}
 
