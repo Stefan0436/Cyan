@@ -241,7 +241,7 @@ public class DownloadsBackend extends JWebService {
 		}
 	}
 
-	public static String jcEncodeParam(String input) throws UnsupportedEncodingException {
+	public static String jcEncodeParam(String input) {
 		return input.replace("%", "%25").replace(":", "%3A").replace(",", "%2C");
 	}
 
