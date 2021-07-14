@@ -12,6 +12,6 @@ public class Protocols {
 	//
 	// We support:
 	//
-	public static final double MODKIT_PROTOCOL = 1.1;
+	public static final double MODKIT_PROTOCOL = 1.2;
 
 }
