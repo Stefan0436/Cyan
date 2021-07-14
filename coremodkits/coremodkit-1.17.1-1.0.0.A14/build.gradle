@@ -172,7 +172,7 @@ platforms {
 		// Paper version:
 		//
 		// def paperVersion = getSupportedPaperVersion(gameVersion, cyanVersion)
-		modloader "90" // paperVersion
+		modloader "103" // paperVersion
 
 		//
 		// Paper mappings version, it is best to only use mappings that have been given a green light by the Cyan team.
@@ -188,7 +188,7 @@ platforms {
 		//
 		//
 		// Commit hash and paper build for mappings version (commit:PB_build)
-		version "bb44da8420a5300c53e63843da8e7bb44cf45d2a:PB_90" // getSpigotMappingsByPaperVersion(gameVersion, paperVersion)
+		version "990f7daeb7673f4e2fd4582b51d5092b14e95fcb:PB_103" // getSpigotMappingsByPaperVersion(gameVersion, paperVersion)
 	}
 }
 

@@ -30,11 +30,28 @@ public class ForgeCompatibilityMappings extends CompatibilityMappings {
 				side, true, mcp);
 	}
 
+	public ForgeCompatibilityMappings(Mapping<?> deobf, Mapping<?> mcp, MinecraftVersionInfo gameVersion,
+			String loaderVersion) {
+		try {
+			create(deobf, mcp, gameVersion, loaderVersion);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException | IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void create(Mapping<?> deobf, Mapping<?> mcp, MinecraftVersionInfo gameVersion, String loaderVersion)
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+			NoSuchMethodException, SecurityException, IOException {
+		combine("MCP", deobf, mcp);
+		applyInconsistencyMappings(gameVersion, "forge", loaderVersion);
+	}
+
 	public ForgeCompatibilityMappings(Mapping<?> mappings, String modloader, MinecraftVersionInfo info, GameSide side,
 			boolean msg, String mcp) {
 		try {
 			String mappingsId = "-" + mcp.replaceAll("[!?/:\\\\]", "-") + (modloader.isEmpty() ? "" : "-" + modloader);
-			if (loadWhenPossible("fabric", mappingsId, info, side))
+			if (loadWhenPossible("forge", mappingsId, info, side))
 				return;
 
 			MinecraftToolkit.infoLog("Loading forge support... Preparing MCP mappings for compatibility...");
@@ -49,8 +66,8 @@ public class ForgeCompatibilityMappings extends CompatibilityMappings {
 			}
 
 			Mapping<?> MCPMappings = MinecraftMappingsToolkit.loadMappings(mappingsId, "mcp", info, side);
-			combine("MCP", mappings, MCPMappings);
-			saveToDisk("fabric", mappingsId, info, side);
+			create(mappings, MCPMappings, info, modloader);
+			saveToDisk("forge", mappingsId, info, side);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException | IOException e) {
 			throw new RuntimeException(e);

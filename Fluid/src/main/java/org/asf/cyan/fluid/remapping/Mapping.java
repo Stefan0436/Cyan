@@ -85,8 +85,8 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 		type = null;
 		obfuscated = null;
 
-		mappings = mappings.replaceAll("\r", "");
-		mappings = mappings.replaceAll("\t", "    ");
+		mappings = mappings.replace("\r", "");
+		mappings = mappings.replace("\t", "    ");
 		ArrayList<Mapping<M>> mappingsLst = new ArrayList<Mapping<M>>();
 		ArrayList<Mapping<M>> mappingsLstFmp = new ArrayList<Mapping<M>>();
 		Mapping<M> mp = null;
@@ -136,7 +136,7 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 			arguments = arguments.substring(0, arguments.lastIndexOf(")"));
 
 			if (!arguments.isEmpty()) {
-				arguments = arguments.replaceAll(", ", ",");
+				arguments = arguments.replace(", ", ",");
 				argumentTypes = arguments.split(",");
 			}
 
@@ -171,8 +171,8 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 		type = null;
 		obfuscated = null;
 
-		mappings = mappings.replaceAll("\r", "");
-		mappings = mappings.replaceAll("\t", "    ");
+		mappings = mappings.replace("\r", "");
+		mappings = mappings.replace("\t", "    ");
 		ArrayList<Mapping<M>> mappingsLst = new ArrayList<Mapping<M>>();
 		ArrayList<Mapping<M>> mappingsLstFmp = new ArrayList<Mapping<M>>();
 		Mapping<M> mp = null;
@@ -279,7 +279,7 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 		obfuscated = input;
 
 		if (mappingType.equals(MAPTYPE.CLASS) && name.contains("/"))
-			name = name.replaceAll("/", ".");
+			name = name.replace("/", ".");
 
 		return (M) this;
 	}
@@ -342,7 +342,7 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 		type = null;
 		obfuscated = null;
 
-		mappings = mappings.replaceAll("\r", "");
+		mappings = mappings.replace("\r", "");
 		String[] lines = mappings.split("\n");
 
 		TargetMap mp = new TargetMap();
@@ -412,10 +412,10 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 			@SuppressWarnings("rawtypes")
 			Mapping<?> map = new Mapping();
 
-			map.type = t.out.replaceAll("/", ".");
+			map.type = t.out.replace("/", ".");
 			map.mappingType = MAPTYPE.CLASS;
-			map.obfuscated = t.in.replaceAll("/", ".");
-			map.name = t.out.replaceAll("/", ".");
+			map.obfuscated = t.in.replace("/", ".");
+			map.name = t.out.replace("/", ".");
 
 			ArrayList<Mapping<?>> localmappings = new ArrayList<Mapping<?>>();
 			for (Target meth : t.methods) {
@@ -425,7 +425,7 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 				methmap.argumentTypes = meth.types;
 				methmap.name = meth.out;
 				methmap.obfuscated = meth.in;
-				methmap.type = meth.type.replaceAll("/", ".");
+				methmap.type = meth.type.replace("/", ".");
 				methmap.mappingType = MAPTYPE.METHOD;
 
 				localmappings.add(methmap);
@@ -436,7 +436,7 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 
 				fieldmap.name = field.out;
 				fieldmap.obfuscated = field.in;
-				fieldmap.type = field.type.replaceAll("/", ".");
+				fieldmap.type = field.type.replace("/", ".");
 				fieldmap.mappingType = MAPTYPE.PROPERTY;
 
 				localmappings.add(fieldmap);
@@ -495,7 +495,7 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 		type = null;
 		obfuscated = null;
 
-		mappings = mappings.replaceAll("\r", "");
+		mappings = mappings.replace("\r", "");
 		String[] lines = mappings.split("\n");
 
 		TargetMap mp = new TargetMap();
@@ -588,8 +588,8 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 			Mapping<?> map = new Mapping();
 
 			map.mappingType = MAPTYPE.CLASS;
-			map.obfuscated = t.in.replaceAll("/", ".");
-			map.name = t.out.replaceAll("/", ".");
+			map.obfuscated = t.in.replace("/", ".");
+			map.name = t.out.replace("/", ".");
 
 			ArrayList<Mapping<?>> localmappings = new ArrayList<Mapping<?>>();
 			for (Target meth : t.methods) {
@@ -655,6 +655,116 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 	}
 
 	/**
+	 * Converts CSRG mappings to CCFG
+	 * 
+	 * @param mappings CSRG content to parse
+	 * @return Self
+	 */
+	@SuppressWarnings("unchecked")
+	public T parseCSRGMappings(String mappings) {
+		mappingType = MAPTYPE.TOPLEVEL;
+		name = null;
+		type = null;
+		obfuscated = null;
+
+		mappings = mappings.replace("\r", "");
+		String[] mappingsLines = mappings.split("\n");
+
+		HashMap<String, Mapping<?>> mappingsCache = new HashMap<String, Mapping<?>>();
+		for (String line : mappingsLines) {
+			if (line.startsWith("#"))
+				continue;
+
+			String[] entries = line.split(" ");
+
+			String obfus;
+			String deobf;
+			String owner;
+			switch (entries.length) {
+			case 2:
+				// Class
+
+				obfus = entries[0].replace(".", "").replace("/", ".");
+				deobf = entries[1].replace(".", "").replace("/", ".");
+
+				Mapping<?> clsMapping = new SimpleMappings();
+				if (mappingsCache.containsKey(deobf))
+					clsMapping = mappingsCache.get(deobf);
+				clsMapping.mappingType = MAPTYPE.CLASS;
+				clsMapping.obfuscated = obfus;
+				clsMapping.name = deobf;
+				mappingsCache.put(deobf, clsMapping);
+
+				break;
+			case 3:
+				// Field
+
+				owner = entries[0].replace(".", "").replace("/", ".");
+				obfus = entries[1].replace(".", "").replace("/", ".");
+				deobf = entries[2].replace(".", "").replace("/", ".");
+
+				Mapping<?> fOwnerMap = mappingsCache.get(owner);
+				if (fOwnerMap == null) {
+					fOwnerMap = new SimpleMappings();
+					fOwnerMap.mappingType = MAPTYPE.CLASS;
+					fOwnerMap.obfuscated = owner;
+					fOwnerMap.name = owner;
+					mappingsCache.put(owner, fOwnerMap);
+				}
+
+				Mapping<?> fieldMap = new SimpleMappings();
+				fieldMap.mappingType = MAPTYPE.PROPERTY;
+				fieldMap.obfuscated = obfus;
+				fieldMap.name = deobf;
+				fOwnerMap.mappings = appendMapping(fieldMap, fOwnerMap.mappings);
+
+				break;
+			case 4:
+				// Method
+
+				owner = entries[0].replace(".", "").replace("/", ".");
+				obfus = entries[1].replace(".", "").replace("/", ".");
+				String desc = entries[2];
+				deobf = entries[3].replace(".", "").replace("/", ".");
+
+				Mapping<?> mOwnerMap = mappingsCache.get(owner);
+				if (mOwnerMap == null) {
+					mOwnerMap = new SimpleMappings();
+					mOwnerMap.mappingType = MAPTYPE.CLASS;
+					mOwnerMap.obfuscated = owner;
+					mOwnerMap.name = owner;
+					mappingsCache.put(owner, mOwnerMap);
+				}
+
+				Mapping<?> methMap = new SimpleMappings();
+				methMap.mappingType = MAPTYPE.METHOD;
+				methMap.obfuscated = obfus;
+				methMap.name = deobf;
+
+				methMap.argumentTypes = Fluid.parseMultipleDescriptors(desc.substring(1, desc.lastIndexOf(")")));
+				methMap.type = Fluid.parseDescriptor(desc.substring(desc.lastIndexOf(")") + 1));
+
+				mOwnerMap.mappings = appendMapping(methMap, mOwnerMap.mappings);
+
+				break;
+			default:
+				break;
+			}
+		}
+		this.mappings = mappingsCache.values().toArray(t -> new Mapping[t]);
+
+		return (T) this;
+	}
+
+	private Mapping<?>[] appendMapping(Mapping<?> append, Mapping<?>[] old) {
+		Mapping<?>[] newMaps = new Mapping[old.length + 1];
+		for (int i = 0; i < old.length; i++)
+			newMaps[i] = old[i];
+		newMaps[newMaps.length - 1] = append;
+		return newMaps;
+	}
+
+	/**
 	 * Parse (Spigot) hybrid SRG/CSRG mappings into this configuration.
 	 * 
 	 * @param fallback             The mappings to use for additional information
@@ -672,9 +782,9 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 		type = null;
 		obfuscated = null;
 
-		classMappingsCsrg = classMappingsCsrg.replaceAll("\r", "");
-		memberMappingsCsrg = memberMappingsCsrg.replaceAll("\r", "");
-		packageMappingsSrg = packageMappingsSrg.replaceAll("\r", "");
+		classMappingsCsrg = classMappingsCsrg.replace("\r", "");
+		memberMappingsCsrg = memberMappingsCsrg.replace("\r", "");
+		packageMappingsSrg = packageMappingsSrg.replace("\r", "");
 
 		String[] linesClasses = classMappingsCsrg.split("\n");
 		String[] linesMembers = memberMappingsCsrg.split("\n");
@@ -694,10 +804,10 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 			if (deobf.endsWith("/"))
 				deobf = deobf.substring(0, deobf.length() - 1);
 
-			obfus = obfus.replaceAll("\\.", "");
-			deobf = deobf.replaceAll("\\.", "");
-			obfus = obfus.replaceAll("/", ".");
-			deobf = deobf.replaceAll("/", ".");
+			obfus = obfus.replace(".", "");
+			deobf = deobf.replace(".", "");
+			obfus = obfus.replace("/", ".");
+			deobf = deobf.replace("/", ".");
 
 			packages.put(obfus, deobf);
 		}
@@ -713,10 +823,10 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 			String obfus = entries[0];
 			String deobf = entries[1];
 
-			obfus = obfus.replaceAll("\\.", "");
-			deobf = deobf.replaceAll("\\.", "");
-			obfus = obfus.replaceAll("/", ".");
-			deobf = deobf.replaceAll("/", ".");
+			obfus = obfus.replace(".", "");
+			deobf = deobf.replace(".", "");
+			obfus = obfus.replace("/", ".");
+			deobf = deobf.replace("/", ".");
 
 			String obfusPackage = "";
 			if (obfus.contains(".")) {
@@ -787,8 +897,8 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 
 			String[] entries = line.split(" ");
 			String owner = entries[0];
-			owner = owner.replaceAll("\\.", "");
-			owner = owner.replaceAll("/", ".");
+			owner = owner.replace(".", "");
+			owner = owner.replace("/", ".");
 
 			String obfus = entries[1];
 

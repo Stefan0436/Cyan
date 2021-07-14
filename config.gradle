@@ -15,7 +15,7 @@ ext.timeRelease=OffsetDateTime.now().withNano(0).toString()
 ext.forgeurltemplate="https://files.minecraftforge.net/maven/net/minecraftforge/forge/%game%-%forgeversion%/forge-%game%-%forgeversion%-installer.jar"
 
 ext.modloader=""
-ext.modkit="1.2"
+ext.modkit="1.1"
 
 buildscript {
 	repositories {

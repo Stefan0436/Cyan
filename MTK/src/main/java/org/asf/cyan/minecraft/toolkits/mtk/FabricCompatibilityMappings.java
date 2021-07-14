@@ -30,6 +30,23 @@ public class FabricCompatibilityMappings extends CompatibilityMappings {
 				side, true);
 	}
 
+	public FabricCompatibilityMappings(Mapping<?> deobf, Mapping<?> intermediary, MinecraftVersionInfo gameVersion,
+			String loaderVersion) {
+		try {
+			create(deobf, intermediary, gameVersion, loaderVersion);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException | IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void create(Mapping<?> deobf, Mapping<?> intermediary, MinecraftVersionInfo gameVersion,
+			String loaderVersion) throws InstantiationException, IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException, NoSuchMethodException, SecurityException, IOException {
+		combine("INTERMEDIARY", deobf, intermediary);
+		applyInconsistencyMappings(gameVersion, "fabric", loaderVersion);
+	}
+
 	public FabricCompatibilityMappings(Mapping<?> mappings, String modloader, MinecraftVersionInfo info, GameSide side,
 			boolean msg) {
 		String mappingsId = (modloader.isEmpty() ? "" : "-" + modloader);
@@ -50,7 +67,7 @@ public class FabricCompatibilityMappings extends CompatibilityMappings {
 
 			Mapping<?> intermediaryMappings = MinecraftMappingsToolkit.loadMappings(mappingsId, "intermediary", info,
 					side);
-			combine("INTERMEDIARY", mappings, intermediaryMappings);
+			create(mappings, intermediaryMappings, info, modloader);
 			saveToDisk("fabric", mappingsId, info, side);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException | IOException e) {
