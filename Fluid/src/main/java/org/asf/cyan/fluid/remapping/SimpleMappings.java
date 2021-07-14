@@ -1,5 +1,10 @@
 package org.asf.cyan.fluid.remapping;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
+
 import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
 
 public class SimpleMappings extends Mapping<SimpleMappings> {
@@ -50,6 +55,30 @@ public class SimpleMappings extends Mapping<SimpleMappings> {
 		}
 
 		return null;
+	}
+
+	public String[] getObfuscatedClassNames() {		
+		ArrayList<String> classes = new ArrayList<String>();
+		
+		for (Mapping<?> mapping : mappings) {
+			if (mapping.mappingType == MAPTYPE.CLASS) {
+				classes.add(mapping.obfuscated);
+			}
+		}
+
+		return classes.toArray(t -> new String[t]);
+	}
+
+	public String[] getDeobfuscatedClassNames() {		
+		ArrayList<String> classes = new ArrayList<String>();
+		
+		for (Mapping<?> mapping : mappings) {
+			if (mapping.mappingType == MAPTYPE.CLASS) {
+				classes.add(mapping.name);
+			}
+		}
+
+		return classes.toArray(t -> new String[t]);
 	}
 
 	public String mapClassToObfuscation(String name) {
@@ -122,5 +151,25 @@ public class SimpleMappings extends Mapping<SimpleMappings> {
 		mappings.type = type;
 		this.mappings = ArrayUtil.append(this.mappings, new Mapping<?>[] { mappings });
 		return mappings;
+	}
+
+	/**
+	 * Loads the given mappings file as SimpleMappings
+	 * 
+	 * @param path Mappings path to load
+	 * @throws IOException If loading fails
+	 */
+	public SimpleMappings loadFile(String path) throws IOException {
+		return loadFile(new File(path));
+	}
+
+	/**
+	 * Loads the given mappings file as SimpleMappings
+	 * 
+	 * @param ccfg Mappings to load
+	 * @throws IOException If loading fails
+	 */
+	public SimpleMappings loadFile(File ccfg) throws IOException {
+		return readAll(new String(Files.readAllBytes(ccfg.toPath())));
 	}
 }

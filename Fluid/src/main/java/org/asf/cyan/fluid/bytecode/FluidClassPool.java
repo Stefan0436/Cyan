@@ -181,6 +181,30 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 	}
 
 	/**
+	 * Adds a classnode to the class pool
+	 * 
+	 * @param name Class name
+	 * @param cls  Class node
+	 */
+	public ClassNode addClass(String name, ClassNode cls) {
+		name = name.replaceAll("\\.", "/");
+
+		ArrayList<ClassEntry> clsLstBackup = new ArrayList<ClassEntry>(classes);
+		for (ClassEntry cls2 : clsLstBackup) {
+			if (cls2.node.name.equals(name)) {
+				cls2.node = cls;
+				return cls2.node;
+			}
+		}
+
+		ClassEntry entry = new ClassEntry();
+		entry.node = cls;
+		entry.firstName = name.replace(".", "/");
+		classes.add(entry);
+		return cls;
+	}
+
+	/**
 	 * Loads a class from a stream
 	 * 
 	 * @param strm The stream to read into a class
@@ -565,4 +589,5 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 		}
 		throw new ClassNotFoundException("Could not find class " + name.replaceAll("/", "."));
 	}
+
 }

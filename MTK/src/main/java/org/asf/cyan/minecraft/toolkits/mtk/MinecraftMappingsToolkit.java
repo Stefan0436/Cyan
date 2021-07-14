@@ -3,7 +3,6 @@ package org.asf.cyan.minecraft.toolkits.mtk;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -429,7 +428,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 		URL infoURL = new URL(spigotInfoUrl.replaceAll("\\%mcver\\%", version.getVersion()));
 
 		InputStream info = infoURL.openStream();
-		JsonObject obj = JsonParser.parseReader(new InputStreamReader(info)).getAsJsonObject();
+		JsonObject obj = JsonParser.parseString(new String(info.readAllBytes())).getAsJsonObject();
 		info.close();
 
 		return obj.get("refs").getAsJsonObject();

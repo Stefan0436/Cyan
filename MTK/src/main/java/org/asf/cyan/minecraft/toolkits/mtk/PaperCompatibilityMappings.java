@@ -36,6 +36,30 @@ public class PaperCompatibilityMappings extends CompatibilityMappings {
 				true, mappingsVersion);
 	}
 
+	public PaperCompatibilityMappings(Mapping<?> deobf, Mapping<?> paper, MinecraftVersionInfo gameVersion,
+			String loaderVersion) {
+		try {
+			create(deobf, paper, gameVersion, loaderVersion);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException | IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void create(Mapping<?> deobf, Mapping<?> paper, MinecraftVersionInfo gameVersion, String loaderVersion)
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+			NoSuchMethodException, SecurityException, IOException {
+		if (Version.fromString(gameVersion.getVersion()).isGreaterOrEqualTo(Version.fromString("1.17"))) {
+			ignoredTypes.add("net.minecraft.network.protocol.status.ServerStatus$Serializer");
+			combine("PAPER", deobf, paper, true);
+		} else {
+			ignoredTypes.add("net.minecraft.network.protocol.status.ServerStatus$Serializer");
+			combine("SPIGOT", deobf, paper, true);
+		}
+
+		applyInconsistencyMappings(gameVersion, "paper", loaderVersion);
+	}
+
 	public void applyCsrgMemberMappings(List<String> linesMembers, Mapping<?> mappings) {
 		for (String line : linesMembers) {
 			if (line.startsWith("#"))
@@ -111,6 +135,8 @@ public class PaperCompatibilityMappings extends CompatibilityMappings {
 			if (loadWhenPossible("paper", mappingsId, info, GameSide.SERVER))
 				return;
 
+			Mapping<?> paperMappings;
+
 			if (Version.fromString(info.getVersion()).isGreaterOrEqualTo(Version.fromString("1.17"))) {
 				MinecraftToolkit.infoLog("Loading paper support... Preparing PAPER mappings for compatibility...");
 				if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "spigot", info, GameSide.SERVER)) {
@@ -123,10 +149,7 @@ public class PaperCompatibilityMappings extends CompatibilityMappings {
 					MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "spigot", info, GameSide.SERVER);
 				}
 
-				Mapping<?> paperMappings = MinecraftMappingsToolkit.loadMappings(mappingsId, "spigot", info,
-						GameSide.SERVER);
-				ignoredTypes.add("net.minecraft.network.protocol.status.ServerStatus$Serializer");
-				combine("PAPER", mappings, paperMappings, true);
+				paperMappings = MinecraftMappingsToolkit.loadMappings(mappingsId, "spigot", info, GameSide.SERVER);
 			} else {
 				MinecraftToolkit.infoLog("Loading paper support... Preparing SPIGOT mappings for compatibility...");
 				if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "spigot", info, GameSide.SERVER)) {
@@ -139,13 +162,10 @@ public class PaperCompatibilityMappings extends CompatibilityMappings {
 					MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "spigot", info, GameSide.SERVER);
 				}
 
-				Mapping<?> spigotMappings = MinecraftMappingsToolkit.loadMappings(mappingsId, "spigot", info,
-						GameSide.SERVER);
-				ignoredTypes.add("net.minecraft.network.protocol.status.ServerStatus$Serializer");
-				combine("SPIGOT", mappings, spigotMappings, true);
+				paperMappings = MinecraftMappingsToolkit.loadMappings(mappingsId, "spigot", info, GameSide.SERVER);
 			}
 
-			applyInconsistencyMappings(info, "paper", modloader);
+			create(mappings, paperMappings, info, modloader);
 			saveToDisk("paper", mappingsId, info, GameSide.SERVER);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException | IOException e) {
