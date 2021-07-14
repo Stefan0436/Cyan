@@ -1,5 +1,5 @@
 #!/bin/bash
-gameVersions=( "1.16.5" "1.17" )
+gameVersions=( "1.16.5" "1.17" "1.17.1" )
 
 echo Building LiteCyan...
 chmod +x gradlew buildlocal.sh
