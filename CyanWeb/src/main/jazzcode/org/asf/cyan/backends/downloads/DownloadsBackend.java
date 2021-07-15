@@ -519,6 +519,7 @@ public class DownloadsBackend extends JWebService {
 			}
 		}
 
+		versions.sort((a, b) -> a.compareTo(b));
 		versions.sort((a, b) -> -Version.fromString(a).compareTo(Version.fromString(b)));
 		return versions;
 	}
@@ -545,6 +546,7 @@ public class DownloadsBackend extends JWebService {
 		for (String version : manifest.longTermSupportVersions) {
 			versions.add(version);
 		}
+		versions.sort((a, b) -> a.compareTo(b));
 		versions.sort((a, b) -> -Version.fromString(a).compareTo(Version.fromString(b)));
 		return versions;
 	}
@@ -655,6 +657,7 @@ public class DownloadsBackend extends JWebService {
 			}
 		}
 
+		versions.sort((a, b) -> a.compareTo(b));
 		versions.sort((a, b) -> -Version.fromString(a).compareTo(Version.fromString(b)));
 		return versions;
 	}
