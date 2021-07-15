@@ -2885,7 +2885,7 @@ task updateServerData() {
     }
     
     for (def tsk : tasks.keySet()) {
-        //dependsOn tsk
+       dependsOn tsk
     }
 	
 	File output = file("$buildDir/softpatch")
