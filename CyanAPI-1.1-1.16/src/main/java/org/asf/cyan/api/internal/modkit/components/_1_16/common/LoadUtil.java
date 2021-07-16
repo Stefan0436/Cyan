@@ -76,11 +76,11 @@ public class LoadUtil {
 			Version current = Version.fromString(Modloader.getModloaderGameVersion());
 			if (!game.isEqualTo(current)) {
 				if (game.isGreaterThan(current))
-					statuses.put("Minecraft", Colors.GOLD + Language.getInstance().getOrDefault("modkit.downgraded")
-							+ Colors.LIGHT_GREY + ", " + Colors.DARK_PURPLE + current);
+					statuses.put("Minecraft",
+							Colors.GOLD + downgradedMsg + Colors.LIGHT_GREY + ", " + Colors.DARK_PURPLE + current);
 				else
-					statuses.put("Minecraft", Colors.DARK_GREEN + Language.getInstance().getOrDefault("modkit.upgraded")
-							+ Colors.LIGHT_GREY + ", " + Colors.DARK_PURPLE + current);
+					statuses.put("Minecraft",
+							Colors.DARK_GREEN + upgradedMsg + Colors.LIGHT_GREY + ", " + Colors.DARK_PURPLE + current);
 			}
 		}
 		if (statuses.size() != 0) {

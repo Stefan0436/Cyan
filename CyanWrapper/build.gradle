@@ -2869,10 +2869,6 @@ task updateServerData() {
             for (def proj : project(":").childProjects) {
                 def pDir = proj.value.getProjectDir().getAbsolutePath()
                 if (pDir.equals(f.getAbsolutePath()) && proj.value.tasks.hasProperty("jar")) {
-                    if (proj.value.getName().contains("ModKit") || proj.value.getName().contains("ModKit")) {
-                        println "WANRING: Cannot build ModKit or its implementation using soft-patch, please build manually!"
-                        break;
-                    }
                     tasks.put(proj.value.tasks.jar, proj.value);
                     if (proj.value.tasks.hasProperty("sourcesJar"))
                          tasks.put(proj.value.tasks.sourcesJar, proj.value);
