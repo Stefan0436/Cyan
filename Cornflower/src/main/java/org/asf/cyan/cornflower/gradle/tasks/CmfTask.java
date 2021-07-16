@@ -40,6 +40,15 @@ public class CmfTask extends Zip implements ITaskExtender {
 		};
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T extends Configuration<T>> T getManifest(Class<T> manifestType) {
+		Configuration<?> man = manifest.call();
+		if (man.getClass().isAssignableFrom(manifestType)) {
+			return (T) man;
+		}
+		return null;
+	}
+
 	@TaskAction
 	public void cmf() {
 	}

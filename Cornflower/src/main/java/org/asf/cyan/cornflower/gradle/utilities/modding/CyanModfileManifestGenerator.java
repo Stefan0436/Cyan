@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
@@ -12,6 +13,7 @@ import org.asf.cyan.cornflower.gradle.tasks.CtcTask;
 import org.asf.cyan.cornflower.gradle.tasks.RiftJarTask;
 import org.asf.cyan.cornflower.gradle.utilities.modding.manifests.CyanModfileManifest;
 import org.asf.cyan.security.TrustContainer;
+import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.internal.provider.DefaultProviderFactory;
@@ -23,12 +25,30 @@ public class CyanModfileManifestGenerator {
 	private CyanModfileManifest manifest = new CyanModfileManifest();
 	private HashMap<CtcTask, String> ctcTasks = new HashMap<CtcTask, String>();
 
-	public static CyanModfileManifest fromClosure(Closure<?> closure) {
+	@SuppressWarnings("unchecked")
+	public static CyanModfileManifest fromClosure(Project proj, Closure<?> closure) {
 		CyanModfileManifestGenerator owner = new CyanModfileManifestGenerator();
 		closure.setDelegate(owner);
 		closure.call();
 
-		return owner.toManifest();
+		CyanModfileManifest man = owner.toManifest();
+		if (proj.getExtensions().getExtraProperties().has("modfileDependenciesExtra")) {
+			Map<String, String> deps = (Map<String, String>) proj.getExtensions().getExtraProperties()
+					.get("modfileDependenciesExtra");
+			deps.forEach((k, v) -> {
+				if (!man.dependencies.containsKey(k))
+					man.dependencies.put(k, v);
+			});
+		}
+		if (proj.getExtensions().getExtraProperties().has("modfileOptionalDependenciesExtra")) {
+			Map<String, String> deps = (Map<String, String>) proj.getExtensions().getExtraProperties()
+					.get("modfileOptionalDependenciesExtra");
+			deps.forEach((k, v) -> {
+				if (!man.dependencies.containsKey(k))
+					man.optionalDependencies.put(k, v);
+			});
+		}
+		return man;
 	}
 
 	private CyanModfileManifest toManifest() {
@@ -329,6 +349,10 @@ public class CyanModfileManifestGenerator {
 		manifest.fallbackDescription = fallback;
 	}
 
+	public void updateserver(String server) {
+		manifest.updateserver = server;
+	}
+	
 	public void platform(LaunchPlatform platform, String version) {
 		String checkStr = version;
 		if (manifest.platforms.containsKey(platform.toString().toUpperCase()))

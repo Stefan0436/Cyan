@@ -113,6 +113,9 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> impl
 	@Comment("")
 	@Comment("Same checkstring system as dependencies")
 	public HashMap<String, String> platforms = new HashMap<String, String>();
+	
+	@Comment("The update server for this mod, updates are downloaded from this URL")
+	public String updateserver = null;
 
 	@Override
 	public void addJar(Provider<RegularFile> jar, String platform, String side, String outDir, String loaderVersion,
@@ -166,18 +169,25 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> impl
 
 	@Override
 	public String toString() {
-		for (CtcTask ctc : ctcTasks.keySet()) {
-			try {
-				String dest = ctcTasks.get(ctc);
-				if (ctc.getVersion() == null)
-					throw new IOException(
-							"CTC task " + ctc.getName() + " has not been run yet or does not use the 'pack' method.");
+		return toString(true);
+	}
 
-				TrustContainer cont = TrustContainer.importContainer(ctc.getOutput());
-				trustContainers.put(cont.getContainerName() + "@" + cont.getVersion(), dest);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+	public String toString(boolean b) {
+		if (b) {
+			if (ctcTasks != null)
+				for (CtcTask ctc : ctcTasks.keySet()) {
+					try {
+						String dest = ctcTasks.get(ctc);
+						if (ctc.getVersion() == null)
+							throw new IOException("CTC task " + ctc.getName()
+									+ " has not been run yet or does not use the 'pack' method.");
+
+						TrustContainer cont = TrustContainer.importContainer(ctc.getOutput());
+						trustContainers.put(cont.getContainerName() + "@" + cont.getVersion(), dest);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
 		}
 
 		return super.toString();

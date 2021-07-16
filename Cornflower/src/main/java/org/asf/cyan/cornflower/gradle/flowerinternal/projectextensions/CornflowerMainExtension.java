@@ -107,7 +107,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 	public static final GameSide SERVER = GameSide.SERVER;
 	public static final GameSide CLIENT = GameSide.CLIENT;
 
-	public static Configuration<?> modfileManifest(Closure<?> closure) {
+	public static Configuration<?> modfileManifest(Project proj, Closure<?> closure) {
 		try {
 			Class.forName("org.asf.cyan.cornflower.gradle.utilities.modding.CyanModfileManifestGenerator");
 		} catch (Exception e) {
@@ -117,7 +117,7 @@ public class CornflowerMainExtension implements IProjectExtension {
 		try {
 			return (Configuration<?>) Class
 					.forName("org.asf.cyan.cornflower.gradle.utilities.modding.CyanModfileManifestGenerator")
-					.getMethod("fromClosure", Closure.class).invoke(null, closure);
+					.getMethod("fromClosure", Project.class, Closure.class).invoke(null, proj, closure);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 				| SecurityException | ClassNotFoundException e) {
 			throw new RuntimeException(e);

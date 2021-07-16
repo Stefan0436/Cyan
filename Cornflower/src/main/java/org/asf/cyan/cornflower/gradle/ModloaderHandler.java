@@ -1,25 +1,42 @@
 package org.asf.cyan.cornflower.gradle;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 import org.asf.cyan.api.common.CyanComponent;
+import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
+import org.asf.cyan.cornflower.gradle.flowerinternal.projectextensions.CornflowerMainExtension.PlatformConfiguration;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IAPIDependency;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IGame;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IGameExecutionContext;
 import org.asf.cyan.cornflower.gradle.flowerutil.modloaders.IModloader;
+import org.asf.cyan.cornflower.gradle.tasks.EclipseLaunchGenerator;
 import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender;
+import org.asf.cyan.cornflower.gradle.utilities.modding.IPlatformConfiguration;
 import org.asf.cyan.cornflower.gradle.utilities.modding.ModDependency;
 import org.gradle.api.Project;
+import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.ResolvedConfiguration;
 import org.gradle.api.artifacts.ResolvedDependency;
+import org.gradle.api.artifacts.repositories.ArtifactRepository;
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 
 /**
  * Cornflower Plugin ModloaderHandler Class, DO NOT USE OUTSIDE OF GRADLE
@@ -161,19 +178,47 @@ public class ModloaderHandler extends CyanComponent {
 		});
 
 		ArrayList<String> deps = new ArrayList<String>();
+		HashMap<String, String> modDeps = new HashMap<String, String>();
+		HashMap<String, String> modDepsOptional = new HashMap<String, String>();
+		ArrayList<String[]> modDepArtifacts = new ArrayList<String[]>();
+
 		findDeps(proj, "mod", (dep) -> {
 			ModDependency mod = (ModDependency) dep;
-			mod.getRepositories().forEach((name, url) -> {
-				if (proj.getRepositories().findByName(name) == null) {
-					proj.getRepositories().maven(repo -> {
-						repo.setName(name);
-						repo.setUrl(url);
-					});
+			if (!mod.isMod()) {
+				mod.getRepositories().forEach((name, url) -> {
+					if (proj.getRepositories().findByName(name) == null) {
+						proj.getRepositories().maven(repo -> {
+							repo.setName(name);
+							repo.setUrl(url);
+						});
+					}
+				});
+
+				modDepArtifacts.add(new String[] { mod.getModDepGroup(), mod.getModDepName(), mod.getVersion() });
+				addDependency(proj, mod.getModDepGroup(), mod.getModDepName(), mod.getVersion());
+				deps.add(mod.getModDepGroup() + ":" + mod.getModDepName() + ":" + mod.getVersion());
+			} else {
+				if (proj.getExtensions().getExtraProperties().has("platforms")) {
+					PlatformConfiguration config = (PlatformConfiguration) proj.getExtensions().getExtraProperties()
+							.get("platforms");
+					String versions = "";
+					for (IPlatformConfiguration t : config.all) {
+						if (t.getPlatform() == LaunchPlatform.VANILLA) {
+							if (!versions.isEmpty())
+								versions += "|";
+							versions += Pattern.quote(t.getCommonMappingsVersion());
+						}
+					}
+					mod.amendVersionStatement(versions);
 				}
-			});
-			addDependency(proj, mod.getModDepGroup(), mod.getModDepName(), mod.getVersion());
-			deps.add(mod.getModDepGroup() + ":" + mod.getModDepName() + ":" + mod.getVersion());
+				if (mod.isOptional())
+					modDepsOptional.put(mod.getModDepName(), mod.getVersionStatement());
+				else
+					modDeps.put(mod.getModDepName(), mod.getVersionStatement());
+			}
 		});
+		proj.getExtensions().getExtraProperties().set("modfileDependenciesExtra", modDeps);
+		proj.getExtensions().getExtraProperties().set("modfileOptionalDependenciesExtra", modDepsOptional);
 
 		for (IModloader modloader : (ArrayList<IModloader>) proj.getExtensions().getExtraProperties()
 				.get("cornflowermodloaders")) {
@@ -232,13 +277,155 @@ public class ModloaderHandler extends CyanComponent {
 		} catch (Exception e) {
 		}
 
+		proj.getExtensions().getExtraProperties().set("remoteDependencies", remoteDependencies);
 		for (IGame game : (ArrayList<IGame>) proj.getExtensions().getExtraProperties().get("cornflowergames")) {
 			game.addTasks(proj, game.getContextsList().toArray(t -> new IGameExecutionContext[t]), remoteDependencyLst,
 					remoteDependencySrcLst);
 		}
 
-		proj.getExtensions().getExtraProperties().set("remoteDependencies", remoteDependencies);
+		for (String[] dep : modDepArtifacts) {
+			String group = dep[0];
+			String name = dep[1];
+			String version = dep[2];
+
+			for (ArtifactRepository t : proj.getRepositories()) {
+				if (t instanceof MavenArtifactRepository) {
+					MavenArtifactRepository repo = (MavenArtifactRepository) t;
+					ArrayList<URI> uris = new ArrayList<URI>(repo.getArtifactUrls());
+					uris.add(repo.getUrl());
+
+					boolean found = false;
+					for (URI u : uris) {
+						for (Task tsk : proj.getTasks()) {
+							if (tsk instanceof EclipseLaunchGenerator) {
+								EclipseLaunchGenerator gen = (EclipseLaunchGenerator) tsk;
+								if (!gen.tags.getOrDefault("cyan.debug.launch", "false").equals("true"))
+									continue;
+
+								String path = group.replace(".", "/") + "/" + name + "/" + version + "/" + name + "-"
+										+ version + ".cmf";
+								try {
+									if (!u.toString().endsWith("/"))
+										path = "/" + path;
+									URL url = new URL(u.toString() + "/" + path);
+									url.openStream().close();
+									found = true;
+
+									final String pathFinal = path;
+									gen.doFirst(tsk2 -> {
+										try {
+											File outputFile = new File(gen.workingDir,
+													".cyan-data/mods/" + group + "." + name + ".cmf");
+
+											String upstreamHash = "unknown";
+											String localHash = "notinstalled";
+											try {
+												InputStream strm = new URL(u.toString() + "/" + pathFinal + ".sha1")
+														.openStream();
+												upstreamHash = new String(strm.readAllBytes()).replace("\t", "  ")
+														.trim();
+												strm.close();
+												if (upstreamHash.contains(" "))
+													upstreamHash = upstreamHash.substring(0, upstreamHash.indexOf(" "));
+											} catch (IOException e) {
+											}
+
+											if (outputFile.exists()) {
+												try {
+													localHash = sha1HEX(Files.readAllBytes(outputFile.toPath()));
+												} catch (NoSuchAlgorithmException e) {
+												}
+											}
+
+											if (!localHash.equals(upstreamHash)) {
+												if (!outputFile.getParentFile().exists())
+													outputFile.getParentFile().mkdirs();
+												info("Downloading " + name + " CMF file...");
+												FileOutputStream strm = new FileOutputStream(outputFile);
+												InputStream in = url.openStream();
+												in.transferTo(strm);
+												strm.close();
+												in.close();
+											}
+										} catch (IOException e) {
+										}
+									});
+								} catch (IOException e) {
+								}
+
+								path = group.replace(".", "/") + "/" + name + "/" + version + "/" + name + "-" + version
+										+ ".ccmf";
+								try {
+									if (!u.toString().endsWith("/"))
+										path = "/" + path;
+									URL url = new URL(u.toString() + path);
+									url.openStream().close();
+									found = true;
+
+									final String pathFinal = path;
+									gen.doFirst(tsk2 -> {
+										try {
+											File outputFile = new File(gen.workingDir,
+													".cyan-data/coremods/" + group + "." + name + ".ccmf");
+
+											String upstreamHash = "unknown";
+											String localHash = "notinstalled";
+											try {
+												InputStream strm = new URL(u.toString() + "/" + pathFinal + ".sha1")
+														.openStream();
+												upstreamHash = new String(strm.readAllBytes()).replace("\t", "  ")
+														.trim();
+												strm.close();
+												if (upstreamHash.contains(" "))
+													upstreamHash = upstreamHash.substring(0, upstreamHash.indexOf(" "));
+											} catch (IOException e) {
+											}
+
+											if (outputFile.exists()) {
+												try {
+													localHash = sha1HEX(Files.readAllBytes(outputFile.toPath()));
+												} catch (NoSuchAlgorithmException e) {
+												}
+											}
+
+											if (!localHash.equals(upstreamHash)) {
+												if (!outputFile.getParentFile().exists())
+													outputFile.getParentFile().mkdirs();
+												info("Downloading " + name + " CCMF file...");
+												FileOutputStream strm = new FileOutputStream(outputFile);
+												InputStream in = url.openStream();
+												in.transferTo(strm);
+												strm.close();
+												in.close();
+											}
+										} catch (IOException e) {
+										}
+									});
+								} catch (IOException e) {
+								}
+							}
+						}
+						if (found)
+							break;
+					}
+					if (found) {
+						break;
+					}
+				}
+			}
+		}
+
 		Log4jToGradleAppender.noLogInfo();
+	}
+
+	private static String sha1HEX(byte[] array) throws NoSuchAlgorithmException {
+		MessageDigest digest = MessageDigest.getInstance("SHA-1");
+		byte[] sha = digest.digest(array);
+		StringBuilder result = new StringBuilder();
+		for (byte aByte : sha) {
+			result.append(String.format("%02x", aByte));
+		}
+		return result.toString();
 	}
 
 	private static void addDependency(Project project, String group, String name, String version) {

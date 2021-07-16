@@ -46,6 +46,11 @@ public class EclipseLaunchGenerator extends DefaultTask implements ITaskExtender
 	public HashMap<String, String> environmentVariables = new HashMap<String, String>();
 	public ArrayList<String> jvmArguments = new ArrayList<String>();
 	public ArrayList<String> progArguments = new ArrayList<String>();
+	
+	/**
+	 * Tags are not used by the task, but can be used by gradle plugins to identify what launch this task creates
+	 */
+	public HashMap<String, String> tags = new HashMap<String, String>(); 
 
 	public String name = "";
 	public String mainClass = "";

@@ -43,6 +43,7 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> {
 
 	public String descriptionLanguageKey = null;
 	public String fallbackDescription = null;
+	public String updateserver = null;
 
 	public HashMap<String, String> jars = new HashMap<String, String>();
 

@@ -3,11 +3,11 @@
 # NOTICE
 The github repository mirrors to https://aerialworks.ddns.net/ASF/Cyan.git, you can fork Cyan on github, pull requests will be merged manually.
 
-# Paper 1.17 Support
-Paper 1.17 support is slowly coming together, the development is of Cyan is going faster than i initially expected.<br/>
-Paper can launch together with Cyan, but is still EXTREMELY BUGGY. We try to improve stability with each Cyan patch, but things can go wrong.
+# Paper 1.17 Support Now Considered Stable
+Paper 1.17 support is now considered stable, no crashes, private server is working pretty well.<br/>
+Some things might still be buggy, so the filing of bug reports is appreciated.
 
-In short: you can install CyanPaper, however, USE IT AT YOUR OWN RISK.<br/>
+In short: CyanPaper is considered stable, but still, USE IT AT YOUR OWN RISK.<br/>
 The AerialWorks Software Foundation will not be held responsible for damaged server files.
 
 <br/>
@@ -64,7 +64,7 @@ If the '*' is present, the version is not ready for release
 | :----------: | :--------: | :---------: | :--------: | :----------: | :---------: | :---------: | :----------: | :-----------: | :----------: |
 | 1.0.0.A12    | 36.1.13    | 0.11.3      | 634        | Unsupported  | Unsupported | Unsupported | Unsupported  | Unsupported   | Unsupported  |
 | 1.0.0.A13    | 36.1.23    | 0.11.3      | 703        | Unsupported  | Unsupported | Unsupported | Unsupported  | Unsupported   | Unsupported  | 
-| 1.0.0.A14    | 36.1.35    | 0.11.6      | 782        | Unsupported  | 0.11.6      | 72          | Unknown      | 0.11.6        | 107          |
+| 1.0.0.A14    | 36.1.35    | 0.11.6      | 782        | Unsupported  | 0.11.6      | 72          | Unknown      | 0.11.6        | 108          |
 
 # Projects used
 Please note that not a single project is actually distributed, the mappings are being generated (downloaded and re-formatted) by CYAN on launch, only version information is used.
