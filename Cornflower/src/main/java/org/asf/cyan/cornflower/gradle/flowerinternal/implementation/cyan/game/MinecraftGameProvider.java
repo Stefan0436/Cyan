@@ -213,6 +213,7 @@ public class MinecraftGameProvider implements IGame {
 			tsk.jvm("-DauthorizeDebugPackages=" + manifest.modClassPackage);
 			tsk.jvm("-DebugModfileManifests=CM//"
 					+ new File(proj.getBuildDir(), "run/mod.manifest.ccfg").getAbsolutePath());
+			tsk.classpath(proj);
 		} else {
 			tsk.jvm("-DebugModfileManifests=M//"
 					+ new File(proj.getBuildDir(), "run/mod.manifest.ccfg").getAbsolutePath());
