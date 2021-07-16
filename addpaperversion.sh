@@ -81,7 +81,7 @@ if [ -d "coremodkits/coremodkit-$gameversion-$cyanversion" ]; then
     echo "$modkit" > "coremodkits/coremodkit-$gameversion-$cyanversion/build.gradle"
 fi
 
-if [ ! -f "MTK/src/main/resources/mappings/inconsistencies/inconsistencies-paper-fallback-$gameversion.ccfg" ] && [[ ! "$gameversion" =~ 1\.1?[0-6]+(\.[0-9]+)? ]]; then
+if [ ! -f "MTK/src/main/resources/mappings/inconsistencies/inconsistencies-paper-fallback-$gameversion.ccfg" ] && [[ ! "$gameversion" =~ ^1\.1?[0-6]+(\.[0-9]+)?$ ]]; then
    while [ ! -f "MTK/src/main/resources/mappings/inconsistencies/inconsistencies-paper-fallback-$gameversion.ccfg" ]; do
         echo
         echo WARNING!
@@ -94,7 +94,7 @@ if [ ! -f "MTK/src/main/resources/mappings/inconsistencies/inconsistencies-paper
         echo
         read -p "Press enter to try again..."
    done
-elif [ ! -f "MTK/src/main/resources/mappings/inconsistencies/inconsistencies-paper-$gameversion-$version.ccfg" ] && [[ ! "$gameversion" =~ 1\.1?[0-6]+(\.[0-9]+)? ]]; then
+elif [ ! -f "MTK/src/main/resources/mappings/inconsistencies/inconsistencies-paper-$gameversion-$version.ccfg" ] && [[ ! "$gameversion" =~ ^1\.1?[0-6]+(\.[0-9]+)?$ ]]; then
     echo Creating inconsistency mappings...
     echo
     read -rp "Your name: " name
