@@ -33,7 +33,7 @@ public class CheckString {
 	 * @return Error message if invalid or null if valid
 	 */
 	public static String validateCheckString(String check, Version version, String message, boolean brief) {
-		String error = "";
+		String error = null;
 		for (String checkVersion : check.split(" \\| ")) {
 			error = null;
 			for (String checkStr : checkVersion.split(" & ")) {
@@ -114,7 +114,7 @@ public class CheckString {
 						break;
 					}
 				} else if (checkStr.equals("*")) {
-
+					
 				} else {
 					if (!version.isEqualTo(Version.fromString(checkStr.trim()))) {
 						if (!brief)
@@ -127,7 +127,6 @@ public class CheckString {
 			}
 			if (error == null)
 				break;
-
 		}
 		return error;
 	}

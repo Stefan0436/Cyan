@@ -6,7 +6,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A46'
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A47'
 	}
 }
 
@@ -62,45 +62,6 @@ Running the 'runManifest' task re-generates the debug manifest file.
 '''
 
 
-// Mod Debugging Manifest
-task runManifest() {
-	def conf = modfileManifest {
-		modid mod_id
-		modgroup mod_group
-
-		mod_class mod_class_name
-		mod_package mod_package_name
-
-		display_name mod_display_name
-		mod_version project.version
-
-		mod_description modDescLanguageKey, modDescription
-	}
-	doLast {
-		File dest = new File("${project.buildDir}/run/mod.manifest.ccfg")
-		if (!dest.getParentFile().exists())
-			dest.getParentFile().mkdirs()
-
-		java.nio.file.Files.writeString(dest.toPath(), conf.toString());
-	}
-}
-createEclipseLaunches.dependsOn runManifest
-
-// Instructs Cyan to load the coremod in the debug enviroment
-project.afterEvaluate {
-	createServerLaunch {
-		jvm "-DdebugModfileManifests=CM//${project.buildDir}/run/mod.manifest.ccfg";
-		jvm "-DauthorizeDebugPackages=${mod_package_name}";
-		classpath project;
-	}
-
-	createClientLaunch {
-		jvm "-DdebugModfileManifests=CM//${project.buildDir}/run/mod.manifest.ccfg";
-		jvm "-DauthorizeDebugPackages=${mod_package_name}";
-		classpath project;
-	}
-}
-
 // Dependency configuration
 dependencies {
 	//
@@ -121,6 +82,14 @@ dependencies {
 
 	// Adds the ModKit API, Cyan 1.0.0.A14 provides specification 1.0 and 1.1
 	implementation API.forAPI("ModKit", modkitVersion)
+	
+	// Mod dependencies:
+	//
+	// implementation Mod.byId("group:id", "version") // required dependency
+	// implementation Mod.byId("group:id", "version", true) // optional dependency
+	//
+	// Using Mod.byId registers the mod id in the modfile manifest, adds all dependencies and respositories
+	// and downloads the mod CMF or CCMF to the mods directory of the debug environments.
 }
 
 // Platform configuration

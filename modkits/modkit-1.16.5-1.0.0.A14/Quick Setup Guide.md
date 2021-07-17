@@ -11,7 +11,8 @@ you may rename it CYAN-MODDING-LICENSE.txt (not anything else) and add the licen
 Lets get started, regular mods (modular modifications) in cyan's case, cannot make changes to the game code, that is what coremods are for. Cyan mods are compatible with multiple modloaders.
 
 # Setting up the project:
-To set up the project, you only need to run the following command(s) to get started:
+First, you will need to protect your mod, read SETUP-TRUST.md document if you haven't done so already.
+After that, you only need to run the following command(s) to create the eclipse launches:
 
 For Linux:
 

@@ -70,6 +70,9 @@ import org.asf.cyan.internal.KickStartConfig;
 import org.asf.cyan.internal.LegacyModKitSupportHook;
 import org.asf.cyan.internal.modkitimpl.info.Protocols;
 import org.asf.cyan.internal.modkitimpl.util.EventUtilImpl;
+import org.asf.cyan.loader.configs.ModUpdateChannel;
+import org.asf.cyan.loader.configs.ModUpdateChannelConfig;
+import org.asf.cyan.loader.configs.ModUpdateConfiguration;
 import org.asf.cyan.loader.configs.SecurityConfiguration;
 import org.asf.cyan.loader.eventbus.CyanEventBridge;
 
@@ -1428,6 +1431,98 @@ public class CyanLoader extends ModkitModloader
 		return CyanCore.getCoreClassLoader();
 	}
 
+	private File[] otherModFileArray;
+	private HashMap<String, CyanModfileManifest> otherModFileManifests;
+
+	private void scanModFiles() {
+		if (otherModFileManifests == null) {
+			otherModFileManifests = new HashMap<String, CyanModfileManifest>();
+			ArrayList<File> modFiles = new ArrayList<File>();
+
+			File mods = new File(cyanDir, "mods");
+			File versionMods = new File(mods, CyanInfo.getMinecraftVersion());
+			File coremods = new File(cyanDir, "coremods");
+			File versionCoremods = new File(coremods, CyanInfo.getMinecraftVersion());
+
+			if (versionMods.exists()) {
+				for (File cmf : versionMods.listFiles((t) -> !t.isDirectory() && t.getName().endsWith(".cmf"))) {
+					String ccfg2 = null;
+					try {
+						InputStream strm = new URL("jar:" + cmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
+						ccfg2 = new String(strm.readAllBytes());
+						strm.close();
+					} catch (IOException e) {
+					}
+
+					if (ccfg2 != null) {
+						CyanModfileManifest manifest2 = new CyanModfileManifest().readAll(ccfg2);
+						if (!otherModFileManifests.containsKey(manifest2.modGroup + ":" + manifest2.modId)) {
+							otherModFileManifests.put(manifest2.modGroup + ":" + manifest2.modId, manifest2);
+							modFiles.add(cmf);
+						}
+					}
+				}
+			}
+			if (mods.exists()) {
+				for (File cmf : mods.listFiles((t) -> !t.isDirectory() && t.getName().endsWith(".cmf"))) {
+					String ccfg2 = null;
+					try {
+						InputStream strm = new URL("jar:" + cmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
+						ccfg2 = new String(strm.readAllBytes());
+						strm.close();
+					} catch (IOException e) {
+					}
+
+					if (ccfg2 != null) {
+						CyanModfileManifest manifest2 = new CyanModfileManifest().readAll(ccfg2);
+						if (!otherModFileManifests.containsKey(manifest2.modGroup + ":" + manifest2.modId)) {
+							otherModFileManifests.put(manifest2.modGroup + ":" + manifest2.modId, manifest2);
+							modFiles.add(cmf);
+						}
+					}
+				}
+			}
+			if (versionCoremods.exists()) {
+				for (File cmf : versionMods.listFiles((t) -> !t.isDirectory() && t.getName().endsWith(".cmf"))) {
+					String ccfg2 = null;
+					try {
+						InputStream strm = new URL("jar:" + cmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
+						ccfg2 = new String(strm.readAllBytes());
+						strm.close();
+					} catch (IOException e) {
+					}
+
+					if (ccfg2 != null) {
+						CyanModfileManifest manifest2 = new CyanModfileManifest().readAll(ccfg2);
+						if (!otherModFileManifests.containsKey(manifest2.modGroup + ":" + manifest2.modId)) {
+							otherModFileManifests.put(manifest2.modGroup + ":" + manifest2.modId, manifest2);
+							modFiles.add(cmf);
+						}
+					}
+				}
+			}
+			if (coremods.exists()) {
+				for (File cmf : mods.listFiles((t) -> !t.isDirectory() && t.getName().endsWith(".cmf"))) {
+					String ccfg2 = null;
+					try {
+						InputStream strm = new URL("jar:" + cmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
+						ccfg2 = new String(strm.readAllBytes());
+						strm.close();
+					} catch (IOException e) {
+					}
+
+					if (ccfg2 != null) {
+						CyanModfileManifest manifest2 = new CyanModfileManifest().readAll(ccfg2);
+						if (!otherModFileManifests.containsKey(manifest2.modGroup + ":" + manifest2.modId)) {
+							otherModFileManifests.put(manifest2.modGroup + ":" + manifest2.modId, manifest2);
+							modFiles.add(cmf);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	private void importMod(File cmf) throws IOException {
 		String ccfg = null;
 		try {
@@ -1442,14 +1537,32 @@ public class CyanLoader extends ModkitModloader
 		}
 
 		CyanModfileManifest manifest = new CyanModfileManifest().readAll(ccfg);
+
+		if (manifest.updateserver != null) {
+			scanModFiles();
+			checkUpdates(cmf, manifest, otherModFileManifests, otherModFileArray);
+
+			ccfg = null;
+			try {
+				InputStream strm = new URL("jar:" + cmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
+				ccfg = new String(strm.readAllBytes());
+				strm.close();
+			} catch (IOException e) {
+			}
+
+			if (ccfg == null) {
+				throw new IOException("Invalid mod file, missing manifest.");
+			}
+			manifest = new CyanModfileManifest().readAll(ccfg);
+		}
+
+		info("Importing mod " + manifest.modGroup + ":" + manifest.modId + "...");
 		for (String k : new ArrayList<String>(manifest.jars.keySet())) {
 			if (!k.startsWith("/")) {
 				manifest.jars.put("/" + k, manifest.jars.get(k));
 				manifest.jars.remove(k);
 			}
 		}
-
-		info("Importing mod " + manifest.modGroup + ":" + manifest.modId + "...");
 
 		if (manifest.gameVersionRegex != null && manifest.gameVersionMessage != null
 				&& !CyanInfo.getMinecraftVersion().matches(manifest.gameVersionRegex)) {
@@ -1668,6 +1781,342 @@ public class CyanLoader extends ModkitModloader
 		modManifests.put(manifest.modClassPackage + "." + manifest.modClassName, manifest);
 
 		strm.close();
+	}
+
+	private ArrayList<File> updatedMods = new ArrayList<File>();
+
+	private void checkUpdates(File cmf, CyanModfileManifest manifest, HashMap<String, CyanModfileManifest> otherMods,
+			File[] otherModFiles) throws IOException {
+		if (updatedMods.contains(cmf))
+			return;
+
+		updatedMods.add(cmf);
+		ModUpdateConfiguration config = new ModUpdateConfiguration(
+				new File(new File(cyanDir, "config/"), manifest.modGroup + "/" + manifest.modId)).readAll();
+		if (config.updates) {
+			info("Checking for mod updates... Mod: " + manifest.displayName);
+			String server = manifest.updateserver;
+			if (!config.server.equals("@default"))
+				server = config.server;
+
+			String path = manifest.modGroup + "/" + manifest.modId + "/mod.channels.ccfg";
+			if (!server.endsWith("/"))
+				path = "/" + path;
+
+			try {
+				URL url = new URL(server + path);
+				InputStream strm = url.openStream();
+				ModUpdateChannelConfig channels = new ModUpdateChannelConfig().readAll(new String(strm.readAllBytes()));
+				strm.close();
+				String channel = channels.channels.getOrDefault("@default", "stable");
+				if (!config.channel.equals("@default"))
+					channel = config.channel;
+
+				if (!channels.channels.containsValue(channel)) {
+					warn("Update channel '" + channel + "' not found in mod channel list.");
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+					}
+				} else {
+					ModUpdateChannel ch = null;
+					ModUpdateChannel urlCh = null;
+
+					try {
+						path = manifest.modGroup + "/" + manifest.modId + "/channels/" + channel + ".ccfg";
+						if (!server.endsWith("/"))
+							path = "/" + path;
+						url = new URL(server + path);
+						strm = url.openStream();
+						ch = new ModUpdateChannel().readAll(new String(strm.readAllBytes()));
+						strm.close();
+					} catch (IOException e) {
+						warn("Update channel '" + channel + "' was not found.");
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e2) {
+						}
+					}
+
+					if (ch != null) {
+						if (ch.versions.containsKey(CyanInfo.getMinecraftVersion())) {
+
+							urlCh = ch;
+
+							Version oldVer = Version.fromString(manifest.version);
+							String version = ch.versions.get(CyanInfo.getMinecraftVersion());
+							Version newVer = Version.fromString(version);
+
+							debug("Local version: " + oldVer);
+							debug("Remote version: " + newVer);
+							if (newVer.isGreaterThan(oldVer)) {
+								info("Trying to update '" + manifest.displayName + "' to " + newVer + "...");
+
+								String templateURL = null;
+								if (urlCh.urls.containsKey(CyanInfo.getMinecraftVersion())) {
+									templateURL = urlCh.urls.get(CyanInfo.getMinecraftVersion());
+								} else if (urlCh.urls.containsKey("@fallback")) {
+									templateURL = urlCh.urls.get("@fallback");
+								} else {
+									try {
+										path = manifest.modGroup + "/" + manifest.modId + "/channels/@fallback.ccfg";
+										if (!server.endsWith("/"))
+											path = "/" + path;
+										url = new URL(server + path);
+										strm = url.openStream();
+										urlCh = new ModUpdateChannel().readAll(new String(strm.readAllBytes()));
+										strm.close();
+
+										if (urlCh.urls.containsKey(CyanInfo.getMinecraftVersion())) {
+											templateURL = urlCh.urls.get(CyanInfo.getMinecraftVersion());
+										} else if (urlCh.urls.containsKey("@fallback")) {
+											templateURL = urlCh.urls.get("@fallback");
+										} else {
+											throw new IOException("No match");
+										}
+									} catch (IOException e) {
+										warn("Could not find any matching URL for mod update.");
+										try {
+											Thread.sleep(2000);
+										} catch (InterruptedException e2) {
+										}
+									}
+								}
+
+								if (templateURL != null) {
+									templateURL = templateURL.replace("%v", version);
+									templateURL = templateURL.replace("%gv", CyanInfo.getMinecraftVersion());
+									templateURL = templateURL.replace("%cv", CyanInfo.getCyanVersion());
+
+									try {
+										url = new URL("jar:" + templateURL + "!/mod.manifest.ccfg");
+										strm = url.openStream();
+										CyanModfileManifest man = new CyanModfileManifest()
+												.readAll(new String(strm.readAllBytes()));
+										strm.close();
+
+										boolean fail = false;
+										if (man.gameVersionRegex != null
+												&& !CyanInfo.getMinecraftVersion().matches(man.gameVersionRegex)) {
+											info("No update available (update is incompatible with game version)");
+											try {
+												Thread.sleep(500);
+											} catch (InterruptedException e2) {
+											}
+											fail = true;
+										}
+
+										if (!fail) {
+											for (String id : man.incompatibilities.keySet()) {
+												String ver = man.incompatibilities.get(id);
+												String currentVer = null;
+
+												if (otherMods.containsKey(id)) {
+													currentVer = otherMods.get(id).version;
+												}
+
+												if (currentVer != null && CheckString.validateCheckString(ver,
+														Version.fromString(currentVer))) {
+													info("No update available (update is incompatible with current mods)");
+													try {
+														Thread.sleep(500);
+													} catch (InterruptedException e2) {
+													}
+													fail = true;
+													break;
+												}
+											}
+										}
+
+										if (!fail) {
+											for (CyanModfileManifest man2 : otherMods.values()) {
+												for (String id : man2.incompatibilities.keySet()) {
+													String ver = man2.incompatibilities.get(id);
+													String currentVer = man.version;
+
+													if (currentVer != null && CheckString.validateCheckString(ver,
+															Version.fromString(currentVer))) {
+														info("No update available (other mod is incompatible)");
+														try {
+															Thread.sleep(500);
+														} catch (InterruptedException e2) {
+														}
+														fail = true;
+														break;
+													}
+												}
+											}
+										}
+
+										if (!fail) {
+											if (CyanInfo.getPlatform() != LaunchPlatform.DEOBFUSCATED
+													&& CyanInfo.getPlatform() != LaunchPlatform.VANILLA
+													&& CyanInfo.getPlatform() != LaunchPlatform.UNKNOWN) {
+												if (!man.platforms.containsKey(CyanInfo.getPlatform().toString())) {
+													boolean first = true;
+													StringBuilder platforms = new StringBuilder();
+													for (String platform : man.platforms.keySet()) {
+														if (!first)
+															platforms.append(", ");
+														first = false;
+														platforms.append(platform);
+													}
+
+													info("No update available (update is incompatible with current platform)");
+													try {
+														Thread.sleep(500);
+													} catch (InterruptedException e2) {
+													}
+													fail = true;
+												} else {
+													String platformVersion = man.platforms
+															.get(CyanInfo.getPlatform().toString());
+													String cVersion = CyanLoader.platformVersion;
+
+													if (cVersion == null)
+														cVersion = CyanInfo.getModloaderVersion();
+
+													if (!CheckString.validateCheckString(platformVersion,
+															Version.fromString(cVersion))) {
+														info("No update available (update is incompatible with current platform)");
+														try {
+															Thread.sleep(500);
+														} catch (InterruptedException e2) {
+														}
+														fail = true;
+													}
+												}
+											}
+										}
+
+										if (!fail) {
+											for (String dep : man.dependencies.keySet()) {
+												String ver = man.dependencies.get(dep);
+
+												int i = 0;
+												boolean found = false;
+												for (String id : otherMods.keySet()) {
+													if (id.equals(dep)) {
+														found = true;
+
+														CyanModfileManifest man2 = otherMods.get(id);
+														checkUpdates(otherModFiles[i], man2, otherMods, otherModFiles);
+
+														url = new URL("jar:" + otherModFiles[i].toURI().toURL()
+																+ "!/mod.manifest.ccfg");
+														strm = url.openStream();
+														man2 = new CyanModfileManifest()
+																.readAll(new String(strm.readAllBytes()));
+														strm.close();
+
+														String cVersion = man2.version;
+														for (String id2 : man2.incompatibilities.keySet()) {
+															if (id2.equals(man.modGroup + ":" + man.modId)) {
+																String ver2 = man2.incompatibilities.get(id);
+																String currentVer = man.version;
+
+																if (CheckString.validateCheckString(ver2,
+																		Version.fromString(currentVer))) {
+																	info("No update available (update is incompatible with current mods)");
+																	try {
+																		Thread.sleep(500);
+																	} catch (InterruptedException e2) {
+																	}
+																	fail = true;
+																	break;
+																}
+															}
+														}
+														if (!CheckString.validateCheckString(ver,
+																Version.fromString(cVersion))) {
+															info("No update available (incompatible dependency version for: "
+																	+ dep + ")");
+															try {
+																Thread.sleep(500);
+															} catch (InterruptedException e2) {
+															}
+															fail = true;
+														}
+														break;
+													}
+													i++;
+												}
+												if (!found) {
+													info("No update available (missing dependency: " + dep + ")");
+													try {
+														Thread.sleep(500);
+													} catch (InterruptedException e2) {
+													}
+													fail = true;
+												}
+											}
+										}
+
+										if (!fail) {
+											info("Downloading new modfile...");
+											info("Backing up old modfile...");
+											File backup = new File(cmf.getAbsolutePath() + ".bak");
+											Files.copy(cmf.toPath(), backup.toPath());
+
+											info("Downloading...");
+											try {
+												url = new URL(templateURL);
+												strm = url.openStream();
+												FileOutputStream output = new FileOutputStream(cmf);
+												strm.transferTo(output);
+												strm.close();
+
+												String ccfg = null;
+												try {
+													strm = new URL("jar:" + cmf.toURI().toURL() + "!/mod.manifest.ccfg")
+															.openStream();
+													ccfg = new String(strm.readAllBytes());
+													strm.close();
+												} catch (IOException e) {
+												}
+
+												if (ccfg == null) {
+													throw new IOException("Invalid mod file, missing manifest.");
+												}
+												manifest = new CyanModfileManifest().readAll(ccfg);
+
+												backup.delete();
+												info("Updated '" + man.displayName + "' to " + man.version);
+											} catch (IOException e) {
+												error("Exception thrown! Rolling back...");
+												cmf.delete();
+												Files.copy(backup.toPath(), cmf.toPath());
+												backup.delete();
+												try {
+													Thread.sleep(2000);
+												} catch (InterruptedException e2) {
+												}
+												error("Update failed", e);
+											}
+										}
+									} catch (IOException e) {
+										warn("Failed to download update modfile.", e);
+										try {
+											Thread.sleep(2000);
+										} catch (InterruptedException e2) {
+										}
+									}
+								}
+							} else {
+								if (newVer.isLessThan(oldVer))
+									info("No update available (local version is newer)");
+								else
+									info("No update available (matching versions)");
+							}
+						} else {
+							info("No update available (game version not found in manifest)");
+						}
+					}
+				}
+			} catch (IOException e) {
+				warn("Unable to check for updates, could not reach mod update channel file.");
+			}
+		}
 	}
 
 	private static String sha256HEX(byte[] array) {

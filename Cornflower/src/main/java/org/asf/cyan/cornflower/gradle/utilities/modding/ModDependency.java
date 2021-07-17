@@ -22,10 +22,27 @@ public class ModDependency extends AbstractDependency {
 	public static String asfServer = "https://aerialworks.ddns.net/";
 
 	private HashMap<String, String> repos = new HashMap<String, String>();
+	private boolean isMod = false;
+	private boolean optional = false;
+
+	public boolean isOptional() {
+		return optional;
+	}
+
+	public boolean isMod() {
+		return isMod;
+	}
+
 	private String name;
 	private String group;
 	private String version;
 
+	private String modVer;
+
+	public String getVersionStatement() {
+		return modVer;
+	}
+	
 	public Map<String, String> getRepositories() {
 		return new HashMap<String, String>(repos);
 	}
@@ -51,11 +68,21 @@ public class ModDependency extends AbstractDependency {
 			return null;
 		}
 
+		public String dependencyVersion = null;
+
 		public HashMap<String, String> repositories = new HashMap<String, String>();
 		public HashMap<String, HashMap<String, String>> artifacts = new HashMap<String, HashMap<String, String>>();
 	}
 
 	public static Collection<ModDependency> byId(String id, String version) {
+		return byId(id, version, false);
+	}
+
+	public static Collection<ModDependency> optionalById(String id, String version) {
+		return byId(id, version, true);
+	}
+
+	public static Collection<ModDependency> byId(String id, String version, boolean optional) {
 		ArrayList<ModDependency> dependencies = new ArrayList<ModDependency>();
 
 		File modCache = GradleUtil.getSharedCacheFolder(Cornflower.class, "mod-artifacts");
@@ -99,6 +126,16 @@ public class ModDependency extends AbstractDependency {
 			}
 		}
 
+		String depVer = ">=" + version;
+		if (configuration.dependencyVersion != null)
+			depVer = configuration.dependencyVersion;
+		
+		ModDependency dep = new ModDependency("MOD", id, version);
+		dep.optional = optional;
+		dep.isMod = true;
+		dep.modVer = depVer;
+		dependencies.add(dep);
+
 		return dependencies;
 	}
 
@@ -138,6 +175,12 @@ public class ModDependency extends AbstractDependency {
 	@Override
 	public Dependency copy() {
 		return new ModDependency(group, name, version);
+	}
+
+	public void amendVersionStatement(String versions) {
+		if (modVer != null) {
+			modVer = modVer.replace("%gvs", versions);
+		}
 	}
 
 }

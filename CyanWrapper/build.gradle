@@ -56,6 +56,7 @@ import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender
 import org.asf.cyan.core.CyanCore
 import org.asf.cyan.api.modloader.information.game.GameSide
 import org.asf.cyan.minecraft.toolkits.mtk.versioninfo.MinecraftVersionType
+import org.asf.cyan.api.config.annotations.Exclude
 
 apply from: '../config.gradle'
 
@@ -97,67 +98,68 @@ if (!buildfile.exists()) {
 	}
 }
 
-if (buildfile.exists()) {
-	ext.stabilityValue = 'testing'
-	ext.stability = { t ->
-		ext.stability = t;
-	}
+ext.stabilityValue = 'testing'
+ext.stability = { t ->
+	ext.stabilityValue = t;
+}
+
+ext.forge = { ... t ->
+	for (def ver : t) {
+		File forgeInstaller = new File(cyanCache, "forge-" + minecraft + "-" + ver + "-installer.jar")
+		File downloadmarker = new File(cyanCache, forgeInstaller.getName()+".lck")
+		URL url = new URL(forgeurltemplate.replaceAll("\\%game\\%", minecraft).replaceAll("\\%forgeversion\\%", ver))
+		if (!forgeInstaller.exists() || downloadmarker.exists()) {
+			if (!forgeInstaller.getParentFile().exists())
+				forgeInstaller.getParentFile().mkdirs()
+			if (downloadmarker.exists()) downloadmarker.delete()
+			downloadmarker.createNewFile()
 	
-	ext.forge = { ... t ->
-		for (def ver : t) {
-			File forgeInstaller = new File(cyanCache, "forge-" + minecraft + "-" + ver + "-installer.jar")
-			File downloadmarker = new File(cyanCache, forgeInstaller.getName()+".lck")
-			URL url = new URL(forgeurltemplate.replaceAll("\\%game\\%", minecraft).replaceAll("\\%forgeversion\\%", ver))
-			if (!forgeInstaller.exists() || downloadmarker.exists()) {
-				if (!forgeInstaller.getParentFile().exists())
-					forgeInstaller.getParentFile().mkdirs()
-				if (downloadmarker.exists()) downloadmarker.delete()
-				downloadmarker.createNewFile()
-		
-				println "Downloading forge installer to cache..."
-				if (forgeInstaller.exists()) forgeInstaller.delete()
-				FileOutputStream strm = new FileOutputStream(forgeInstaller);
-				InputStream inp = url.openStream()
-				inp.transferTo(strm)
-				strm.close()
-				inp.close()
-				downloadmarker.delete()
-			}
-		
-			println "Searching for MCP version in forge jar..."
-			String mcpVersion = "";
-			ZipFile installerZip = new ZipFile(forgeInstaller);
-			ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + minecraft + "-" + ver + "/forge-" + minecraft + "-" + ver + ".jar");
-			ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
-			while (forgeStrm.available() != 0) {
-				ZipEntry entry = forgeStrm.getNextEntry();
-				if (entry.getName().equals("META-INF/MANIFEST.MF")) {
-					Manifest manifest = new Manifest(forgeStrm);
-					Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
-					mcpVersion = MCP.getValue("Implementation-Version");
-					break;
-				}
-			}
-			forgeStrm.close();
-			installerZip.close();
-			forgeVersions.put(ver, mcpVersion);
+			println "Downloading forge installer to cache..."
+			if (forgeInstaller.exists()) forgeInstaller.delete()
+			FileOutputStream strm = new FileOutputStream(forgeInstaller);
+			InputStream inp = url.openStream()
+			inp.transferTo(strm)
+			strm.close()
+			inp.close()
+			downloadmarker.delete()
 		}
-	}
 	
-	ext.paper = { Map t ->
-		paperVersions.putAll(t);
+		println "Searching for MCP version in forge jar..."
+		String mcpVersion = "";
+		ZipFile installerZip = new ZipFile(forgeInstaller);
+		ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + minecraft + "-" + ver + "/forge-" + minecraft + "-" + ver + ".jar");
+		ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
+		while (forgeStrm.available() != 0) {
+			ZipEntry entry = forgeStrm.getNextEntry();
+			if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+				Manifest manifest = new Manifest(forgeStrm);
+				Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+				mcpVersion = MCP.getValue("Implementation-Version");
+				break;
+			}
+		}
+		forgeStrm.close();
+		installerZip.close();
+		forgeVersions.put(ver, mcpVersion);
 	}
-	
-	ext.fabric = { ... t ->
-		fabricVersions.addAll(t);
-	}
+}
+
+ext.paper = { Map t ->
+	paperVersions.putAll(t);
+}
+
+ext.fabric = { ... t ->
+	fabricVersions.addAll(t);
+}
+
+if (buildfile.exists()) {
 	
 	apply from: buildfile.getAbsolutePath()
-	if (ext.stability.equals("latest")) {
+	if (ext.stabilityValue.equals("latest")) {
 		ext.addToLatest = "true";				
-	} else if (ext.stability.equals("stable")) {
+	} else if (ext.stabilityValue.equals("stable")) {
 		ext.addToStable = "true";		
-	} else if (ext.stability.equals("lts")) {
+	} else if (ext.stabilityValue.equals("lts")) {
 		ext.LTS = "true";
 	}
 }
@@ -191,6 +193,9 @@ public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 	
 	public HashMap<String, String> spigotMappings = new HashMap<String, String>();
 
+	@Exclude
+	public boolean __$stMC;
+	
 	public CyanUpdateInfo(String content) {
 		readAll(content);
 	}
@@ -2587,7 +2592,7 @@ task vanillaManifest () {
 }
 serverDownloads.finalizedBy vanillaManifest
 
-ext.cyanManifest = { wrapperServer, wrapperClient, profile, icon, modloader, modloaderVersion, inherits, mappingsVersion, platformName ->
+ext.cyanManifest = { wrapperServer, wrapperClient, profile, icon, modloader, modloaderVersion, inherits, mappingsVersion, platformName, gameVer=minecraft, wrapperVer=wrapperVersion ->
 	return kickstartManifest {
     
     	name 'Cyan'
@@ -2596,7 +2601,7 @@ ext.cyanManifest = { wrapperServer, wrapperClient, profile, icon, modloader, mod
     	serverMain project.group + '.' + wrapperServer
     
     	projectVersion cyanversion
-    	game minecraft
+    	game gameVer
     	profileName profile
     	profileIcon icon
     	
@@ -2607,7 +2612,7 @@ ext.cyanManifest = { wrapperServer, wrapperClient, profile, icon, modloader, mod
     	mappings mappingsVersion
     	platform platformName
     
-    	wrapper wrapperVersion    	
+    	wrapper wrapperVer    	
     	
     	id '%i-cyan-%pv'
     	manifest '/org/asf/cyan/CyanWrapper/%wv-cyan-%pv/CyanWrapper-%wv-cyan-%pv-%gv-cyan-%pv.json'
@@ -2840,3 +2845,621 @@ task createCoreModKitTarGz(type: Tar) {
 	archiveVersion = "$minecraft-$cyanversion"
 }
 serverDownloads.finalizedBy createCoreModKitTarGz
+
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.tasks.PublishToMavenLocal
+task updateServerData() {
+    def gitcmd = [
+        'git',
+        'status',
+        '--porcelain'
+    ].execute(null, file(".."))
+    gitcmd.waitFor()
+    def errorg = gitcmd.errorStream.text.trim()
+    def files = gitcmd.text.trim().replaceAll(".* ", "").replace("\r", "").split("\n")
+	
+	dependsOn project(":CyanLoader").tasks.getByName('createCyanSourceZip')
+	dependsOn project(":CyanLoader").tasks.getByName('createCyanSourceTarGz')
+	
+    def tasks = [:]
+    for (def file : files) {
+        if (file.contains("/")) {
+            file = file.substring(0, file.indexOf("/"));
+            File f = project.file("../" + file)
+            for (def proj : project(":").childProjects) {
+                def pDir = proj.value.getProjectDir().getAbsolutePath()
+                if (pDir.equals(f.getAbsolutePath()) && proj.value.tasks.hasProperty("jar")) {
+                    tasks.put(proj.value.tasks.jar, proj.value);
+                    if (proj.value.tasks.hasProperty("sourcesJar"))
+                         tasks.put(proj.value.tasks.sourcesJar, proj.value);
+                    if (proj.value.tasks.hasProperty("javadocJar"))
+                         tasks.put(proj.value.tasks.javadocJar, proj.value);
+                    break
+                }
+            }
+        }
+    }
+    
+    for (def tsk : tasks.keySet()) {
+       dependsOn tsk
+    }
+	
+	File output = file("$buildDir/softpatch")
+	File maven = file("$buildDir/softpatch/maven")
+	File cyanReleases = file("$buildDir/softpatch/cyan-releases")
+	
+	StringBuilder conf = new StringBuilder();
+	def useurl = fallback_url
+	if (fallback_url.equals(""))
+		useurl = netTestUrl
+	
+	try {
+		URL u = new URL(useurl + infoPath);
+		Scanner sc = new Scanner(u.openStream());
+		while (sc.hasNext())
+			conf.append(sc.nextLine()+System.lineSeparator());
+		sc.close();
+	} catch (IOException e) {
+	}
+				
+    def newModloaderVersions = []
+    def completedVersions = []
+	CyanUpdateInfo info = new CyanUpdateInfo(conf.toString())
+	
+    for (String file : files) {
+        if (file.startsWith("workflowbuilddata-")) {
+            def game = file.substring("workflowbuilddata-".length(), file.lastIndexOf(".bash"));
+            def major = game
+            if (completedVersions.contains(game))
+                continue
+            
+            completedVersions.add(game)
+            if (major.split("\\.").length >= 3)
+                major = major.substring(0, major.lastIndexOf("."))
+                
+            boolean found = false				
+            for (def f2 : files) {
+                if (f2.equals("modloaderbuild-" + game + ".gradle") || f2.equals("modloaderbuild-" + major + ".gradle")) {
+                    found = true
+                    break;
+                }
+            }
+            if (!found)
+                continue
+				
+			for (def f2 : files) {
+				if (f2.equals("modloaderbuild-" + game + ".gradle") || f2.equals("modloaderbuild-" + major + ".gradle")) {
+					project.ext.forgeVersions = [:]
+					project.ext.paperVersions = [:]
+					project.ext.fabricVersions = []
+					
+					project.ext.stabilityValue = 'testing'
+					project.ext.stability = { t ->
+						ext.stabilityValue = t;
+					}
+					
+					project.ext.forge = { ... t ->
+						for (def ver : t) {
+							File forgeInstaller = new File(cyanCache, "forge-" + game + "-" + ver + "-installer.jar")
+							File downloadmarker = new File(cyanCache, forgeInstaller.getName()+".lck")
+							URL url = new URL(forgeurltemplate.replaceAll("\\%game\\%", game).replaceAll("\\%forgeversion\\%", ver))
+							if (!forgeInstaller.exists() || downloadmarker.exists()) {
+								if (!forgeInstaller.getParentFile().exists())
+									forgeInstaller.getParentFile().mkdirs()
+								if (downloadmarker.exists()) downloadmarker.delete()
+								downloadmarker.createNewFile()
+						
+								if (forgeInstaller.exists()) forgeInstaller.delete()
+								FileOutputStream strm = new FileOutputStream(forgeInstaller);
+								InputStream inp = url.openStream()
+								inp.transferTo(strm)
+								strm.close()
+								inp.close()
+								downloadmarker.delete()
+							}
+						
+							String mcpVersion = "";
+							ZipFile installerZip = new ZipFile(forgeInstaller);
+							ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + game + "-" + ver + "/forge-" + game + "-" + ver + ".jar");
+							ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
+							while (forgeStrm.available() != 0) {
+								ZipEntry entry = forgeStrm.getNextEntry();
+								if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+									Manifest manifest = new Manifest(forgeStrm);
+									Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+									mcpVersion = MCP.getValue("Implementation-Version");
+									break;
+								}
+							}
+							forgeStrm.close();
+							installerZip.close();
+							forgeVersions.put(ver, mcpVersion);
+						}
+					}
+					
+					project.ext.paper = { Map t ->
+						paperVersions.putAll(t);
+					}
+					
+					project.ext.fabric = { ... t ->
+						fabricVersions.addAll(t);
+					}
+					
+					apply from: new File(project.getRootDir(), f2).getAbsolutePath()					
+					forgeVersions.keySet().stream().sorted({ String t1, String t2 ->
+						return Version.fromString(t1).compareTo(Version.fromString(t2));
+					}).forEach { version ->
+						if (!info.forgeSupport.containsKey(game + "-" + version + "-testing"))
+							newModloaderVersions.add([ "forge", game, version ])
+					}
+					
+					fabricVersions.stream().sorted({ t1, t2 ->
+						return Version.fromString(t1).compareTo(Version.fromString(t2));
+					}).forEach { version ->
+						if (!info.fabricSupport.containsKey(game + "-" + version + "-testing"))
+							newModloaderVersions.add([ "fabric", game, version ])
+					}
+					
+					paperVersions.keySet().stream().sorted({ t1, t2 ->
+						return Version.fromString(t1).compareTo(Version.fromString(t2));
+					}).forEach { version ->
+						if (!info.paperSupport.containsKey(game + "-" + version + "-testing"))
+							newModloaderVersions.add([ "paper", game, version ])
+					}
+				}
+			}
+        }
+    }
+	
+	if (newModloaderVersions.size() != 0) {
+		for (String[] data : newModloaderVersions) {
+			def game = data[1]
+			def loader = data[0]
+			
+			def version = data[2]
+			if (loader.equals("forge")) {
+				def mappings = forgeVersions.get(version)
+				def wrapperVer = info.libraryVersions.getOrDefault("CyanWrapper", project.version)
+				wrapperVer = wrapperVer.substring(0, wrapperVer.lastIndexOf("-cyan-" + cyanversion))
+				
+				finalizedBy project.tasks.register('modloader_forge_' + game.replaceAll('[^A-Za-z0-9_]', "_") + '_' + version.replaceAll('[^A-Za-z0-9_]', "_") + '_Installer', KickStartInstallerTask) {
+					project(cyanManifest 'CyanForgeServerWrapper', 'CyanForgeClientWrapper', 'Cyan %gv (Forge ' + version + ')', 'Furnace', 'forge', version, game + '-forge-' + version, mappings, 'MCP', game, wrapperVer)
+					destinationDirectory = new File(cyanReleases, "${cyanversion}/installers/$game")
+					archiveBaseName = "$game-forge-$version-cyan"
+					archiveVersion = "$cyanversion"
+					archiveClassifier = "installer"
+				}
+			} else if (loader.equals("fabric")) {
+				def wrapperVer = info.libraryVersions.getOrDefault("CyanWrapper", project.version)
+				wrapperVer = wrapperVer.substring(0, wrapperVer.lastIndexOf("-cyan-" + cyanversion))
+				
+				finalizedBy project.tasks.register('modloader_fabric_' + game.replaceAll('[^A-Za-z0-9_]', "_") + '_' + version.replaceAll('[^A-Za-z0-9_]', "_") + '_Installer', KickStartInstallerTask) {
+					project(cyanManifest 'CyanFabricServerWrapper', 'CyanFabricClientWrapper', 'Cyan %gv (Fabric ' + version + ')', 'Lectern_Book', 'fabric', version, 'fabric-loader-' + version + '-' + game, game, 'INTERMEDIARY', game, wrapperVer)
+					destinationDirectory = new File(cyanReleases, "${cyanversion}/installers/$game")
+					archiveBaseName = "$game-fabric-$version-cyan"
+					archiveVersion = "$cyanversion"
+					archiveClassifier = "installer"
+				}
+			} else if (loader.equals("paper")) {
+				def mappings = paperVersions.get(version)
+				def wrapperVer = info.libraryVersions.getOrDefault("CyanWrapper", project.version)
+				wrapperVer = wrapperVer.substring(0, wrapperVer.lastIndexOf("-cyan-" + cyanversion))
+				
+				finalizedBy project.tasks.register('modloader_paper_' + game.replaceAll('[^A-Za-z0-9_]', "_") + '_' + version.replaceAll('[^A-Za-z0-9_]', "_") + '_Installer', KickStartInstallerTask) {
+					project(cyanManifest 'CyanPaperServerWrapper', 'CyanClientWrapper', 'Cyan %gv (Paper ' + version + ')', 'Lapis_Ore', 'paper', version, game + '-paper-' + version, mappings, 'SPIGOT', game, wrapperVer)
+					destinationDirectory = new File(cyanReleases, "${cyanversion}/installers/$game")
+					archiveBaseName = "$game-paper-$version-cyan"
+					archiveVersion = "$cyanversion"
+					archiveClassifier = "installer"
+				}
+			}
+		}
+	}
+	
+    doLast {
+        println "Building serverdata soft-patch..."
+        
+        if (output.exists())
+            delete output
+        if (!output.exists())
+            output.mkdirs()
+		
+        if (tasks.size() != 0) {
+            if (!maven.exists())
+                maven.mkdirs()
+            
+            println " | Building maven files..."
+            for (def tsk : tasks.keySet()) {
+                def proj = tasks.get(tsk)
+                def ver = proj.getVersion()
+				
+				if (tsk.getArchiveClassifier().getOrNull() == null || tsk.getArchiveClassifier().getOrNull().isEmpty())
+					println " +-- Building maven artifact for " + proj.getName() + "..."
+				
+                if (info.libraryVersions.containsKey(proj.getName())) {
+                    ver = info.libraryVersions.get(proj.getName())
+                }
+                
+                File data = new File(maven, proj.getGroup().toString().replace(".", "/") + "/" + proj.getName() + "/" + ver)
+                if (!data.exists())
+                    data.mkdirs();
+                
+                File outputFile = new File(data, proj.getName() + propTsk(tsk.getArchiveAppendix()) + "-" + ver + propTsk(tsk.getArchiveClassifier()) + "." + tsk.getArchiveExtension().get())
+                if (tsk.getArchiveFile().get().getAsFile().exists()) {
+                    Files.copy(tsk.getArchiveFile().get().getAsFile().toPath(), outputFile.toPath())
+                    hashFiles(outputFile)
+                }
+            }
+        }
+		
+		boolean first = true
+		completedVersions = []
+		for (String file : files) {
+			if (file.startsWith("workflowbuilddata-")) {
+				def game = file.substring("workflowbuilddata-".length(), file.lastIndexOf(".bash"));
+				def major = game
+				if (completedVersions.contains(game))
+					continue
+				
+				completedVersions.add(game)
+				if (major.split("\\.").length >= 3)
+					major = major.substring(0, major.lastIndexOf("."))
+					
+				boolean found = false				
+				for (def f2 : files) {
+					if (f2.equals("modloaderbuild-" + game + ".gradle") || f2.equals("modloaderbuild-" + major + ".gradle")) {
+						found = true
+						break;
+					}
+				}
+				if (!found)
+					continue
+						
+				if (first) {
+					if (tasks.size() != 0) {
+						println(" |")
+					}
+					println(" | Building new modloader manifest file...")
+				} else {
+					println " |"
+				}
+				println " +-- Building " + game + " manifest..."		
+				first = false;
+				
+				for (def f2 : files) {
+					if (f2.equals("modloaderbuild-" + game + ".gradle") || f2.equals("modloaderbuild-" + major + ".gradle")) {
+						project.ext.forgeVersions = [:]
+						project.ext.paperVersions = [:]
+						project.ext.fabricVersions = []
+						
+						project.ext.stabilityValue = 'testing'
+						project.ext.stability = { t ->
+							ext.stabilityValue = t;
+						}
+						
+						project.ext.forge = { ... t ->
+							for (def ver : t) {
+								File forgeInstaller = new File(cyanCache, "forge-" + game + "-" + ver + "-installer.jar")
+								File downloadmarker = new File(cyanCache, forgeInstaller.getName()+".lck")
+								URL url = new URL(forgeurltemplate.replaceAll("\\%game\\%", game).replaceAll("\\%forgeversion\\%", ver))
+								if (!forgeInstaller.exists() || downloadmarker.exists()) {
+									if (!forgeInstaller.getParentFile().exists())
+										forgeInstaller.getParentFile().mkdirs()
+									if (downloadmarker.exists()) downloadmarker.delete()
+									downloadmarker.createNewFile()
+							
+									println " +-- Downloading forge installer to cache..."
+									if (forgeInstaller.exists()) forgeInstaller.delete()
+									FileOutputStream strm = new FileOutputStream(forgeInstaller);
+									InputStream inp = url.openStream()
+									inp.transferTo(strm)
+									strm.close()
+									inp.close()
+									downloadmarker.delete()
+								}
+							
+								println " +-- Searching for MCP version in forge jar..."
+								String mcpVersion = "";
+								ZipFile installerZip = new ZipFile(forgeInstaller);
+								ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + game + "-" + ver + "/forge-" + game + "-" + ver + ".jar");
+								ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
+								while (forgeStrm.available() != 0) {
+									ZipEntry entry = forgeStrm.getNextEntry();
+									if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+										Manifest manifest = new Manifest(forgeStrm);
+										Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+										mcpVersion = MCP.getValue("Implementation-Version");
+										break;
+									}
+								}
+								forgeStrm.close();
+								installerZip.close();
+								forgeVersions.put(ver, mcpVersion);
+							}
+						}
+						
+						project.ext.paper = { Map t ->
+							paperVersions.putAll(t);
+						}
+						
+						project.ext.fabric = { ... t ->
+							fabricVersions.addAll(t);
+						}
+						
+						apply from: new File(project.getRootDir(), f2).getAbsolutePath()
+						
+						forgeVersions.keySet().stream().sorted({ String t1, String t2 ->
+							return Version.fromString(t1).compareTo(Version.fromString(t2));	
+						}).forEach { version ->
+							if (ext.stabilityValue.equals("stable")) {
+								info.forgeSupport.put("stable-forge", game + "-" + version)
+								info.forgeSupport.put("stable-forge-" + game, version)
+								info.forgeSupport.put("stable-cyan-" + game + "-" + cyanversion, version)
+								info.forgeSupport.put(game + "-" + version + "-stable", cyanversion)
+								info.forgeSupport.put("latest-forge", game + "-" + version)
+								info.forgeSupport.put("latest-forge-" + game, version)
+								info.forgeSupport.put("latest-cyan-" + game + "-" + cyanversion, version)
+								info.forgeSupport.put(game + "-" + version + "-latest", cyanversion)
+							} else if (ext.stabilityValue.equals("latest")) {
+								info.forgeSupport.put("latest-forge", game + "-" + version)
+								info.forgeSupport.put("latest-forge-" + game, version)
+								info.forgeSupport.put("latest-cyan-" + game + "-" + cyanversion, version)
+								info.forgeSupport.put(game + "-" + version + "-latest", cyanversion)
+							}
+						
+							info.forgeSupport.put("testing-forge", game + "-" + version)
+							info.forgeSupport.put("testing-forge-" + game, version)
+							info.forgeSupport.put("testing-cyan-" + game + "-" + cyanversion, version)
+							info.forgeSupport.put(game + "-" + version + "-testing", cyanversion)
+						}
+						
+						fabricVersions.stream().sorted({ t1, t2 ->
+							return Version.fromString(t1).compareTo(Version.fromString(t2));	
+						}).forEach { version ->
+							if (ext.stabilityValue.equals("stable")) {
+								info.fabricSupport.put("stable-fabric", game + "-" + version)
+								info.fabricSupport.put("stable-fabric-" + game, version)
+								info.fabricSupport.put("stable-cyan-" + game + "-" + cyanversion, version)
+								info.fabricSupport.put(game + "-" + version + "-stable", cyanversion);
+								info.fabricSupport.put("latest-fabric", game + "-" + version)
+								info.fabricSupport.put("latest-fabric-" + game, version)
+								info.fabricSupport.put("latest-cyan-" + game + "-" + cyanversion, version)
+								info.fabricSupport.put(game + "-" + version + "-latest", cyanversion);
+							} else if (ext.stabilityValue.equals("latest")) {
+								info.fabricSupport.put("latest-fabric", game + "-" + version)
+								info.fabricSupport.put("latest-fabric-" + game, version)
+								info.fabricSupport.put("latest-cyan-" + game + "-" + cyanversion, version)
+								info.fabricSupport.put(game + "-" + version + "-latest", cyanversion);
+							}
+						
+							info.fabricSupport.put("testing-fabric", game + "-" + version)
+							info.fabricSupport.put("testing-fabric-" + game, version)
+							info.fabricSupport.put("testing-cyan-" + game + "-" + cyanversion, version)
+							info.fabricSupport.put(game + "-" + version + "-testing", cyanversion);
+						}
+						
+					    paperVersions.keySet().stream().sorted({ t1, t2 ->
+							return Version.fromString(t1).compareTo(Version.fromString(t2));	
+						}).forEach { version ->
+							if (ext.stabilityValue.equals("stable")) {
+								info.paperSupport.put("stable-paper", game + "-" + version)
+								info.paperSupport.put("stable-paper-" + game, version)
+								info.paperSupport.put("stable-cyan-" + game + "-" + cyanversion, version)
+								info.paperSupport.put(game + "-" + version + "-stable", cyanversion);
+								info.paperSupport.put("latest-paper", game + "-" + version)
+								info.paperSupport.put("latest-paper-" + game, version)
+								info.paperSupport.put("latest-cyan-" + game + "-" + cyanversion, version)
+								info.paperSupport.put(game + "-" + version + "-latest", cyanversion);
+							} else if (ext.stabilityValue.equals("latest")) {
+								info.paperSupport.put("latest-paper", game + "-" + version)
+								info.paperSupport.put("latest-paper-" + game, version)
+								info.paperSupport.put("latest-cyan-" + game + "-" + cyanversion, version)
+								info.paperSupport.put(game + "-" + version + "-latest", cyanversion);
+							}
+						
+							info.paperSupport.put("testing-paper", game + "-" + version)
+							info.paperSupport.put("testing-paper-" + game, version)
+							info.paperSupport.put("testing-cyan-" + game + "-" + cyanversion, version)
+							info.paperSupport.put(game + "-" + version + "-testing", cyanversion);
+				
+							def mappings = paperVersions.get(version)
+							info.paperByMappings.put(mappings, version)
+							info.spigotMappings.put("paper-" + game + "-" + version, mappings)
+							info.spigotMappings.put("cyan-" + game + "-" + cyanversion, mappings)
+						}
+					}
+				}
+			}
+		}
+		
+		if (!first) {
+			println(" |")
+			println(" | Writing new files....")
+			if (!maven.exists())
+				maven.mkdirs()
+			
+			println " +-- Saving new Cyan information manifest..."
+			File outputFile = new File(maven, "org/asf/cyan/CyanVersionHolder/generic/CyanVersionHolder-generic-versions.ccfg")
+			if (!outputFile.getParentFile().exists())
+				outputFile.getParentFile().mkdirs()				
+			Files.write(outputFile.toPath(), info.toString().getBytes())
+			hashFiles(outputFile)
+			
+			outputFile = new File(maven, "org/asf/cyan/CyanVersionHolder/$cyanversion/CyanVersionHolder-$cyanversion-versions.ccfg")
+			if (!outputFile.getParentFile().exists())
+				outputFile.getParentFile().mkdirs()				
+			Files.write(outputFile.toPath(), info.toString().getBytes())
+			hashFiles(outputFile)
+			
+			if (!cyanReleases.exists())
+				cyanReleases.mkdirs()
+			outputFile = new File(cyanReleases, "$cyanversion/versions.ccfg")
+			if (!outputFile.getParentFile().exists())
+				outputFile.getParentFile().mkdirs()
+			Files.write(outputFile.toPath(), info.toString().getBytes())
+			
+			for (def data : newModloaderVersions) {
+				println " +-- Added support for " + data[1] + " " + data[0].substring(0, 1).toUpperCase() + data[0].substring(1) + " " + data[2]
+			}
+			println(" |")
+		}
+		
+		if (tasks.size() != 0 && first) {
+			println(" |")
+		}
+		
+		println " | Building source archives..."
+		File archiveOne = project(":CyanLoader").tasks.getByName('createCyanSourceTarGz').getArchiveFile().get().getAsFile()
+		File archiveTwo = project(":CyanLoader").tasks.getByName('createCyanSourceTarGz').getArchiveFile().get().getAsFile()
+		
+		File archiveDestOne = new File(cyanReleases, "$cyanversion/sources.zip")
+		File archiveDestTwo = new File(cyanReleases, "$cyanversion/sources.tar.gz")
+		File archiveDestThree = new File(maven, "org/asf/cyan/CyanLoader-Sources/$cyanversion/CyanLoader-Sources-$cyanversion-full.zip")
+		File archiveDestFour = new File(maven, "org/asf/cyan/CyanLoader-Sources/$cyanversion/CyanLoader-Sources-$cyanversion-full.tar.gz")
+		
+		if (!archiveDestOne.getParentFile().exists())
+			archiveDestOne.getParentFile().mkdirs()
+		if (!archiveDestTwo.getParentFile().exists())
+			archiveDestTwo.getParentFile().mkdirs()
+		if (!archiveDestThree.getParentFile().exists())
+			archiveDestThree.getParentFile().mkdirs()
+		if (!archiveDestFour.getParentFile().exists())
+			archiveDestFour.getParentFile().mkdirs()
+		
+		if (archiveDestOne.exists())
+			archiveDestOne.delete()
+		if (archiveDestTwo.exists())
+			archiveDestTwo.delete()
+		if (archiveDestThree.exists())
+			archiveDestThree.delete()
+		if (archiveDestFour.exists())
+			archiveDestFour.delete()
+			
+		println " +-- Copying source zip..."
+		Files.copy(archiveOne.toPath(), archiveDestOne.toPath())
+		Files.copy(archiveOne.toPath(), archiveDestThree.toPath())
+		hashFiles(archiveDestThree)
+		println " +-- Copying source targz..."
+		Files.copy(archiveTwo.toPath(), archiveDestTwo.toPath())
+		Files.copy(archiveOne.toPath(), archiveDestFour.toPath())
+		hashFiles(archiveDestFour)
+		
+		println(" |")
+		println(" |")
+		println(" \\-- Soft-patch main task completed.")
+    }
+	
+	def modkits = []
+	def coremodkits = []
+	for (def file : files) {
+		if (file.contains("/") && (file.startsWith("modkits/") || file.startsWith("coremodkits/"))) {
+			if (file.startsWith("modkits/")) {
+				def path = file
+				def game = file.substring(file.indexOf("/modkit-") + "/modkit-".length());
+				game = game.substring(0, game.indexOf("/"));
+				
+				def cyan = game.substring(game.lastIndexOf("-") + 1);
+				game = game.substring(0, game.lastIndexOf("-"));
+				
+				if (modkits.contains(game + "-" + cyan))
+					continue;
+				modkits.add(game + "-" + cyan)
+				
+				finalizedBy project.tasks.register('zip_mk_' + cyan.replaceAll('[^A-Za-z0-9_]', "_") + '_' + game.replaceAll('[^A-Za-z0-9_]', "_"), Zip) {
+					from project.file("../modkits/modkit-$game-$cyan")
+					destinationDirectory = new File(cyanReleases, "$cyan/modkits/$game")
+					archiveBaseName = 'modkit'
+					archiveVersion = "$game-$cyan"
+				}
+			
+				finalizedBy project.tasks.register('targz_mk_' + cyan.replaceAll('[^A-Za-z0-9_]', "_") + '_' + game.replaceAll('[^A-Za-z0-9_]', "_"), Tar) {
+					compression Compression.GZIP
+					archiveExtension = 'tar.gz'
+					from project.file("../modkits/modkit-$game-$cyan")
+					destinationDirectory = new File(cyanReleases, "$cyan/modkits/$game")
+					archiveBaseName = 'modkit'
+					archiveVersion = "$game-$cyan"
+				}
+			} else if (file.startsWith("coremodkits/")) {
+				def path = file
+				def game = file.substring(file.indexOf("/coremodkit-") + "/coremodkit-".length());
+				game = game.substring(0, game.indexOf("/"));
+				
+				def cyan = game.substring(game.lastIndexOf("-") + 1);
+				game = game.substring(0, game.lastIndexOf("-"));
+				
+				if (coremodkits.contains(game + "-" + cyan))
+					continue;
+				coremodkits.add(game + "-" + cyan)
+				
+				finalizedBy project.tasks.register('zip_cmk_' + cyan.replaceAll('[^A-Za-z0-9_]', "_") + '_' + game.replaceAll('[^A-Za-z0-9_]', "_"), Zip) {
+					from project.file("../coremodkits/coremodkit-$game-$cyan")
+					destinationDirectory = new File(cyanReleases, "$cyan/coremodkits/$game")
+					archiveBaseName = 'coremodkit'
+					archiveVersion = "$game-$cyan"
+				}
+				
+				finalizedBy project.tasks.register('targz_cmk_' + cyan.replaceAll('[^A-Za-z0-9_]', "_") + '_' + game.replaceAll('[^A-Za-z0-9_]', "_"), Tar) {
+					compression Compression.GZIP
+					archiveExtension = 'tar.gz'
+					from project.file("../coremodkits/coremodkit-$game-$cyan")
+					destinationDirectory = new File(cyanReleases, "$cyan/coremodkits/$game")
+					archiveBaseName = 'coremodkit'
+					archiveVersion = "$game-$cyan"
+				}
+			}
+		}
+	}
+}
+
+void hashFiles(File outputFile) {
+    Files.write(Path.of(outputFile.getPath() + ".md5"), md5HEX(Files.readAllBytes(outputFile.toPath())).getBytes())
+    Files.write(Path.of(outputFile.getPath() + ".sha1"), sha1HEX(Files.readAllBytes(outputFile.toPath())).getBytes())
+    Files.write(Path.of(outputFile.getPath() + ".sha256"), sha256HEX(Files.readAllBytes(outputFile.toPath())).getBytes())
+    Files.write(Path.of(outputFile.getPath() + ".sha512"), sha512HEX(Files.readAllBytes(outputFile.toPath())).getBytes())
+}
+
+String propTsk(def prop) {
+    return prop != null && prop.getOrNull() != null && !prop.get().isEmpty() ? "-" + prop.get() : ""
+}
+
+String md5HEX(byte[] array) {
+   MessageDigest digest = MessageDigest.getInstance("MD5");
+   byte[] sha = digest.digest(array);
+   StringBuilder result = new StringBuilder();
+   for (byte aByte : sha) {
+       result.append(String.format("%02x", aByte));
+   }
+   return result.toString();
+}
+
+String sha256HEX(byte[] array) {
+   MessageDigest digest = MessageDigest.getInstance("SHA-256");
+   byte[] sha = digest.digest(array);
+   StringBuilder result = new StringBuilder();
+   for (byte aByte : sha) {
+       result.append(String.format("%02x", aByte));
+   }
+   return result.toString();
+}
+
+String sha512HEX(byte[] array) {
+   MessageDigest digest = MessageDigest.getInstance("SHA-512");
+   byte[] sha = digest.digest(array);
+   StringBuilder result = new StringBuilder();
+   for (byte aByte : sha) {
+       result.append(String.format("%02x", aByte));
+   }
+   return result.toString();
+}
+
+String sha1HEX(byte[] array) {
+   MessageDigest digest = MessageDigest.getInstance("SHA-1");
+   byte[] sha = digest.digest(array);
+   StringBuilder result = new StringBuilder();
+   for (byte aByte : sha) {
+       result.append(String.format("%02x", aByte));
+   }
+   return result.toString();
+}
+	
