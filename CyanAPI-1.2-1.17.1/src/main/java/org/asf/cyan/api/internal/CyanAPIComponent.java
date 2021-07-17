@@ -10,6 +10,7 @@ import org.asf.cyan.api.fluid.annotations.PlatformExclude;
 import org.asf.cyan.api.fluid.annotations.PlatformOnly;
 import org.asf.cyan.api.fluid.annotations.SideOnly;
 import org.asf.cyan.api.fluid.annotations.VersionRegex;
+import org.asf.cyan.api.internal.modkit.transformers._1_17.client.network.ServerDataAccessor;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.core.CyanInfo;
@@ -122,6 +123,10 @@ public class CyanAPIComponent extends CyanComponent {
 		} catch (IOException e) {
 			return null;
 		}
+	}
+
+	public static void test(ServerDataAccessor acc) {
+		acc = acc;
 	}
 
 }
