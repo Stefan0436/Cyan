@@ -29,4 +29,8 @@ mappings> [ {
         mappingType> METHOD
         argumentTypes> [ 'javax.swing.JTextArea' 'javax.swing.JScrollPane' 'java.lang.String' ]
     } ]
+} {
+    mappingType> CLASS
+    name> 'net.minecraft.network.protocol.status.ServerStatus\$Serializer'
+    obfuscated> 'net.minecraft.network.protocol.status.ServerPing\$Serializer'
 } ]

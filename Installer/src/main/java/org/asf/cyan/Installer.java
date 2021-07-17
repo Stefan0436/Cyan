@@ -91,7 +91,7 @@ import javax.swing.JCheckBox;
 
 public class Installer extends CyanComponent {
 
-	private static final String version = "3.2";
+	private static final String version = "3.3";
 
 	private static Installer impl;
 
@@ -846,7 +846,7 @@ public class Installer extends CyanComponent {
 			builder.appendRiftProvider(SimpleRiftBuilder.getProviderForPlatform(
 					LaunchPlatform.valueOf(project.platform), version, side, project.loaderVersion, project.mappings));
 			builder.appendSources(new FileClassSourceProvider(riftJar));
-			builder.setIdentifier(project.platform.toLowerCase() + "-" + project.game + "-"
+			builder.setIdentifier("kickstart-" + project.platform.toLowerCase() + "-" + project.game + "-"
 					+ project.mappings.replaceAll("[^A-Za-z0-9-.]", "-")
 					+ (project.loader.isEmpty() ? "" : "-" + project.loader)
 					+ (project.loaderVersion.isEmpty() ? "" : "-" + project.loaderVersion));
