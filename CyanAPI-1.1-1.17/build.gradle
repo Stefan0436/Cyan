@@ -198,6 +198,9 @@ repositories {
 	maven {
 		url 'https://papermc.io/repo/repository/maven-public/'
 	}
+	maven {
+		url 'https://libraries.minecraft.net/'
+	}
 }
 
 createEclipseLaunches {
@@ -206,7 +209,11 @@ createEclipseLaunches {
 
 dependencies {
 	implementation name: 'client', version: minecraft + "-deobf"
- 	implementation name: 'server', version: minecraft + "-deobf"
+	
+	MinecraftInstallationToolkit.saveVersionManifest(info)
+	for (String lib : MinecraftInstallationToolkit.getLibrariesMavenFormat(info, true)) {
+		implementation lib
+	}
 	
     testImplementation 'junit:junit:4.12'
     
