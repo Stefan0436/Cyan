@@ -2010,6 +2010,23 @@ public class CyanLoader extends ModkitModloader
 														strm.close();
 
 														String cVersion = man2.version;
+														for (String id2 : man2.incompatibilities.keySet()) {
+															if (id2.equals(man.modGroup + ":" + man.modId)) {
+																String ver2 = man2.incompatibilities.get(id);
+																String currentVer = man.version;
+
+																if (CheckString.validateCheckString(ver2,
+																		Version.fromString(currentVer))) {
+																	info("No update available (update is incompatible with current mods)");
+																	try {
+																		Thread.sleep(500);
+																	} catch (InterruptedException e2) {
+																	}
+																	fail = true;
+																	break;
+																}
+															}
+														}
 														if (!CheckString.validateCheckString(ver,
 																Version.fromString(cVersion))) {
 															info("No update available (incompatible dependency version for: "

@@ -1,4 +1,4 @@
-forge=36.1.35
+forge=36.1.58
 fabric=0.11.6
 paper=782
 
