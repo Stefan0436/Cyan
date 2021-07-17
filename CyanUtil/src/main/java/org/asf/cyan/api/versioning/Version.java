@@ -200,7 +200,7 @@ public class Version {
 				return true;
 
 			if (segment.value > otherSegment.value)
-				return false;
+				return lastWasLess;
 			lastWasLess = segment.value < otherSegment.value;
 			
 			i++;

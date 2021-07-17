@@ -46,7 +46,7 @@ public class CyanIDEWrapper {
 		CyanLoader.enableDeveloperMode();
 
 		boolean deobf = Boolean.valueOf(System.getProperty("cyan.deobfuscated"));
-		String side = System.getProperty("cyan.side");		
+		String side = System.getProperty("cyan.side");
 		String clientMAIN = System.getProperty("cyan.launcher.client.wrapper", "net.minecraft.client.main.Main");
 		String serverMAIN = System.getProperty("cyan.launcher.server.wrapper", "%def");
 
@@ -144,7 +144,7 @@ public class CyanIDEWrapper {
 		}
 
 		String defaultMain = "net.minecraft.server.Main";
-		if (Version.fromString(CyanInfo.getMinecraftVersion()).isLessOrEqualTo(Version.fromString("1.15.2"))) {
+		if (Version.fromString("1.15.2").isGreaterOrEqualTo(Version.fromString(CyanInfo.getMinecraftVersion()))) {
 			defaultMain = "net.minecraft.server.MinecraftServer";
 		}
 		String wrapper = (CyanCore.getSide() == GameSide.CLIENT ? clientMAIN : serverMAIN.replace("%def", defaultMain));

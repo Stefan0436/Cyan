@@ -33,7 +33,7 @@ public class VersionTest {
 		Version ver8 = Version.fromString("1.15.2");
 		Version ver9 = Version.fromString("1.16.5");
 		Version ver12 = Version.fromString("1.17");
-		
+
 		Version ver10 = Version.fromString("5.1.4");
 		Version ver11 = Version.fromString("5.0");
 
@@ -71,7 +71,7 @@ public class VersionTest {
 		assertTrue(ver.isLessThan(ver5));
 		assertTrue(ver5.isLessThan(ver6));
 		assertTrue(ver2.isLessThan(ver7));
-		assertTrue(!ver3.isLessThan(ver10));
+		assertTrue(ver3.isLessThan(ver10));
 		assertTrue(ver.isLessThan(ver6));
 	}
 }
