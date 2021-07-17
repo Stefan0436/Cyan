@@ -8,8 +8,8 @@ import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.TargetType;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
-import modkit.events.ingame.entities.EntityRendererRegistryEvent;
-import modkit.events.objects.ingame.entities.EntityRendererRegistryEventObject;
+import modkit.events.ingame.rendering.entity.EntityRendererRegistryEvent;
+import modkit.events.objects.ingame.rendering.entity.EntityRendererRegistryEventObject;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -19,6 +19,7 @@ import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.entity.EntityType;
 
 @FluidTransformer
+@SuppressWarnings("deprecation")
 @TargetClass(target = "net.minecraft.client.renderer.entity.EntityRenderDispatcher")
 public class EntityRenderDispatcherModification {
 

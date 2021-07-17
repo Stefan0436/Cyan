@@ -62,6 +62,7 @@ public class VersionStatusTransformer {
 	private static JsonObject modloader(Modloader modloader, boolean addMods) {
 		JsonObject loader = new JsonObject();
 		loader.addProperty("name", modloader.getName());
+		loader.addProperty("simplename", modloader.getSimpleName());
 		loader.addProperty("version", modloader.getVersion().toString());
 		loader.addProperty("game.version", modloader.getGameVersion());
 		loader.addProperty("type", modloader.getClass().getTypeName());
@@ -78,6 +79,7 @@ public class VersionStatusTransformer {
 			JsonArray mods = new JsonArray();
 			for (IModManifest mod : modloader.getLoadedMods()) {
 				JsonObject modinfo = new JsonObject();
+				modinfo.addProperty("name", mod.displayName());
 				modinfo.addProperty("id", mod.id());
 				modinfo.addProperty("version", mod.version().toString());
 				mods.add(modinfo);
@@ -86,6 +88,7 @@ public class VersionStatusTransformer {
 			JsonArray coremods = new JsonArray();
 			for (IModManifest mod : modloader.getLoadedCoremods()) {
 				JsonObject modinfo = new JsonObject();
+				modinfo.addProperty("name", mod.displayName());
 				modinfo.addProperty("id", mod.id());
 				modinfo.addProperty("version", mod.version().toString());
 				coremods.add(modinfo);

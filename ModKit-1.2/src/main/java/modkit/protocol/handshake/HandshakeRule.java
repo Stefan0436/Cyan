@@ -63,19 +63,22 @@ public class HandshakeRule {
 				continue;
 
 			if (!entries.containsKey(rule.key)) {
-				String msg = CheckString.validateCheckString(rule.checkString, Version.fromString(""), "", true);
-				if (msg == null)
-					msg = "";
-				if (msg.equals(" (incompatible)"))
-					msg = "   ";
-				output.put(rule.key, msg.substring(2, msg.length() - 1));
+				if (output != null) {
+					String msg = CheckString.validateCheckString(rule.checkString, Version.fromString(""), "", true);
+					if (msg == null)
+						msg = "";
+					if (msg.equals(" (incompatible)"))
+						msg = "   ";
+					output.put(rule.key, msg.substring(2, msg.length() - 1));
+				}
 				fail = true;
 				continue;
 			}
 
 			String msg = CheckString.validateCheckString(rule.checkString, entries.get(rule.key), "", true);
 			if (msg != null) {
-				output.put(rule.key, msg.substring(2, msg.length() - 1));
+				if (output != null)
+					output.put(rule.key, msg.substring(2, msg.length() - 1));
 				fail = true;
 			}
 		}
@@ -102,5 +105,23 @@ public class HandshakeRule {
 	 */
 	public static List<HandshakeRule> getAllRules() {
 		return List.copyOf(rules);
+	}
+
+	/**
+	 * Validates this rule
+	 * 
+	 * @param entries Mod entries to search in
+	 * @param side    Current side
+	 * @return True if valid, false otherwise
+	 */
+	public boolean validate(Map<String, Version> entries, GameSide side) {
+		if (!getSide().equals(side))
+			return true;
+
+		if (!entries.containsKey(key)) {
+			return false;
+		}
+
+		return CheckString.validateCheckString(checkString, entries.get(key));
 	}
 }

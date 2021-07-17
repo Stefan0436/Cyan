@@ -32,5 +32,9 @@
 	"modkit.upgraded": "Upgraded",
 	
 	"modkit.worldbackup.question": "§2Do you want to create a backup before loading?",
-	"modkit.worldbackup.message": "§eThe world you are trying to load has mod changes:\n%s"
+	"modkit.worldbackup.message": "§eThe world you are trying to load has mod changes:\n%s",
+	"modkit.incompatible.server.serverlist": "Incompatible %s server",
+	"modkit.incompatible.server.serverlist.tooltip": "Incompatible mods present!",
+	"modkit.incompatible.server.serverlist.tooltip.listmessage": "List of server mods:",
+	"modkit.incompatible.server.serverlist.tooltip.loaderissue": "Incompatible modloader(s) present!"
 }

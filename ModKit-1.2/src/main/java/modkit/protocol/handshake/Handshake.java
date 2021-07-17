@@ -16,7 +16,6 @@ import com.google.gson.JsonObject;
 
 import modkit.protocol.ModKitProtocol;
 import modkit.protocol.ModkitModloader;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -34,12 +33,10 @@ public class Handshake extends CyanComponent {
 	 * Runs the early handshake process
 	 * 
 	 * @param response       Response server status JSON.
-	 * @param minecraft      Minecraft client
 	 * @param disconnectCall Method to call to disconnect the client
 	 * @return True if the client can try to log in, false otherwise
 	 */
-	public static boolean earlyClientHandshake(JsonObject response, Minecraft minecraft,
-			Consumer<Component> disconnectCall) {
+	public static boolean earlyClientHandshake(JsonObject response, Consumer<Component> disconnectCall) {
 		ModkitModloader.ModkitProtocolRules root = (ModkitModloader.ModkitProtocolRules) ModkitModloader
 				.getModKitRootModloader();
 
@@ -88,8 +85,8 @@ public class Handshake extends CyanComponent {
 				if (modloader.has("protocol")) {
 					Modloader loader = Modloader.getModloader(name);
 					if (loader == null) {
-						disconnectCall
-								.accept(new TranslatableComponent("modkit.missingmodded.client.loader", "\u00A76" + name));
+						disconnectCall.accept(
+								new TranslatableComponent("modkit.missingmodded.client.loader", "\u00A76" + name));
 						return false;
 					}
 
@@ -249,6 +246,112 @@ public class Handshake extends CyanComponent {
 			disconnectCall.accept(new TranslatableComponent("modkit.missingmodded.server"));
 			return false;
 		}
+
+		return true;
+	}
+
+	/**
+	 * Validates the given server
+	 * 
+	 * @param response       Response server status JSON.
+	 * @return True if the client is compatible, false otherwise
+	 */
+	public static boolean serverListHandshake(JsonObject response) {
+		ModkitModloader.ModkitProtocolRules root = (ModkitModloader.ModkitProtocolRules) ModkitModloader
+				.getModKitRootModloader();
+
+		if (response.has("modkit")) {
+			JsonObject modkitData = response.get("modkit").getAsJsonObject();
+
+			double serverProtocol = modkitData.get("protocol").getAsDouble();
+			double serverMinProtocol = modkitData.get("protocol.min").getAsDouble();
+			double serverMaxProtocol = modkitData.get("protocol.max").getAsDouble();
+
+			int status = validateModKitProtocol(serverProtocol, serverMinProtocol, serverMaxProtocol,
+					ModKitProtocol.CURRENT, ModKitProtocol.MIN_PROTOCOL, ModKitProtocol.MAX_PROTOCOL);
+			if (status != 0)
+				return false;
+
+			JsonObject modloaderData = modkitData.get("modloader").getAsJsonObject();
+			HashMap<String, Version> remoteEntries = new HashMap<String, Version>();
+			remoteEntries.put("game",
+					Version.fromString(modloaderData.get("root").getAsJsonObject().get("game.version").getAsString()));
+
+			ArrayList<String> presentLoaders = new ArrayList<String>();
+			JsonArray loaders = modloaderData.get("all").getAsJsonArray();
+			for (JsonElement element : loaders) {
+				JsonObject modloader = element.getAsJsonObject();
+
+				String name = modloader.get("name").getAsString();
+				String version = modloader.get("version").getAsString();
+
+				if (modloader.has("protocol")) {
+					Modloader loader = Modloader.getModloader(name);
+					if (loader == null)
+						return false;
+
+					presentLoaders.add(name);
+
+					JsonObject protocol = modloader.get("protocol").getAsJsonObject();
+					double loaderProtocol = protocol.get("version").getAsDouble();
+					double loaderMinProtocol = protocol.get("min").getAsDouble();
+					double loaderMaxProtocol = protocol.get("max").getAsDouble();
+
+					status = validateLoaderProtocol(loaderProtocol, loaderMinProtocol, loaderMaxProtocol,
+							root.modloaderProtocol(), root.modloaderMinProtocol(), root.modloaderMaxProtocol());
+					if (status != 0)
+						return false;
+				}
+
+				remoteEntries.put(name.toLowerCase(), Version.fromString(version));
+				JsonArray mods = modloader.get("mods").getAsJsonArray();
+				JsonArray coremods = modloader.get("coremods").getAsJsonArray();
+
+				for (JsonElement ele : mods) {
+					JsonObject mod = ele.getAsJsonObject();
+					remoteEntries.putIfAbsent(mod.get("id").getAsString(),
+							Version.fromString(mod.get("version").getAsString()));
+				}
+				for (JsonElement ele : coremods) {
+					JsonObject mod = ele.getAsJsonObject();
+					remoteEntries.putIfAbsent(mod.get("id").getAsString(),
+							Version.fromString(mod.get("version").getAsString()));
+				}
+			}
+
+			if (!presentLoaders.contains(ModkitModloader.getModKitRootModloader().getName()))
+				return false;
+
+			HashMap<String, Version> localEntries = new HashMap<String, Version>();
+			localEntries.put("game", Version.fromString(Modloader.getModloaderGameVersion()));
+			for (Modloader loader : Modloader.getAllModloaders()) {
+				localEntries.put(loader.getName().toLowerCase(), loader.getVersion());
+			}
+			for (IModManifest mod : Modloader.getAllMods()) {
+				localEntries.putIfAbsent(mod.id(), mod.version());
+			}
+
+			ArrayList<HandshakeRule> rules = new ArrayList<HandshakeRule>();
+			JsonArray remoteRules = modkitData.get("handshake").getAsJsonArray();
+			for (JsonElement ele : remoteRules) {
+				JsonObject ruleObject = ele.getAsJsonObject();
+				rules.add(new HandshakeRule(GameSide.valueOf(ruleObject.get("side").getAsString()),
+						ruleObject.get("key").getAsString(), ruleObject.get("checkstring").getAsString()));
+			}
+			HandshakeRule.getAllRules().forEach(rule -> {
+				if (!rules.stream().anyMatch(t -> t.getKey().equals(rule.getKey())
+						&& t.getCheckString().equals(rule.getCheckString()) && t.getSide() == rule.getSide())) {
+					rules.add(rule);
+				}
+			});
+
+			boolean failClient = !HandshakeRule.checkAll(localEntries, GameSide.CLIENT, null, rules);
+			boolean failServer = !HandshakeRule.checkAll(remoteEntries, GameSide.SERVER, null, rules);
+
+			if (failClient || failServer)
+				return false;
+		} else if (HandshakeRule.getAllRules().stream().filter(t -> t.getSide() == GameSide.SERVER).count() != 0)
+			return false;
 
 		return true;
 	}

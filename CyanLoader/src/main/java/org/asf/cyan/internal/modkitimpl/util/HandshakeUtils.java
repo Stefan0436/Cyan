@@ -7,6 +7,8 @@ import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeLoaderPacket;
 
+import com.google.gson.JsonObject;
+
 import modkit.network.channels.ClientPacketProcessor;
 import modkit.network.channels.PacketChannel;
 import modkit.network.channels.ServerPacketProcessor;
@@ -63,5 +65,7 @@ public abstract class HandshakeUtils extends CyanComponent {
 
 	public abstract int validateLoaderProtocol(double loaderProtocol, double loaderMinProtocol,
 			double loaderMaxProtocol, double clientProtocol, double clientMinProtocol, double clientMaxProtocol);
+
+	public abstract boolean handhakeCheck(JsonObject cyanGetServerData);
 
 }

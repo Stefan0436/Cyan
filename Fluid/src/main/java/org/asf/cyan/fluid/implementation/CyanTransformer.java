@@ -268,7 +268,6 @@ public class CyanTransformer extends Transformer {
 			lineless = true;
 		}
 
-		int injectLine = -1;
 		int injectNodeIndex = -1;
 
 		AbstractInsnNode injectNode = null;
@@ -297,7 +296,6 @@ public class CyanTransformer extends Transformer {
 										while (pr != null && injectNode == null) {
 											if (pr instanceof LineNumberNode) {
 												injectNode = pr.getPrevious();
-												injectLine = ((LineNumberNode) pr).line;
 												injectNodeIndex = index;
 												break;
 											} else if (pr instanceof LabelNode) {
@@ -338,7 +336,6 @@ public class CyanTransformer extends Transformer {
 										while (pr != null && injectNode == null) {
 											if (pr instanceof LineNumberNode) {
 												injectNode = pr.getPrevious();
-												injectLine = ((LineNumberNode) pr).line;
 												injectNodeIndex = index;
 												break;
 											} else if (pr instanceof LabelNode) {
@@ -370,7 +367,6 @@ public class CyanTransformer extends Transformer {
 							offset--;
 						} else {
 							injectNode = tnode.getPrevious();
-							injectLine = ((LineNumberNode) tnode).line;
 							injectNodeIndex = index;
 							break;
 						}
@@ -401,7 +397,6 @@ public class CyanTransformer extends Transformer {
 							offset--;
 						} else {
 							injectNode = tnode.getPrevious();
-							injectLine = ((LineNumberNode) tnode).line;
 							injectNodeIndex = index;
 							break;
 						}
@@ -439,7 +434,6 @@ public class CyanTransformer extends Transformer {
 				- (actualParams.length + (Modifier.isStatic(transformer.access) ? 0 : 1));
 
 		int injectCodeStart = -1;
-		int injectCodeEnd = -1;
 
 		int addVarStart = 0;
 		if (injectNode != null) {
@@ -519,7 +513,6 @@ public class CyanTransformer extends Transformer {
 				}
 				if (nd.getPrevious() != null && nd.getPrevious() instanceof LineNumberNode) {
 					LineNumberNode line = (LineNumberNode) nd.getPrevious();
-					injectCodeEnd = line.line;
 					LabelNode label = line.start;
 					if (injectNode != null && transformer.localVariables != null && endLabel != null) {
 						for (LocalVariableNode var : transformer.localVariables) {
@@ -610,27 +603,9 @@ public class CyanTransformer extends Transformer {
 			}
 		}
 
-		int ind = 1;
-		int codeLength = injectCodeEnd - injectCodeStart;
-		if (injectCodeEnd == injectCodeStart)
-			codeLength = 1;
-
-		for (AbstractInsnNode node : target.instructions) {
-			if (node instanceof LineNumberNode) {
-				LineNumberNode lnNode = (LineNumberNode) node;
-				if (lnNode.line >= injectLine) {
-					lnNode.line += codeLength + 1;
-				}
-			}
-		}
-
-		ind = 1;
 		LabelNode mthStartNode = null;
 		for (AbstractInsnNode node : newNodes) {
-			if (node instanceof LineNumberNode) {
-				LineNumberNode lnNode = (LineNumberNode) node;
-				lnNode.line = injectLine + ind++;
-			} else if (node instanceof LabelNode && mthStartNode == null) {
+			if (node instanceof LabelNode && mthStartNode == null) {
 				mthStartNode = (LabelNode) node;
 			}
 		}

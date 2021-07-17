@@ -112,7 +112,7 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 				conn.send(new ClientIntentionPacket(ip, port, ConnectionProtocol.STATUS));
 				conn.send(new ServerboundStatusRequestPacket());
 				JsonObject response = handler.getResponse();
-				return Handshake.earlyClientHandshake(response, minecraft, c -> {
+				return Handshake.earlyClientHandshake(response, c -> {
 					new Thread(() -> {
 						minecraft.execute(() -> {
 							minecraft.setScreen(new DisconnectedScreen(parent, CommonComponents.CONNECT_FAILED, c));
@@ -182,8 +182,8 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 	@Override
 	public void disconnectColored1(ServerPacketProcessor processor, HandshakeFailedPacket response, double protocol) {
 		synchronized (processor.getPlayer().connection) {
-			processor.getPlayer().connection.disconnect(new TranslatableComponent(response.language, "\u00A76" + protocol,
-					"\u00A76" + response.displayVersion, "\u00A76" + response.version));
+			processor.getPlayer().connection.disconnect(new TranslatableComponent(response.language,
+					"\u00A76" + protocol, "\u00A76" + response.displayVersion, "\u00A76" + response.version));
 		}
 	}
 
@@ -259,6 +259,11 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 			return 1;
 		}
 		return 0;
+	}
+
+	@Override
+	public boolean handhakeCheck(JsonObject cyanGetServerData) {
+		return Handshake.serverListHandshake(cyanGetServerData);
 	}
 
 }

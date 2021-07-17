@@ -10,7 +10,6 @@ import org.asf.cyan.api.fluid.annotations.PlatformExclude;
 import org.asf.cyan.api.fluid.annotations.PlatformOnly;
 import org.asf.cyan.api.fluid.annotations.SideOnly;
 import org.asf.cyan.api.fluid.annotations.VersionRegex;
-import org.asf.cyan.api.internal.modkit.transformers._1_17.client.network.ServerDataAccessor;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.core.CyanInfo;
@@ -20,7 +19,7 @@ import org.asf.cyan.fluid.api.FluidTransformer;
 
 @FLUID_AUTODETECT
 public class CyanAPIComponent extends CyanComponent {
-	
+
 	private static String base = null;
 
 	protected static void addTransformers() {
@@ -31,7 +30,7 @@ public class CyanAPIComponent extends CyanComponent {
 			base = base.substring(0,
 					base.length() - ("/" + CyanAPIComponent.class.getTypeName().replace(".", "/") + ".class").length());
 		}
-		
+
 		info("Loading CyanAPI ModKit transformers...");
 		Version minecraft = Version.fromString(CyanInfo.getMinecraftVersion());
 		Version last = Version.fromString("0.0.0");
@@ -115,7 +114,7 @@ public class CyanAPIComponent extends CyanComponent {
 		}
 	}
 
-	public static InputStream getResourceAsStream(String path) {		
+	public static InputStream getResourceAsStream(String path) {
 		try {
 			if ((base.endsWith(".jar") || base.endsWith(".zip")) && !base.startsWith("jar:"))
 				base = "jar:" + base + "!";
@@ -123,10 +122,6 @@ public class CyanAPIComponent extends CyanComponent {
 		} catch (IOException e) {
 			return null;
 		}
-	}
-
-	public static void test(ServerDataAccessor acc) {
-		acc = acc;
 	}
 
 }

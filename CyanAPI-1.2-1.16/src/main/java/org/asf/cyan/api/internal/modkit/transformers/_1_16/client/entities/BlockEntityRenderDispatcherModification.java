@@ -8,8 +8,8 @@ import org.asf.cyan.fluid.api.transforming.InjectAt;
 import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
-import modkit.events.ingame.blocks.BlockEntityRendererRegistryEvent;
-import modkit.events.objects.ingame.blocks.BlockEntityRendererRegistryEventObject;
+import modkit.events.ingame.rendering.blockentity.BlockEntityRendererRegistryEvent;
+import modkit.events.objects.ingame.rendering.blockentity.BlockEntityRendererRegistryEventObject;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 @FluidTransformer
+@SuppressWarnings("deprecation")
 @TargetClass(target = "net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher")
 public class BlockEntityRenderDispatcherModification {
 

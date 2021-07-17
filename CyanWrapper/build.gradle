@@ -3012,11 +3012,15 @@ task updateServerData() {
     }
 	
 	if (newModloaderVersions.size() != 0) {
+        def addedloaders = []
 		for (String[] data : newModloaderVersions) {
 			def game = data[1]
 			def loader = data[0]
 			
 			def version = data[2]
+			if (addedloaders.contains(loader + "-" + version + "-" + game))
+                continue;
+            addedloaders.add(loader + "-" + version + "-" + game);
 			if (loader.equals("forge")) {
 				def mappings = forgeVersions.get(version)
 				def wrapperVer = info.libraryVersions.getOrDefault("CyanWrapper", project.version)

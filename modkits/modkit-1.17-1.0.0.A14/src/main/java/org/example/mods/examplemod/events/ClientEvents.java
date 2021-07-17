@@ -11,7 +11,7 @@ public class ClientEvents implements IEventListenerContainer {
 
 	// Called after the client verifies that both sides are running it
 	@SimpleEvent(ModKitClientHandshakeEvent.class)
-	public void handshake(ModKitConnectionEventObject event) {
+	public void handshake(ClientConnectionEventObject event) {
 		// You can manage mod communications with this event.
 		// Do not attempt to send mod packets to a non-cyan server and vice-versa.
 	}
