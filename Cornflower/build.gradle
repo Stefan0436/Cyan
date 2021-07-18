@@ -58,6 +58,9 @@ repositories {
 	mavenCentral()
 	maven { name = "AerialWorks"; url = "https://aerialworks.ddns.net/maven" }
 	maven { name = "Gradle"; url = "https://repo.gradle.org/artifactory/libs-releases-local" }
+	maven {
+		url 'https://libraries.minecraft.net/'
+	}
 }
 
 configurations.implementation.setCanBeResolved(true)

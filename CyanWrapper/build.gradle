@@ -2916,19 +2916,30 @@ task updateServerData() {
             completedVersions.add(game)
             if (major.split("\\.").length >= 3)
                 major = major.substring(0, major.lastIndexOf("."))
-                
+            
+			def pth = null
             boolean found = false				
             for (def f2 : files) {
-                if (f2.equals("modloaderbuild-" + game + ".gradle") || f2.equals("modloaderbuild-" + major + ".gradle")) {
+                if (f2.equals("modloaderbuild-" + game + ".gradle")) {
                     found = true
+					pth = f2
                     break;
                 }
             }
+			if (!found) {				
+				for (def f2 : files) {
+					if (f2.equals("modloaderbuild-" + major + ".gradle")) {
+						found = true
+						pth = f2
+						break;
+					}
+				}
+			}
             if (!found)
                 continue
 				
 			for (def f2 : files) {
-				if (f2.equals("modloaderbuild-" + game + ".gradle") || f2.equals("modloaderbuild-" + major + ".gradle")) {
+				if (f2.equals(pth)) {
 					project.ext.forgeVersions = [:]
 					project.ext.paperVersions = [:]
 					project.ext.fabricVersions = []
@@ -3108,12 +3119,23 @@ task updateServerData() {
 				completedVersions.add(game)
 				if (major.split("\\.").length >= 3)
 					major = major.substring(0, major.lastIndexOf("."))
-					
-				boolean found = false				
+				
+				def pth = null
+				boolean found = false
 				for (def f2 : files) {
-					if (f2.equals("modloaderbuild-" + game + ".gradle") || f2.equals("modloaderbuild-" + major + ".gradle")) {
+					if (f2.equals("modloaderbuild-" + game + ".gradle")) {
 						found = true
+						pth = f2
 						break;
+					}
+				}
+				if (!found) {
+					for (def f2 : files) {
+						if (f2.equals("modloaderbuild-" + major + ".gradle")) {
+							found = true
+							pth = f2
+							break;
+						}
 					}
 				}
 				if (!found)
@@ -3129,9 +3151,9 @@ task updateServerData() {
 				}
 				println " +-- Building " + game + " manifest..."		
 				first = false;
-				
+					
 				for (def f2 : files) {
-					if (f2.equals("modloaderbuild-" + game + ".gradle") || f2.equals("modloaderbuild-" + major + ".gradle")) {
+					if (f2.equals(pth)) {
 						project.ext.forgeVersions = [:]
 						project.ext.paperVersions = [:]
 						project.ext.fabricVersions = []
