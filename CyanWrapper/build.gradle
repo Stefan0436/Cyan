@@ -3001,7 +3001,7 @@ task updateServerData() {
 						return Version.fromString(t1).compareTo(Version.fromString(t2));
 					}).forEach { version ->
 						if (!info.forgeSupport.containsKey(game + "-" + version + "-testing"))
-							newModloaderVersions.add([ "forge", game, version ])
+							newModloaderVersions.add([ "forge", game, version, forgeVersions.get(version) ])
 					}
 					
 					fabricVersions.stream().sorted({ t1, t2 ->
@@ -3015,7 +3015,7 @@ task updateServerData() {
 						return Version.fromString(t1).compareTo(Version.fromString(t2));
 					}).forEach { version ->
 						if (!info.paperSupport.containsKey(game + "-" + version + "-testing"))
-							newModloaderVersions.add([ "paper", game, version ])
+							newModloaderVersions.add([ "paper", game, version, paperVersions.get(version) ])
 					}
 				}
 			}
@@ -3033,7 +3033,7 @@ task updateServerData() {
                 continue;
             addedloaders.add(loader + "-" + version + "-" + game);
 			if (loader.equals("forge")) {
-				def mappings = forgeVersions.get(version)
+				def mappings = data[3]
 				def wrapperVer = info.libraryVersions.getOrDefault("CyanWrapper", project.version)
 				wrapperVer = wrapperVer.substring(0, wrapperVer.lastIndexOf("-cyan-" + cyanversion))
 				
@@ -3056,7 +3056,7 @@ task updateServerData() {
 					archiveClassifier = "installer"
 				}
 			} else if (loader.equals("paper")) {
-				def mappings = paperVersions.get(version)
+				def mappings = data[3]
 				def wrapperVer = info.libraryVersions.getOrDefault("CyanWrapper", project.version)
 				wrapperVer = wrapperVer.substring(0, wrapperVer.lastIndexOf("-cyan-" + cyanversion))
 				
