@@ -53,7 +53,7 @@ public class CyanInfoProvider implements IVersionProvider, IVersionStatusProvide
 	}
 
 	@Override
-	public Version getModloaderVersion() {
+	public Version getLoaderVersion() {
 		if (ver == null)
 			ver = Version.fromString(CyanInfo.getCyanVersion());
 		return ver;

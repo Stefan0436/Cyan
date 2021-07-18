@@ -85,7 +85,7 @@ public abstract class Modloader extends CyanComponent {
 						componentCls = (Class<IModloaderComponent>) loader.loadClass(typeName);
 						e = null;
 						break;
-					} catch(ClassNotFoundException ex) {
+					} catch (ClassNotFoundException ex) {
 						if (e == null)
 							e = ex;
 					}
@@ -564,15 +564,15 @@ public abstract class Modloader extends CyanComponent {
 			for (IModloaderInfoProvider info : informationProviders) {
 				if (info instanceof IVersionProvider) {
 					versionProvider = (IVersionProvider) info;
-					return versionProvider.getModloaderVersion();
+					return versionProvider.getLoaderVersion();
 				}
 			}
 			noVersionProvider = true;
 		} else if (!noVersionProvider) {
-			return versionProvider.getModloaderVersion();
+			return versionProvider.getLoaderVersion();
 		}
 
-		return null;
+		return Version.fromString("none");
 	}
 
 	/**
@@ -954,6 +954,46 @@ public abstract class Modloader extends CyanComponent {
 	 */
 	public <T extends IBaseMod> T getModByClass(Class<T> modClass) {
 		return null;
+	}
+
+	/**
+	 * Retrieves the modloader owning the given mod id
+	 * 
+	 * @param id Mod id
+	 * @return Modloader instance or null
+	 */
+	public static Modloader getModOwner(String id) {
+		for (Modloader loader : Modloader.getAllModloaders()) {
+			for (IModManifest man : loader.getLoadedMods()) {
+				if (man.id().equals(id))
+					return loader;
+			}
+			for (IModManifest man : loader.getLoadedCoremods()) {
+				if (man.id().equals(id))
+					return loader;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Retrieves the modloader owning the given mod
+	 * 
+	 * @param mod Mod instance
+	 * @return Modloader instance or null
+	 */
+	public static <T extends IBaseMod> Modloader getModOwner(T mod) {
+		return getModOwner(mod.getManifest().id());
+	}
+
+	/**
+	 * Retrieves the modloader owning the given mod
+	 * 
+	 * @param mod Mod manifest
+	 * @return Modloader instance or null
+	 */
+	public static Modloader getModOwner(IModManifest mod) {
+		return getModOwner(mod.id());
 	}
 
 }

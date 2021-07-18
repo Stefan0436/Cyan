@@ -10,7 +10,7 @@ public class StringVersionProvider implements IVersionProvider {
 	}
 	
  	@Override
-	public Version getModloaderVersion() {
+	public Version getLoaderVersion() {
 		return version;
 	}
 

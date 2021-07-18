@@ -7,7 +7,7 @@ Cyan Update Changelog: 1.0.0 (Alpha 14):
  - ModKit Key Binding Registry Events (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2)
  - ModKit World Load Warning if mods have changed (CyanAPI ModKit 1.1)
  - ModKit ported to 1.17 and fully tested (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2)
- - Added scripts to create local installers - ModKit Threads API (CyanAPI ModKit 1.2, CyanAPI 1.0.0.A4, count of threads is displayed in crash logs) -- TODO
+ - Added scripts to create local installers - ModKit Threads API (CyanAPI ModKit 1.2, CyanAPI 1.0.0.A4, count of threads is displayed in crash logs)
  - MTK MSA Account Support (MTK A31) -- TODO
  - Added 1.17.1 support (CyanLoader 14-07-2021 14:13 CEST)
  - Implemented Mod.byId dependencies (Cornflower 1.0.0.A47)
@@ -15,6 +15,8 @@ Cyan Update Changelog: 1.0.0 (Alpha 14):
  - Implemented server list mod compatibility check (CyanAPI ModKit 1.2)
   
  // A15
+ - ModKit 1.17 Layer Support (CyanAPI ModKit 1.3) -- TODO
+ 
  - ModKit Entity API (CyanAPI ModKit 1.3) -- TODO
  - ModKit Block Entity API (CyanAPI ModKit 1.3) -- TODO
  

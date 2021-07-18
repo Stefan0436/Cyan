@@ -96,6 +96,7 @@ import org.asf.cyan.mods.internal.ModInfoCache;
 import org.asf.cyan.security.TrustContainer;
 
 import modkit.protocol.ModkitModloader;
+import modkit.threading.ThreadManager;
 import modkit.util.CheckString;
 
 /**
@@ -120,8 +121,6 @@ public class CyanLoader extends ModkitModloader
 		return "MODLOADER";
 	}
 
-	// TODO: Mod thread manager
-
 	public static void appendCyanInfo(BiConsumer<String, Object> setDetail1, BiConsumer<String, Object> setDetail2) {
 		int mods = Modloader.getModloader(CyanLoader.class).getLoadedCoremods().length;
 		if (mods != 0) {
@@ -144,18 +143,27 @@ public class CyanLoader extends ModkitModloader
 
 	public static String displayMod(IModManifest mod, boolean coremod) {
 		try {
-			// TODO: thread manager:
-			// suspended = not running queued instructions
-			// in-memory = not running at all, killed and queue has been stored for when the
-			// thread is re-opened
-			// repeating = re-running tasks
-
 			HashMap<String, Object> entries = new HashMap<String, Object>();
 			entries.put("Version", mod.version());
 			entries.put("Display Name", mod.displayName());
 			entries.put("Dependencies", (mod.dependencies().length + mod.optionalDependencies().length) + " ("
 					+ mod.optionalDependencies().length + " optional)");
-			entries.put("Mod Threads", "0 (0 suspended, 0 in memory, 0 repeating)");
+
+			long allThreads = 0;
+			long suspendedThreads = 0;
+			long savedThreads = 0;
+			long repeatingThreads = 0;
+			for (ThreadManager manager : ThreadManager.getThreadManagers(mod)) {
+				allThreads += manager.getThreadList().size();
+				allThreads += manager.getSuspendedThreadList().size();
+
+				savedThreads += manager.getSavedThreads().length;
+				repeatingThreads += manager.getThreadList().stream().filter(t -> t.isRepeating()).count();
+				suspendedThreads += manager.getSuspendedThreadList().size();
+
+			}
+			entries.put("Mod Threads", allThreads + " (" + suspendedThreads + " suspended, " + savedThreads
+					+ " in memory, " + repeatingThreads + " repeating)");
 
 			if (coremod) {
 				int transformers = 0;

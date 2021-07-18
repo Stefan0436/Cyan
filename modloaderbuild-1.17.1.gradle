@@ -5,6 +5,7 @@ fabric(
 )
 
 paper([
+    '112': 'bc127ea819df17e60ecb76e3cd0abec730422de1:PB_112',
     '110': 'b1cdc1274c3be30abf31d2178dd03a10c6d6965d:PB_110',
     '109': '7f89e963579c9692325f3a4647ca9be0c4e2b60a:PB_109',
     '108': 'a5acf367a37549ea3b7cb0eb8c0115973d0c58de:PB_108',
