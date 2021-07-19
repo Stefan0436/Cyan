@@ -89,8 +89,9 @@ public class OnlineServerEntryModification {
 
 				Component tooltip = new TranslatableComponent("modkit.incompatible.server.serverlist.tooltip",
 						(srv.has("simplename") ? srv.get("simplename").getAsString()
-								: (Modloader.getModloader(srv.get("name") == null ? srv.get("name").getAsString()
-										: Modloader.getModloader(srv.get("name").getAsString()).getSimpleName()))),
+								: (Modloader.getModloader(srv.get("name").getAsString()) == null
+										? srv.get("name").getAsString()
+										: Modloader.getModloader(srv.get("name").getAsString()).getSimpleName())),
 						acc.cyanGetServerData().get("modkit").getAsJsonObject().get("modloader").getAsJsonObject()
 								.get("root").getAsJsonObject().get("game.version").getAsString(),
 						serverData.name, serverData.protocol).withStyle(ChatFormatting.RED);
@@ -160,11 +161,12 @@ public class OnlineServerEntryModification {
 					lst.clear();
 					tooltip = new TranslatableComponent("modkit.incompatible.server.serverlist.tooltip.loaderissue",
 							(srv.has("simplename") ? srv.get("simplename").getAsString()
-									: (Modloader.getModloader(srv.get("name") == null ? srv.get("name").getAsString()
-											: Modloader.getModloader(srv.get("name").getAsString()).getSimpleName()))),
-							acc.cyanGetServerData().get("modkit").getAsJsonObject().get("modloader").getAsJsonObject()
-									.get("root").getAsJsonObject().get("game.version").getAsString(),
-							serverData.name, serverData.protocol).withStyle(ChatFormatting.RED);
+								: (Modloader.getModloader(srv.get("name").getAsString()) == null
+										? srv.get("name").getAsString()
+										: Modloader.getModloader(srv.get("name").getAsString()).getSimpleName())),
+						acc.cyanGetServerData().get("modkit").getAsJsonObject().get("modloader").getAsJsonObject()
+								.get("root").getAsJsonObject().get("game.version").getAsString(),
+						serverData.name, serverData.protocol).withStyle(ChatFormatting.RED);
 				}
 
 				return new Object[] { lst, tooltip };
@@ -182,7 +184,10 @@ public class OnlineServerEntryModification {
 				JsonObject srv = acc.cyanGetServerData().get("modkit").getAsJsonObject().get("modloader")
 						.getAsJsonObject().get("root").getAsJsonObject();
 				return new TranslatableComponent("modkit.incompatible.server.serverlist",
-						(srv.has("simplename") ? srv.get("simplename").getAsString() : srv.get("name").getAsString()),
+						(srv.has("simplename") ? srv.get("simplename").getAsString()
+								: (Modloader.getModloader(srv.get("name").getAsString()) == null
+										? srv.get("name").getAsString()
+										: Modloader.getModloader(srv.get("name").getAsString()).getSimpleName())),
 						acc.cyanGetServerData().get("modkit").getAsJsonObject().get("modloader").getAsJsonObject()
 								.get("root").getAsJsonObject().get("game.version").getAsString(),
 						serverData.name, serverData.protocol).withStyle(ChatFormatting.RED);

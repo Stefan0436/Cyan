@@ -33,7 +33,7 @@ def mod_group = project.group
 // Loader information
 def gameVersion = "1.16.5"
 def cyanVersion = "1.0.0.A14"
-def modkitVersion = "1.1"
+def modkitVersion = "1.2"
 
 // Mod information
 def mod_class_name = "ExampleMod"
@@ -80,7 +80,7 @@ dependencies {
 	// Selects game dependencies
 	implementation Game.forGame("Minecraft", gameVersion)
 
-	// Adds the ModKit API, Cyan 1.0.0.A14 provides specification 1.0 and 1.1
+	// Adds the ModKit API, Cyan 1.0.0.A14 provides specification 1.0, 1.1 and 1.2
 	implementation API.forAPI("ModKit", modkitVersion)
 	
 	// Mod dependencies:
@@ -104,10 +104,10 @@ platforms {
 	// MCP Platform, for forge support
 	MCP {
 		// YYYYMMDD.HHMMSS, should match upstream forge
-		version "20210115.111550"
+		version ""
 
 		// Forge version
-		modloader "36.1.62"
+		modloader "36.1.65"
 	}
 
 	// Intermediary Platform, for fabric support
@@ -141,7 +141,7 @@ platforms {
 		// Paper version:
 		//
 		// def paperVersion = getSupportedPaperVersion(gameVersion, cyanVersion)
-		modloader "782" // paperVersion
+		modloader "783" // paperVersion
 
 		//
 		// SPIGOT mappings version, it is best to only use mappings that have been given a green light by the Cyan team.

@@ -1,6 +1,7 @@
-stability 'testing'
+stability 'latest'
 
 forge(
+    '36.1.65',
     '36.1.62',
     '36.1.61',
     '36.1.58',
@@ -25,6 +26,7 @@ forge(
 )
 
 paper ([
+    '783': 'f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3',
     '782': 'f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3',
     '778': 'f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3',
     '777': 'f0a5ed1aeff8156ba4afa504e190c838dd1af50c:1_16_R3',

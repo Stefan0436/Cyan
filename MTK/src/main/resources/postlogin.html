@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<style>
+body {
+	margin: 0px;
+	background-color: rgb(211, 211, 211);	
+}
+
+#menubox {
+	border: 2px inset;
+	position: absolute;
+	height: 250px;
+	width: 500px;
+	top: calc(50% - (250px / 2));
+	left: calc(50% - (500px / 2));
+	background-color: rgb(154, 153, 150);
+}
+
+.text {
+	position: absolute;
+  	top: 50%;
+  	left: 50%;
+  	transform: translate(-50%, -50%);
+	text-align: center;
+}
+</style>
+</head>
+<body>
+<div id="menubox">
+<a style="font-size: 20px">%title%</a>
+<hr style="border-top: 2px solid; margin: 0px" />
+<div class="text">
+	<a id="message">%message1%</a><br/>
+	<a id="subtitle" style="top: 58%">%message2%</a>
+</div>
+</div>
+</body>
+</html>

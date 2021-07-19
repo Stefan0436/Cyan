@@ -1,10 +1,12 @@
-stability 'testing'
+stability 'latest'
 
 fabric(
     '0.11.6'
 )
 
 paper([
+    '119': 'f25facb302f6b1dd508c3a2e103f8892e145b638:PB_119',
+    '116': 'fc478727d5722e97d0e1516c535cbb8554de1a18:PB_116',
     '112': 'bc127ea819df17e60ecb76e3cd0abec730422de1:PB_112',
     '110': 'b1cdc1274c3be30abf31d2178dd03a10c6d6965d:PB_110',
     '109': '7f89e963579c9692325f3a4647ca9be0c4e2b60a:PB_109',

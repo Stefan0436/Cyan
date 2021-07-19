@@ -33,7 +33,7 @@ def mod_group = project.group
 // Loader information
 def gameVersion = "1.17"
 def cyanVersion = "1.0.0.A14"
-def modkitVersion = "1.1"
+def modkitVersion = "1.2"
 
 // Mod information
 def mod_class_name = "ExampleCoremod"
@@ -80,7 +80,7 @@ dependencies {
 	// Selects game dependencies
 	implementation Game.forGame("Minecraft", gameVersion)
 
-	// Adds the ModKit API, Cyan 1.0.0.A14 provides specification 1.0 and 1.1
+	// Adds the ModKit API, Cyan 1.0.0.A14 provides specification 1.0, 1.1 and 1.2
 	implementation API.forAPI("ModKit", modkitVersion)
 	
 	// Mod dependencies:

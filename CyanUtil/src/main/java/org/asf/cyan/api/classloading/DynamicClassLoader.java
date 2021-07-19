@@ -339,31 +339,39 @@ public class DynamicClassLoader extends URLClassLoader {
 	}
 
 	Class<?> doLoadClass(String name, boolean resolve) throws ClassNotFoundException {
-		if (!allowSelfToLoad) {
+		if (!allowSelfToLoad || classRestrictions.stream().anyMatch(t -> t.apply(name))) {
 			if (getParent() == null)
 				return ClassLoader.getSystemClassLoader().loadClass(name);
 			else
 				return getParent().loadClass(name);
 		}
 
-		if (!allowSelfToDefine || classRestrictions.stream().anyMatch(t -> t.apply(name))) {
+		if (!allowSelfToDefine) {
 			return super.loadClass(name, resolve);
 		}
 
 		String path = name.replaceAll("\\.", "/") + ".class";
 		for (URL u : getURLs()) {
 			try {
-				if (u.toString().endsWith(".jar") || u.toString().endsWith(".zip")) {
-					try {
-						u = new URL("jar:" + u.toString() + "!/" + path);
-					} catch (MalformedURLException e) {
+				if (!u.toString().endsWith(".class")) {
+					if (u.toString().endsWith(".jar") || u.toString().endsWith(".zip")) {
+						try {
+							u = new URL("jar:" + u.toString() + "!/" + path);
+						} catch (MalformedURLException e) {
+						}
+					} else {
+						try {
+							u = new URL(u + "/" + path);
+						} catch (MalformedURLException e) {
+						}
 					}
 				} else {
-					try {
-						u = new URL(u + "/" + path);
-					} catch (MalformedURLException e) {
+					if (!u.toString().endsWith("/" + path)) {
+						continue;
 					}
 				}
+				if (name.startsWith("java."))
+					return ClassLoader.getSystemClassLoader().loadClass(name);
 
 				BufferedInputStream strm = new BufferedInputStream(u.openStream());
 				byte[] data = strm.readAllBytes();
@@ -402,27 +410,34 @@ public class DynamicClassLoader extends URLClassLoader {
 			cl = Thread.currentThread().getContextClassLoader();
 		if (cl == this)
 			cl = ClassLoader.getSystemClassLoader();
-		URL cSource = caller.getProtectionDomain().getCodeSource().getLocation();
-		String prefix = cSource.toString();
-		if (rewrittenResources.containsKey(caller.getTypeName() + ".source")) {
-			cSource = new File(rewrittenResources.get(caller.getTypeName() + ".source")).toURI().toURL();
-			prefix = cSource.toString();
+		
+		try {
+			URL cSource = caller.getProtectionDomain().getCodeSource().getLocation();
+			String prefix = cSource.toString();
+			if (rewrittenResources.containsKey(caller.getTypeName() + ".source")) {
+				cSource = new File(rewrittenResources.get(caller.getTypeName() + ".source")).toURI().toURL();
+				prefix = cSource.toString();
+			}
+			if (cSource.getProtocol().equals("jar")) {
+				prefix = prefix.substring(0, prefix.lastIndexOf("!"));
+				prefix = prefix + "!/";
+			} else if (cSource.toString().endsWith("jar")) {
+				prefix = "jar:" + prefix + "!/";
+			} else if (!prefix.endsWith("/"))
+				prefix += "/";
+			prefix += name;
+			return new URL(prefix);
+		} catch (NullPointerException e) {
+			return null;
 		}
-		if (cSource.getProtocol().equals("jar")) {
-			prefix = prefix.substring(0, prefix.lastIndexOf("!"));
-			prefix = prefix + "!/";
-		} else if (cSource.toString().endsWith("jar")) {
-			prefix = "jar:" + prefix + "!/";
-		} else if (!prefix.endsWith("/"))
-			prefix += "/";
-		prefix += name;
-		return new URL(prefix);
 	}
 
 	@Override
 	public URL getResource(String name) {
 		try {
 			URL resource = getResourceURL(name);
+			if (resource == null)
+				return null;
 			try {
 				resource.openStream().close();
 			} catch (IOException ex) {

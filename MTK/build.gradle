@@ -2,6 +2,7 @@ plugins {
     id 'java'
 	id 'maven-publish'
 }
+
 apply from: '../asf.mvn.publish.gradle'
 apply from: '../config.gradle'
 apply plugin: 'eclipse'
@@ -57,6 +58,30 @@ dependencies {
 	implementation 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.13'
 	implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: '5.1.2.Final'
 	
+	implementation group: 'org.openjfx', name: 'javafx-swing', version: '17-ea+15', classifier: 'linux'
+	implementation group: 'org.openjfx', name: 'javafx-swing', version: '17-ea+15', classifier: 'win'
+	implementation group: 'org.openjfx', name: 'javafx-swing', version: '17-ea+15', classifier: 'mac'
+	
+	implementation group: 'org.openjfx', name: 'javafx-web', version: '17-ea+15', classifier: 'linux'
+	implementation group: 'org.openjfx', name: 'javafx-web', version: '17-ea+15', classifier: 'win'
+	implementation group: 'org.openjfx', name: 'javafx-web', version: '17-ea+15', classifier: 'mac'
+	
+	implementation group: 'org.openjfx', name: 'javafx-controls', version: '17-ea+15', classifier: 'linux'
+	implementation group: 'org.openjfx', name: 'javafx-controls', version: '17-ea+15', classifier: 'win'
+	implementation group: 'org.openjfx', name: 'javafx-controls', version: '17-ea+15', classifier: 'mac'
+	
+	implementation group: 'org.openjfx', name: 'javafx-base', version: '17-ea+15', classifier: 'linux'
+	implementation group: 'org.openjfx', name: 'javafx-base', version: '17-ea+15', classifier: 'win'
+	implementation group: 'org.openjfx', name: 'javafx-base', version: '17-ea+15', classifier: 'mac'
+	
+	implementation group: 'org.openjfx', name: 'javafx-graphics', version: '17-ea+15', classifier: 'linux'
+	implementation group: 'org.openjfx', name: 'javafx-graphics', version: '17-ea+15', classifier: 'win'
+	implementation group: 'org.openjfx', name: 'javafx-graphics', version: '17-ea+15', classifier: 'mac'
+	
+	implementation group: 'org.openjfx', name: 'javafx-media', version: '17-ea+15', classifier: 'linux'
+	implementation group: 'org.openjfx', name: 'javafx-media', version: '17-ea+15', classifier: 'win'
+	implementation group: 'org.openjfx', name: 'javafx-media', version: '17-ea+15', classifier: 'mac'
+		
     testImplementation 'junit:junit:4.12'
 }
 

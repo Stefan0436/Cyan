@@ -79,8 +79,6 @@ public class CyanIDEWrapper {
 				} else {
 					System.exit(1);
 				}
-
-				Files.writeString(login.toPath(), storage.toString());
 			} else {
 				storage.readAll(Files.readString(login.toPath()));
 			}
@@ -90,7 +88,7 @@ public class CyanIDEWrapper {
 				if (storage.type != MinecraftAccountType.MSA) {
 					account = AuthenticationInfo.authenticate(storage.login, storage.type);
 				} else {
-					// TODO: MSA
+					account = AuthenticationInfo.authenticate(storage.type);
 				}
 			} catch (IOException ex) {
 				if (storage.type != MinecraftAccountType.MSA) {
@@ -107,8 +105,6 @@ public class CyanIDEWrapper {
 						storage.login = window.getAccount().getUserName();
 						account = window.getAccount();
 					}
-				} else {
-					// TODO: MSA
 				}
 			}
 			if (account == null)

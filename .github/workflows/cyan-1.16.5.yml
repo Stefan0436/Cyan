@@ -5,9 +5,9 @@ name: Build (1.16.5)
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, ModKit-1.2 ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, ModKit-1.2 ]
 
 jobs:
   build:
@@ -24,7 +24,7 @@ jobs:
     - name: Set up JDK 16
       uses: actions/setup-java@v2
       with:
-        java-version: '16'
+        java-version: '15'
         distribution: 'adopt'
     - name: Setup git user email
       run: git config --global user.email "autobuild@localhost"
@@ -37,7 +37,7 @@ jobs:
     - name: Grant execute permissions to workflow build script
       run: chmod +x buildworkflow.sh
     - name: Setup LiteCyan libraries for build
-      run: ./gradlew -c settings.lite.gradle installLiteLibs
+      run: ./gradlew -c settings.lite.gradle installLiteLibs -PoverrideGameVersion=1.16.5
     - name: Build for 1.16.5
       run: ./buildworkflow.sh 1.16.5
     - name: Build for 1.16.5 with Paper support

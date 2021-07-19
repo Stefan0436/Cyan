@@ -19,13 +19,16 @@ import java.util.zip.ZipOutputStream;
 
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.config.serializing.internal.Splitter;
+import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.bytecode.enums.ComparisonMethod;
 import org.asf.cyan.fluid.bytecode.sources.IClassSourceProvider;
 import org.asf.cyan.fluid.bytecode.sources.LoaderClassSourceProvider;
 import org.asf.cyan.fluid.bytecode.sources.URLClassSourceProvider;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -171,6 +174,7 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 		reader.accept(node, 0);
 
 		fixLocalVariableNames(node);
+		removeNullable(node);
 		node.name = name;
 
 		ClassEntry entry = new ClassEntry();
@@ -227,6 +231,7 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 		reader.accept(node, 0);
 
 		fixLocalVariableNames(node);
+		removeNullable(node);
 		node.name = name;
 
 		ClassEntry entry = new ClassEntry();
@@ -269,6 +274,7 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 				ClassReader reader = new ClassReader(strm);
 				reader.accept(node, 0);
 				fixLocalVariableNames(node);
+				removeNullable(node);
 				strm.close();
 
 				ClassEntry entry = new ClassEntry();
@@ -535,7 +541,15 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 				int varIndex = 0;
 				for (LocalVariableNode var : meth.localVariables) {
 					if (var.name != null && !var.name.matches("^[A-Za-z0-9_$]+$")) {
-						var.name = "var" + varIndex;
+						String nm = "var" + var.index;
+						while (true) {
+							String nameF = nm;
+							if (meth.localVariables.stream().anyMatch(t -> t.name.equals(nameF)))
+								nm = "var" + var.index + "x" + varIndex++;
+							else
+								break;
+						}
+						var.name = nm;
 					}
 					varIndex++;
 				}
@@ -560,10 +574,122 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 				ClassReader reader = new ClassReader(bytecode);
 				reader.accept(cls.node, 0);
 				fixLocalVariableNames(cls.node);
+				removeNullable(cls.node);
 				return cls.node;
 			}
 		}
 		throw new ClassNotFoundException("Could not find class " + name.replaceAll("/", "."));
+	}
+
+	private void removeNullable(ClassNode node) {
+		if (node.visibleAnnotations != null) {
+			for (AnnotationNode nd : new ArrayList<AnnotationNode>(node.visibleAnnotations)) {
+				if (Fluid.parseDescriptor(nd.desc).equals("javax.annotation.Nullable"))
+					node.visibleAnnotations.remove(nd);
+			}
+		}
+		if (node.invisibleAnnotations != null) {
+			for (AnnotationNode nd : new ArrayList<AnnotationNode>(node.invisibleAnnotations)) {
+				if (Fluid.parseDescriptor(nd.desc).equals("javax.annotation.Nullable"))
+					node.invisibleAnnotations.remove(nd);
+			}
+		}
+		if (node.visibleTypeAnnotations != null) {
+			for (AnnotationNode nd : new ArrayList<AnnotationNode>(node.visibleTypeAnnotations)) {
+				if (Fluid.parseDescriptor(nd.desc).equals("javax.annotation.Nullable"))
+					node.visibleAnnotations.remove(nd);
+			}
+		}
+		if (node.invisibleTypeAnnotations != null) {
+			for (AnnotationNode nd : new ArrayList<AnnotationNode>(node.invisibleTypeAnnotations)) {
+				if (Fluid.parseDescriptor(nd.desc).equals("javax.annotation.Nullable"))
+					node.invisibleAnnotations.remove(nd);
+			}
+		}
+
+		for (FieldNode nd : node.fields) {
+			if (nd.visibleAnnotations != null) {
+				for (AnnotationNode anno : new ArrayList<AnnotationNode>(nd.visibleAnnotations)) {
+					if (Fluid.parseDescriptor(anno.desc).equals("javax.annotation.Nullable"))
+						nd.visibleAnnotations.remove(anno);
+				}
+			}
+			if (nd.invisibleAnnotations != null) {
+				for (AnnotationNode anno : new ArrayList<AnnotationNode>(nd.invisibleAnnotations)) {
+					if (Fluid.parseDescriptor(anno.desc).equals("javax.annotation.Nullable"))
+						nd.invisibleAnnotations.remove(anno);
+				}
+			}
+			if (nd.visibleTypeAnnotations != null) {
+				for (AnnotationNode anno : new ArrayList<AnnotationNode>(nd.visibleTypeAnnotations)) {
+					if (Fluid.parseDescriptor(anno.desc).equals("javax.annotation.Nullable"))
+						nd.visibleAnnotations.remove(anno);
+				}
+			}
+			if (nd.invisibleTypeAnnotations != null) {
+				for (AnnotationNode anno : new ArrayList<AnnotationNode>(nd.invisibleTypeAnnotations)) {
+					if (Fluid.parseDescriptor(anno.desc).equals("javax.annotation.Nullable"))
+						nd.invisibleAnnotations.remove(anno);
+				}
+			}
+		}
+
+		for (MethodNode nd : node.methods) {
+			if (nd.visibleParameterAnnotations != null) {
+				Stream.of(nd.visibleParameterAnnotations).forEach(t -> {
+					if (t != null)
+						for (AnnotationNode anno : new ArrayList<AnnotationNode>(t)) {
+							if (Fluid.parseDescriptor(anno.desc).equals("javax.annotation.Nullable"))
+								t.remove(anno);
+						}
+				});
+			}
+			if (nd.invisibleParameterAnnotations != null) {
+				Stream.of(nd.invisibleParameterAnnotations).forEach(t -> {
+					if (t != null)
+						for (AnnotationNode anno : new ArrayList<AnnotationNode>(t)) {
+							if (Fluid.parseDescriptor(anno.desc).equals("javax.annotation.Nullable"))
+								t.remove(anno);
+						}
+				});
+			}
+			if (nd.visibleLocalVariableAnnotations != null) {
+				for (AnnotationNode anno : new ArrayList<AnnotationNode>(nd.visibleLocalVariableAnnotations)) {
+					if (Fluid.parseDescriptor(anno.desc).equals("javax.annotation.Nullable"))
+						nd.visibleLocalVariableAnnotations.remove(anno);
+				}
+			}
+			if (nd.invisibleLocalVariableAnnotations != null) {
+				for (AnnotationNode anno : new ArrayList<AnnotationNode>(nd.invisibleLocalVariableAnnotations)) {
+					if (Fluid.parseDescriptor(anno.desc).equals("javax.annotation.Nullable"))
+						nd.invisibleLocalVariableAnnotations.remove(anno);
+				}
+			}
+			if (nd.visibleAnnotations != null) {
+				for (AnnotationNode anno : new ArrayList<AnnotationNode>(nd.visibleAnnotations)) {
+					if (Fluid.parseDescriptor(anno.desc).equals("javax.annotation.Nullable"))
+						nd.visibleAnnotations.remove(anno);
+				}
+			}
+			if (nd.invisibleAnnotations != null) {
+				for (AnnotationNode anno : new ArrayList<AnnotationNode>(nd.invisibleAnnotations)) {
+					if (Fluid.parseDescriptor(anno.desc).equals("javax.annotation.Nullable"))
+						nd.invisibleAnnotations.remove(anno);
+				}
+			}
+			if (nd.visibleTypeAnnotations != null) {
+				for (AnnotationNode anno : new ArrayList<AnnotationNode>(nd.visibleTypeAnnotations)) {
+					if (Fluid.parseDescriptor(anno.desc).equals("javax.annotation.Nullable"))
+						nd.visibleAnnotations.remove(anno);
+				}
+			}
+			if (nd.invisibleTypeAnnotations != null) {
+				for (AnnotationNode anno : new ArrayList<AnnotationNode>(nd.invisibleTypeAnnotations)) {
+					if (Fluid.parseDescriptor(anno.desc).equals("javax.annotation.Nullable"))
+						nd.invisibleAnnotations.remove(anno);
+				}
+			}
+		}
 	}
 
 	/**
@@ -584,6 +710,7 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 				ClassReader reader = new ClassReader(input);
 				reader.accept(cls.node, 0);
 				fixLocalVariableNames(cls.node);
+				removeNullable(cls.node);
 				return cls.node;
 			}
 		}

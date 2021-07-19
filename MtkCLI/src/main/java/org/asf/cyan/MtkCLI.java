@@ -233,6 +233,7 @@ public class MtkCLI extends CyanComponent {
 					}
 				}
 				if (username == null) {
+					info("Authenticating...");
 					AuthenticationInfo account = AuthenticationInfo.authenticate(MinecraftAccountType.MOJANG);
 					if (account != null) {
 						StringBuilder accountFile = new StringBuilder();
@@ -253,6 +254,7 @@ public class MtkCLI extends CyanComponent {
 					try {
 						account = AuthenticationInfo.authenticate(username, MinecraftAccountType.MOJANG);
 					} catch (IOException e) {
+						info("Authenticating...");
 						YggdrasilAuthentication.init();
 						YggdrasilAuthenticationWindow window = new YggdrasilAuthenticationWindow(username,
 								"Login no longer valid.");
@@ -272,6 +274,24 @@ public class MtkCLI extends CyanComponent {
 						System.exit(1);
 						return;
 					}
+				}
+			} else if (args[0].equals("msalogin") && args.length >= 2) {
+				File authFile = new File(args[1]);
+				info("Authenticating...");
+				AuthenticationInfo account = AuthenticationInfo.authenticate(MinecraftAccountType.MSA);
+				if (account != null) {
+					StringBuilder accountFile = new StringBuilder();
+					accountFile.append(account.getUserName()).append("\n");
+					accountFile.append(account.getPlayerName()).append("\n");
+					accountFile.append(account.getAccessToken()).append("\n");
+					accountFile.append(account.getUUID()).append("\n");
+					accountFile.append(account.getAccountType().toString()).append("\n");
+					Files.write(authFile.toPath(), accountFile.toString().getBytes());
+					info("Saved authentication file.");
+					return;
+				} else {
+					System.exit(1);
+					return;
 				}
 			} else if (args[0].equals("deobfuscate") && args.length >= 3 && new File(args[1]).exists()
 					&& args[1].endsWith(".jar")) {
@@ -525,6 +545,8 @@ public class MtkCLI extends CyanComponent {
 				" - manifest <version>                                                                      - download game version manifests");
 		System.err.println(
 				" - yggdrasil <authfile>                                                                    - authenticate a mojang user");
+		System.err.println(
+				" - msalogin <authfile>                                                                     - authenticate a microsoft user");
 		System.err.println(
 				" - runclient <version> <gamedir> <authfile>                                                - runs the client");
 		System.err.println();

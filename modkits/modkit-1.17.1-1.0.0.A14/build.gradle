@@ -33,7 +33,7 @@ def mod_group = project.group
 // Loader information
 def gameVersion = "1.17.1"
 def cyanVersion = "1.0.0.A14"
-def modkitVersion = "1.1"
+def modkitVersion = "1.2"
 
 // Mod information
 def mod_class_name = "ExampleMod"
@@ -80,7 +80,7 @@ dependencies {
 	// Selects game dependencies
 	implementation Game.forGame("Minecraft", gameVersion)
 
-	// Adds the ModKit API, Cyan 1.0.0.A14 provides specification 1.0 and 1.1
+	// Adds the ModKit API, Cyan 1.0.0.A14 provides specification 1.0, 1.1 and 1.2
 	implementation API.forAPI("ModKit", modkitVersion)
 	
 	// Mod dependencies:
@@ -141,7 +141,7 @@ platforms {
 		// Paper version:
 		//
 		// def paperVersion = getSupportedPaperVersion(gameVersion, cyanVersion)
-		modloader "112" // paperVersion
+		modloader "119" // paperVersion
 
 		//
 		// Paper mappings version, it is best to only use mappings that have been given a green light by the Cyan team.
@@ -157,7 +157,7 @@ platforms {
 		//
 		//
 		// Commit hash and paper build for mappings version (commit:PB_build)
-		version "bc127ea819df17e60ecb76e3cd0abec730422de1:PB_112" // getSpigotMappingsByPaperVersion(gameVersion, paperVersion)
+		version "f25facb302f6b1dd508c3a2e103f8892e145b638:PB_119" // getSpigotMappingsByPaperVersion(gameVersion, paperVersion)
 	}
 }
 

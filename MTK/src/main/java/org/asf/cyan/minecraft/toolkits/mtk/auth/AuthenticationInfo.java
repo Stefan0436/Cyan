@@ -41,7 +41,8 @@ public class AuthenticationInfo {
 		return info;
 	}
 
-	public static AuthenticationInfo create(String userName, String playerName, String token, UUID uuid, MinecraftAccountType type) {
+	public static AuthenticationInfo create(String userName, String playerName, String token, UUID uuid,
+			MinecraftAccountType type) {
 		AuthenticationInfo info = new AuthenticationInfo();
 		info.playerName = playerName;
 		info.accessToken = token;
@@ -86,8 +87,7 @@ public class AuthenticationInfo {
 	}
 
 	/**
-	 * Authenticate through an interactive interface (legacy and mojang only for
-	 * now)
+	 * Authenticate through an interactive interface
 	 * 
 	 * @param type Account type
 	 * @return New AuthenticationInfo
@@ -95,7 +95,7 @@ public class AuthenticationInfo {
 	 */
 	public static AuthenticationInfo authenticate(MinecraftAccountType type) throws IOException {
 		if (type.equals(MinecraftAccountType.MSA))
-			throw new UnsupportedOperationException("Microsoft accounts are not yet supported."); // FIXME
+			return MsaAuthentication.newAuth().getAccount();
 
 		YggdrasilAuthentication.init();
 		YggdrasilAuthenticationWindow window = new YggdrasilAuthenticationWindow();

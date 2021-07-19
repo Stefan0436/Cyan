@@ -6,12 +6,15 @@ import modkit.events.objects.ingame.rendering.layers.EntityModelLayerRegistryEve
 
 /**
  * 
- * Event called to register custom entity layers (ignored for pre-1.17 clients)
+ * Event called to register custom entity layers (ignored for pre-1.17 clients,
+ * <b>NOT YET IMPLEMENTED, MODKIT 1.3</b>)
  * 
  * @author Sky Swimmer - AerialWorks Software Foundation
- * @since 1.2
+ * @deprecated Upcoming feature, unused
+ * @since 1.3
  *
  */
+@Deprecated
 public class EntityModelLayerRegistryEvent extends AbstractExtendedEvent<EntityModelLayerRegistryEventObject> {
 
 	private static EntityModelLayerRegistryEvent implementation;

@@ -194,7 +194,63 @@ public class CyanUpdateInfo extends Configuration<CyanUpdateInfo> {
 	public HashMap<String, String> spigotMappings = new HashMap<String, String>();
 
 	@Exclude
-	public boolean __$stMC;
+	public static boolean __$stMC;
+	
+	public CyanUpdateInfo() {
+		
+	}
+	
+	public void merge(CyanUpdateInfo info) {
+		if ((latestStableVersion == null || latestStableVersion.isEmpty()) && info.latestStableVersion != null) {
+			latestStableVersion = info.latestStableVersion
+		}
+		if ((latestAlphaVersion == null || latestAlphaVersion.isEmpty()) && info.latestAlphaVersion != null) {
+			latestAlphaVersion = info.latestAlphaVersion
+		}
+		if ((latestBetaVersion == null || latestBetaVersion.isEmpty()) && info.latestBetaVersion != null) {
+			latestBetaVersion = info.latestBetaVersion
+		}
+		if ((latestPreviewVersion == null || latestPreviewVersion.isEmpty()) && info.latestPreviewVersion != null) {
+			latestPreviewVersion = info.latestPreviewVersion
+		}
+		
+		if (info.longTermSupportVersions != null && info.longTermSupportVersions.length != 0) {
+			String[] versions = new String[(longTermSupportVersions != null ? longTermSupportVersions.length : 0) + info.longTermSupportVersions.length]
+			int i = 0;
+			if (longTermSupportVersions != null) {
+				for (String ver : longTermSupportVersions) {
+					versions[i++] = ver
+				}
+			}
+			for (String ver : info.longTermSupportVersions) {
+				versions[i++] = ver
+			}
+		}
+		if (info.requiredUpgrade != null && info.requiredUpgrade.length != 0) {
+			String[] versions = new String[(requiredUpgrade != null ? requiredUpgrade.length : 0) + info.requiredUpgrade.length]
+			int i = 0;
+			if (requiredUpgrade != null) {
+				for (String ver : requiredUpgrade) {
+					versions[i++] = ver
+				}
+			}
+			for (String ver : info.requiredUpgrade) {
+				versions[i++] = ver
+			}
+		}
+		
+		changelogs.putAll(info.changelogs)
+		allVersions.putAll(info.allVersions)
+		byGameVersions.putAll(info.byGameVersions)
+		forgeSupport.putAll(info.forgeSupport)
+		fabricSupport.putAll(info.fabricSupport)
+		paperSupport.putAll(info.paperSupport)
+		paperByMappings.putAll(info.paperByMappings)
+		spigotStableMappings.putAll(info.spigotStableMappings)
+		spigotLatestMappings.putAll(info.spigotLatestMappings)
+		spigotTestingMappings.putAll(info.spigotTestingMappings)
+		spigotMappings.putAll(info.spigotMappings)
+	}
 	
 	public CyanUpdateInfo(String content) {
 		readAll(content);
@@ -1381,6 +1437,15 @@ processResources {
 		latestalpha = info.latestAlphaVersion
 		latestbeta = info.latestBetaVersion
 		latestpreview = info.latestPreviewVersion
+		
+		if (project.hasProperty("mergeVersionManifests")) {
+			for (String man : project.getProperty("mergeVersionManifests").split(File.pathSeparator)) {
+                if (new File(man).exists()) {
+                    CyanUpdateInfo info2 = new CyanUpdateInfo(new String(Files.readAllBytes(Path.of(man))))
+                    info.merge(info2)
+				}
+			}
+		}
 
 		for (String key : info.allVersions.keySet()) {
 			def val = info.allVersions.get(key)
@@ -1658,7 +1723,7 @@ processResources {
 			}
 		}
 		
-		forgeVersions.keySet().stream().sorted({ String t1, String t2 ->
+		forgeVersions.keySet().stream().sorted().sorted({ String t1, String t2 ->
 			return Version.fromString(t1).compareTo(Version.fromString(t2));	
 		}).forEach { version ->
 			forgeSupportVersions.put("testing-forge", minecraft + "-" + version)
@@ -1667,7 +1732,7 @@ processResources {
 			forgeSupportVersions.put(minecraft + "-" + version + "-testing", cyanversion);
 		}
 		
-		fabricVersions.stream().sorted({ t1, t2 ->
+		fabricVersions.stream().sorted().sorted({ t1, t2 ->
 			return Version.fromString(t1).compareTo(Version.fromString(t2));	
 		}).forEach { version ->
 			fabricSupportVersions.put("testing-fabric", minecraft + "-" + version)
@@ -1676,7 +1741,7 @@ processResources {
 			fabricSupportVersions.put(minecraft + "-" + version + "-testing", cyanversion);
 		}
 		
-	    paperVersions.keySet().stream().sorted({ t1, t2 ->
+	    paperVersions.keySet().stream().sorted().sorted({ t1, t2 ->
 			return Version.fromString(t1).compareTo(Version.fromString(t2));	
 		}).forEach { version ->
 			paperSupportVersions.put("testing-paper", minecraft + "-" + version)
@@ -1694,7 +1759,7 @@ processResources {
 		spigotMappingVersions.put("cyan-" + minecraft + "-" + cyanversion, mappingsVersion)
 	}
 	
-    paperVersions.keySet().stream().sorted({ t1, t2 ->
+    paperVersions.keySet().stream().sorted().sorted({ t1, t2 ->
 		return Version.fromString(t1).compareTo(Version.fromString(t2));	
 	}).forEach { version ->
 		def mappings = paperVersions.get(version)
@@ -1737,7 +1802,7 @@ processResources {
 			forgeSupportVersions.put(minecraft + "-" + version + "-latest", cyanversion);
 		}
 		
-		fabricVersions.stream().sorted({ t1, t2 ->
+		fabricVersions.stream().sorted().sorted({ t1, t2 ->
 			return -Version.fromString(t1).compareTo(Version.fromString(t2));
 		}).forEach { version ->
 			fabricSupportVersions.put("latest-fabric", minecraft + "-" + version)
@@ -1746,7 +1811,7 @@ processResources {
 			fabricSupportVersions.put(minecraft + "-" + version + "-latest", cyanversion);
 		}
 		
-		paperVersions.keySet().stream().sorted({ t1, t2 ->
+		paperVersions.keySet().stream().sorted().sorted({ t1, t2 ->
 			return -Version.fromString(t1).compareTo(Version.fromString(t2));
 		}).forEach { version ->
 			paperSupportVersions.put("latest-paper", minecraft + "-" + version)
@@ -1813,7 +1878,7 @@ processResources {
 			forgeSupportVersions.put(minecraft + "-" + version + "-latest", cyanversion);
 		}
 		
-		fabricVersions.stream().sorted({ t1, t2 ->
+		fabricVersions.stream().sorted().sorted({ t1, t2 ->
 			return -Version.fromString(t1).compareTo(Version.fromString(t2));
 		}).forEach { version ->
 			fabricSupportVersions.put("stable-fabric", minecraft + "-" + version)
@@ -1827,7 +1892,7 @@ processResources {
 			fabricSupportVersions.put(minecraft + "-" + version + "-latest", cyanversion);
 		}
 		
-		paperVersions.keySet().stream().sorted({ t1, t2 ->
+		paperVersions.keySet().stream().sorted().sorted({ t1, t2 ->
 			return -Version.fromString(t1).compareTo(Version.fromString(t2));
 		}).forEach { version ->
 			paperSupportVersions.put("stable-paper", minecraft + "-" + version)
@@ -1870,14 +1935,14 @@ processResources {
 				forgeSupportVersions.put(minecraft + "-" + version + "-lts-"+cyanversion, cyanversion);
 			}
 			
-			fabricVersions.stream().sorted({ t1, t2 ->
+			fabricVersions.stream().sorted().sorted({ t1, t2 ->
 				return -Version.fromString(t1).compareTo(Version.fromString(t2));
 			}).forEach { version ->
 				fabricSupportVersions.put("lts-"+cyanversion+"-fabric-" + minecraft, version);
 				fabricSupportVersions.put(minecraft + "-" + version + "-lts-"+cyanversion, cyanversion);
 			}
 			
-			paperVersions.keySet().stream().sorted({ t1, t2 ->
+			paperVersions.keySet().stream().sorted().sorted({ t1, t2 ->
 				return -Version.fromString(t1).compareTo(Version.fromString(t2));
 			}).forEach { version ->
 				paperSupportVersions.put("lts-"+cyanversion+"-paper-" + minecraft, version);
@@ -3004,14 +3069,14 @@ task updateServerData() {
 							newModloaderVersions.add([ "forge", game, version, forgeVersions.get(version) ])
 					}
 					
-					fabricVersions.stream().sorted({ t1, t2 ->
+					fabricVersions.stream().sorted().sorted({ t1, t2 ->
 						return Version.fromString(t1).compareTo(Version.fromString(t2));
 					}).forEach { version ->
 						if (!info.fabricSupport.containsKey(game + "-" + version + "-testing"))
 							newModloaderVersions.add([ "fabric", game, version ])
 					}
 					
-					paperVersions.keySet().stream().sorted({ t1, t2 ->
+					paperVersions.keySet().stream().sorted().sorted({ t1, t2 ->
 						return Version.fromString(t1).compareTo(Version.fromString(t2));
 					}).forEach { version ->
 						if (!info.paperSupport.containsKey(game + "-" + version + "-testing"))
@@ -3239,7 +3304,7 @@ task updateServerData() {
 							info.forgeSupport.put(game + "-" + version + "-testing", cyanversion)
 						}
 						
-						fabricVersions.stream().sorted({ t1, t2 ->
+						fabricVersions.stream().sorted().sorted({ t1, t2 ->
 							return Version.fromString(t1).compareTo(Version.fromString(t2));	
 						}).forEach { version ->
 							if (ext.stabilityValue.equals("stable")) {
@@ -3264,7 +3329,7 @@ task updateServerData() {
 							info.fabricSupport.put(game + "-" + version + "-testing", cyanversion);
 						}
 						
-					    paperVersions.keySet().stream().sorted({ t1, t2 ->
+					    paperVersions.keySet().stream().sorted().sorted({ t1, t2 ->
 							return Version.fromString(t1).compareTo(Version.fromString(t2));	
 						}).forEach { version ->
 							if (ext.stabilityValue.equals("stable")) {
