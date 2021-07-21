@@ -91,7 +91,7 @@ import javax.swing.JCheckBox;
 
 public class Installer extends CyanComponent {
 
-	private static final String version = "3.8";
+	private static final String version = "3.9";
 
 	private static Installer impl;
 
@@ -338,7 +338,7 @@ public class Installer extends CyanComponent {
 				MinecraftVersionType.UNKNOWN, manifest, OffsetDateTime.now());
 
 		logger.info("Downloading modloader version manifest...");
-		MinecraftInstallationToolkit.saveVersionManifest(info);
+		MinecraftInstallationToolkit.saveVersionManifest(info, true);
 
 		logger.info("Finding vanilla version...");
 		MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(project.game);

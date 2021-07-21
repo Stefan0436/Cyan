@@ -180,7 +180,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 	 */
 	public static VanillaMappings downloadVanillaMappings(MinecraftVersionInfo version, GameSide side)
 			throws IOException {
-		MinecraftInstallationToolkit.downloadVersionManifest(version);
+		MinecraftInstallationToolkit.downloadVersionManifest(version, false);
 		if (!MinecraftToolkit.hasMinecraftDownloadConnection())
 			throw new IOException("No network connection");
 

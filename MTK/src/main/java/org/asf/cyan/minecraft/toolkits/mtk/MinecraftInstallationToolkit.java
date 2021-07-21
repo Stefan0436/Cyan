@@ -1334,7 +1334,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 			output.delete();
 		}
 
-		downloadVersionManifest(version);
+		downloadVersionManifest(version, false);
 
 		info("Resolving " + side + " jar of minecraft version " + version.getVersion() + "...");
 		JsonObject manifest = versionCache.get(version.getVersion()).deepCopy();
@@ -1371,7 +1371,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 * @throws IOException If the manifest does not exist and cannot be downloaded
 	 */
 	public static JsonObject getVersionManifest(MinecraftVersionInfo version) throws IOException {
-		downloadVersionManifest(version);
+		downloadVersionManifest(version, false);
 		return versionCache.get(version.getVersion());
 	}
 
@@ -1383,7 +1383,19 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 * @throws IOException If saving fails
 	 */
 	public static void saveVersionManifest(MinecraftVersionInfo version) throws IOException {
-		downloadVersionManifest(version);
+		saveVersionManifest(version, false);
+	}
+
+	/**
+	 * Save a version manifest, downloads if not done before, saved manifests are
+	 * loaded on MTK initialization
+	 * 
+	 * @param version   Minecraft version
+	 * @param overwrite True to download existing files, false othetwise
+	 * @throws IOException If saving fails
+	 */
+	public static void saveVersionManifest(MinecraftVersionInfo version, boolean overwrite) throws IOException {
+		downloadVersionManifest(version, overwrite);
 
 		trace("CREATE manifests directory IF NONEXISTENT, caller: " + CallTrace.traceCallName());
 		File manifestDir = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/manifests");
@@ -1398,9 +1410,23 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		Files.writeString(versionFile.toPath(), versionCache.get(version.getVersion()).toString());
 	}
 
-	static void downloadVersionManifest(MinecraftVersionInfo version) throws IOException {
-		if (versionCache.containsKey(version.getVersion()))
-			return;
+	static void downloadVersionManifest(MinecraftVersionInfo version, boolean overwrite) throws IOException {
+		if (versionCache.containsKey(version.getVersion())) {
+			if (!MinecraftToolkit.hasMinecraftDownloadConnection() || !overwrite)
+				return;
+
+			URL u = version.getManifestURL();
+			info("Downloading version manifest from " + u + "...");
+			trace("OPEN server connection, CREATE URL STREAM, caller: " + CallTrace.traceCallName());
+			InputStreamReader reader = new InputStreamReader(u.openStream());
+			info("Parsing manifest to json...");
+			trace("PARSE json from stream, caller: " + CallTrace.traceCallName());
+			JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
+			trace("CLOSE server stream, caller: " + CallTrace.traceCallName());
+			reader.close();
+
+			versionCache.put(version.getVersion(), json);
+		}
 		if (!MinecraftToolkit.hasMinecraftDownloadConnection())
 			throw new IOException("No network connection");
 
