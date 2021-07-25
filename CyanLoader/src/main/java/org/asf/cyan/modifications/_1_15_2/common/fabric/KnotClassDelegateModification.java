@@ -18,7 +18,7 @@ public class KnotClassDelegateModification {
 
 	@InjectAt(location = InjectLocation.HEAD)
 	public byte[] getRawClassByteArray(String name, boolean skipOriginalLoader) throws IOException {
-		InputStream cyanOverrideStream = CyanLoader.getFabricClassStream(name);
+		InputStream cyanOverrideStream = CyanLoader.getClassStream(name);
 		if (cyanOverrideStream != null) {
 			byte[] data = cyanOverrideStream.readAllBytes();
 			cyanOverrideStream.close();

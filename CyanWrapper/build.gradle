@@ -103,6 +103,7 @@ ext.stability = { t ->
 	ext.stabilityValue = t;
 }
 
+def forgeUniversalURL = "https://maven.minecraftforge.net/net/minecraftforge/forge/%game%-%forgeversion%/forge-%game%-%forgeversion%-universal.jar"
 ext.forge = { ... t ->
 	for (def ver : t) {
 		File forgeInstaller = new File(cyanCache, "forge-" + minecraft + "-" + ver + "-installer.jar")
@@ -126,20 +127,54 @@ ext.forge = { ... t ->
 	
 		println "Searching for MCP version in forge jar..."
 		String mcpVersion = "";
-		ZipFile installerZip = new ZipFile(forgeInstaller);
-		ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + minecraft + "-" + ver + "/forge-" + minecraft + "-" + ver + ".jar");
-		ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
-		while (forgeStrm.available() != 0) {
-			ZipEntry entry = forgeStrm.getNextEntry();
-			if (entry.getName().equals("META-INF/MANIFEST.MF")) {
-				Manifest manifest = new Manifest(forgeStrm);
-				Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
-				mcpVersion = MCP.getValue("Implementation-Version");
-				break;
-			}
+		if (Version.fromString(majorversion).isGreaterOrEqualTo(Version.fromString("1.17"))) {
+            url = new URL(forgeUniversalURL.replaceAll("\\%game\\%", minecraft).replaceAll("\\%forgeversion\\%", ver))
+            File forgeJar = new File(cyanCache, "forge-" + minecraft + "-" + ver + "-universal.jar")
+            File forgeJarDownloadMarker = new File(cyanCache, forgeJar.getName()+".lck")
+            if (!forgeJar.exists() || forgeJarDownloadMarker.exists()) {
+                if (!forgeJar.getParentFile().exists())
+                    forgeJar.getParentFile().mkdirs()
+                if (forgeJarDownloadMarker.exists()) forgeJarDownloadMarker.delete()
+                forgeJarDownloadMarker.createNewFile()
+        
+                println "Downloading forge jar to cache..."
+                if (forgeJar.exists()) forgeJar.delete()
+                FileOutputStream strm = new FileOutputStream(forgeJar);
+                InputStream inp = url.openStream()
+                inp.transferTo(strm)
+                strm.close()
+                inp.close()
+                forgeJarDownloadMarker.delete()
+            }
+            FileInputStream forgeJarStrm = new FileInputStream(forgeJar);
+            ZipInputStream forgeStrm = new ZipInputStream(forgeJarStrm);
+            while (forgeStrm.available() != 0) {
+                ZipEntry entry = forgeStrm.getNextEntry();
+                if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+                    Manifest manifest = new Manifest(forgeStrm);
+                    Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+                    mcpVersion = MCP.getValue("Implementation-Version");
+                    break;
+                }
+            }
+            forgeStrm.close();
+            forgeJarStrm.close();
+		} else {
+            ZipFile installerZip = new ZipFile(forgeInstaller);
+            ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + minecraft + "-" + ver + "/forge-" + minecraft + "-" + ver + ".jar");
+            ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
+            while (forgeStrm.available() != 0) {
+                ZipEntry entry = forgeStrm.getNextEntry();
+                if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+                    Manifest manifest = new Manifest(forgeStrm);
+                    Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+                    mcpVersion = MCP.getValue("Implementation-Version");
+                    break;
+                }
+            }
+            forgeStrm.close();
+            installerZip.close();
 		}
-		forgeStrm.close();
-		installerZip.close();
 		forgeVersions.put(ver, mcpVersion);
 	}
 }
@@ -337,20 +372,54 @@ if (modloader.startsWith("forge-")) {
 
     println "Searching for MCP version in forge jar..."
     String mcpVersion = "";
-    ZipFile installerZip = new ZipFile(forgeInstaller);
-    ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + minecraft + "-" + forgeversion + "/forge-" + minecraft + "-" + forgeversion + ".jar");
-    ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
-    while (forgeStrm.available() != 0) {
-        ZipEntry entry = forgeStrm.getNextEntry();
-        if (entry.getName().equals("META-INF/MANIFEST.MF")) {
-            Manifest manifest = new Manifest(forgeStrm);
-            Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
-            mcpVersion = MCP.getValue("Implementation-Version");
-            break;
+    if (Version.fromString(majorversion).isGreaterOrEqualTo(Version.fromString("1.17"))) {
+        url = new URL(forgeUniversalURL.replaceAll("\\%game\\%", minecraft).replaceAll("\\%forgeversion\\%", forgeversion))
+        File forgeJar = new File(cyanCache, "forge-" + minecraft + "-" + forgeversion + "-universal.jar")
+        File forgeJarDownloadMarker = new File(cyanCache, forgeJar.getName()+".lck")
+        if (!forgeJar.exists() || forgeJarDownloadMarker.exists()) {
+            if (!forgeJar.getParentFile().exists())
+                forgeJar.getParentFile().mkdirs()
+            if (forgeJarDownloadMarker.exists()) forgeJarDownloadMarker.delete()
+            forgeJarDownloadMarker.createNewFile()
+    
+            println "Downloading forge jar to cache..."
+            if (forgeJar.exists()) forgeJar.delete()
+            FileOutputStream strm = new FileOutputStream(forgeJar);
+            InputStream inp = url.openStream()
+            inp.transferTo(strm)
+            strm.close()
+            inp.close()
+            forgeJarDownloadMarker.delete()
         }
+        FileInputStream forgeJarStrm = new FileInputStream(forgeJar);
+        ZipInputStream forgeStrm = new ZipInputStream(forgeJarStrm);
+        while (forgeStrm.available() != 0) {
+            ZipEntry entry = forgeStrm.getNextEntry();
+            if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+                Manifest manifest = new Manifest(forgeStrm);
+                Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+                mcpVersion = MCP.getValue("Implementation-Version");
+                break;
+            }
+        }
+        forgeStrm.close();
+        forgeJarStrm.close();
+    } else {
+        ZipFile installerZip = new ZipFile(forgeInstaller);
+        ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + minecraft + "-" + forgeversion + "/forge-" + minecraft + "-" + forgeversion + ".jar");
+        ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
+        while (forgeStrm.available() != 0) {
+            ZipEntry entry = forgeStrm.getNextEntry();
+            if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+                Manifest manifest = new Manifest(forgeStrm);
+                Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+                mcpVersion = MCP.getValue("Implementation-Version");
+                break;
+            }
+        }
+        forgeStrm.close();
+        installerZip.close();
     }
-    forgeStrm.close();
-    installerZip.close();
     if (!project.hasProperty("overrideMappingsVersion"))
         mappingsVersion = mcpVersion;
 }
@@ -1112,7 +1181,7 @@ if (!modloader.equals("")) {
 			Files.move(new File(cyanCache, "forge-"+minecraft+"-"+forgeversion+"-server.tmp").toPath(), serverFolder.toPath())
 		}
 		println "Processing forge server dependencies..."
-		HashMap<String, File> filecollection = scanFiles(new File(serverFolder, "libraries"), "libraries/", "jar", "jar.cache")
+		HashMap<String, File> filecollection = scanFiles(new File(serverFolder, "libraries"), "libraries/", "jar", "zip", "jar.cache", "txt")
 		filecollection.forEach { str, f ->
 			String[] information = str.split("/")
 			String group = ""
@@ -1158,14 +1227,17 @@ if (!modloader.equals("")) {
 			}
 
 			if (!newer) {
-				String[] libs = filecollection.keySet().stream().filter({it.startsWith("libraries/"+groupstr+name+"/"+version+"/"+name+"-"+version)}).toArray({new String[it]})
+				String[] libs = filecollection.keySet().stream().filter({it.startsWith("libraries/"+groupstr+name+"/"+version+"/")}).toArray({new String[it]})
 
-				if (!libnames.stream().anyMatch({ t -> t.equals(group+"."+name) })) {
+				if (!libnames.stream().anyMatch({ t -> t.equals(group+":"+name) })) {
 					for (String lib : libs)  {
-						if (lib.endsWith(".jar")) cyanclasspath += " "+lib
+						if (lib.endsWith(".jar") && !(lib.contains("net/minecraft/server") && (lib.contains("-slim.jar")
+							 || lib.contains("-srg.jar"))) && !(lib.contains("net/minecraftforge/forge") 
+							 && lib.contains("-server.jar")))
+							cyanclasspath += " "+lib
 						filepaths.put(lib, filecollection.get(lib).toPath())
 					}
-					libnames.add(group+"."+name)
+					libnames.add(group+":"+name)
 				}
 			}
 		}
@@ -1375,6 +1447,15 @@ println ""
 
 processResources {
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+	
+	def forgeargs = ""
+	if (modloader.startsWith("forge-") && Version.fromString(majorversion).isGreaterOrEqualTo(Version.fromString("1.17"))) {
+		forgeargs = ''',
+			
+			"--add-exports=java.base/sun.security.util=ALL-UNNAMED",
+			"--add-opens=java.base/java.util.jar=ALL-UNNAMED",
+			"--add-exports=cpw.mods.bootstraplauncher/cpw.mods.bootstraplauncher=ALL-UNNAMED"''';
+	}
 
 	def logSha = "Unknown"
 	def logSize = "0"
@@ -2085,6 +2166,7 @@ processResources {
 
 	allcyan += "    ${cyanversion}> '${cyantype}'"
 
+	inputs.property "forgeargs", forgeargs
 	inputs.property "mappingsVersion", mappingsVersion
 	inputs.property "paperByMappings", "${paperByMappings}"
 	inputs.property "spigotStableMappings", "${spigotStableMappings}"
@@ -2275,7 +2357,8 @@ processResources {
 			"spigotStableMappings": "${spigotStableMappings}",
 			"spigotLatestMappings": "${spigotLatestMappings}",
 			"spigotTestingMappings": "${spigotTestingMappings}",
-			"spigotMappings": "${spigotMappings}"
+			"spigotMappings": "${spigotMappings}",
+			"forgeargs": "${forgeargs}"
 		]
 
 		for (def proj : project(":").childProjects) {
@@ -2519,6 +2602,7 @@ task serverJar (type: Jar, dependsOn: build) {
 				"Implementation-Vendor" :"${authorname}",
 				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
 				"Launcher-Agent-Class": "org.asf.cyan.fluid.FluidAgent",
+				"Premain-Class": "org.asf.cyan.fluid.FluidAgent",
 				"Class-Path": cyanclasspath,
 				"Boot-Class-Path": bootclasspath,
 				"Main-Class": project.group+"."+classWrapperServer,
@@ -2698,6 +2782,7 @@ ext.cyanManifest = { wrapperServer, wrapperClient, profile, icon, modloader, mod
     	
     	serverJarManifest([
     		'Launcher-Agent-Class': 'org.asf.cyan.fluid.FluidAgent',
+			'Premain-Class': 'org.asf.cyan.fluid.FluidAgent',
     		'Multi-Release': 'true',
     		
     		'Specification-Title': 'CyanWrapper',
@@ -3035,20 +3120,53 @@ task updateServerData() {
 							}
 						
 							String mcpVersion = "";
-							ZipFile installerZip = new ZipFile(forgeInstaller);
-							ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + game + "-" + ver + "/forge-" + game + "-" + ver + ".jar");
-							ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
-							while (forgeStrm.available() != 0) {
-								ZipEntry entry = forgeStrm.getNextEntry();
-								if (entry.getName().equals("META-INF/MANIFEST.MF")) {
-									Manifest manifest = new Manifest(forgeStrm);
-									Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
-									mcpVersion = MCP.getValue("Implementation-Version");
-									break;
-								}
-							}
-							forgeStrm.close();
-							installerZip.close();
+                            if (Version.fromString(major).isGreaterOrEqualTo(Version.fromString("1.17"))) {
+                                url = new URL(forgeUniversalURL.replaceAll("\\%game\\%", game).replaceAll("\\%forgeversion\\%", ver))
+                                File forgeJar = new File(cyanCache, "forge-" + game + "-" + ver + "-universal.jar")
+                                File forgeJarDownloadMarker = new File(cyanCache, forgeJar.getName()+".lck")
+                                if (!forgeJar.exists() || forgeJarDownloadMarker.exists()) {
+                                    if (!forgeJar.getParentFile().exists())
+                                        forgeJar.getParentFile().mkdirs()
+                                    if (forgeJarDownloadMarker.exists()) forgeJarDownloadMarker.delete()
+                                    forgeJarDownloadMarker.createNewFile()
+                            
+                                    if (forgeJar.exists()) forgeJar.delete()
+                                    FileOutputStream strm = new FileOutputStream(forgeJar);
+                                    InputStream inp = url.openStream()
+                                    inp.transferTo(strm)
+                                    strm.close()
+                                    inp.close()
+                                    forgeJarDownloadMarker.delete()
+                                }
+                                FileInputStream forgeJarStrm = new FileInputStream(forgeJar);
+                                ZipInputStream forgeStrm = new ZipInputStream(forgeJarStrm);
+                                while (forgeStrm.available() != 0) {
+                                    ZipEntry entry = forgeStrm.getNextEntry();
+                                    if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+                                        Manifest manifest = new Manifest(forgeStrm);
+                                        Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+                                        mcpVersion = MCP.getValue("Implementation-Version");
+                                        break;
+                                    }
+                                }
+                                forgeStrm.close();
+                                forgeJarStrm.close();
+                            } else {
+                                ZipFile installerZip = new ZipFile(forgeInstaller);
+                                ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + game + "-" + ver + "/forge-" + game + "-" + ver + ".jar");
+                                ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
+                                while (forgeStrm.available() != 0) {
+                                    ZipEntry entry = forgeStrm.getNextEntry();
+                                    if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+                                        Manifest manifest = new Manifest(forgeStrm);
+                                        Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+                                        mcpVersion = MCP.getValue("Implementation-Version");
+                                        break;
+                                    }
+                                }
+                                forgeStrm.close();
+                                installerZip.close();
+                            }
 							forgeVersions.put(ver, mcpVersion);
 						}
 					}
@@ -3229,45 +3347,76 @@ task updateServerData() {
 						}
 						
 						project.ext.forge = { ... t ->
-							for (def ver : t) {
-								File forgeInstaller = new File(cyanCache, "forge-" + game + "-" + ver + "-installer.jar")
-								File downloadmarker = new File(cyanCache, forgeInstaller.getName()+".lck")
-								URL url = new URL(forgeurltemplate.replaceAll("\\%game\\%", game).replaceAll("\\%forgeversion\\%", ver))
-								if (!forgeInstaller.exists() || downloadmarker.exists()) {
-									if (!forgeInstaller.getParentFile().exists())
-										forgeInstaller.getParentFile().mkdirs()
-									if (downloadmarker.exists()) downloadmarker.delete()
-									downloadmarker.createNewFile()
-							
-									println " +-- Downloading forge installer to cache..."
-									if (forgeInstaller.exists()) forgeInstaller.delete()
-									FileOutputStream strm = new FileOutputStream(forgeInstaller);
-									InputStream inp = url.openStream()
-									inp.transferTo(strm)
-									strm.close()
-									inp.close()
-									downloadmarker.delete()
-								}
-							
-								println " +-- Searching for MCP version in forge jar..."
-								String mcpVersion = "";
-								ZipFile installerZip = new ZipFile(forgeInstaller);
-								ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + game + "-" + ver + "/forge-" + game + "-" + ver + ".jar");
-								ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
-								while (forgeStrm.available() != 0) {
-									ZipEntry entry = forgeStrm.getNextEntry();
-									if (entry.getName().equals("META-INF/MANIFEST.MF")) {
-										Manifest manifest = new Manifest(forgeStrm);
-										Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
-										mcpVersion = MCP.getValue("Implementation-Version");
-										break;
-									}
-								}
-								forgeStrm.close();
-								installerZip.close();
-								forgeVersions.put(ver, mcpVersion);
-							}
-						}
+                            for (def ver : t) {
+                                File forgeInstaller = new File(cyanCache, "forge-" + game + "-" + ver + "-installer.jar")
+                                File downloadmarker = new File(cyanCache, forgeInstaller.getName()+".lck")
+                                URL url = new URL(forgeurltemplate.replaceAll("\\%game\\%", game).replaceAll("\\%forgeversion\\%", ver))
+                                if (!forgeInstaller.exists() || downloadmarker.exists()) {
+                                    if (!forgeInstaller.getParentFile().exists())
+                                        forgeInstaller.getParentFile().mkdirs()
+                                    if (downloadmarker.exists()) downloadmarker.delete()
+                                    downloadmarker.createNewFile()
+                            
+                                    if (forgeInstaller.exists()) forgeInstaller.delete()
+                                    FileOutputStream strm = new FileOutputStream(forgeInstaller);
+                                    InputStream inp = url.openStream()
+                                    inp.transferTo(strm)
+                                    strm.close()
+                                    inp.close()
+                                    downloadmarker.delete()
+                                }
+                            
+                                String mcpVersion = "";
+                                if (Version.fromString(major).isGreaterOrEqualTo(Version.fromString("1.17"))) {
+                                    url = new URL(forgeUniversalURL.replaceAll("\\%game\\%", game).replaceAll("\\%forgeversion\\%", ver))
+                                    File forgeJar = new File(cyanCache, "forge-" + game + "-" + ver + "-universal.jar")
+                                    File forgeJarDownloadMarker = new File(cyanCache, forgeJar.getName()+".lck")
+                                    if (!forgeJar.exists() || forgeJarDownloadMarker.exists()) {
+                                        if (!forgeJar.getParentFile().exists())
+                                            forgeJar.getParentFile().mkdirs()
+                                        if (forgeJarDownloadMarker.exists()) forgeJarDownloadMarker.delete()
+                                        forgeJarDownloadMarker.createNewFile()
+                                
+                                        if (forgeJar.exists()) forgeJar.delete()
+                                        FileOutputStream strm = new FileOutputStream(forgeJar);
+                                        InputStream inp = url.openStream()
+                                        inp.transferTo(strm)
+                                        strm.close()
+                                        inp.close()
+                                        forgeJarDownloadMarker.delete()
+                                    }
+                                    FileInputStream forgeJarStrm = new FileInputStream(forgeJar);
+                                    ZipInputStream forgeStrm = new ZipInputStream(forgeJarStrm);
+                                    while (forgeStrm.available() != 0) {
+                                        ZipEntry entry = forgeStrm.getNextEntry();
+                                        if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+                                            Manifest manifest = new Manifest(forgeStrm);
+                                            Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+                                            mcpVersion = MCP.getValue("Implementation-Version");
+                                            break;
+                                        }
+                                    }
+                                    forgeStrm.close();
+                                    forgeJarStrm.close();
+                                } else {
+                                    ZipFile installerZip = new ZipFile(forgeInstaller);
+                                    ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + game + "-" + ver + "/forge-" + game + "-" + ver + ".jar");
+                                    ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
+                                    while (forgeStrm.available() != 0) {
+                                        ZipEntry entry = forgeStrm.getNextEntry();
+                                        if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+                                            Manifest manifest = new Manifest(forgeStrm);
+                                            Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+                                            mcpVersion = MCP.getValue("Implementation-Version");
+                                            break;
+                                        }
+                                    }
+                                    forgeStrm.close();
+                                    installerZip.close();
+                                }
+                                forgeVersions.put(ver, mcpVersion);
+                            }
+                        }
 						
 						project.ext.paper = { Map t ->
 							paperVersions.putAll(t);

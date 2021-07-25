@@ -27,7 +27,6 @@ import org.asf.cyan.fluid.remapping.Mapping;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.commons.ClassRemapper;
-import org.objectweb.asm.commons.MethodRemapper;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -503,6 +502,18 @@ public class Fluid extends CyanComponent {
 		return new FluidClassRemapper(mp);
 	}
 
+	private static class MapDat {
+		public MapDat(ClassNode cls, Mapping<?> root, Mapping<?> clsMapping) {
+			this.cls = cls;
+			this.root = root;
+			this.clsMapping = clsMapping;
+		}
+
+		public ClassNode cls;
+		public Mapping<?> root;
+		public Mapping<?> clsMapping;
+	}
+
 	/**
 	 * Create an deobfuscation target map
 	 * 
@@ -515,84 +526,137 @@ public class Fluid extends CyanComponent {
 			Mapping<?>... mappings) {
 		DeobfuscationTargetMap mp = new DeobfuscationTargetMap();
 
-		int i = 0;
+		int threads = Integer.getInteger("fluid.mapping.threads.count", Runtime.getRuntime().availableProcessors());
+		ArrayList<MapDat[]> batches = new ArrayList<MapDat[]>();
+
+		info("FLUID uses a multi-threaded mapping system, " + threads + " threads are being used.");
+
+		int done = 0;
+		MapDat[] currentBatch = new MapDat[threads];
 		for (ClassNode cls : classes) {
 			for (Mapping<?> root : mappings) {
 				for (Mapping<?> clsMapping : root.mappings) {
 					if (clsMapping.mappingType == MAPTYPE.CLASS
 							&& clsMapping.obfuscated.equals(cls.name.replace("/", "."))) {
-						DeobfuscationTarget target = new DeobfuscationTarget();
-
-						target.jvmName = clsMapping.name.replaceAll("\\.", "/");
-						target.outputName = clsMapping.name;
-
-						for (MethodNode method : cls.methods) {
-							String str = "";
-							String desc = method.desc;
-							String[] types = Fluid.parseMultipleDescriptors(
-									desc.substring(1).substring(0, desc.substring(1).lastIndexOf(")")));
-
-							for (int index = 0; index < types.length; index++) {
-								String type = types[index];
-								String tSuffix = "";
-								if (type.contains("[]")) {
-									tSuffix = type.substring(type.indexOf("["));
-									type = type.substring(0, type.indexOf("["));
-								}
-								Mapping<?> mp2 = root.mapClassToMapping(type, t -> true, true);
-								if (mp2 != null)
-									types[index] = mp2.name + tSuffix;
-
-								if (str.equals(""))
-									str = type + tSuffix;
-								else
-									str += ", " + type + tSuffix;
-							}
-
-							for (Mapping<?> methodMap : clsMapping.mappings) {
-								if (methodMap.mappingType.equals(MAPTYPE.METHOD)
-										&& methodMap.obfuscated.equals(method.name)
-										&& Arrays.equals(types, methodMap.argumentTypes)) {
-									target.methods.put(methodMap.obfuscated + " " + method.desc, methodMap.name);
-									break;
-								}
-							}
+						currentBatch[done++] = new MapDat(cls, root, clsMapping);
+						if (done == threads) {
+							batches.add(currentBatch);
+							currentBatch = new MapDat[threads];
+							done = 0;
 						}
-
-						for (FieldNode field : cls.fields) {
-							for (Mapping<?> fieldMap : clsMapping.mappings) {
-								if (fieldMap.mappingType.equals(MAPTYPE.PROPERTY)
-										&& fieldMap.obfuscated.equals(field.name)) {
-									target.fields.put(fieldMap.obfuscated + " " + field.desc, fieldMap.name);
-									break;
-								}
-							}
-						}
-
-						if (cls.superName != null
-								&& !cls.superName.equals(Object.class.getTypeName().replaceAll("\\.", "/"))) {
-							try {
-								mapSuperAndInterfaces(root, mp, target, pool.getClassNode(cls.superName), pool);
-							} catch (ClassNotFoundException e) {
-							}
-						}
-						for (String inter : cls.interfaces) {
-							try {
-								mapSuperAndInterfaces(root, mp, target, pool.getClassNode(inter), pool);
-							} catch (ClassNotFoundException e) {
-							}
-						}
-
-						mp.put(clsMapping.obfuscated.replaceAll("\\.", "/"), target);
-						if (i % 100 == 0) {
-							info("Mapped " + i + "/" + classes.length + " classes.");
-						}
-						i++;
-						break;
 					}
 				}
 			}
 		}
+		if (done != threads) {
+			batches.add(currentBatch);
+		}
+
+		done = 0;
+		int i = 0;
+		for (MapDat[] batch : batches) {
+			int thc = 1;
+			Thread[] threadInstances = new Thread[threads];
+			for (MapDat dat : batch) {
+				if (dat == null) {
+					continue;
+				}
+
+				Thread th = new Thread(() -> {
+					Mapping<?> root = dat.root;
+					Mapping<?> clsMapping = dat.clsMapping;
+					ClassNode cls = dat.cls;
+
+					DeobfuscationTarget target = new DeobfuscationTarget();
+					target.jvmName = clsMapping.name.replaceAll("\\.", "/");
+					target.outputName = clsMapping.name;
+
+					for (MethodNode method : cls.methods) {
+						String str = "";
+						String desc = method.desc;
+						String[] types = Fluid.parseMultipleDescriptors(
+								desc.substring(1).substring(0, desc.substring(1).lastIndexOf(")")));
+
+						for (int index = 0; index < types.length; index++) {
+							String type = types[index];
+							String tSuffix = "";
+							if (type.contains("[]")) {
+								tSuffix = type.substring(type.indexOf("["));
+								type = type.substring(0, type.indexOf("["));
+							}
+							Mapping<?> mp2 = root.mapClassToMapping(type, t -> true, true);
+							if (mp2 != null)
+								types[index] = mp2.name + tSuffix;
+
+							if (str.equals(""))
+								str = type + tSuffix;
+							else
+								str += ", " + type + tSuffix;
+						}
+
+						for (Mapping<?> methodMap : clsMapping.mappings) {
+							if (methodMap.mappingType.equals(MAPTYPE.METHOD) && methodMap.obfuscated.equals(method.name)
+									&& Arrays.equals(types, methodMap.argumentTypes)) {
+								target.methods.put(methodMap.obfuscated + " " + method.desc, methodMap.name);
+								break;
+							}
+						}
+					}
+
+					for (FieldNode field : cls.fields) {
+						for (Mapping<?> fieldMap : clsMapping.mappings) {
+							if (fieldMap.mappingType.equals(MAPTYPE.PROPERTY)
+									&& fieldMap.obfuscated.equals(field.name)) {
+								target.fields.put(fieldMap.obfuscated + " " + field.desc, fieldMap.name);
+								break;
+							}
+						}
+					}
+
+					if (cls.superName != null
+							&& !cls.superName.equals(Object.class.getTypeName().replaceAll("\\.", "/"))) {
+						try {
+							mapSuperAndInterfaces(root, mp, target, pool.getClassNode(cls.superName), pool);
+						} catch (ClassNotFoundException e) {
+						}
+					}
+					for (String inter : cls.interfaces) {
+						try {
+							mapSuperAndInterfaces(root, mp, target, pool.getClassNode(inter), pool);
+						} catch (ClassNotFoundException e) {
+						}
+					}
+
+					mp.put(clsMapping.obfuscated.replaceAll("\\.", "/"), target);
+				}, "FLUID Mapper Thread #" + thc++);
+				threadInstances[thc - 2] = th;
+				th.setDaemon(true);
+				th.start();
+			}
+
+			while (true) {
+				boolean running = false;
+				for (Thread th : threadInstances) {
+					if (th == null)
+						continue;
+					if (th.isAlive()) {
+						running = true;
+						break;
+					}
+				}
+				if (!running)
+					break;
+			}
+
+			if (i % 100 == 0) {
+				info("Mapped " + i + "/" + classes.length + " classes.");
+			}
+			if (i + threads <= classes.length)
+				i += threads;
+			else
+				i = classes.length;
+		}
+
 		info("Mapped " + classes.length + "/" + classes.length + " classes.");
 
 		return mp;
@@ -904,7 +968,7 @@ public class Fluid extends CyanComponent {
 			newNode.exceptions = meth.exceptions;
 			newNode.parameters = meth.parameters;
 			newNode.access = meth.access;
-			MethodVisitor methremapper = new MethodRemapper(newNode, remapper);
+			MethodVisitor methremapper = new FluidMemberRemapper.FluidMemberVisitor(newNode, remapper);
 			meth.accept(methremapper);
 			meth.instructions = newNode.instructions;
 			meth.tryCatchBlocks = newNode.tryCatchBlocks;

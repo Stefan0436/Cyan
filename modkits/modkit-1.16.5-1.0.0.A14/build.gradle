@@ -104,10 +104,10 @@ platforms {
 	// MCP Platform, for forge support
 	MCP {
 		// YYYYMMDD.HHMMSS, should match upstream forge
-		version ""
+		version "20210115.111550"
 
 		// Forge version
-		modloader "36.1.65"
+		modloader "36.2.1"
 	}
 
 	// Intermediary Platform, for fabric support

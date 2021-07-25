@@ -49,6 +49,8 @@ public class ForgeCompatibilityMappings extends CompatibilityMappings {
 
 	public ForgeCompatibilityMappings(Mapping<?> mappings, String modloader, MinecraftVersionInfo info, GameSide side,
 			boolean msg, String mcp) {
+		setBuild(2);
+		
 		try {
 			String mappingsId = "-" + mcp.replaceAll("[!?/:\\\\]", "-") + (modloader.isEmpty() ? "" : "-" + modloader);
 			if (loadWhenPossible("forge", mappingsId, info, side))

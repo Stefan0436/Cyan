@@ -91,7 +91,7 @@ import javax.swing.JCheckBox;
 
 public class Installer extends CyanComponent {
 
-	private static final String version = "3.9";
+	private static final String version = "4.0";
 
 	private static Installer impl;
 
@@ -413,6 +413,8 @@ public class Installer extends CyanComponent {
 	private JCheckBox chckbxNewCheckBox;
 	private JCheckBox chckbxNewCheckBox_1;
 
+	private String forgeUniversalURL = "https://maven.minecraftforge.net/net/minecraftforge/forge/%game%-%forgeversion%/forge-%game%-%forgeversion%-universal.jar";
+
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -680,30 +682,68 @@ public class Installer extends CyanComponent {
 			logger.info("Determining mappings version by modloader...");
 			if (project.loader.equalsIgnoreCase("forge")) {
 				File forgeInstaller = downloadForgeInstaller(project, cache);
-				logger.info("Searching for MCP version in forge jar...");
-				String mcpVersion = "";
-				ZipFile installerZip = new ZipFile(forgeInstaller);
-				ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + project.game + "-"
-						+ project.loaderVersion + "/forge-" + project.game + "-" + project.loaderVersion + ".jar");
-				ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
-				while (forgeStrm.available() != 0) {
-					ZipEntry entry = forgeStrm.getNextEntry();
-					if (entry.getName().equals("META-INF/MANIFEST.MF")) {
-						Manifest manifest = new Manifest(forgeStrm);
-						Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
-						mcpVersion = MCP.getValue("Implementation-Version");
-						break;
+				if (Version.fromString(project.game).isLessThan(Version.fromString("1.17"))) {
+					logger.info("Searching for MCP version in forge jar...");
+					String mcpVersion = "";
+					ZipFile installerZip = new ZipFile(forgeInstaller);
+					ZipEntry forgeJar = installerZip.getEntry("maven/net/minecraftforge/forge/" + project.game + "-"
+							+ project.loaderVersion + "/forge-" + project.game + "-" + project.loaderVersion + ".jar");
+					ZipInputStream forgeStrm = new ZipInputStream(installerZip.getInputStream(forgeJar));
+					while (forgeStrm.available() != 0) {
+						ZipEntry entry = forgeStrm.getNextEntry();
+						if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+							Manifest manifest = new Manifest(forgeStrm);
+							Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+							mcpVersion = MCP.getValue("Implementation-Version");
+							break;
+						}
 					}
+					forgeStrm.close();
+					installerZip.close();
+					project.mappings = mcpVersion;
+				} else {
+					URL url = new URL(forgeUniversalURL.replaceAll("\\%game\\%", project.game)
+							.replaceAll("\\%forgeversion\\%", project.loaderVersion));
+					File forgeJar = new File(cache,
+							"forge-" + project.game + "-" + project.loaderVersion + "-universal.jar");
+					File forgeJarDownloadMarker = new File(cache, forgeJar.getName() + ".lck");
+					if (!forgeJar.exists() || forgeJarDownloadMarker.exists()) {
+						if (!forgeJar.getParentFile().exists())
+							forgeJar.getParentFile().mkdirs();
+						if (forgeJarDownloadMarker.exists())
+							forgeJarDownloadMarker.delete();
+						forgeJarDownloadMarker.createNewFile();
+
+						logger.info("Downloading forge jar to cache...");
+						if (forgeJar.exists())
+							forgeJar.delete();
+						FileOutputStream strm = new FileOutputStream(forgeJar);
+						InputStream inp = url.openStream();
+						inp.transferTo(strm);
+						strm.close();
+						inp.close();
+						forgeJarDownloadMarker.delete();
+					}
+					FileInputStream forgeJarStrm = new FileInputStream(forgeJar);
+					ZipInputStream forgeStrm = new ZipInputStream(forgeJarStrm);
+					while (forgeStrm.available() != 0) {
+						ZipEntry entry = forgeStrm.getNextEntry();
+						if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+							Manifest manifest = new Manifest(forgeStrm);
+							Attributes MCP = manifest.getAttributes("net/minecraftforge/versions/mcp/");
+							project.mappings = MCP.getValue("Implementation-Version");
+							break;
+						}
+					}
+					forgeStrm.close();
+					forgeJarStrm.close();
 				}
-				forgeStrm.close();
-				installerZip.close();
-				project.mappings = mcpVersion;
 				logger.info("");
 			} else {
 				throw new IOException("Cannot resolve mappings version if not using forge");
 			}
 		}
-		
+
 		String suffix = "";
 		if (!project.loader.isEmpty())
 			suffix += "-" + project.loader;
@@ -711,7 +751,7 @@ public class Installer extends CyanComponent {
 			suffix += "-" + project.mappings.replaceAll("[^A-Za-z0-9.-]", "-");
 		if (!project.loaderVersion.isEmpty())
 			suffix += "-" + project.loaderVersion;
-		
+
 		if (!project.platform.equals("VANILLA")) {
 			logger.info("Preparing " + project.platform + " " + project.mappings + " mappings...");
 			if (!MinecraftMappingsToolkit.areMappingsAvailable(suffix, project.platform.toLowerCase(), version, side)) {
@@ -1056,6 +1096,21 @@ public class Installer extends CyanComponent {
 									+ (project.loaderVersion.isEmpty() ? "" : "-" + project.loaderVersion)));
 			manifest.addProperty("mainClass", project.clientMain);
 			manifest.addProperty("inheritsFrom", project.inheritsFrom);
+
+			if (project.loader.equals("forge")
+					&& Version.fromString(project.game).isGreaterOrEqualTo(Version.fromString("1.17"))) {
+				if (!manifest.has("arguments"))
+					manifest.add("arguments", new JsonObject());
+				JsonObject args = manifest.get("arguments").getAsJsonObject();
+				if (!args.has("jvm"))
+					args.add("jvm", new JsonArray());
+
+				JsonArray jvm = args.get("jvm").getAsJsonArray();
+				jvm.add("--add-exports=java.base/sun.security.util=ALL-UNNAMED");
+				jvm.add("--add-opens=java.base/java.util.jar=ALL-UNNAMED");
+				jvm.add("--add-exports=cpw.mods.bootstraplauncher/cpw.mods.bootstraplauncher=ALL-UNNAMED");
+			}
+
 			JsonArray libArray = new JsonArray();
 			libs.forEach(lib -> {
 				JsonObject artifact = new JsonObject();
@@ -1227,8 +1282,8 @@ public class Installer extends CyanComponent {
 				cp += " ";
 			cp += "vanilla-server.jar";
 
-			HashMap<String, File> filePaths = new HashMap<String, File>();
-			HashMap<String, File> outputPaths = new HashMap<String, File>();
+			HashMap<String, ArrayList<File>> filePaths = new HashMap<String, ArrayList<File>>();
+			HashMap<String, ArrayList<File>> outputPaths = new HashMap<String, ArrayList<File>>();
 			HashMap<String, URL> remoteLibs = new HashMap<String, URL>();
 			for (String lib : libs) {
 				String group = lib.split(":")[0];
@@ -1332,7 +1387,7 @@ public class Installer extends CyanComponent {
 				}
 				logger.info("Processing Forge server files...");
 				HashMap<String, File> files = scanFiles(new File(serverFolder, "libraries"), "libraries/", "jar",
-						"jar.cache");
+						"jar.cache", "zip", "txt");
 
 				for (String str : files.keySet()) {
 					String[] information = str.split("/");
@@ -1387,17 +1442,33 @@ public class Installer extends CyanComponent {
 					}
 
 					if (!newer) {
-						String pth = "libraries/" + groupPath + name + "/" + ver + "/" + name + "-" + ver;
+						String pth = "libraries/" + groupPath + name + "/" + ver + "/";
 						String[] srvlibs = files.keySet().stream().filter(t -> t.startsWith(pth))
 								.toArray(t -> new String[t]);
 
 						String artifact = group + ":" + name;
 						if (!filePaths.keySet().stream().anyMatch(t -> t.startsWith(artifact + ":"))) {
 							for (String lib : srvlibs) {
-								if (lib.endsWith(".jar"))
+								if (lib.endsWith(".jar")
+										&& !(lib.contains("net/minecraft/server")
+												&& (lib.contains("-slim.jar") || lib.contains("-srg.jar")))
+										&& !(lib.contains("net/minecraftforge/forge") && lib.contains("-server.jar")))
 									cp += " " + lib;
-								filePaths.put(group + ":" + name + ":" + ver, files.get(lib));
-								outputPaths.put(group + ":" + name + ":" + ver, new File(dest, pth));
+
+								ArrayList<File> files1 = filePaths.get(group + ":" + name + ":" + ver);
+								if (files1 == null)
+									files1 = new ArrayList<File>();
+								ArrayList<File> files2 = outputPaths.get(group + ":" + name + ":" + ver);
+								if (files2 == null)
+									files2 = new ArrayList<File>();
+
+								if (!files1.contains(files.get(lib)))
+									files1.add(files.get(lib));
+								if (!files2.contains(new File(dest, lib)))
+									files2.add(new File(dest, lib));
+
+								filePaths.put(group + ":" + name + ":" + ver, files1);
+								outputPaths.put(group + ":" + name + ":" + ver, files2);
 							}
 						}
 					}
@@ -1458,7 +1529,13 @@ public class Installer extends CyanComponent {
 
 						lib += "/" + name + "/" + versionstr + "/" + name + "-" + versionstr + ".jar";
 						remoteLibs.put(idFull, new URL(url));
-						outputPaths.put(group + ":" + name + ":" + versionstr, new File(dest, lib));
+
+						ArrayList<File> files = outputPaths.get(group + ":" + name + ":" + versionstr);
+						if (files == null)
+							files = new ArrayList<File>();
+						if (!files.contains(new File(dest, lib)))
+							files.add(new File(dest, lib));
+						outputPaths.put(group + ":" + name + ":" + versionstr, files);
 
 						cp += lib;
 					}
@@ -1495,8 +1572,21 @@ public class Installer extends CyanComponent {
 
 						lib += "/" + name + "/" + versionstr + "/" + name + "-" + versionstr + ".jar";
 						remoteLibs.put(idFull, new URL(url));
-						filePaths.put(idFull, new File(dest, lib));
-						outputPaths.put(group + ":" + name + ":" + versionstr, new File(dest, lib));
+
+						ArrayList<File> files1 = filePaths.get(idFull);
+						if (files1 == null)
+							files1 = new ArrayList<File>();
+						if (!files1.contains(new File(dest, lib)))
+							files1.add(new File(dest, lib));
+
+						ArrayList<File> files2 = outputPaths.get(group + ":" + name + ":" + versionstr);
+						if (files2 == null)
+							files2 = new ArrayList<File>();
+						if (!files2.contains(new File(dest, lib)))
+							files2.add(new File(dest, lib));
+
+						filePaths.put(idFull, files1);
+						outputPaths.put(group + ":" + name + ":" + versionstr, files2);
 
 						cp += lib;
 					}
@@ -1601,26 +1691,58 @@ public class Installer extends CyanComponent {
 				}
 
 				logger.info("Adding cached libary to install list... file: " + inputcache.getName());
-				filePaths.put(id, new File(cache, k));
-				outputPaths.put(id, new File(dest, k));
+				ArrayList<File> files1 = filePaths.get(id);
+				if (files1 == null)
+					files1 = new ArrayList<File>();
+				if (!files1.contains(new File(cache, k)))
+					files1.add(new File(cache, k));
+
+				ArrayList<File> files2 = outputPaths.get(id);
+				if (files2 == null)
+					files2 = new ArrayList<File>();
+				if (!files2.contains(new File(dest, k)))
+					files2.add(new File(dest, k));
+
+				filePaths.put(id, files1);
+				outputPaths.put(id, files2);
 			}
 
 			logger.info("Installing local libraries...");
 			for (String lib : filePaths.keySet()) {
-				File in = filePaths.get(lib);
-				File out = outputPaths.get(lib);
-				if (!out.getParentFile().exists())
-					out.getParentFile().mkdirs();
 				logger.info("Installing " + lib + "...");
-				if (out.exists())
-					out.delete();
-				Files.copy(in.toPath(), out.toPath());
+
+				int i = 0;
+				ArrayList<File> inF = filePaths.get(lib);
+				ArrayList<File> outF = outputPaths.get(lib);
+				for (File in : inF) {
+					File out = outF.get(i);
+
+					if (!out.getParentFile().exists())
+						out.getParentFile().mkdirs();
+					if (out.exists())
+						out.delete();
+					Files.copy(in.toPath(), out.toPath());
+
+					i++;
+				}
 			}
 
 			if (project.loader.equals("fabric-loader")) {
 				logger.info("Merging fabric loader and intermediary jars...");
-				File loader = outputPaths.get(loaderArti);
-				File intermediary = outputPaths.get(intermediaryArti);
+				File loader = null;
+				for (File f : outputPaths.get(loaderArti)) {
+					if (f.getName().endsWith("-" + loaderArti.split(":")[2] + ".jar")) {
+						loader = f;
+						break;
+					}
+				}
+				File intermediary = null;
+				for (File f : outputPaths.get(intermediaryArti)) {
+					if (f.getName().endsWith("-" + loaderArti.split(":")[2] + ".jar")) {
+						intermediary = f;
+						break;
+					}
+				}
 				File output = new File(loader.getCanonicalPath() + ".intermediary.tmp");
 				if (output.exists())
 					output.delete();

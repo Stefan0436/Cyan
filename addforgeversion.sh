@@ -5,8 +5,14 @@ read -rp "Game version: " gameversion
 read -rp "Forge version: " version
 
 echo "Finding MCP version..."
-manifestMF="$(curl -L "${forgeurltemplate//%game%-%forgeversion%/$gameversion-$version}" -s --output - | bsdtar -O -xvf - maven/net/minecraftforge/forge/$gameversion-$version/forge-$gameversion-$version.jar 2>/dev/null | bsdtar -O -xvf - META-INF/MANIFEST.MF 2>/dev/null)"
-mappings=$(echo "$manifestMF" | grep --after-context=4 'Implementation-Title: MCP' | grep 'Implementation-Version: ' | sed "s/Implementation-Version: //g" | sed "s/\r//g")
+forgeuniversaltemplate="https://maven.minecraftforge.net/net/minecraftforge/forge/%game%-%forgeversion%/forge-%game%-%forgeversion%-universal.jar"
+if [[ "$gameversion" =~ ^1\.1?[0-6]+(\.[0-9]+)?$ ]]; then
+    manifestMF="$(curl -L "${forgeurltemplate//%game%-%forgeversion%/$gameversion-$version}" -s --output - | bsdtar -O -xvf - maven/net/minecraftforge/forge/$gameversion-$version/forge-$gameversion-$version.jar 2>/dev/null | bsdtar -O -xvf - META-INF/MANIFEST.MF 2>/dev/null)"
+    mappings=$(echo "$manifestMF" | grep --after-context=4 'Implementation-Title: MCP' | grep 'Implementation-Version: ' | sed "s/Implementation-Version: //g" | sed "s/\r//g")
+else
+    manifestMF="$(curl -L "${forgeuniversaltemplate//%game%-%forgeversion%/$gameversion-$version}" -s --output - | bsdtar -O -xvf - META-INF/MANIFEST.MF 2>/dev/null)"
+    mappings=$(echo "$manifestMF" | grep --after-context=4 'Implementation-Title: MCP' | grep 'Implementation-Version: ' | sed "s/Implementation-Version: //g" | sed "s/\r//g")
+fi
 echo MCP: "$mappings"
 
 echo "Adding support for $gameversion Forge $version..."
@@ -62,7 +68,7 @@ else
 fabric=
 paper=
 
-mappings_paper=$mappings
+mappings_paper=
 '
 fi
 echo "$buildfile" > "workflowbuilddata-$gameversion.bash"

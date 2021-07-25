@@ -463,14 +463,8 @@ public abstract class TransformerMetadata extends CyanComponent {
 						trPseudoCode.getParentFile().mkdirs();
 						trClassFile.getParentFile().mkdirs();
 						logDebug.accept("Dumping transformer " + md.getTransfomerClass() + " PseudoCode...");
-
-						ClassNode targetClass = null;
-						try {
-							targetClass = pool.getClassNode(md.getMappedTargetClass());
-						} catch (ClassNotFoundException e) {
-							targetClass = pool.getClassNode(md.getTargetClass());
-						}
-						Files.write(trPseudoCode.toPath(), BytecodeExporter.classToString(targetClass).getBytes());
+						Files.write(trPseudoCode.toPath(),
+								BytecodeExporter.classToString(pool.getClassNode(md.getTransfomerClass())).getBytes());
 
 						logDebug.accept("Dumping transformer " + md.getTransfomerClass() + " bytecode class file...");
 						Files.write(trClassFile.toPath(), pool.getByteCode(md.getTransfomerClass()));

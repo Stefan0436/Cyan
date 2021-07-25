@@ -102,13 +102,13 @@ platforms {
 	}
 
 	// MCP Platform, for forge support
-// 	MCP {
-// 		// YYYYMMDD.HHMMSS, should match upstream forge
-// 		version "20210115.111550"
-// 
-// 		// Forge version
-// 		modloader "36.1.31"
-// 	}
+ 	MCP {
+ 		// YYYYMMDD.HHMMSS, should match upstream forge
+ 		version "20210706.113038"
+ 
+ 		// Forge version
+ 		modloader "37.0.10"
+ 	}
 
 	// Intermediary Platform, for fabric support
 	INTERMEDIARY {
@@ -141,7 +141,7 @@ platforms {
 		// Paper version:
 		//
 		// def paperVersion = getSupportedPaperVersion(gameVersion, cyanVersion)
-		modloader "119" // paperVersion
+		modloader "132" // paperVersion
 
 		//
 		// Paper mappings version, it is best to only use mappings that have been given a green light by the Cyan team.
@@ -157,7 +157,7 @@ platforms {
 		//
 		//
 		// Commit hash and paper build for mappings version (commit:PB_build)
-		version "f25facb302f6b1dd508c3a2e103f8892e145b638:PB_119" // getSpigotMappingsByPaperVersion(gameVersion, paperVersion)
+		version "efd7e5182c6885c2aa4e1c267ed3da61eb6185b8:PB_132" // getSpigotMappingsByPaperVersion(gameVersion, paperVersion)
 	}
 }
 

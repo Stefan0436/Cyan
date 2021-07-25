@@ -79,6 +79,8 @@ public class YggdrasilAuthentication extends CyanComponent {
 	 */
 	public static AuthenticationInfo authenticate(String username, String password) throws IOException {
 		init();
+		if (password.isEmpty() || username.isEmpty())
+			throw new IOException("Invalid credentials.");
 
 		try {
 			URL u = new URL(authServer + "/authenticate");

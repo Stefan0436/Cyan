@@ -138,6 +138,7 @@ class CompatibilityMappings extends SimpleMappings {
 				if (m.mappingType == MAPTYPE.PROPERTY) {
 					boolean remap = true;
 					String map = mapProperty(combine, mapping.obfuscated, m.obfuscated, true);
+					Mapping<?> mp = mapPropertyMapping(combine, mapping.obfuscated, m.obfuscated, true);
 					if (!map.equals(m.obfuscated)) {
 						Mapping<?> tmap = mapClassToMapping(m.type, t2 -> true, true);
 						if (tmap != null)
@@ -147,11 +148,20 @@ class CompatibilityMappings extends SimpleMappings {
 						remap = false;
 					}
 					if (remap || alwaysAllowRemap)
-						newMembers.add(m);
+						if (!m.name.equals(m.obfuscated))
+							newMembers.add(m);
+						else if (mp != null) {
+							m.obfuscated = mp.name;
+
+							if (!m.name.equals(m.obfuscated))
+								newMembers.add(m);
+						}
 				} else if (m.mappingType == MAPTYPE.METHOD) {
 					Mapping<?> argMap = tMap.mappings[ind];
 					boolean remap = true;
 					String map = mapMethod(combine, mapping.obfuscated, m.obfuscated, true, argMap.argumentTypes);
+					Mapping<?> mp = mapMethodMapping(combine, mapping.obfuscated, m.obfuscated, true,
+							argMap.argumentTypes);
 					if (map.equals(m.obfuscated) && !map.equals("<init>") && !map.equals("<clinit>")
 							&& !argMap.name.equals(argMap.obfuscated)) {
 						String typeStr = "";
@@ -180,7 +190,15 @@ class CompatibilityMappings extends SimpleMappings {
 						Mapping<?> tmap = mapClassToMapping(m.type, t2 -> true, true);
 						if (tmap != null)
 							m.type = tmap.name;
-						newMembers.add(m);
+						if (!m.name.equals(m.obfuscated))
+							newMembers.add(m);
+						else {
+							if (mp != null)
+								m.obfuscated = mp.name;
+
+							if (!m.name.equals(m.obfuscated))
+								newMembers.add(m);
+						}
 					}
 					m.obfuscated = map;
 				}
@@ -363,6 +381,21 @@ class CompatibilityMappings extends SimpleMappings {
 		return propertyName;
 	}
 
+	public static Mapping<?> mapPropertyMapping(Mapping<?> mappings, String classPath, String propertyName,
+			boolean obfuscated) {
+		final String pName = propertyName;
+		Mapping<?> map = mappings.mapClassToMapping(classPath, t -> Stream.of(t.mappings).anyMatch(
+				t2 -> t2.mappingType == MAPTYPE.PROPERTY && (!obfuscated ? t2.name : t2.obfuscated).equals(pName)),
+				false);
+		if (map != null) {
+			map = Stream.of(map.mappings).filter(
+					t2 -> t2.mappingType == MAPTYPE.PROPERTY && (!obfuscated ? t2.name : t2.obfuscated).equals(pName))
+					.findFirst().get();
+			return map;
+		}
+		return null;
+	}
+
 	static String mapMethod(Mapping<?> mappings, String classPath, String methodName, boolean obfuscated,
 			String... methodParameters) {
 		return mapMethod(mappings, classPath, methodName, obfuscated, false, methodParameters);
@@ -393,5 +426,26 @@ class CompatibilityMappings extends SimpleMappings {
 			return classPath + "." + methodName;
 		else
 			return methodName;
+	}
+
+	static Mapping<?> mapMethodMapping(Mapping<?> mappings, String classPath, String methodName, boolean obfuscated,
+			String... methodParameters) {
+		final String mName = methodName;
+		Mapping<?> map = mappings.mapClassToMapping(classPath,
+				t -> Stream.of(t.mappings)
+						.anyMatch(t2 -> t2.mappingType.equals(MAPTYPE.METHOD)
+								&& (!obfuscated ? t2.name : t2.obfuscated).equals(mName)
+								&& Arrays.equals(t2.argumentTypes, methodParameters)),
+				false);
+		if (map != null) {
+			classPath = map.obfuscated;
+			map = Stream.of(map.mappings)
+					.filter(t2 -> t2.mappingType == MAPTYPE.METHOD
+							&& (!obfuscated ? t2.name : t2.obfuscated).equals(mName)
+							&& Arrays.equals(t2.argumentTypes, methodParameters))
+					.findFirst().get();
+			return map;
+		}
+		return null;
 	}
 }

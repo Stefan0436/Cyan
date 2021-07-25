@@ -49,7 +49,7 @@ public class MinecraftModificationMcp {
 	}
 
 	@Constructor
-	@InjectAt(location = InjectLocation.TAIL, targetCall = "setErrorCallback(org.lwjgl.glfw.GLFWErrorCallbackI)", targetOwner = "com.mojang.blaze3d.systems.RenderSystem")
+	@InjectAt(location = InjectLocation.TAIL, targetCall = "<init>(net.minecraft.client.Minecraft)", targetOwner = "net.minecraftforge.client.gui.ForgeIngameGui")
 	public void init4(@TargetType(target = "net.minecraft.client.main.GameConfig") GameConfig config) {
 		resourceManager.registerReloadListener(new CyanReloadListener());
 	}

@@ -257,4 +257,12 @@ public class FluidAgent extends CyanComponent {
 		for (Class<?> cls : classes)
 			function.accept(cls);
 	}
+
+	public static Class<?> getLoadedClass(String name) {
+		Class<?>[] classes = inst.getAllLoadedClasses();
+		for (Class<?> cls : classes)
+			if (cls.getTypeName().equals(name))
+				return cls;
+		return null;
+	}
 }

@@ -22,7 +22,7 @@
 	"arguments": {
 		"game": [],
 		"jvm": [
-			"-Djdk.attach.allowAttachSelf=true"
+			"-Djdk.attach.allowAttachSelf=true"${forgeargs}
 		]
 	}
 }

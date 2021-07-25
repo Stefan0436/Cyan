@@ -6,7 +6,9 @@ import java.net.URL;
 import java.util.Scanner;
 
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.core.CyanCore;
+import org.asf.cyan.core.CyanInfo;
 
 public class CyanForgeClientWrapper {
 
@@ -45,7 +47,11 @@ public class CyanForgeClientWrapper {
 		CyanLoader.addCompatibilityMappings(CyanLoader.getForgeCompatibilityMappings(GameSide.CLIENT, mcp.toString()));
 
 		CyanLoader.initializeGame("CLIENT");
-		String wrapper = System.getProperty("cyan.launcher.client.wrapper", "cpw.mods.modlauncher.Launcher");
+		String defaultWrapper = "cpw.mods.modlauncher.Launcher";
+		if (Version.fromString(CyanInfo.getMinecraftVersion()).isGreaterOrEqualTo(Version.fromString("1.17.1"))) {
+			defaultWrapper = "cpw.mods.bootstraplauncher.BootstrapLauncher";
+		}
+		String wrapper = System.getProperty("cyan.launcher.client.wrapper", defaultWrapper);
 		CyanCore.startGame(wrapper, args);
 	}
 }

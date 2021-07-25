@@ -3034,8 +3034,10 @@ public class CyanLoader extends ModkitModloader
 			"org.asf.cyan.api.modloader.Modloader", "org.asf.cyan.api.common.CyanComponent",
 			"org.asf.cyan.api.config.Configuration", "modkit.util.EventUtil", "modkit.util.ContainerConditions",
 			"org.asf.cyan.api.internal.CyanAPIComponent", "org.asf.cyan.mods.config.CyanModfileManifest",
-			"org.asf.cyan.internal.modkitimpl.info.Protocols", "org.asf.cyan.internal.modkitimpl.util.EventUtilImpl" };
-	static String[] dntPackages = new String[] {};
+			"org.asf.cyan.internal.modkitimpl.info.Protocols", "org.asf.cyan.internal.modkitimpl.util.EventUtilImpl",
+			"org.asf.cyan.api.events.extended.IExtendedEvent", "org.asf.cyan.api.events.extended.EventObject" };
+	static String[] dntPackages = new String[] { "com.google.gson", "org.apache.logging", "com.google.common",
+			"org.asf.cyan.api.packet" };
 
 	public static boolean doNotTransform(String name) {
 		if (coremodTypes == null) {
@@ -3056,10 +3058,15 @@ public class CyanLoader extends ModkitModloader
 
 	private static CyanLoader cyanModloader = null;
 
-	public static InputStream getFabricClassStream(String name) throws MalformedURLException {
+	public static InputStream getClassStream(String name) throws MalformedURLException {
 		if (doNotTransform(name))
 			return null;
+		return (InputStream) getClassData(name)[0];
+	}
 
+	public static Object[] getClassData(String name) throws MalformedURLException {
+		if (doNotTransform(name))
+			return null;
 		if (cyanModloader == null)
 			cyanModloader = CyanLoader.getModloader(CyanLoader.class);
 
@@ -3087,7 +3094,10 @@ public class CyanLoader extends ModkitModloader
 			try {
 				URL u = new URL(loc + name.replace(".", "/") + ".class");
 				InputStream strm = u.openStream();
-				return strm;
+				String location = loc;
+				if (location.startsWith("jar:"))
+					location = location.substring(4, location.lastIndexOf("!/"));
+				return new Object[] { strm, new URL(location) };
 			} catch (IOException e) {
 			}
 		}

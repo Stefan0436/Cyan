@@ -280,6 +280,8 @@ public class Mapping<T extends Configuration<T>> extends Configuration<T> {
 
 		if (mappingType.equals(MAPTYPE.CLASS) && name.contains("/"))
 			name = name.replace("/", ".");
+		if (mappingType.equals(MAPTYPE.CLASS) && obfuscated.contains("/"))
+			obfuscated = obfuscated.replace("/", ".");
 
 		return (M) this;
 	}

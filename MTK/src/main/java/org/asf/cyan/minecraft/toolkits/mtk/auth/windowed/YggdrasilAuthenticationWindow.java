@@ -42,7 +42,7 @@ public class YggdrasilAuthenticationWindow {
 	}
 
 	public YggdrasilAuthenticationWindow(String startingUsername) {
-		this(startingUsername, "");
+		this(startingUsername, "Press enter to log in... You will be prompted for a password if necessary...");
 	}
 
 	public YggdrasilAuthenticationWindow(String startingUsername, String startingError) {
@@ -66,7 +66,7 @@ public class YggdrasilAuthenticationWindow {
 	 */
 	private void initialize() {
 		frame = new JDialog();
-		frame.setBounds(100, 100, 671, 399);
+		frame.setBounds(100, 100, 671, 336);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
@@ -84,7 +84,7 @@ public class YggdrasilAuthenticationWindow {
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 
 		JPanel panel_2 = new JPanel();
-		panel_2.setPreferredSize(new Dimension(600, 200));
+		panel_2.setPreferredSize(new Dimension(600, 195));
 		panel_2.setLayout(null);
 
 		textField = new JTextField();
@@ -103,10 +103,16 @@ public class YggdrasilAuthenticationWindow {
 		textField_1 = new JPasswordField();
 		textField_1.setBounds(0, 115, 600, 19);
 		panel_2.add(textField_1);
-		textField_1.setEnabled(false);
+
+		textField.setBounds(0, (int) (panel_2.getPreferredSize().getHeight() / 2) - (textField.getHeight() / 2), 600,
+				19);
+		lblNewLabel.setBounds(0, textField.getY() - 20, 600, 15);
+		lblNewLabel_1.setVisible(false);
+		textField_1.setVisible(false);
+
 		textField_1.setColumns(10);
 
-		lblNewLabel_2 = new JLabel("");
+		lblNewLabel_2 = new JLabel("Press enter to log in... You will be prompted for a password if necessary...");
 		lblNewLabel_2.setBounds(0, 146, 600, 42);
 		panel_2.add(lblNewLabel_2);
 		panel.add(panel_2);
@@ -136,16 +142,32 @@ public class YggdrasilAuthenticationWindow {
 						} catch (IOException e) {
 							lblNewLabel_2.setText(e.getMessage());
 							textField_1.setText("");
-							textField_1.setEnabled(true);
+
+							lblNewLabel.setBounds(0, 48, 600, 15);
+							textField.setBounds(0, 69, 600, 19);
+							lblNewLabel_1.setVisible(true);
+							textField_1.setVisible(true);
+
 							textField_1.grabFocus();
 						}
 					} else {
-						textField_1.setEnabled(true);
+
+						lblNewLabel.setBounds(0, 48, 600, 15);
+						textField.setBounds(0, 69, 600, 19);
+						lblNewLabel_1.setVisible(true);
+						textField_1.setVisible(true);
+
 						textField_1.grabFocus();
 					}
 				} else if (textField.getText().isEmpty()) {
-					textField_1.setEnabled(false);
-					textField_1.setText("");
+
+					textField.setBounds(0,
+							(int) (panel_2.getPreferredSize().getHeight() / 2) - (textField.getHeight() / 2), 600, 19);
+					lblNewLabel.setBounds(0, textField.getY() - 20, 600, 15);
+					lblNewLabel_1.setVisible(false);
+					textField_1.setVisible(false);
+
+					textField_1.setText("Press enter to log in... You will be prompted for a password if necessary...");
 				} else if (textField_1.hasFocus() || btnNewButton.hasFocus()) {
 					try {
 						info = YggdrasilAuthentication.authenticate(textField.getText(),
@@ -154,6 +176,14 @@ public class YggdrasilAuthenticationWindow {
 					} catch (IOException e) {
 						lblNewLabel_2.setText(e.getMessage());
 						textField_1.setText("");
+
+						textField.setBounds(0,
+								(int) (panel_2.getPreferredSize().getHeight() / 2) - (textField.getHeight() / 2), 600,
+								19);
+						lblNewLabel.setBounds(0, textField.getY() - 20, 600, 15);
+						lblNewLabel_1.setVisible(false);
+						textField_1.setVisible(false);
+
 						textField.grabFocus();
 					}
 				}

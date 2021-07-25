@@ -87,13 +87,14 @@ public class Version {
 			if (last.data == null) {
 				last.data = "";
 			}
+
 			if (Character.isAlphabetic(ch) && lastWasAlpha) {
 				if (last.value == -1)
 					last.value = last.data.charAt(0);
 				last.data += ch;
 				continue;
 			}
-
+			
 			last.data += ch;
 
 			lastWasAlpha = Character.isAlphabetic(ch);
@@ -199,7 +200,7 @@ public class Version {
 				return true;
 
 			if (segment.value > otherSegment.value)
-				return false;
+				return lastWasLess;
 			lastWasLess = segment.value < otherSegment.value;
 			
 			i++;

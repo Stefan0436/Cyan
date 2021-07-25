@@ -121,18 +121,18 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 		if (MinecraftToolkit.hasMinecraftDownloadConnection()) {
 			info = MinecraftVersionToolkit.getLatestReleaseVersion();
 		} else {
-			info = MinecraftVersionToolkit.createOrGetVersion("1.16.5", MinecraftVersionType.RELEASE,
+			info = MinecraftVersionToolkit.createOrGetVersion("1.17.1", MinecraftVersionType.RELEASE,
 					new URL("file:////tmp"), OffsetDateTime.now());
 		}
 
-		String mcp = getLatestMCP(info);
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-mtktest-" + mcp, "mcp", info, GameSide.CLIENT)) {
+		String mcp = "20210706.113038"; //getLatestMCP(info);
+		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + mcp+ "-mtktest", "mcp", info, GameSide.CLIENT)) {
 			MinecraftMappingsToolkit.downloadMCPMappings(info, GameSide.CLIENT, mcp);
-			MinecraftMappingsToolkit.saveMappingsToDisk("-mtktest-" + mcp, "mcp", info, GameSide.CLIENT);
+			MinecraftMappingsToolkit.saveMappingsToDisk("-" + mcp+ "-mtktest", "mcp", info, GameSide.CLIENT);
 		}
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-mtktest-" + mcp, "mcp", info, GameSide.SERVER)) {
+		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + mcp+ "-mtktest", "mcp", info, GameSide.SERVER)) {
 			MinecraftMappingsToolkit.downloadMCPMappings(info, GameSide.SERVER, mcp);
-			MinecraftMappingsToolkit.saveMappingsToDisk("-mtktest-" + mcp, "mcp", info, GameSide.SERVER);
+			MinecraftMappingsToolkit.saveMappingsToDisk("-" + mcp+ "-mtktest", "mcp", info, GameSide.SERVER);
 		}
 
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(info, GameSide.CLIENT)) {
@@ -145,8 +145,8 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 			MinecraftMappingsToolkit.saveMappingsToDisk(info, GameSide.SERVER);
 		}
 
-		MinecraftMappingsToolkit.loadMappings("-mtktest-" + mcp, "mcp", info, GameSide.CLIENT);
-		MinecraftMappingsToolkit.loadMappings("-mtktest-" + mcp, "mcp", info, GameSide.SERVER);
+		MinecraftMappingsToolkit.loadMappings("-" + mcp+ "-mtktest", "mcp", info, GameSide.CLIENT);
+		MinecraftMappingsToolkit.loadMappings("-" + mcp+ "-mtktest", "mcp", info, GameSide.SERVER);
 
 		MinecraftMappingsToolkit.loadMappings(info, GameSide.CLIENT);
 		MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER);

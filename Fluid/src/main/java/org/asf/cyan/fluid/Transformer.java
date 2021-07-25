@@ -234,7 +234,7 @@ public abstract class Transformer extends CyanComponent {
 									+ meth.name + ")");
 
 							final String oMethName = meth.name;
-							
+
 							AnnotationInfo targetData = AnnotationInfo.getAnnotation(InjectAt.class, meth);
 							String targetMethName = null;
 							String targetMethTypes[] = null;
@@ -639,6 +639,7 @@ public abstract class Transformer extends CyanComponent {
 	public static class FluidMethodInfo {
 		public String name;
 		public String[] types;
+		public String owner;
 		public String returnType;
 
 		public int getVarOffset() {

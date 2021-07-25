@@ -23,6 +23,7 @@ import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.fluid.remapping.MAPTYPE;
 import org.asf.cyan.fluid.remapping.Mapping;
 import org.asf.cyan.fluid.remapping.SimpleMappings;
@@ -368,6 +369,76 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 		trace("MAP version " + side + " MCP mappings into CCFG, caller: " + CallTrace.traceCallName());
 		McpMappings mappings = new McpMappings().parseTSRGMappings(mappings_text.toString());
 		mappings.mappingsVersion = mcpVersion;
+
+		if (Version.fromString(version.getVersion()).isGreaterOrEqualTo(Version.fromString("1.17"))) {
+			MinecraftToolkit.infoLog("Computing Forge-compatible namings...");
+			if (!MinecraftMappingsToolkit.areMappingsAvailable(version, side)) {
+				MinecraftMappingsToolkit.downloadVanillaMappings(version, side);
+				MinecraftMappingsToolkit.saveMappingsToDisk(version, side);
+			}
+			Mapping<?> vanilla = MinecraftMappingsToolkit.loadMappings(version, side);
+			int i = 0;
+			int c = 0;
+			for (Mapping<?> cls : mappings.mappings) {
+				if (cls.mappingType == MAPTYPE.CLASS) {
+					c++;
+				}
+			}
+			for (Mapping<?> cls : mappings.mappings) {
+				if (cls.mappingType == MAPTYPE.CLASS) {
+					trace("PROCESS " + cls.name + " (" + cls.obfuscated + ")");
+
+					for (Mapping<?> member : cls.mappings) {
+						if (member.type != null) {
+							Mapping<?> mp = mappings.mapClassToMapping(member.type, t -> true, false);
+							if (mp != null) {
+								mp = vanilla.mapClassToMapping(mp.obfuscated, t -> true, true);
+								if (mp != null)
+									member.type = mp.name;
+							}
+						}
+						
+						if (member.argumentTypes != null) {
+							int ind = 0;
+							for (String type : member.argumentTypes) {								
+								if (member.type != null) {
+									Mapping<?> mp = mappings.mapClassToMapping(type, t -> true, false);
+									if (mp != null) {
+										mp = vanilla.mapClassToMapping(mp.obfuscated, t -> true, true);
+										if (mp != null)
+											member.argumentTypes[ind] = mp.name;
+									}
+								}
+								
+								ind++;
+							}
+						}
+					}
+
+					if (i % 100 == 0)
+						info("Processed " + i + "/" + c + " references.");
+					i++;
+				}
+			}
+			info("Processed " + i + "/" + c + " references.");
+			
+			i = 0;
+			for (Mapping<?> cls : mappings.mappings) {
+				if (cls.mappingType == MAPTYPE.CLASS) {
+					Mapping<?> mp = vanilla.mapClassToMapping(cls.obfuscated, t -> true, true);
+					trace("PROCESS " + cls.name + " (" + cls.obfuscated + ")");
+					if (mp != null) {
+						trace("RENAME " + cls.name + " TO " + mp.name + " (" + cls.obfuscated + ")");
+						cls.name = mp.name;
+					}
+
+					if (i % 100 == 0)
+						info("Processed " + i + "/" + c + " namings.");
+					i++;
+				}
+			}
+			info("Processed " + i + "/" + c + " namings.");
+		}
 
 		if (MappingsLoadEventProvider.isAccepted()) {
 			try {
