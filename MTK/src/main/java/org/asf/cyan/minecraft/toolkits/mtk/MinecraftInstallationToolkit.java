@@ -401,6 +401,9 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 				cp += (OsInfo.getCurrent() == OsInfo.windows ? ";" : ":") + mainJar.getCanonicalPath();
 		}
 
+		keys.put("classpath_separator", File.pathSeparator);
+		keys.put("library_directory",
+				new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/libraries").getAbsolutePath());
 		keys.put("version_name", version.getVersion());
 		keys.put("version_type", version.getVersionType().toString().toLowerCase());
 		keys.put("assets_root", assetDir.getCanonicalPath());
@@ -665,6 +668,10 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 
 		HashMap<String, String> keys = new HashMap<String, String>();
 		keys.putAll(variableStorage);
+
+		keys.put("classpath_separator", File.pathSeparator);
+		keys.put("library_directory",
+				new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/libraries").getAbsolutePath());
 
 		keys.put("auth_player_name", playerName);
 		keys.put("auth_access_token", accessToken);
