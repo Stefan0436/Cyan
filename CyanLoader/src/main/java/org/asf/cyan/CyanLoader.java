@@ -3061,6 +3061,8 @@ public class CyanLoader extends ModkitModloader
 	public static InputStream getClassStream(String name) throws MalformedURLException {
 		if (doNotTransform(name))
 			return null;
+		if (getClassData(name) == null)
+			return null;
 		return (InputStream) getClassData(name)[0];
 	}
 
