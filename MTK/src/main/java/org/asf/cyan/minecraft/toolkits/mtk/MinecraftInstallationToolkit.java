@@ -2158,8 +2158,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 			if (element1.has(key) && element1.get(key).isJsonArray()) {
 				JsonArray a = element1.get(key).getAsJsonArray();
 				for (JsonElement element2 : e.getAsJsonArray()) {
-					if (!a.contains(element2))
-						a.add(element2);
+					a.add(element2);
 				}
 			} else {
 				if (element != null)
