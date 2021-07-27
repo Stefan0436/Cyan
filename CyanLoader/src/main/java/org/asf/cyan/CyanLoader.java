@@ -3035,7 +3035,10 @@ public class CyanLoader extends ModkitModloader
 			"org.asf.cyan.api.config.Configuration", "modkit.util.EventUtil", "modkit.util.ContainerConditions",
 			"org.asf.cyan.api.internal.CyanAPIComponent", "org.asf.cyan.mods.config.CyanModfileManifest",
 			"org.asf.cyan.internal.modkitimpl.info.Protocols", "org.asf.cyan.internal.modkitimpl.util.EventUtilImpl",
-			"org.asf.cyan.api.events.extended.IExtendedEvent", "org.asf.cyan.api.events.extended.EventObject" };
+			"org.asf.cyan.api.events.extended.IExtendedEvent", "org.asf.cyan.api.events.extended.EventObject",
+			"modkit.protocol.ModkitModloader", "modkit.protocol.ModKitProtocol",
+			"modkit.protocol.handshake.HandshakeRule", "modkit.protocol.IncompatibleProtocolException",
+			"modkit.protocol.ModkitModloader$ModkitProtocolRules" };
 	static String[] dntPackages = new String[] { "com.google.gson", "org.apache.logging", "com.google.common",
 			"org.asf.cyan.api.packet" };
 

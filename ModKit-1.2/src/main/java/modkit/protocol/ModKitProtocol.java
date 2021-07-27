@@ -13,7 +13,7 @@ public class ModKitProtocol {
 	/**
 	 * Current ModKit protocol version
 	 */
-	public static final double CURRENT = 1.1d;
+	public static final double CURRENT = 1.2d;
 	
 	/**
 	 * Minimal ModKit protocol version
