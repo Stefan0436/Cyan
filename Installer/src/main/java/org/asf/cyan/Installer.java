@@ -91,7 +91,7 @@ import javax.swing.JCheckBox;
 
 public class Installer extends CyanComponent {
 
-	private static final String version = "4.0";
+	private static final String version = "4.1";
 
 	private static Installer impl;
 

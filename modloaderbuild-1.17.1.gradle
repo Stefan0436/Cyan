@@ -5,6 +5,7 @@ fabric(
 )
 
 paper([
+    '133': 'b32a3b147cba623c87f4b72bcaa2aa4d2b4e165d:PB_133',
     '132': 'efd7e5182c6885c2aa4e1c267ed3da61eb6185b8:PB_132',
     '130': '2f1f1b7f0c9e79ac55dda0a27aec1f8b4aa81d02:PB_130',
     '127': '9a0263e2ac2a4bd52274c836b6ee70f064acef74:PB_127',
@@ -21,6 +22,7 @@ paper([
 ])
 
 forge(
+    '37.0.12',
     '37.0.10',
     '37.0.9',
     '37.0.8',
