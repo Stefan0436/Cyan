@@ -33,6 +33,10 @@ public class VersionTest {
 		Version ver8 = Version.fromString("1.15.2");
 		Version ver9 = Version.fromString("1.16.5");
 		Version ver12 = Version.fromString("1.17");
+		Version ver13 = Version.fromString("1.17.1");
+
+		int i = ver13.compareTo(ver9);
+		assertTrue(i == 1);
 
 		Version ver10 = Version.fromString("5.1.4");
 		Version ver11 = Version.fromString("5.0");

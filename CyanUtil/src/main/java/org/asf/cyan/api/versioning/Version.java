@@ -94,7 +94,7 @@ public class Version {
 				last.data += ch;
 				continue;
 			}
-			
+
 			last.data += ch;
 
 			lastWasAlpha = Character.isAlphabetic(ch);
@@ -158,7 +158,7 @@ public class Version {
 				return false;
 
 			if (segment.value < otherSegment.value)
-				return false;
+				return lastWasGreater;
 			else if (segment.value != otherSegment.value)
 				lastWasGreater = true;
 			i++;
@@ -182,7 +182,7 @@ public class Version {
 	public boolean isLessThan(Version other) {
 		if (isEqualTo(other))
 			return false;
-		
+
 		boolean lastWasLess = false;
 		int i = 0;
 		for (VersionSegment segment : segments) {
@@ -202,7 +202,7 @@ public class Version {
 			if (segment.value > otherSegment.value)
 				return lastWasLess;
 			lastWasLess = segment.value < otherSegment.value;
-			
+
 			i++;
 		}
 
