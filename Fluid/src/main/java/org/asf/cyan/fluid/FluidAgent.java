@@ -199,9 +199,6 @@ public class FluidAgent extends CyanComponent {
 						try {
 							if (!hook.isSilent())
 								debug("Applying hook " + hook.getClass().getTypeName() + " to class " + className);
-							else {
-								trace("Applying hook " + hook.getClass().getTypeName() + " to class " + className);
-							}
 
 							hook.apply(cc, pool, loader, classBeingRedefined, protectionDomain, classfileBuffer);
 						} catch (ClassNotFoundException e) {
