@@ -3040,7 +3040,7 @@ public class CyanLoader extends ModkitModloader
 			"modkit.protocol.handshake.HandshakeRule", "modkit.protocol.IncompatibleProtocolException",
 			"modkit.protocol.ModkitModloader$ModkitProtocolRules" };
 	static String[] dntPackages = new String[] { "com.google.gson", "org.apache.logging", "com.google.common",
-			"org.asf.cyan.api.packet" };
+			"org.asf.cyan.api.packet", "org.asf.cyan.fluid" };
 
 	public static boolean doNotTransform(String name) {
 		if (coremodTypes == null) {
