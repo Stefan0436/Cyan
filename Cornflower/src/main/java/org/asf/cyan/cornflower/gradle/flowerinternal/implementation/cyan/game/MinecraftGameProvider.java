@@ -211,11 +211,11 @@ public class MinecraftGameProvider implements IGame {
 		CyanModfileManifest manifest = (CyanModfileManifest) man;
 		if (coremod) {
 			tsk.jvm("-DauthorizeDebugPackages=" + manifest.modClassPackage);
-			tsk.jvm("-DebugModfileManifests=CM//"
+			tsk.jvm("-DdebugModfileManifests=CM//"
 					+ new File(proj.getBuildDir(), "run/mod.manifest.ccfg").getAbsolutePath());
 			tsk.classpath(proj);
 		} else {
-			tsk.jvm("-DebugModfileManifests=M//"
+			tsk.jvm("-DdebugModfileManifests=M//"
 					+ new File(proj.getBuildDir(), "run/mod.manifest.ccfg").getAbsolutePath());
 			tsk.jvm("-Dcyan.load.classpath=${project_loc:" + proj.getName() + "}/bin/main" + File.pathSeparator
 					+ "${project_loc:" + proj.getName() + "}/bin/test");
