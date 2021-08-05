@@ -2398,14 +2398,16 @@ public class CyanLoader extends ModkitModloader
 				}
 			}, eventType -> {
 				for (IExtendedEvent<?> ev : extEvents) {
-					if (eventType.isAssignableFrom(ev.getClass()))
+					if (eventType.isAssignableFrom(ev.getClass())
+							|| eventType.getTypeName().equals(ev.getClass().getTypeName()))
 						return ev.channelName();
 				}
 
 				return null;
 			}, eventType -> {
 				for (IExtendedEvent<?> ev : extEvents) {
-					if (eventType.isAssignableFrom(ev.getClass()))
+					if (eventType.isAssignableFrom(ev.getClass())
+							|| eventType.getTypeName().equals(ev.getClass().getTypeName()))
 						return ev.requiresSynchronizedListeners();
 				}
 
@@ -2779,6 +2781,9 @@ public class CyanLoader extends ModkitModloader
 			}
 		});
 		addToSystemLater.clear();
+
+		info("Reloading reflections...");
+		CyanCore.reinitReflections();
 
 		info("Downloading coremod maven dependencies...");
 		downloadMavenDependencies(coremodMavenDependencies);
