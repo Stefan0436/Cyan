@@ -659,7 +659,7 @@ public class CtcCLI {
 		String username = in.nextLine();
 		System.out.print("Password for " + username + "@" + dest.getHost() + ": ");
 		char[] password = System.console().readPassword();
-		credentials = new Object[] { username, password };
+		credentials = new Object[] { username, new String(password) };
 		return credentials;
 	}
 
