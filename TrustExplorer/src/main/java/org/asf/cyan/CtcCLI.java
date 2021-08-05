@@ -34,7 +34,7 @@ public class CtcCLI {
 			Object[] cred = getCredentials(group);
 			if (cred == null)
 				return null;
-			return Base64.getEncoder().encodeToString((cred[0] + ":" + cred[1]).getBytes());
+			return "Basic " + Base64.getEncoder().encodeToString((cred[0] + ":" + cred[1]).getBytes());
 		}
 
 		@Override
