@@ -10,11 +10,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import org.asf.cyan.security.ClassTrustEntry;
 import org.asf.cyan.security.PackageTrustEntry;
@@ -22,14 +20,29 @@ import org.asf.cyan.security.TrustContainer;
 import org.asf.cyan.security.TrustContainerBuilder;
 
 public class CtcUtil {
+
+	public static abstract class HttpCredential {
+
+		public String provideHeaderEarly() {
+			return null;
+		}
+
+		public abstract boolean supportsAuthMethod(String type);
+
+		public abstract boolean supportsGroup(String group);
+
+		public abstract String buildHeader(String group, String type);
+
+	}
+
 	public static String pack(File input, File output, Consumer<Integer> setMax, Consumer<Integer> setValue)
 			throws IOException {
 
 		int value = 1;
-		
+
 		if (output.getPath().startsWith(".") || output.getPath().startsWith("/"))
-			output.getParentFile().mkdirs();		
-		
+			output.getParentFile().mkdirs();
+
 		if (!new File(input, "main.header").exists())
 			throw new IOException("Invalid UCTC directory!");
 
@@ -138,13 +151,13 @@ public class CtcUtil {
 		}
 	}
 
-	public static void publish(File input, URL output, Function<String, Object[]> credentialSupplier,
-			Consumer<String> outputLogger) throws IOException {
+	public static void publish(File input, URL output, List<HttpCredential> credential, Consumer<String> outputLogger)
+			throws IOException {
 		TrustContainer container = TrustContainer.importContainer(input);
 		publishInternal(input,
 				new URL(output.toString() + "/" + input.getName() + (output.toString().contains("?") ? "&" : "?")
 						+ "version=" + container.getVersion() + "&name=" + container.getContainerName()),
-				null, credentialSupplier, new HashMap<String, String>(), null);
+				null, credential, new HashMap<String, String>(), null);
 		outputLogger.accept(input.getName());
 
 		if (new File(input.getCanonicalPath() + ".sha256").exists()) {
@@ -152,14 +165,13 @@ public class CtcUtil {
 					new URL(output.toString() + "/" + new File(input.getCanonicalPath() + ".sha256").getName()
 							+ (output.toString().contains("?") ? "&" : "?") + "version=" + container.getVersion()
 							+ "&name=" + container.getContainerName()),
-					null, credentialSupplier, new HashMap<String, String>(), null);
+					null, credential, new HashMap<String, String>(), null);
 			outputLogger.accept(new File(input.getCanonicalPath() + ".sha256").getName());
 		}
 	}
 
 	private static void publishInternal(File input, URL dest, HttpURLConnection connection,
-			Function<String, Object[]> credentialSupplier, HashMap<String, String> cookies, String authorization)
-			throws IOException {
+			List<HttpCredential> credential, HashMap<String, String> cookies, String authorization) throws IOException {
 		if (connection == null) {
 			connection = (HttpURLConnection) dest.openConnection();
 			connection.setRequestProperty("X-Use-HTTP-Authentication", "True");
@@ -182,8 +194,18 @@ public class CtcUtil {
 		if (!cookieStr.isEmpty()) {
 			connection.setRequestProperty("Cookie", cookieStr);
 		}
+
 		if (authorization != null) {
 			connection.setRequestProperty("Authorization", authorization);
+		} else {
+			String h = null;
+			for (HttpCredential cred : credential) {
+				h = cred.provideHeaderEarly();
+				if (h != null)
+					break;
+			}
+			if (h != null)
+				connection.setRequestProperty("Authorization", h);
 		}
 
 		HashMap<String, List<String>> headers = new HashMap<String, List<String>>(connection.getRequestProperties());
@@ -219,7 +241,19 @@ public class CtcUtil {
 				});
 			}
 			if (status > 300 && status < 400) {
-				String auth = authorization;
+				String auth = null;
+				if (authorization != null) {
+					auth = authorization;
+				} else {
+					String h = null;
+					for (HttpCredential cred : credential) {
+						h = cred.provideHeaderEarly();
+						if (h != null)
+							break;
+					}
+					if (h != null)
+						auth = h;
+				}
 				String location = connection.getHeaderField("Location");
 				if (location.startsWith("/")) {
 					location = dest.getProtocol() + "://" + dest.getHost()
@@ -249,7 +283,7 @@ public class CtcUtil {
 					}
 				}
 
-				publishInternal(input, dest, connection, credentialSupplier, cookies, auth);
+				publishInternal(input, dest, connection, credential, cookies, auth);
 			} else if (status == 401 && header != null) {
 				connection = (HttpURLConnection) dest.openConnection();
 				for (String k : headers.keySet()) {
@@ -262,31 +296,34 @@ public class CtcUtil {
 				}
 
 				String realm = "";
-				if (header.startsWith("Basic")) {
-					if (header.contains(" realm=")) {
-						realm = header.substring(header.indexOf(" realm=") + " realm=".length());
-					}
-				} else {
-					throw new IOException("Server requested incompatible authentication method.");
+				String type = header;
+				if (header.contains(" "))
+					type = type.substring(0, type.indexOf(" "));
+				if (header.contains(" realm=")) {
+					realm = header.substring(header.indexOf(" realm=") + " realm=".length());
 				}
 
-				Object[] credentials = credentialSupplier.apply(realm);
-				if (credentials == null) {
+				String cred = null;
+				boolean found = false;
+				for (HttpCredential c : credential) {
+					if (c.supportsAuthMethod(type) && (!realm.isEmpty() && c.supportsGroup(realm))) {
+						cred = c.buildHeader(realm, type);
+						found = true;
+					}
+				}
+				if (!found && cred == null)
+					throw new IOException("Server requested incompatible authentication method.");
+				if (cred == null) {
 					throw new IOException(
 							"No credentials provided, cannot upload to server, server requires authentication.");
 				}
-				String auth = "Basic " + Base64.getEncoder()
-						.encodeToString((credentials[0] + ":" + new String((char[]) credentials[1])).getBytes());
-				credentials = credentials.clone();
-				connection.setRequestProperty("Authorization", auth);
+
+				connection.setRequestProperty("Authorization", cred);
 				connection.setUseCaches(false);
 				connection.setDoInput(true);
 				connection.setDoOutput(true);
 
-				for (int i = 0; i < credentials.length; i++)
-					credentials[i] = null;
-
-				publishInternal(input, dest, connection, credentialSupplier, cookies, auth);
+				publishInternal(input, dest, connection, credential, cookies, cred);
 			} else {
 				if (status == 401 || status == 403) {
 					throw new IOException("Credentials were not accepted by the server");

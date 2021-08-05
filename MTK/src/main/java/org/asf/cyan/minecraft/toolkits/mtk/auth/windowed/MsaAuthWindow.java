@@ -148,7 +148,7 @@ public class MsaAuthWindow {
 						DynamicClassLoader loader = new DynamicClassLoader();
 						loader.addLoadRestriction(str -> {
 							return str.contains("org.asf") && !str.contains("SwingFXWebView")
-									&& !str.contains("AuthAdapter");
+									&& !str.contains("AuthAdapter") || str.contains("javax.swing");
 						});
 						loader.setOptions(DynamicClassLoader.OPTION_ALLOW_DEFINE);
 						loader.addUrls(urls);
@@ -221,7 +221,7 @@ public class MsaAuthWindow {
 								DynamicClassLoader loader = new DynamicClassLoader();
 								loader.addLoadRestriction(str -> {
 									return str.contains("org.asf") && !str.contains("SwingFXWebView")
-											&& !str.contains("AuthAdapter");
+											&& !str.contains("AuthAdapter") || str.contains("javax.swing");
 								});
 								loader.setOptions(DynamicClassLoader.OPTION_ALLOW_DEFINE);
 								loader.addUrls(urls);

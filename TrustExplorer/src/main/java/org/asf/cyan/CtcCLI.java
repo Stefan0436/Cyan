@@ -7,11 +7,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
 import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.asf.cyan.CtcUtil.HttpCredential;
 import org.asf.cyan.security.TrustContainerBuilder;
 
 public class CtcCLI {
@@ -21,7 +24,58 @@ public class CtcCLI {
 	private static URL dest;
 	private static String lastGroup = "";
 
+	private static HttpBasicCredential cred1;
+	private static HttpBearerCredential cred2;
+
+	public static class HttpBasicCredential extends HttpCredential {
+
+		@Override
+		public String buildHeader(String group, String type) {
+			Object[] cred = getCredentials(group);
+			if (cred == null)
+				return null;
+			return Base64.getEncoder().encodeToString((cred[0] + ":" + cred[1]).getBytes());
+		}
+
+		@Override
+		public boolean supportsAuthMethod(String type) {
+			return type.equals("Basic");
+		}
+
+		@Override
+		public boolean supportsGroup(String group) {
+			return true;
+		}
+
+	}
+
+	public static class HttpBearerCredential extends HttpCredential {
+
+		@Override
+		public String buildHeader(String group, String type) {
+			System.out.print("Authorization bearer token (often a JWT): ");
+			char[] token = System.console().readPassword();
+			return "Bearer " + new String(token);
+		}
+
+		@Override
+		public boolean supportsGroup(String group) {
+			return true;
+		}
+
+		@Override
+		public boolean supportsAuthMethod(String type) {
+			return type.equals("Bearer");
+		}
+
+	}
+
 	public static void main(String[] args) throws IOException {
+		if (cred1 == null)
+			cred1 = new HttpBasicCredential();
+		if (cred2 == null)
+			cred2 = new HttpBearerCredential();
+
 		if (args.length < 3 && args.length >= 1 && args[0].equalsIgnoreCase("manual")) {
 			startManual();
 			return;
@@ -75,9 +129,7 @@ public class CtcCLI {
 			});
 		} else if (args[0].equals("publish")) {
 			dest = new URL(args[2]);
-			CtcUtil.publish(new File(args[1]), dest, (group) -> {
-				return getCredentials(group);
-			}, (published) -> {
+			CtcUtil.publish(new File(args[1]), dest, List.of(cred1, cred2), (published) -> {
 				if (published.startsWith("/"))
 					published = published.substring(1);
 				if (!args[2].endsWith("/"))

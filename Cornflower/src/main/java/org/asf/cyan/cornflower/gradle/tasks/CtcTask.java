@@ -1,23 +1,31 @@
 package org.asf.cyan.cornflower.gradle.tasks;
 
 import java.io.File;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Enumeration;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.asf.cyan.CtcUtil;
+import org.asf.cyan.CtcUtil.HttpCredential;
 import org.asf.cyan.cornflower.gradle.Cornflower;
 import org.asf.cyan.cornflower.gradle.utilities.GradleUtil;
 import org.asf.cyan.cornflower.gradle.utilities.ITaskExtender;
+import org.asf.cyan.minecraft.toolkits.amasauth.windowed.AMASAuthWindow;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.provider.Provider;
@@ -33,12 +41,31 @@ import groovy.lang.Closure;
 public class CtcTask extends DefaultTask implements ITaskExtender {
 
 	@SuppressWarnings("unused")
-	private class Credentials {
+	private class Credentials extends HttpCredential {
 		public String group;
 		public String username;
 		private char[] password;
 
+		private boolean setType = false;
+		public String type = "@ NONE @";
+
+		private Closure<?> invokeLater = null;
+
+		public void invokeLater(Closure<?> closure) {
+			if (!setType)
+				throw new IllegalStateException(
+						"Cannot use invokeLater BEFORE specifying the credential type (Basic or Bearer)");
+			this.invokeLater = closure;
+		}
+
+		public void type(String type) {
+			this.type = type;
+			setType = true;
+		}
+
 		public void username(String username) {
+			if (!setType)
+				type = "Basic";
 			this.username = username;
 		}
 
@@ -46,7 +73,18 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 			this.group = group;
 		}
 
+		public void bearer(String token) {
+			if (!setType)
+				type = "Bearer";
+			if (token != null)
+				this.password = token.toCharArray();
+			else
+				password = null;
+		}
+
 		public void password(String password) {
+			if (!setType)
+				type = "Basic";
 			this.password = password.toCharArray();
 		}
 
@@ -55,9 +93,135 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 			closure.call();
 			return this;
 		}
+
+		@Override
+		public String provideHeaderEarly() {
+			if (!type.equals("@ NONE @")) {
+				if (password == null)
+					return null;
+				if (type.equals("Bearer"))
+					return "Bearer " + new String(password);
+				else if (type.equals("Basic"))
+					return "Basic "
+							+ Base64.getEncoder().encodeToString((username + ":" + new String(password)).getBytes());
+			}
+			return null;
+		}
+
+		@Override
+		public boolean supportsAuthMethod(String type) {
+			return type.equals(this.type);
+		}
+
+		@Override
+		public String buildHeader(String group, String type) {
+			if (invokeLater != null) {
+				invokeLater.setDelegate(this);
+				invokeLater.call();
+				invokeLater = null;
+			}
+
+			if (!type.equals("@ NONE @")) {
+				if (type.equals("Bearer"))
+					return "Bearer " + new String(password);
+				else if (type.equals("Basic"))
+					return "Basic "
+							+ Base64.getEncoder().encodeToString((username + ":" + new String(password)).getBytes());
+			}
+			return null;
+		}
+
+		@Override
+		public boolean supportsGroup(String group) {
+			if (this.group == null)
+				return true;
+			return this.group.equals(group);
+		}
 	}
 
-	private ArrayList<Credentials> credentials = new ArrayList<Credentials>();
+	public static String getAmasToken(String protocol, String host, String group) throws IOException {
+		File tokenCache = GradleUtil.getSharedCacheFolder(Cornflower.class, "amas-tokens");
+		File tokenFile = new File(tokenCache, host + "." + group + ".token");
+
+		String token = null;
+		if (tokenFile.exists()) {
+			URL u = new URL(protocol + "://" + host + "/users/authenticate?amas-token="
+					+ URLEncoder.encode(new String(Files.readAllBytes(tokenFile.toPath())), "UTF-8") + "&group="
+					+ URLEncoder.encode(group, "UTF-8") + "&service=printbearer");
+
+			try {
+				HttpURLConnection conn = (HttpURLConnection) u.openConnection();
+				int resp = conn.getResponseCode();
+				if (resp != 401 && resp != 403) {
+					if (resp == 302) {
+						String location = conn.getHeaderField("Location");
+						if (location.startsWith("about:blank")) {
+							Map<String, String> query = parseQuery(location.substring("about:blank".length()));
+							token = query.get("amas-token");
+							Files.write(tokenFile.toPath(), token.getBytes());
+							return token;
+						}
+					}
+				}
+			} catch (IOException e) {
+			}
+		}
+		if (token == null) {
+			token = new AMASAuthWindow(protocol + "://" + host, group).getToken();
+		}
+
+		if (token != null) {
+			Files.write(tokenFile.toPath(), token.getBytes());
+		}
+		return token;
+	}
+
+	private static Map<String, String> parseQuery(String query) {
+
+		HashMap<String, String> map = new HashMap<String, String>();
+
+		String key = "";
+		String value = "";
+		boolean isKey = true;
+
+		for (int i = 0; i < query.length(); i++) {
+			char ch = query.charAt(i);
+			if (ch == '&' || ch == '?') {
+				if (isKey && !key.isEmpty()) {
+					map.put(key, "");
+					key = "";
+				} else if (!isKey && !key.isEmpty()) {
+					try {
+						map.put(key, URLDecoder.decode(value, "UTF-8"));
+					} catch (UnsupportedEncodingException e) {
+						map.put(key, value);
+					}
+					isKey = true;
+					key = "";
+					value = "";
+				}
+			} else if (ch == '=') {
+				isKey = !isKey;
+			} else {
+				if (isKey) {
+					key += ch;
+				} else {
+					value += ch;
+				}
+			}
+		}
+		if (!key.isEmpty() || !value.isEmpty()) {
+			try {
+				map.put(key, URLDecoder.decode(value, "UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				map.put(key, value);
+			}
+		}
+
+		return map;
+	}
+
+	private ArrayList<HttpCredential> credentials = new ArrayList<HttpCredential>();
 	public ArrayList<File> inputCache = new ArrayList<File>();
 
 	public void credentials(Closure<?> closure) {
@@ -308,14 +472,7 @@ public class CtcTask extends DefaultTask implements ITaskExtender {
 		} else if (method.equals("publish")) {
 			for (String input : inputs) {
 				if (input.endsWith(".ctc")) {
-					CtcUtil.publish(new File(input), new URL(outputStr), (group) -> {
-						Optional<Credentials> cred = credentials.stream().filter(t -> t.group.equals(group))
-								.findFirst();
-						if (!cred.isPresent())
-							return null;
-
-						return new Object[] { cred.get().username, cred.get().password };
-					}, (published) -> {
+					CtcUtil.publish(new File(input), new URL(outputStr), credentials, (published) -> {
 						System.out.println("Published: " + published + " -> " + outputStr + "/" + published);
 					});
 				}
