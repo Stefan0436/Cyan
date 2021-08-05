@@ -67,7 +67,7 @@ public class DownloadsBackend extends JWebService {
 				selecting = false;
 
 				File sources = new File(function.getServerContext().getSourceDirectory(),
-						"cyan/versions/" + info.cyanVersion + "/" + info.gameVersion + "/" + info.platform + "/"
+						"cyanfiles/" + info.cyanVersion + "/" + info.gameVersion + "/" + info.platform + "/"
 								+ info.platformVersion + "/cyan-sources-" + info.cyanVersion + ".zip");
 
 				if (sources.exists()) {
@@ -102,7 +102,7 @@ public class DownloadsBackend extends JWebService {
 					strmO.close();
 
 					File target = new File(function.getServerContext().getSourceDirectory(),
-							"cyan/versions/" + info.cyanVersion + "/" + info.gameVersion + "/" + info.platform + "/"
+							"cyanfiles/" + info.cyanVersion + "/" + info.gameVersion + "/" + info.platform + "/"
 									+ info.platformVersion + "/cyan-sources-" + info.cyanVersion + ".zip");
 					if (!target.getParentFile().exists())
 						target.mkdirs();
@@ -182,8 +182,8 @@ public class DownloadsBackend extends JWebService {
 		if (cyan == null)
 			return null;
 
-		File zip = new File(function.getServerContext().getSourceDirectory(), "cyan/versions/" + cyan + "/" + game + "/"
-				+ platform + "/" + version + "/cyan-sources-" + cyan + ".zip");
+		File zip = new File(function.getServerContext().getSourceDirectory(),
+				"cyanfiles/" + cyan + "/" + game + "/" + platform + "/" + version + "/cyan-sources-" + cyan + ".zip");
 		if (!zip.exists())
 			return null;
 
@@ -297,7 +297,7 @@ public class DownloadsBackend extends JWebService {
 			manifest = new UpdateInfo(new String(strm.readAllBytes()));
 			strm.close();
 		} catch (IOException e) {
-
+			manifest = new UpdateInfo(new String(""));
 		}
 
 		ready = true;
@@ -565,7 +565,7 @@ public class DownloadsBackend extends JWebService {
 			return null;
 
 		File dir = new File(function.getServerContext().getSourceDirectory(),
-				"cyan/versions/" + cyan + "/" + game + "/" + platform + "/" + version);
+				"cyanfiles/" + cyan + "/" + game + "/" + platform + "/" + version);
 		return dir;
 	}
 
@@ -580,7 +580,10 @@ public class DownloadsBackend extends JWebService {
 		String version = function.parameters[3];
 		String cyan = getCyanVersion(new FunctionInfo(function).setParams(function.parameters));
 
-		return "/cyan/versions/" + cyan + "/" + game + "/" + platform + "/" + version;
+		String root = function.getContextRoot();
+		if (!root.endsWith("/"))
+			root += "/";
+		return root + "cyanfiles/" + cyan + "/" + game + "/" + platform + "/" + version;
 	}
 
 	@Function

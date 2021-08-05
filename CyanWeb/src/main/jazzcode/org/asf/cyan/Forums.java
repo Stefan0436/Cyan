@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Map;
 
 import org.asf.connective.usermanager.UserManagerModule;
@@ -28,6 +29,9 @@ import org.asf.rats.Memory;
 import org.asf.rats.http.ProviderContext;
 
 public class Forums extends AbstractWebComponent {
+
+	// TODO: AMAS user check, prevent username/password change if using AMAS to log
+	// in.
 
 	private AuthResult user = null;
 	private IAuthFrontend frontend = Memory.getInstance().get("usermanager.auth.frontend")
@@ -61,12 +65,19 @@ public class Forums extends AbstractWebComponent {
 		if (user != null) {
 			function.writeLine("account();");
 		} else {
-			getCookies().set("cyanforums.session",
-					Cookie.create("cyanforums.session").setValue("logout").setOption(CookieOption.PATH, "/"));
+			getCookies().set("cyanforums.session", Cookie.create("cyanforums.session").setValue("logout")
+					.setExpires(new Date(1000)).setOption(CookieOption.PATH, "/"));
+			getCookies().set("cyanforums.amas.token", Cookie.create("cyanforums.amas.token").setValue("logout")
+					.setExpires(new Date(1000)).setOption(CookieOption.PATH, "/"));
+
 			function.writeLine("document.getElementById(\"loginFrame\").classList.toggle(\"loginFrameActive\");");
 			function.writeLine("document.getElementById(\"loginFrame\").classList.toggle(\"loginFrameInactive\");");
-			function.writeLine("document.getElementById(\"cancelLogin\").classList.toggle(\"cancelLoginActive\");");
-			function.writeLine("document.getElementById(\"cancelLogin\").classList.toggle(\"cancelLoginInactive\");");
+
+			if (!frontend.getClass().getTypeName().contains("org.asf.connective.amas")) {
+				function.writeLine("document.getElementById(\"cancelLogin\").classList.toggle(\"cancelLoginActive\");");
+				function.writeLine(
+						"document.getElementById(\"cancelLogin\").classList.toggle(\"cancelLoginInactive\");");
+			}
 
 			String url = "/" + function.getContextRoot() + "/" + UserManagerModule.getBase() + "/"
 					+ UserManagerModule.getAuthCommand();
@@ -158,8 +169,10 @@ public class Forums extends AbstractWebComponent {
 						+ userData.get("avatar", String.class) + "')\")");
 			}
 		} else {
-			getCookies().set("cyanforums.session",
-					Cookie.create("cyanforums.session").setValue("logout").setOption(CookieOption.PATH, "/"));
+			getCookies().set("cyanforums.session", Cookie.create("cyanforums.session").setValue("logout")
+					.setExpires(new Date(1000)).setOption(CookieOption.PATH, "/"));
+			getCookies().set("cyanforums.amas.token", Cookie.create("cyanforums.amas.token").setValue("logout")
+					.setExpires(new Date(1000)).setOption(CookieOption.PATH, "/"));
 		}
 	}
 
@@ -222,8 +235,10 @@ public class Forums extends AbstractWebComponent {
 			return;
 
 		if (!frontend.check("cyanforums", getRequest(), getResponse())) {
-			getCookies().set("cyanforums.session",
-					Cookie.create("cyanforums.session").setValue("logout").setOption(CookieOption.PATH, "/"));
+			getCookies().set("cyanforums.session", Cookie.create("cyanforums.session").setValue("logout")
+					.setExpires(new Date(1000)).setOption(CookieOption.PATH, "/"));
+			getCookies().set("cyanforums.amas.token", Cookie.create("cyanforums.amas.token").setValue("logout")
+					.setExpires(new Date(1000)).setOption(CookieOption.PATH, "/"));
 			function.write("&#10068;");
 		}
 	}
@@ -231,14 +246,21 @@ public class Forums extends AbstractWebComponent {
 	@Function
 	public void init(FunctionInfo function) throws IOException {
 		Map<String, String> query = QueryUtil.parseQuery(function.getRequest().query);
+
+		if (frontend.getClass().getTypeName().contains("org.asf.connective.amas")) {
+			function.writeLine("<meta id=\"is-amas\" />");
+		}
+
 		if (query.containsKey("login") && query.get("login").equals("true")) {
 			function.getResponse().setContent("text/html",
 					"<script>parent.navDirect(parent.window.location);</script>");
 			return;
 		}
 		if (query.containsKey("logout") && query.get("logout").equals("true")) {
-			getCookies().set("cyanforums.session",
-					Cookie.create("cyanforums.session").setValue("logout").setOption(CookieOption.PATH, "/"));
+			getCookies().set("cyanforums.session", Cookie.create("cyanforums.session").setValue("logout")
+					.setExpires(new Date(1000)).setOption(CookieOption.PATH, "/"));
+			getCookies().set("cyanforums.amas.token", Cookie.create("cyanforums.amas.token").setValue("logout")
+					.setExpires(new Date(1000)).setOption(CookieOption.PATH, "/"));
 		}
 	}
 

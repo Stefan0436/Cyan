@@ -41,6 +41,18 @@ public class Downloads extends AbstractWebComponent {
 	}
 
 	@Function
+	@Referenceable
+	public void checkBackend(FunctionInfo function) throws InvocationTargetException, IOException {
+		if (!DownloadsBackend.isReady()) {
+			function.getResponse().status = 404;
+			function.getResponse().message = "File not found (yet)";
+			return;
+		}
+		function.getResponse().status = 204;
+		function.getResponse().message = "No content";
+	}
+
+	@Function
 	public boolean setToSpecificPage(FunctionInfo function) {
 		boolean ready = true;
 		if (!DownloadsBackend.isReady()) {
@@ -144,8 +156,14 @@ public class Downloads extends AbstractWebComponent {
 						"<br /><center>We're sorry, but our download backend has been stopped for maintenance.<br />Please try again later.</center>");
 			} else {
 				function.variables.put("http.path",
-						URLEncoder.encode(URLEncoder.encode(getRequest().path, "UTF-8"), "UTF-8"));
-				function.variables.putIfAbsent("menuentry", backend.getFirstType(function));
+						URLEncoder.encode(URLEncoder.encode(function.getPagePath(), "UTF-8"), "UTF-8"));
+				String type = backend.getFirstType(function);
+				if (type == null) {
+					function.writeLine(
+							"<br /><center>We're sorry, but our downloads backend cannot reach the Cyan release files.<br />This kind of issue will usually resolve itself, please try again later.</center>");
+					return;
+				}
+				function.variables.putIfAbsent("menuentry", type);
 			}
 		} else {
 			function.writeLine("<script>");

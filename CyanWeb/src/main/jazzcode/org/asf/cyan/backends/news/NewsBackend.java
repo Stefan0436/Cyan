@@ -115,7 +115,12 @@ public class NewsBackend extends JWebService {
 			func.variables.put("path", function.namedParameters.get("execPath"));
 			func.variables.put("title", msg.title);
 			func.variables.put("author", msg.author);
-			func.variables.put("authorimg", msg.authorImagePath);
+
+			String root = function.getContextRoot();
+			if (!root.endsWith("/"))
+				root += "/";
+
+			func.variables.put("authorimg", root + msg.authorImagePath);
 			func.variables.put("message", msg.message);
 			func.variables.put("datecp", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(msg.time));
 			func.variables.put("datepretty", new SimpleDateFormat("MM/dd/yyyy HH:mm").format(msg.time));

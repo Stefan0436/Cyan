@@ -231,8 +231,10 @@ function toggleChangePassword() {
 
 function cancelLogin() {
 	document.getElementById("loginFrame").classList.toggle("loginFrameInactive");
-	document.getElementById("cancelLogin").classList.toggle("cancelLoginInactive");
-	document.getElementById("cancelLogin").classList.toggle("cancelLoginActive");
+	if (document.getElementById("is-amas") == null) {
+		document.getElementById("cancelLogin").classList.toggle("cancelLoginInactive");
+		document.getElementById("cancelLogin").classList.toggle("cancelLoginActive");
+	}
 	setTimeout(function() { 
 		document.getElementById("loginFrame").classList.toggle("loginFrameActive");
 	}, 500);

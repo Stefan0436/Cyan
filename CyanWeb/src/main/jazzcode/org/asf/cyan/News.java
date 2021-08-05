@@ -59,7 +59,7 @@ public class News extends AbstractWebComponent {
 		}
 
 		if (ready) {
-			backend.getNews(function.addNamedParams(Map.of("execPath", getRequest().path)));
+			backend.getNews(function.addNamedParams(Map.of("execPath", function.getPagePath())));
 		} else {
 			function.writeLine("<script>");
 			function.writeLine("\tfunction checkBackend() {");

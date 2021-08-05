@@ -107,7 +107,7 @@ platforms {
  		version "20210706.113038"
  
  		// Forge version
- 		modloader "37.0.12"
+ 		modloader "37.0.25"
  	}
 
 	// Intermediary Platform, for fabric support
@@ -141,7 +141,7 @@ platforms {
 		// Paper version:
 		//
 		// def paperVersion = getSupportedPaperVersion(gameVersion, cyanVersion)
-		modloader "133" // paperVersion
+		modloader "157" // paperVersion
 
 		//
 		// Paper mappings version, it is best to only use mappings that have been given a green light by the Cyan team.
@@ -157,7 +157,7 @@ platforms {
 		//
 		//
 		// Commit hash and paper build for mappings version (commit:PB_build)
-		version "b32a3b147cba623c87f4b72bcaa2aa4d2b4e165d:PB_133" // getSpigotMappingsByPaperVersion(gameVersion, paperVersion)
+		version "f521a18a17f32997793b2d0b2ebcd7890f200fc8:PB_157" // getSpigotMappingsByPaperVersion(gameVersion, paperVersion)
 	}
 }
 

@@ -171,9 +171,20 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 	 * @throws IOException If the directory cannot be set
 	 */
 	public static void setMinecraftDirectory(File directory) throws IOException {
+		setMinecraftDirectory(directory, false);
+	}
+
+	/**
+	 * Set the Minecraft installation directory
+	 * 
+	 * @param directory     The new Minecraft installation directory
+	 * @param ignoreWarning True to prevent warnings from being logged
+	 * @throws IOException If the directory cannot be set
+	 */
+	public static void setMinecraftDirectory(File directory, boolean ignoreWarning) throws IOException {
 		MinecraftToolkit.trace("SET Minecraft Installation directory to " + directory.getCanonicalPath() + ", caller: "
 				+ CallTrace.traceCallName());
-		if (initialized)
+		if (initialized && !ignoreWarning)
 			MinecraftToolkit.warn(
 					"The Minecraft installation directory was set after the toolkit was initialized, this is **bad** practice, caller: "
 							+ CallTrace.traceCallName());

@@ -33,6 +33,13 @@ public class UploadPreview extends AbstractWebComponent {
 
 	@Function
 	@Referenceable
+	public void checkBackend(FunctionInfo function) {
+		if (!NewsBackend.isReady())
+			function.getResponse().status = 500;
+	}
+
+	@Function
+	@Referenceable
 	public void confirm(FunctionInfo function) throws IOException {
 		boolean ready = true;
 		if (!NewsBackend.isReady()) {
@@ -126,6 +133,7 @@ public class UploadPreview extends AbstractWebComponent {
 
 					NewsMessage msg = NewsMessage.load(file);
 					function.variables.put("username", user.getUsername());
+					function.variables.put("root", function.getContextRoot());
 					function.variables.put("file",
 							URLEncoder.encode(URLEncoder.encode(file.getCanonicalPath(), "UTF-8"), "UTF-8"));
 					function.variables.put("publishpage",

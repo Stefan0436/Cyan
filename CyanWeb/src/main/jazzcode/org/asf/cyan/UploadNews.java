@@ -181,7 +181,8 @@ public class UploadNews extends AbstractWebComponent {
 			return;
 		}
 
-		function.variables.put("http.location",
+		function.variables.put(
+				"http.location",
 				URLEncoder.encode(URLEncoder.encode(function.getRequest().path, "UTF-8"), "UTF-8"));
 		Map<String, String> query = QueryUtil.parseQuery(getRequest().query);
 		if (query.containsKey("preview") && query.get("preview").equals("true")) {

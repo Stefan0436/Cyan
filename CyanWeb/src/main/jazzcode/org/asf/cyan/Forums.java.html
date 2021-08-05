@@ -121,12 +121,18 @@ window.navDirect = function(target) {
 				</div>
 			</div>
 		</div>
-		<iframe class="loginFrameInactive" id="loginFrame" frameBorder="0">
+		<iframe class="loginFrameInactive" id="loginFrame" onLoad="amasCancelHandler(this)" frameBorder="0">
 		</iframe>
 		<button id="cancelLogin" class="cancelLoginInactive" onclick="cancelLogin()">Cancel Login</button>
 	</div>
 </body>
 <script>
+function amasCancelHandler(frame) {
+	if (frame.contentWindow.location.href === "about:blank?amas-cancel=true"){
+		cancelLogin();
+	}
+}
+
 function accountCheck() {
 	<?jcil
 	run accountCheckJavaScript()
