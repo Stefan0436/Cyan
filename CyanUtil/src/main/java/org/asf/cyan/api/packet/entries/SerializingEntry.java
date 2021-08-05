@@ -13,12 +13,12 @@ public class SerializingEntry<T> implements PacketEntry<T> {
 	public class CounterOutputStream extends OutputStream {
 
 		private long l = 0;
-		
+
 		@Override
 		public void write(int arg0) throws IOException {
 			l++;
 		}
-		
+
 		public long length() {
 			return l;
 		}
@@ -27,7 +27,7 @@ public class SerializingEntry<T> implements PacketEntry<T> {
 
 	private T val;
 
-	SerializingEntry() {
+	public SerializingEntry() {
 
 	}
 
