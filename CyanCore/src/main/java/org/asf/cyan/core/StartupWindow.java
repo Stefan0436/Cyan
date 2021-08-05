@@ -120,6 +120,9 @@ public class StartupWindow {
 	private String lastMessageText;
 
 	public void log(String message) {
+		if (!shown)
+			return;
+		
 		lastMessageText = message;
 		if (!message.isEmpty())
 			lastMessage.setText(message);

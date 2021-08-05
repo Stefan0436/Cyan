@@ -64,7 +64,7 @@ public class CyanPackResources extends VanillaPackResources {
 					if (strm != null)
 						return strm;
 					else {
-						if (location.getPath().equals("mod.mcmeta"))
+						if (location.getPath().equals("pack.mcmeta"))
 							return new ByteArrayInputStream(getPackMeta().getBytes());
 					}
 				}
@@ -74,7 +74,7 @@ public class CyanPackResources extends VanillaPackResources {
 			if (strm != null)
 				return strm;
 			else {
-				if (location.getPath().equals("mod.mcmeta"))
+				if (location.getPath().equals("pack.mcmeta"))
 					return new ByteArrayInputStream(getPackMeta().getBytes());
 			}
 		}
