@@ -39,9 +39,9 @@ public abstract class CyanComponent {
 	 *
 	 */
 	protected static class CallTrace {
-		
+
 		private static ClassLoader traceLoader = ClassLoader.getPlatformClassLoader();
-		
+
 		/**
 		 * Sets the class loader used by CallTrace
 		 */
@@ -216,9 +216,10 @@ public abstract class CyanComponent {
 		if (LOG == null)
 			initLogger();
 
-		String markerName = CallTrace.traceCallName(2);
-		if (Stream.of(CallTrace.traceCall(2).getDeclaredMethods()).anyMatch(t -> t.getName() == "getMarker")) {
-			Method meth = Stream.of(CallTrace.traceCall(2).getDeclaredMethods()).filter(t -> t.getName() == "getMarker")
+		final Class<?> caller = CallTrace.traceCall(2);
+		String markerName = caller.getSimpleName();
+		if (Stream.of(caller.getDeclaredMethods()).anyMatch(t -> t.getName() == "getMarker")) {
+			Method meth = Stream.of(caller.getDeclaredMethods()).filter(t -> t.getName() == "getMarker")
 					.findFirst().get();
 			try {
 				meth.setAccessible(true);
@@ -253,14 +254,14 @@ public abstract class CyanComponent {
 	static void logwm(String message, Level level, Throwable data) {
 		if (LOG == null)
 			initLogger();
-		trace("SEND " + level.toString() + " message from class " + CallTrace.traceCallName(2) + ", message: "
-				+ message);
-		trace("PARSE marker of the " + CallTrace.traceCallName(2) + " class");
-		String markerName = CallTrace.traceCallName(2);
+		final Class<?> caller = CallTrace.traceCall(2);
+		trace("SEND " + level.toString() + " message from class " + caller.getSimpleName() + ", message: " + message);
+		String markerName = caller.getSimpleName();
+		trace("PARSE marker of the " + caller.getSimpleName() + " class");
 		try {
-			if (Stream.of(CallTrace.traceCall(2).getDeclaredMethods()).anyMatch(t -> t.getName() == "getMarker")) {
-				trace("OVERRIDE marker name by " + CallTrace.traceCallName(2) + ", getMarker method was found");
-				Method meth = Stream.of(CallTrace.traceCall(2).getDeclaredMethods())
+			if (Stream.of(caller.getDeclaredMethods()).anyMatch(t -> t.getName() == "getMarker")) {
+				trace("OVERRIDE marker name by " + caller + ", getMarker method was found");
+				Method meth = Stream.of(caller.getDeclaredMethods())
 						.filter(t -> t.getName() == "getMarker").findFirst().get();
 				try {
 					meth.setAccessible(true);
@@ -272,7 +273,7 @@ public abstract class CyanComponent {
 
 		}
 		if (markerName.startsWith("Cyan") && !markerName.substring("Cyan".length()).equals("Component")) {
-			trace(CallTrace.traceCallName(2) + " is a CYAN component, stripping 'Cyan' from marker name");
+			trace(caller.getSimpleName() + " is a CYAN component, stripping 'Cyan' from marker name");
 			markerName = markerName.substring("Cyan".length());
 		}
 		if (markerName.startsWith("Minecraft") && !markerName.substring("Minecraft".length()).equals("Toolkit")) {
@@ -515,7 +516,7 @@ public abstract class CyanComponent {
 	protected static <T> Class<T>[] findClasses(CyanComponent implementation, Class<T> interfaceOrSupertype,
 			ClassLoader... loaders) {
 		ArrayList<Class<T>> classes = new ArrayList<Class<T>>();
-		
+
 		for (String cls : implementation.findClassNamesInternal(interfaceOrSupertype)) {
 			for (ClassLoader loader : loaders) {
 				try {
@@ -525,7 +526,7 @@ public abstract class CyanComponent {
 				}
 			}
 		}
-		
+
 		return classes.toArray(t -> new Class[t]);
 	}
 
