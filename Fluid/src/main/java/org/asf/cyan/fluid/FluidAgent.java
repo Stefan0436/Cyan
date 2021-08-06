@@ -123,6 +123,7 @@ public class FluidAgent extends CyanComponent {
 	 * @throws IOException If adding the jar fails
 	 */
 	public static void addToClassPath(File f) throws IOException {
+		inst.appendToSystemClassLoaderSearch(new JarFile(f));
 		inst.appendToBootstrapClassLoaderSearch(new JarFile(f));
 	}
 

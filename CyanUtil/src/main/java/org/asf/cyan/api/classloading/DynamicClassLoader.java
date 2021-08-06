@@ -303,7 +303,7 @@ public class DynamicClassLoader extends URLClassLoader {
 			if (l == null)
 				l = Thread.currentThread().getContextClassLoader();
 			if (l == this)
-				l = getClass().getClassLoader();
+				l = ClassLoader.getSystemClassLoader();
 			_class = Class.forName(name, true, l);
 		}
 		if (!CyanClassTracker.loadedClasses.containsKey(name)) {
@@ -342,7 +342,7 @@ public class DynamicClassLoader extends URLClassLoader {
 			if (l == null)
 				l = Thread.currentThread().getContextClassLoader();
 			if (l == this)
-				l = getClass().getClassLoader();
+				l = ClassLoader.getSystemClassLoader();
 			cl = l.loadClass(name);
 		}
 
@@ -363,7 +363,7 @@ public class DynamicClassLoader extends URLClassLoader {
 	Class<?> doLoadClass(String name, boolean resolve) throws ClassNotFoundException {
 		if (!allowSelfToLoad || classRestrictions.stream().anyMatch(t -> t.apply(name))) {
 			if (getParent() == null)
-				return getClass().getClassLoader().loadClass(name);
+				return ClassLoader.getSystemClassLoader().loadClass(name);
 			else
 				return getParent().loadClass(name);
 		}
@@ -393,7 +393,7 @@ public class DynamicClassLoader extends URLClassLoader {
 					}
 				}
 				if (name.startsWith("java."))
-					return getClass().getClassLoader().loadClass(name);
+					return ClassLoader.getSystemClassLoader().loadClass(name);
 
 				BufferedInputStream strm = new BufferedInputStream(u.openStream());
 				byte[] data = strm.readAllBytes();
@@ -431,7 +431,7 @@ public class DynamicClassLoader extends URLClassLoader {
 		if (cl == this)
 			cl = Thread.currentThread().getContextClassLoader();
 		if (cl == this)
-			cl = getClass().getClassLoader();
+			cl = ClassLoader.getSystemClassLoader();
 
 		try {
 			URL cSource = caller.getProtectionDomain().getCodeSource().getLocation();

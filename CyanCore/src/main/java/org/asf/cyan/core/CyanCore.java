@@ -1,9 +1,11 @@
 package org.asf.cyan.core;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -461,6 +463,13 @@ public class CyanCore extends CyanComponent {
 		if (loader == null) {
 			loader = new DynamicClassLoader("CyanCore Internal Class Loader", CyanCore.class.getClassLoader());
 			loader.setOptions(DynamicClassLoader.OPTION_PREVENT_AUTOSECURE);
+			loader.setOptions(DynamicClassLoader.OPTION_ALLOW_DEFINE);
+			loader.addDefaultCp();
+			if (new File("vanilla-server.jar").exists())
+				try {
+					loader.addUrl(new File("vanilla-server.jar").toURI().toURL());
+				} catch (MalformedURLException e) {
+				}
 		} else
 			throw new IllegalStateException("CyanCore Class Loader is already registered!");
 	}

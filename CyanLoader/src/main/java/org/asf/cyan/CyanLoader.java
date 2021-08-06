@@ -2865,6 +2865,9 @@ public class CyanLoader extends ModkitModloader
 		});
 		addToSystemLater.clear();
 
+		info("Reloading reflections...");
+		CyanCore.reinitReflections();
+
 		info("Downloading coremod maven dependencies...");
 		downloadMavenDependencies(coremodMavenDependencies);
 
