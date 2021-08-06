@@ -85,9 +85,9 @@ public abstract class Modloader extends CyanComponent {
 						componentCls = (Class<IModloaderComponent>) loader.loadClass(typeName);
 						e = null;
 						break;
-					} catch (ClassNotFoundException ex) {
-						if (e == null)
-							e = ex;
+					} catch (ClassNotFoundException | NoClassDefFoundError ex) {
+						if (e == null && ex instanceof ClassNotFoundException)
+							e = (ClassNotFoundException) ex;
 					}
 				}
 				if (e != null)
