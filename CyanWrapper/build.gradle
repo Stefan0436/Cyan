@@ -3218,6 +3218,8 @@ task updateServerData() {
 			if (loader.equals("forge")) {
 				def mappings = data[3]
 				def wrapperVer = info.libraryVersions.getOrDefault("CyanWrapper", project.version)
+				if (project.hasProperty("useCurrentVersions"))
+					wrapperVer = project.version
 				wrapperVer = wrapperVer.substring(0, wrapperVer.lastIndexOf("-cyan-" + cyanversion))
 				
 				finalizedBy project.tasks.register('modloader_forge_' + game.replaceAll('[^A-Za-z0-9_]', "_") + '_' + version.replaceAll('[^A-Za-z0-9_]', "_") + '_Installer', KickStartInstallerTask) {
@@ -3229,6 +3231,8 @@ task updateServerData() {
 				}
 			} else if (loader.equals("fabric")) {
 				def wrapperVer = info.libraryVersions.getOrDefault("CyanWrapper", project.version)
+				if (project.hasProperty("useCurrentVersions"))
+					wrapperVer = project.version
 				wrapperVer = wrapperVer.substring(0, wrapperVer.lastIndexOf("-cyan-" + cyanversion))
 				
 				finalizedBy project.tasks.register('modloader_fabric_' + game.replaceAll('[^A-Za-z0-9_]', "_") + '_' + version.replaceAll('[^A-Za-z0-9_]', "_") + '_Installer', KickStartInstallerTask) {
@@ -3241,6 +3245,8 @@ task updateServerData() {
 			} else if (loader.equals("paper")) {
 				def mappings = data[3]
 				def wrapperVer = info.libraryVersions.getOrDefault("CyanWrapper", project.version)
+				if (project.hasProperty("useCurrentVersions"))
+					wrapperVer = project.version
 				wrapperVer = wrapperVer.substring(0, wrapperVer.lastIndexOf("-cyan-" + cyanversion))
 				
 				finalizedBy project.tasks.register('modloader_paper_' + game.replaceAll('[^A-Za-z0-9_]', "_") + '_' + version.replaceAll('[^A-Za-z0-9_]', "_") + '_Installer', KickStartInstallerTask) {
@@ -3274,7 +3280,7 @@ task updateServerData() {
 				if (tsk.getArchiveClassifier().getOrNull() == null || tsk.getArchiveClassifier().getOrNull().isEmpty())
 					println " +-- Building maven artifact for " + proj.getName() + "..."
 				
-                if (info.libraryVersions.containsKey(proj.getName())) {
+                if (info.libraryVersions.containsKey(proj.getName()) && !project.hasProperty("useCurrentVersions")) {
                     ver = info.libraryVersions.get(proj.getName())
                 }
                 

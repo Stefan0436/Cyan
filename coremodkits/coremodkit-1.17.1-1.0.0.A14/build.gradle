@@ -6,7 +6,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A47'
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A48'
 	}
 }
 
@@ -141,7 +141,7 @@ platforms {
 		// Paper version:
 		//
 		// def paperVersion = getSupportedPaperVersion(gameVersion, cyanVersion)
-		modloader "157" // paperVersion
+		modloader "158" // paperVersion
 
 		//
 		// Paper mappings version, it is best to only use mappings that have been given a green light by the Cyan team.
@@ -157,7 +157,7 @@ platforms {
 		//
 		//
 		// Commit hash and paper build for mappings version (commit:PB_build)
-		version "f521a18a17f32997793b2d0b2ebcd7890f200fc8:PB_157" // getSpigotMappingsByPaperVersion(gameVersion, paperVersion)
+		version "020f18aaa6c302679272e97fddb6bb12925a25d8:PB_158" // getSpigotMappingsByPaperVersion(gameVersion, paperVersion)
 	}
 }
 

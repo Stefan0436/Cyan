@@ -11,6 +11,6 @@ echo Preparing LiteLibs...
 ./gradlew -c settings.lite.gradle installLiteLibs || exit 1
 
 echo Creating patch directory...
-./gradlew updateServerData || exit 1
+./gradlew updateServerData "$@" || exit 1
 
 echo Soft-patch created in build/Wrapper/softpatch.

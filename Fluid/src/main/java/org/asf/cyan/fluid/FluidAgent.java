@@ -21,6 +21,8 @@ import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.bytecode.FluidClassPool;
 import org.asf.cyan.fluid.bytecode.sources.LoaderClassSourceProvider;
 import org.asf.cyan.fluid.remapping.Mapping;
+import org.asf.cyan.api.classloading.DynamicClassLoader;
+import org.asf.cyan.api.classloading.DynamicClassLoader.LoadedClassProvider;
 import org.objectweb.asm.tree.ClassNode;
 
 /**
@@ -121,7 +123,7 @@ public class FluidAgent extends CyanComponent {
 	 * @throws IOException If adding the jar fails
 	 */
 	public static void addToClassPath(File f) throws IOException {
-		inst.appendToSystemClassLoaderSearch(new JarFile(f));
+		inst.appendToBootstrapClassLoaderSearch(new JarFile(f));
 	}
 
 	/**
@@ -148,6 +150,22 @@ public class FluidAgent extends CyanComponent {
 
 				if (!loadedAgents) {
 					loadedAgents = true;
+
+					if (!DynamicClassLoader.knowsLoadedClassProvider("fluidagent")) {
+						DynamicClassLoader.registerLoadedClassProvider(new LoadedClassProvider() {
+
+							@Override
+							public String name() {
+								return "fluidagent";
+							}
+
+							@Override
+							public Class<?> provide(String name) {
+								return getLoadedClass(name);
+							}
+						});
+					}
+
 					Fluid.getAgents().forEach((cls, meth) -> {
 						try {
 							Class<?> agent = ld.loadClass(cls);

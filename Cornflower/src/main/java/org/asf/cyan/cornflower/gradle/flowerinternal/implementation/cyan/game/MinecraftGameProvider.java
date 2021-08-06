@@ -217,8 +217,7 @@ public class MinecraftGameProvider implements IGame {
 		} else {
 			tsk.jvm("-DdebugModfileManifests=M//"
 					+ new File(proj.getBuildDir(), "run/mod.manifest.ccfg").getAbsolutePath());
-			tsk.jvm("-Dcyan.load.classpath=${project_loc:" + proj.getName() + "}/bin/main" + File.pathSeparator
-					+ "${project_loc:" + proj.getName() + "}/bin/test");
+			tsk.classpath(proj);
 		}
 	}
 

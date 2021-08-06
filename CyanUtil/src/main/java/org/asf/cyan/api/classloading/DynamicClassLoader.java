@@ -287,6 +287,11 @@ public class DynamicClassLoader extends URLClassLoader {
 
 	@Override
 	public Class<?> findClass(String name) throws ClassNotFoundException {
+		for (LoadedClassProvider prov : loadedClassProviders) {
+			Class<?> cls = prov.provide(name);
+			if (cls != null)
+				return cls;
+		}
 		Class<?> _class = null;
 		try {
 			if (CyanClassTracker.loadedClasses.containsKey(name)) {
@@ -308,7 +313,24 @@ public class DynamicClassLoader extends URLClassLoader {
 	}
 
 	@Override
+	public Class<?> loadClass(String name) throws ClassNotFoundException {
+		for (LoadedClassProvider prov : loadedClassProviders) {
+			Class<?> cls = prov.provide(name);
+			if (cls != null)
+				return cls;
+		}
+		if (CyanClassTracker.loadedClasses.containsKey(name))
+			return CyanClassTracker.loadedClasses.get(name);
+		return super.loadClass(name);
+	}
+
+	@Override
 	public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+		for (LoadedClassProvider prov : loadedClassProviders) {
+			Class<?> cls = prov.provide(name);
+			if (cls != null)
+				return cls;
+		}
 		if (CyanClassTracker.loadedClasses.containsKey(name))
 			return CyanClassTracker.loadedClasses.get(name);
 
@@ -472,6 +494,27 @@ public class DynamicClassLoader extends URLClassLoader {
 				}
 			}
 		}
+	}
+
+	public static interface LoadedClassProvider {
+		public String name();
+
+		public Class<?> provide(String name);
+	}
+
+	public static ArrayList<LoadedClassProvider> loadedClassProviders = new ArrayList<LoadedClassProvider>();
+
+	public static boolean knowsLoadedClassProvider(String name) {
+		for (LoadedClassProvider prov : loadedClassProviders) {
+			if (prov.name().equals(name))
+				return true;
+		}
+		return false;
+	}
+
+	public static void registerLoadedClassProvider(LoadedClassProvider loadedClassProvider) {
+		if (!knowsLoadedClassProvider(loadedClassProvider.name()))
+			loadedClassProviders.add(loadedClassProvider);
 	}
 
 }

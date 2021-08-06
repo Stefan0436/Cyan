@@ -178,6 +178,43 @@ public class TrustContainer {
 		return 1;
 	}
 
+	/**
+	 * Validates the given class
+	 * 
+	 * @param cls  Class stream to validate
+	 * @param name Class name
+	 * @return 0 if nothing is wrong, 1 if invalid, 2 if not found
+	 * @throws IOException If validating fails
+	 */
+	public int validateClass(InputStream cls, String name) throws IOException {
+		String pkgN = "";
+		if (name.contains(".")) {
+			pkgN = name.substring(0, name.lastIndexOf("."));
+			name = name.substring(name.lastIndexOf(".") + 1);
+		}
+		final String nameFinal = name;
+		final String pkgF = pkgN;
+		if (!Stream.of(entries).anyMatch(t -> t.getName().equals(pkgF)
+				&& Stream.of(t.getEntries()).anyMatch(t2 -> t2.getName().equals(nameFinal)))) {
+			return 2;
+		}
+
+		PackageTrustEntry pkg = Stream.of(entries).filter(t -> t.getName().equals(pkgF)
+				&& Stream.of(t.getEntries()).anyMatch(t2 -> t2.getName().equals(nameFinal))).findFirst().get();
+
+		ClassTrustEntry ent = Stream.of(pkg.getEntries()).filter(t2 -> t2.getName().equals(nameFinal)).findFirst()
+				.get();
+
+		String sha256 = sha256HEX(cls.readAllBytes());
+		for (String hash : ent.getHashes()) {
+			if (hash.equals(sha256)) {
+				return 0;
+			}
+		}
+
+		return 1;
+	}
+
 	private String sha256HEX(byte[] array) {
 		MessageDigest digest;
 		try {

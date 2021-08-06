@@ -1,6 +1,7 @@
 package org.asf.cyan;
 
 import java.awt.GraphicsEnvironment;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -229,7 +230,7 @@ public class CyanLoader extends ModkitModloader
 	private ArrayList<IMod> mods = new ArrayList<IMod>();
 	private ArrayList<ICoremod> coremods = new ArrayList<ICoremod>();
 
-	private static HashMap<String, String[]> classesMap = new HashMap<String, String[]>();
+	private static HashMap<String, HashMap<String, byte[]>> classesMap = new HashMap<String, HashMap<String, byte[]>>();
 
 	private HashMap<String, IAcceptableComponent> loadedComponents = new HashMap<String, IAcceptableComponent>();
 
@@ -455,8 +456,7 @@ public class CyanLoader extends ModkitModloader
 					ld.coreModManifests.put(mod.modGroup + ":" + mod.modId, mod);
 					ld.coreModManifests.put(mod.modClassPackage + "." + mod.modClassName, mod);
 					CyanCore.addAllowedPackage(mod.modClassPackage);
-					classesMap.put(mod.modGroup + ":" + mod.modId,
-							new String[] { mod.modClassPackage + "." + mod.modClassName });
+					classesMap.put(mod.modGroup + ":" + mod.modId, new HashMap<String, byte[]>());
 					try {
 						Class<?> cls = Class.forName(mod.modClassPackage + "." + mod.modClassName);
 						String base = cls.getProtectionDomain().getCodeSource().getLocation().toString();
@@ -864,14 +864,17 @@ public class CyanLoader extends ModkitModloader
 	 * 
 	 * @param mod         Coremod to load
 	 * @param modManifest Mod manifest
+	 * @param classes     Class map
 	 */
-	public void loadCoremod(ICoremod mod, CyanModfileManifest modManifest, String[] classes) {
+	public void loadCoremod(ICoremod mod, CyanModfileManifest modManifest, HashMap<String, byte[]> classes) {
 		if (CyanCore.getCurrentPhase().equals(LoadPhase.NOT_READY)
 				|| CyanCore.getCurrentPhase().equals(LoadPhase.CORELOAD)) {
-			for (String cls : classes) {
+			for (String clsName : classes.keySet()) {
 				try {
-					this.checkTrust("mod class", CyanCore.getCoreClassLoader().loadClass(cls));
-				} catch (IOException | ClassNotFoundException e) {
+					ByteArrayInputStream strm = new ByteArrayInputStream(classes.get(clsName));
+					this.checkTrust("mod class", strm, clsName);
+					strm.close();
+				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 			}
@@ -1013,7 +1016,7 @@ public class CyanLoader extends ModkitModloader
 
 	private void importCoremod(File ccmf) throws IOException {
 		String ccfg = null;
-		ArrayList<String> modClasses = new ArrayList<String>();
+		HashMap<String, byte[]> modClasses = new HashMap<String, byte[]>();
 
 		try {
 			InputStream strm = new URL("jar:" + ccmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
@@ -1091,6 +1094,25 @@ public class CyanLoader extends ModkitModloader
 			} else if (!(CyanInfo.getModloaderName() + "-" + CyanInfo.getModloaderVersion().toString())
 					.equals(info.platformVersion)) {
 				cacheOutOfDate = true;
+			} else if (manifest.trustContainers.size() != info.trustContainers.size()) {
+				cacheOutOfDate = true;
+			} else {
+				for (String key : manifest.trustContainers.keySet()) {
+					if (!info.trustContainers.containsKey(key)
+							|| !info.trustContainers.get(key).equals(manifest.trustContainers.get(key))) {
+						cacheOutOfDate = true;
+						break;
+					}
+				}
+				if (!cacheOutOfDate) {
+					for (String key : info.trustContainers.keySet()) {
+						if (!manifest.trustContainers.containsKey(key)
+								|| !info.trustContainers.get(key).equals(manifest.trustContainers.get(key))) {
+							cacheOutOfDate = true;
+							break;
+						}
+					}
+				}
 			}
 		}
 
@@ -1102,6 +1124,7 @@ public class CyanLoader extends ModkitModloader
 			info.platform = CyanInfo.getPlatform().toString();
 			info.platformVersion = CyanInfo.getModloaderName() + "-" + CyanInfo.getModloaderVersion().toString();
 			info.modVersion = manifest.version;
+			info.trustContainers.putAll(manifest.trustContainers);
 
 			info("Game version: " + CyanInfo.getMinecraftVersion());
 			info("Mod version: " + manifest.version);
@@ -1245,7 +1268,9 @@ public class CyanLoader extends ModkitModloader
 						}
 						if (entryPath.endsWith(".class")) {
 							String cls = entryPath.replace("/", ".").substring(0, entryPath.lastIndexOf(".class"));
-							modClasses.add(cls);
+							InputStream strmI = modJar.getInputStream(entry);
+							modClasses.put(cls, strmI.readAllBytes());
+							strmI.close();
 						}
 					}
 					modJar.close();
@@ -1418,7 +1443,7 @@ public class CyanLoader extends ModkitModloader
 		coreModManifests.put(manifest.modClassPackage + "." + manifest.modClassName, manifest);
 
 		strm.close();
-		classesMap.put(manifest.modGroup + ":" + manifest.modId, modClasses.toArray(t -> new String[t]));
+		classesMap.put(manifest.modGroup + ":" + manifest.modId, modClasses);
 	}
 
 	private void importMods(File modsDirectory) {
@@ -1771,6 +1796,7 @@ public class CyanLoader extends ModkitModloader
 						}
 					}
 					CyanCore.addUrl(output.toURI().toURL());
+					FluidAgent.addToClassPath(output);
 				}
 			}
 
@@ -2358,6 +2384,63 @@ public class CyanLoader extends ModkitModloader
 		return true;
 	}
 
+	private boolean checkTrust(String type, InputStream component, String name) throws IOException {
+		String pkgN = "";
+		if (name.contains(".")) {
+			pkgN = name.substring(0, name.lastIndexOf("."));
+		}
+		final String pkgF = pkgN;
+		if (Stream.of(allowedComponentPackages).anyMatch(t -> t.equals(pkgF) || pkgF.startsWith(t + "."))) {
+			return true;
+		}
+
+		boolean found = false;
+		for (TrustContainer container : trust) {
+			int result = container.validateClass(component, name);
+			if (result == 1) {
+				fatal("");
+				fatal("");
+				fatal("----------------------- COREMOD MIGHT HAVE BEEN TAMPERED WITH! -----------------------");
+				fatal("A " + type + " did not pass security checks, Cyan will shut down to protect the end-user.");
+				fatal("Make sure you download content from official sources and not third-parties. If you are");
+				fatal("certain the content is authentic, you might need to clear the trust container storage.");
+				fatal("");
+				fatal(type.substring(0, 1).toUpperCase() + type.substring(1).toLowerCase() + ": " + name);
+				fatal("");
+				fatal("");
+				StartupWindow.WindowAppender.fatalError("A coremod might have been tampered with!\nPlease check log!");
+				System.exit(-1);
+			} else if (result == 0) {
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			fatal("");
+			fatal("Starting failed as a " + type + " was not present in any trust container.");
+			fatal("");
+			fatal("Make sure you have the component trust container installed.");
+			fatal("Most components should automatically download from a trust server, if the server is");
+			fatal("down, you will need to manually copy the component trust container to .cyan-data/trust.");
+			fatal("");
+			fatal(type.substring(0, 1).toUpperCase() + type.substring(1).toLowerCase() + ": " + name);
+			info("");
+			info("");
+			info("");
+			info("Note for coremod developers: as it is impossible to authenticate mods from development");
+			info("environments, you need to instruct the security system to allow your coremod classes.");
+			info("");
+			info("You will need to be running development cyan wrappers. If you are, you can use the");
+			info("-DauthorizeDebugPackages=<package> argument to whitelist your component.");
+			info("(use -DauthorizeDebugPackages=<package1>:<package2> for multiple)");
+			StartupWindow.WindowAppender.fatalError("Unauthorized component.\nPlease check log.");
+			System.exit(-1);
+		}
+
+		return true;
+	}
+
 	@Override
 	protected boolean execComponent(IModloaderComponent component) {
 		if (component instanceof CyanEventBridge) {
@@ -2782,9 +2865,6 @@ public class CyanLoader extends ModkitModloader
 		});
 		addToSystemLater.clear();
 
-		info("Reloading reflections...");
-		CyanCore.reinitReflections();
-
 		info("Downloading coremod maven dependencies...");
 		downloadMavenDependencies(coremodMavenDependencies);
 
@@ -2803,18 +2883,19 @@ public class CyanLoader extends ModkitModloader
 		}
 		StartupWindow.WindowAppender.increaseProgress();
 
-		info("Downloading mod maven dependencies...");
-		downloadMavenDependencies(modMavenDependencies);
-		StartupWindow.WindowAppender.increaseProgress();
-
 		info("Importing regular mods...");
 		for (File f : extraClassPath) {
 			try {
 				CyanCore.addUrl(f.toURI().toURL());
-			} catch (MalformedURLException e) {
+				FluidAgent.addToClassPath(f);
+			} catch (IOException e) {
 			}
 		}
 		importMods(mods);
+		StartupWindow.WindowAppender.increaseProgress();
+
+		info("Downloading mod maven dependencies...");
+		downloadMavenDependencies(modMavenDependencies);
 		StartupWindow.WindowAppender.increaseProgress();
 	}
 
@@ -2925,10 +3006,11 @@ public class CyanLoader extends ModkitModloader
 			try {
 				CyanCore.addCoreUrl(libFile.toURI().toURL());
 				CyanCore.addUrl(libFile.toURI().toURL());
-			} catch (MalformedURLException e) {
+				FluidAgent.addToClassPath(libFile);
+			} catch (IOException e) {
 				fatal("Could not load dependency " + group + ":" + name);
 				StartupWindow.WindowAppender.fatalError();
-				fatal("Exception was thrown during dependency download.", e);
+				fatal("Exception was thrown during dependency loading.", e);
 				System.exit(1);
 			}
 		});

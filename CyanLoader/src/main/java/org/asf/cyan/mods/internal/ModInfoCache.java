@@ -1,5 +1,7 @@
 package org.asf.cyan.mods.internal;
 
+import java.util.HashMap;
+
 import org.asf.cyan.api.config.Configuration;
 
 public class ModInfoCache extends Configuration<ModInfoCache> {
@@ -19,5 +21,7 @@ public class ModInfoCache extends Configuration<ModInfoCache> {
 	
 	public String platform = "";
 	public String platformVersion = "";
+	
+	public HashMap<String, String> trustContainers = new HashMap<String, String>();
 
 }
