@@ -67,6 +67,7 @@ public class SimpleRiftBuilder implements Closeable {
 		return null;
 	}
 
+	private ArrayList<File> helperJars = new ArrayList<File>();
 	private ArrayList<String> classes = new ArrayList<String>();
 	private ArrayList<IClassSourceProvider<?>> sourceProviders = new ArrayList<IClassSourceProvider<?>>();
 	private ArrayList<IRiftToolchainProvider> toolchainProviders = new ArrayList<IRiftToolchainProvider>();
@@ -200,10 +201,10 @@ public class SimpleRiftBuilder implements Closeable {
 		}
 
 		if (output != null && output.exists()) {
-			rift.assign(libs, sources, output, new Mapping<?>[0]);
+			rift.assign(libs, sources, output, new Mapping<?>[0], helperJars);
 			return rift;
 		}
-		rift.assign(libs, sources, output, mappings.toArray(t -> new Mapping[t]));
+		rift.assign(libs, sources, output, mappings.toArray(t -> new Mapping[t]), helperJars);
 		return rift;
 	}
 
@@ -212,7 +213,12 @@ public class SimpleRiftBuilder implements Closeable {
 		classes.clear();
 		sourceProviders.clear();
 		toolchainProviders.clear();
+		helperJars.clear();
 		outputMappingsFile = null;
 		outputIdentifier = null;
+	}
+
+	public void appendHelpFile(File dep) {
+		helperJars.add(dep);
 	}
 }

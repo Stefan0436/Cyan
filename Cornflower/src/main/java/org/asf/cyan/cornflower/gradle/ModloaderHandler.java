@@ -46,6 +46,12 @@ import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
  */
 public class ModloaderHandler extends CyanComponent {
 
+	private static HashMap<String, File[]> allDeps = new HashMap<String, File[]>();
+
+	public static File[] getAllDependencies(Project proj) {
+		return allDeps.getOrDefault(proj.getPath(), new File[0]);
+	}
+
 	@SuppressWarnings("unchecked")
 	public static void exec(Project proj) {
 		Log4jToGradleAppender.logInfo();
@@ -272,8 +278,10 @@ public class ModloaderHandler extends CyanComponent {
 		try {
 			Configuration conf = proj.getConfigurations().getByName("implementation");
 			ResolvedConfiguration config = conf.getResolvedConfiguration();
+			ArrayList<File> allDependencies = new ArrayList<File>();
 			scanDeps(config.getFirstLevelModuleDependencies(), remoteDependencies, deps, remoteDependencyLst,
-					remoteDependencySrcLst);
+					remoteDependencySrcLst, allDependencies);
+			allDeps.put(proj.getPath(), allDependencies.toArray(t -> new File[t]));
 		} catch (Exception e) {
 		}
 
@@ -433,9 +441,9 @@ public class ModloaderHandler extends CyanComponent {
 	}
 
 	private static void scanDeps(Collection<ResolvedDependency> dependencies, ArrayList<String> remoteDependencies,
-			ArrayList<String> deps, ArrayList<File> depOut, ArrayList<File> srcOut) {
+			ArrayList<String> deps, ArrayList<File> depOut, ArrayList<File> srcOut, ArrayList<File> allOut) {
 		for (ResolvedDependency dep : dependencies) {
-			scanDeps(dep.getChildren(), remoteDependencies, deps, depOut, srcOut);
+			scanDeps(dep.getChildren(), remoteDependencies, deps, depOut, srcOut, allOut);
 			if (dep.getModuleGroup() != null && !dep.getModuleGroup().startsWith("cornflower.internal.")) {
 				if (dep.getModuleName() != null
 						&& !remoteDependencies.stream()
@@ -457,6 +465,16 @@ public class ModloaderHandler extends CyanComponent {
 					if (containsNormalArtifact) {
 						remoteDependencies
 								.add(dep.getModuleGroup() + ":" + dep.getModuleName() + ":" + dep.getModuleVersion());
+					}
+				}
+
+				if (dep.getModuleName() != null) {
+					for (ResolvedArtifact arti : dep.getModuleArtifacts()) {
+						if (arti.getExtension().equals("jar")
+								&& (arti.getClassifier() == null || arti.getClassifier().isEmpty())) {
+							if (!allOut.contains(arti.getFile()))
+								allOut.add(arti.getFile());
+						}
 					}
 				}
 			}

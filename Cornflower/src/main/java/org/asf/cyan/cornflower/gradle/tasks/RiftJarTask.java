@@ -11,6 +11,7 @@ import java.util.zip.ZipInputStream;
 
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.cornflower.gradle.utilities.modding.IPlatformConfiguration;
+import org.asf.cyan.cornflower.gradle.ModloaderHandler;
 import org.asf.cyan.cornflower.gradle.utilities.ITaskExtender;
 import org.asf.cyan.cornflower.gradle.utilities.Log4jToGradleAppender;
 import org.asf.cyan.fluid.bytecode.sources.FileClassSourceProvider;
@@ -151,6 +152,9 @@ public class RiftJarTask extends AbstractArchiveTask implements ITaskExtender {
 
 				for (IRiftToolchainProvider provider : providers) {
 					rift.appendRiftProvider(provider);
+				}
+				for (File dep : ModloaderHandler.getAllDependencies(getProject())) {
+					rift.appendHelpFile(dep);
 				}
 				for (String cls : classes) {
 					rift.addClass(cls);

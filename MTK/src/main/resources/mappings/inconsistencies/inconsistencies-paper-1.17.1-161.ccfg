@@ -1,0 +1,34 @@
+#
+# Cyan Inconsistency Mappings, for Paper 1.17.1 compatibility.
+# Written by hand, Copyright(c) 2021 Sky Swimmer, LGPL-3.0.
+#
+
+mappingsVersion> '23e3a0ccb63689b8e24901be2630f600297a0d33:PB_161'
+
+mappings> [ {
+    mappingType> CLASS
+    name> 'net.minecraft.server.level.ServerLevel'
+    obfuscated> 'net.minecraft.server.level.WorldServer'
+    mappings> [ {
+        mappingType> METHOD
+        type> 'net.minecraft.core.BlockPosition'
+        name> 'getSharedSpawnPos'
+        obfuscated> 'getSpawn'
+    } ]
+} {
+    mappingType> CLASS
+    name> 'net.minecraft.server.gui.MinecraftServerGui'
+    obfuscated> 'net.minecraft.server.gui.ServerGUI'
+    mappings> [ {
+        type> 'void'
+        name> 'print'
+        obfuscated> 'a'
+        mappingType> METHOD
+        argumentTypes> [ 'javax.swing.JTextArea' 'javax.swing.JScrollPane' 'java.lang.String' ]
+    } ]
+} {
+    mappingType> CLASS
+    name> 'net.minecraft.network.protocol.status.ServerStatus\$Serializer'
+    obfuscated> 'net.minecraft.network.protocol.status.ServerPing\$Serializer'
+} ]
+

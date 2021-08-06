@@ -10,10 +10,12 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
+import java.util.ArrayList;
 
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.bytecode.FluidClassPool;
+import org.asf.cyan.fluid.bytecode.sources.FileClassSourceProvider;
 import org.asf.cyan.fluid.deobfuscation.DeobfuscationTargetMap;
 import org.asf.cyan.fluid.remapping.Mapping;
 import org.asf.cyan.fluid.remapping.SupertypeRemapper;
@@ -46,11 +48,13 @@ public class SimpleRift extends CyanComponent implements Closeable {
 		return (T) obj;
 	}
 
-	void assign(FluidClassPool pool1, FluidClassPool pool2, File saveFile, Mapping<?>[] mappingsCCFG) {
+	void assign(FluidClassPool pool1, FluidClassPool pool2, File saveFile, Mapping<?>[] mappingsCCFG,
+			ArrayList<File> helpers) {
 		libraryPool = pool1;
 		sourcesPool = pool2;
 		this.saveFile = saveFile;
 		this.mappingsCCFG = mappingsCCFG;
+		helpers.forEach(helper -> libraryPool.addSource(new FileClassSourceProvider(helper)));
 	}
 
 	private FluidClassPool libraryPool;
