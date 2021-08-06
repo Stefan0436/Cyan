@@ -1030,6 +1030,8 @@ public class CyanLoader extends ModkitModloader
 		}
 
 		CyanModfileManifest manifest = new CyanModfileManifest().readAll(ccfg);
+
+		scanModFiles();
 		checkUpdates(ccmf, manifest, otherModFileManifests, otherModFileArray);
 		
 		for (String k : new ArrayList<String>(manifest.jars.keySet())) {
