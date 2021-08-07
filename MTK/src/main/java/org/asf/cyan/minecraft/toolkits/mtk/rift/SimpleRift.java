@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OptionalDataException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.zip.ZipInputStream;
@@ -44,9 +45,14 @@ public class SimpleRift extends CyanComponent implements Closeable {
 	<T> T deserialize(byte[] data) throws IOException, ClassNotFoundException {
 		ByteArrayInputStream strm = new ByteArrayInputStream(data);
 		ObjectInputStream deserializer = new ObjectInputStream(strm);
-		Object obj = deserializer.readObject();
-		strm.close();
-		return (T) obj;
+		try {
+			Object obj = deserializer.readObject();
+			strm.close();
+			return (T) obj;
+		} catch (OptionalDataException e) {
+			strm.close();
+			return null;
+		}
 	}
 
 	void assign(FluidClassPool pool1, FluidClassPool pool2, File saveFile, Mapping<?>[] mappingsCCFG,
@@ -61,7 +67,7 @@ public class SimpleRift extends CyanComponent implements Closeable {
 	private ArrayList<File> helpers = new ArrayList<File>();
 	private FluidClassPool libraryPool;
 	private FluidClassPool sourcesPool;
-	private DeobfuscationTargetMap mappings;
+	private DeobfuscationTargetMap mappings = null;
 	private File saveFile;
 	private Mapping<?>[] mappingsCCFG;
 
@@ -121,8 +127,13 @@ public class SimpleRift extends CyanComponent implements Closeable {
 			if (saveFile != null && saveFile.exists()) {
 				info("Loading RIFT binary mappings...");
 				mappings = deserialize(Files.readAllBytes(saveFile.toPath()));
-			} else {
-				info("Creating RIFT target mappings...");
+			}
+			if (mappings == null) {
+				if (saveFile != null && saveFile.exists())
+					info("Re-creating RIFT target mappings... (old file has been corrupted)");
+				else
+					info("Creating RIFT target mappings...");
+
 				mappings = Fluid.createTargetMap(getHelperClasses(), libraryPool, mappingsCCFG);
 
 				if (saveFile != null) {
