@@ -1520,7 +1520,7 @@ public class CyanLoader extends ModkitModloader
 				}
 			}
 			if (versionCoremods.exists()) {
-				for (File cmf : versionMods.listFiles((t) -> !t.isDirectory() && t.getName().endsWith(".cmf"))) {
+				for (File cmf : versionMods.listFiles((t) -> !t.isDirectory() && t.getName().endsWith(".ccmf"))) {
 					String ccfg2 = null;
 					try {
 						InputStream strm = new URL("jar:" + cmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
@@ -1539,7 +1539,7 @@ public class CyanLoader extends ModkitModloader
 				}
 			}
 			if (coremods.exists()) {
-				for (File cmf : mods.listFiles((t) -> !t.isDirectory() && t.getName().endsWith(".cmf"))) {
+				for (File cmf : mods.listFiles((t) -> !t.isDirectory() && t.getName().endsWith(".ccmf"))) {
 					String ccfg2 = null;
 					try {
 						InputStream strm = new URL("jar:" + cmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();

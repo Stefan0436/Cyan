@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.Transformer.FluidMethodInfo;
+import org.asf.cyan.fluid.bytecode.FluidClassPool;
 import org.asf.cyan.fluid.deobfuscation.DeobfuscationTarget;
 import org.asf.cyan.fluid.deobfuscation.DeobfuscationTargetMap;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -21,9 +22,15 @@ import org.objectweb.asm.tree.MethodNode;
  */
 public class SupertypeRemapper {
 	private DeobfuscationTargetMap mappings;
+	private FluidClassPool pool;
 
 	public SupertypeRemapper(DeobfuscationTargetMap initialMappings) {
 		mappings = initialMappings;
+	}
+
+	public SupertypeRemapper(DeobfuscationTargetMap initialMappings, FluidClassPool pool) {
+		mappings = initialMappings;
+		this.pool = pool;
 	}
 
 	/**
@@ -39,6 +46,12 @@ public class SupertypeRemapper {
 		clsTarget.jvmName = input.name;
 
 		if (input.superName != null && !input.superName.equals("java/lang/Object")) {
+			if (pool != null) {
+				try {
+					remap(pool.getClassNode(input.superName));
+				} catch (ClassNotFoundException e) {
+				}
+			}
 			mappings.forEach((type, target) -> {
 				if (type.equals(input.superName)) {
 					for (String fieldKey : target.fields.keySet()) {
@@ -53,6 +66,12 @@ public class SupertypeRemapper {
 		}
 		if (input.interfaces != null) {
 			for (String interfaceName : input.interfaces) {
+				if (pool != null) {
+					try {
+						remap(pool.getClassNode(interfaceName));
+					} catch (ClassNotFoundException e) {
+					}
+				}
 				mappings.forEach((type, target) -> {
 					if (type.equals(interfaceName)) {
 						for (String fieldKey : target.fields.keySet()) {

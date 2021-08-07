@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,11 +12,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.zip.ZipInputStream;
 
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.fluid.Fluid;
 import org.asf.cyan.fluid.bytecode.FluidClassPool;
-import org.asf.cyan.fluid.bytecode.sources.FileClassSourceProvider;
 import org.asf.cyan.fluid.deobfuscation.DeobfuscationTargetMap;
 import org.asf.cyan.fluid.remapping.Mapping;
 import org.asf.cyan.fluid.remapping.SupertypeRemapper;
@@ -54,9 +55,10 @@ public class SimpleRift extends CyanComponent implements Closeable {
 		sourcesPool = pool2;
 		this.saveFile = saveFile;
 		this.mappingsCCFG = mappingsCCFG;
-		helpers.forEach(helper -> libraryPool.addSource(new FileClassSourceProvider(helper)));
+		this.helpers.addAll(helpers);
 	}
 
+	private ArrayList<File> helpers = new ArrayList<File>();
 	private FluidClassPool libraryPool;
 	private FluidClassPool sourcesPool;
 	private DeobfuscationTargetMap mappings;
@@ -130,6 +132,41 @@ public class SimpleRift extends CyanComponent implements Closeable {
 
 					info("Writing RIFT binary mappings for future use...");
 					Files.write(saveFile.toPath(), serialize(mappings));
+				}
+			}
+
+			for (File jar : helpers) {
+				if (jar.isFile()) {
+					FileInputStream strmI = new FileInputStream(jar);
+					ZipInputStream zip = new ZipInputStream(strmI);
+					libraryPool.importArchive(zip);
+					zip.close();
+					strmI.close();
+				}
+			}
+
+			for (File jar : helpers) {
+				if (jar.isFile()) {
+					info("Mapping clases of " + jar.getName() + "...");
+					FluidClassPool pool = FluidClassPool.createEmpty();
+					FileInputStream strmI = new FileInputStream(jar);
+					ZipInputStream zip = new ZipInputStream(strmI);
+					pool.importArchive(zip);
+					zip.close();
+					strmI.close();
+
+					SupertypeRemapper remapper = new SupertypeRemapper(mappings, libraryPool);
+					int i = 0;
+					int c = pool.getLoadedClasses().length;
+					for (ClassNode cls : pool.getLoadedClasses()) {
+						remapper.remap(cls);
+						if (i % 100 == 0) {
+							info("Mapped " + i + "/" + c + " classes.");
+						}
+						i++;
+					}
+					pool.close();
+					info("Mapped " + i + "/" + c + " classes.");
 				}
 			}
 

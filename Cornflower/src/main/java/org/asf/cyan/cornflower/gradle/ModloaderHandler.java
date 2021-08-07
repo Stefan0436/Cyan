@@ -47,9 +47,14 @@ import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 public class ModloaderHandler extends CyanComponent {
 
 	private static HashMap<String, File[]> allDeps = new HashMap<String, File[]>();
+	private static HashMap<String, File[]> modDeps = new HashMap<String, File[]>();
 
 	public static File[] getAllDependencies(Project proj) {
-		return allDeps.getOrDefault(proj.getPath(), new File[0]);
+		return allDeps.getOrDefault(proj.getPath(), new File[0]).clone();
+	}
+
+	public static File[] getModDeps(Project proj) {
+		return modDeps.getOrDefault(proj.getPath(), new File[0]).clone();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -187,7 +192,7 @@ public class ModloaderHandler extends CyanComponent {
 		HashMap<String, String> modDeps = new HashMap<String, String>();
 		HashMap<String, String> modDepsOptional = new HashMap<String, String>();
 		ArrayList<String[]> modDepArtifacts = new ArrayList<String[]>();
-
+		ArrayList<String> modDependencies = new ArrayList<String>();
 		findDeps(proj, "mod", (dep) -> {
 			ModDependency mod = (ModDependency) dep;
 			if (!mod.isMod()) {
@@ -202,6 +207,7 @@ public class ModloaderHandler extends CyanComponent {
 
 				modDepArtifacts.add(new String[] { mod.getModDepGroup(), mod.getModDepName(), mod.getVersion() });
 				addDependency(proj, mod.getModDepGroup(), mod.getModDepName(), mod.getVersion());
+				modDependencies.add(mod.getModDepGroup() + ":" + mod.getModDepName() + ":" + mod.getVersion());
 				deps.add(mod.getModDepGroup() + ":" + mod.getModDepName() + ":" + mod.getVersion());
 			} else {
 				if (proj.getExtensions().getExtraProperties().has("platforms")) {
@@ -276,11 +282,13 @@ public class ModloaderHandler extends CyanComponent {
 		}
 
 		try {
+			ArrayList<File> modDependencyFiles = new ArrayList<File>();
 			Configuration conf = proj.getConfigurations().getByName("implementation");
 			ResolvedConfiguration config = conf.getResolvedConfiguration();
 			ArrayList<File> allDependencies = new ArrayList<File>();
 			scanDeps(config.getFirstLevelModuleDependencies(), remoteDependencies, deps, remoteDependencyLst,
-					remoteDependencySrcLst, allDependencies);
+					remoteDependencySrcLst, allDependencies, modDependencies, modDependencyFiles);
+			ModloaderHandler.modDeps.put(proj.getPath(), modDependencyFiles.toArray(t -> new File[t]));
 			allDeps.put(proj.getPath(), allDependencies.toArray(t -> new File[t]));
 		} catch (Exception e) {
 		}
@@ -436,14 +444,15 @@ public class ModloaderHandler extends CyanComponent {
 		return result.toString();
 	}
 
-	private static void addDependency(Project project, String group, String name, String version) {
-		project.getDependencies().add("implementation", group + ":" + name + ":" + version);
+	private static Dependency addDependency(Project project, String group, String name, String version) {
+		return project.getDependencies().add("implementation", group + ":" + name + ":" + version);
 	}
 
 	private static void scanDeps(Collection<ResolvedDependency> dependencies, ArrayList<String> remoteDependencies,
-			ArrayList<String> deps, ArrayList<File> depOut, ArrayList<File> srcOut, ArrayList<File> allOut) {
+			ArrayList<String> deps, ArrayList<File> depOut, ArrayList<File> srcOut, ArrayList<File> allOut,
+			ArrayList<String> modDepIDs, ArrayList<File> modOut) {
 		for (ResolvedDependency dep : dependencies) {
-			scanDeps(dep.getChildren(), remoteDependencies, deps, depOut, srcOut, allOut);
+			scanDeps(dep.getChildren(), remoteDependencies, deps, depOut, srcOut, allOut, modDepIDs, modOut);
 			if (dep.getModuleGroup() != null && !dep.getModuleGroup().startsWith("cornflower.internal.")) {
 				if (dep.getModuleName() != null
 						&& !remoteDependencies.stream()
@@ -474,6 +483,13 @@ public class ModloaderHandler extends CyanComponent {
 								&& (arti.getClassifier() == null || arti.getClassifier().isEmpty())) {
 							if (!allOut.contains(arti.getFile()))
 								allOut.add(arti.getFile());
+							if (modDepIDs.contains(
+									dep.getModuleGroup() + ":" + dep.getModuleName() + ":" + dep.getModuleVersion())) {
+								modDepIDs.remove(dep.getModuleGroup() + ":" + dep.getModuleName() + ":"
+										+ dep.getModuleVersion());
+								if (!modOut.contains(arti.getFile()))
+									modOut.add(arti.getFile());
+							}
 						}
 					}
 				}

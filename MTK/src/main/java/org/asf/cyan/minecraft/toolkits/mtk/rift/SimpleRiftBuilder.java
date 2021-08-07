@@ -218,7 +218,11 @@ public class SimpleRiftBuilder implements Closeable {
 		outputIdentifier = null;
 	}
 
-	public void appendHelpFile(File dep) {
+	/**
+	 * Appends jars that will be mapped before running rift
+	 * @param dep Dependency jar
+	 */
+	public void appendRiftDependencyFile(File dep) {
 		helperJars.add(dep);
 	}
 }

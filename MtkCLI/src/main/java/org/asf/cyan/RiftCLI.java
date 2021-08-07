@@ -49,6 +49,15 @@ public class RiftCLI extends CyanComponent {
 									MinecraftVersionToolkit.getVersion(artifact.gameVersion),
 									GameSide.valueOf(artifact.side), artifact.loaderVersion, artifact.mappingsVersion));
 
+					for (String dep : config.dependencies.keySet()) {
+						System.out.println("Processing dependency " + dep + "...");
+						File depFile = new File(config.dependencies.get(dep));
+						if (depFile.exists()) {
+							System.out.println("Adding dependency jar " + depFile.getName() + "...");
+							builder.appendRiftDependencyFile(depFile);
+						}
+					}
+
 					FileInputStream fileIn = new FileInputStream(input);
 					ZipInputStream strm = new ZipInputStream(fileIn);
 					ZipEntry ent = strm.getNextEntry();

@@ -1,5 +1,7 @@
 package org.asf.cyan;
 
+import java.util.HashMap;
+
 import org.asf.cyan.api.config.Configuration;
 
 public class RiftConfig extends Configuration<RiftConfig> {
@@ -8,6 +10,7 @@ public class RiftConfig extends Configuration<RiftConfig> {
 	public String cacheDir = ".";
 
 	public RiftArtifact[] riftJars;
+	public HashMap<String, String> dependencies;
 
 	@Override
 	public String filename() {

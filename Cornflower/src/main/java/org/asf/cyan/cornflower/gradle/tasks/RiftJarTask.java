@@ -153,8 +153,8 @@ public class RiftJarTask extends AbstractArchiveTask implements ITaskExtender {
 				for (IRiftToolchainProvider provider : providers) {
 					rift.appendRiftProvider(provider);
 				}
-				for (File dep : ModloaderHandler.getAllDependencies(getProject())) {
-					rift.appendHelpFile(dep);
+				for (File dep : ModloaderHandler.getModDeps(getProject())) {
+					rift.appendRiftDependencyFile(dep);
 				}
 				for (String cls : classes) {
 					rift.addClass(cls);
