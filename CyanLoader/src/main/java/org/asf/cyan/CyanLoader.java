@@ -1019,10 +1019,23 @@ public class CyanLoader extends ModkitModloader
 		HashMap<String, byte[]> modClasses = new HashMap<String, byte[]>();
 
 		try {
-			InputStream strm = new URL("jar:" + ccmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
-			ccfg = new String(strm.readAllBytes());
-			strm.close();
+			FileInputStream strmI = new FileInputStream(ccmf);
+			ZipInputStream zIn = new ZipInputStream(strmI);
+			ZipEntry ent = zIn.getNextEntry();
+			while (ent != null) {
+				String pth = ent.getName();
+				if (pth.startsWith("/"))
+					pth = pth.substring(1);
+				if (pth.equals("mod.manifest.ccfg")) {
+					ccfg = new String(zIn.readAllBytes());
+					break;
+				}
+				ent = zIn.getNextEntry();
+			}
+			zIn.close();
+			strmI.close();
 		} catch (IOException e) {
+			throw new IOException("Invalid mod file, failed to load manifest.", e);
 		}
 
 		if (ccfg == null) {
@@ -1030,9 +1043,36 @@ public class CyanLoader extends ModkitModloader
 		}
 
 		CyanModfileManifest manifest = new CyanModfileManifest().readAll(ccfg);
+		if (manifest.updateserver != null) {
+			scanModFiles();
+			checkUpdates(ccmf, manifest, otherModFileManifests, otherModFileArray);
 
-		scanModFiles();
-		checkUpdates(ccmf, manifest, otherModFileManifests, otherModFileArray);
+			ccfg = null;
+			try {
+				FileInputStream strmI = new FileInputStream(ccmf);
+				ZipInputStream zIn = new ZipInputStream(strmI);
+				ZipEntry ent = zIn.getNextEntry();
+				while (ent != null) {
+					String pth = ent.getName();
+					if (pth.startsWith("/"))
+						pth = pth.substring(1);
+					if (pth.equals("mod.manifest.ccfg")) {
+						ccfg = new String(zIn.readAllBytes());
+						break;
+					}
+					ent = zIn.getNextEntry();
+				}
+				zIn.close();
+				strmI.close();
+			} catch (IOException e) {
+				throw new IOException("Invalid mod file, failed to load manifest.", e);
+			}
+
+			if (ccfg == null) {
+				throw new IOException("Invalid mod file, missing manifest.");
+			}
+			manifest = new CyanModfileManifest().readAll(ccfg);
+		}
 
 		for (String k : new ArrayList<String>(manifest.jars.keySet())) {
 			if (!k.startsWith("/")) {
@@ -1286,12 +1326,13 @@ public class CyanLoader extends ModkitModloader
 			ent = strm.getNextEntry();
 		}
 
+		final CyanModfileManifest mf = manifest;
 		manifest.trustContainers.forEach((name, location) -> {
 			HashMap<String, String> rewrites = new HashMap<String, String>();
 			try {
 				if (MinecraftToolkit.hasMinecraftDownloadConnection()) {
-					URL u = new URL(securityConf.modSecurityService + "/request-server-location/" + manifest.modGroup
-							+ "/" + manifest.modId);
+					URL u = new URL(securityConf.modSecurityService + "/request-server-location/" + mf.modGroup + "/"
+							+ mf.modId);
 					InputStream in = u.openStream();
 					location = new String(in.readAllBytes()).replace("\r", "").split("\n")[0];
 					in.close();
@@ -1318,8 +1359,8 @@ public class CyanLoader extends ModkitModloader
 
 			try {
 				if (MinecraftToolkit.hasMinecraftDownloadConnection()) {
-					URL u = new URL(securityConf.modSecurityService + "/request-trust-container-name/"
-							+ manifest.modGroup + "/" + manifest.modId + "/" + name);
+					URL u = new URL(securityConf.modSecurityService + "/request-trust-container-name/" + mf.modGroup
+							+ "/" + mf.modId + "/" + name);
 					InputStream in = u.openStream();
 					name = new String(in.readAllBytes()).replace("\r", "").split("\n")[0];
 					in.close();
@@ -1330,8 +1371,8 @@ public class CyanLoader extends ModkitModloader
 
 			try {
 				if (MinecraftToolkit.hasMinecraftDownloadConnection()) {
-					URL u = new URL(securityConf.modSecurityService + "/request-trust-container-version/"
-							+ manifest.modGroup + "/" + manifest.modId + "/" + name + "/" + version);
+					URL u = new URL(securityConf.modSecurityService + "/request-trust-container-version/" + mf.modGroup
+							+ "/" + mf.modId + "/" + name + "/" + version);
 					InputStream in = u.openStream();
 					version = new String(in.readAllBytes()).replace("\r", "").split("\n")[0];
 					in.close();
@@ -1400,7 +1441,7 @@ public class CyanLoader extends ModkitModloader
 
 							String localhash = sha256HEX(Files.readAllBytes(trust.toPath()));
 							if (!localhash.equals(sha)) {
-								fatal("Trust container " + name + " for coremod '" + manifest.displayName
+								fatal("Trust container " + name + " for coremod '" + mf.displayName
 										+ "' has been tampered with!");
 								fatal("Will not start to protect the end user!");
 								StartupWindow.WindowAppender
@@ -1419,7 +1460,7 @@ public class CyanLoader extends ModkitModloader
 			}
 
 			if (update) {
-				info("Downloading coremod trust container " + name + " for coremod '" + manifest.displayName + "'...");
+				info("Downloading coremod trust container " + name + " for coremod '" + mf.displayName + "'...");
 				try {
 					URL remote = new URL(location + "/" + name.replace(".", "/") + "-" + version + ".ctc");
 					InputStream in = remote.openStream();
@@ -1428,7 +1469,7 @@ public class CyanLoader extends ModkitModloader
 					out.close();
 					in.close();
 				} catch (IOException e) {
-					fatal("Unable to download trust container " + name + " for coremod '" + manifest.displayName + "'");
+					fatal("Unable to download trust container " + name + " for coremod '" + mf.displayName + "'");
 					StartupWindow.WindowAppender.fatalError();
 					System.exit(-1);
 				}
@@ -1474,7 +1515,7 @@ public class CyanLoader extends ModkitModloader
 	private void scanModFiles() {
 		if (otherModFileManifests == null) {
 			otherModFileManifests = new HashMap<String, CyanModfileManifest>();
-			ArrayList<File> modFiles = new ArrayList<File>();
+			HashMap<String, File> modFiles = new HashMap<String, File>();
 
 			File mods = new File(cyanDir, "mods");
 			File versionMods = new File(mods, CyanInfo.getMinecraftVersion());
@@ -1495,7 +1536,7 @@ public class CyanLoader extends ModkitModloader
 						CyanModfileManifest manifest2 = new CyanModfileManifest().readAll(ccfg2);
 						if (!otherModFileManifests.containsKey(manifest2.modGroup + ":" + manifest2.modId)) {
 							otherModFileManifests.put(manifest2.modGroup + ":" + manifest2.modId, manifest2);
-							modFiles.add(cmf);
+							modFiles.put(manifest2.modGroup + ":" + manifest2.modId, cmf);
 						}
 					}
 				}
@@ -1514,7 +1555,7 @@ public class CyanLoader extends ModkitModloader
 						CyanModfileManifest manifest2 = new CyanModfileManifest().readAll(ccfg2);
 						if (!otherModFileManifests.containsKey(manifest2.modGroup + ":" + manifest2.modId)) {
 							otherModFileManifests.put(manifest2.modGroup + ":" + manifest2.modId, manifest2);
-							modFiles.add(cmf);
+							modFiles.put(manifest2.modGroup + ":" + manifest2.modId, cmf);
 						}
 					}
 				}
@@ -1533,7 +1574,7 @@ public class CyanLoader extends ModkitModloader
 						CyanModfileManifest manifest2 = new CyanModfileManifest().readAll(ccfg2);
 						if (!otherModFileManifests.containsKey(manifest2.modGroup + ":" + manifest2.modId)) {
 							otherModFileManifests.put(manifest2.modGroup + ":" + manifest2.modId, manifest2);
-							modFiles.add(cmf);
+							modFiles.put(manifest2.modGroup + ":" + manifest2.modId, cmf);
 						}
 					}
 				}
@@ -1552,23 +1593,41 @@ public class CyanLoader extends ModkitModloader
 						CyanModfileManifest manifest2 = new CyanModfileManifest().readAll(ccfg2);
 						if (!otherModFileManifests.containsKey(manifest2.modGroup + ":" + manifest2.modId)) {
 							otherModFileManifests.put(manifest2.modGroup + ":" + manifest2.modId, manifest2);
-							modFiles.add(cmf);
+							modFiles.put(manifest2.modGroup + ":" + manifest2.modId, cmf);
 						}
 					}
 				}
 			}
 
-			otherModFileArray = modFiles.toArray(t -> new File[t]);
+			otherModFileArray = new File[modFiles.size()];
+
+			int i = 0;
+			for (String key : otherModFileManifests.keySet()) {
+				otherModFileArray[i++] = modFiles.get(key);
+			}
 		}
 	}
 
 	private void importMod(File cmf) throws IOException {
 		String ccfg = null;
 		try {
-			InputStream strm = new URL("jar:" + cmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
-			ccfg = new String(strm.readAllBytes());
-			strm.close();
+			FileInputStream strmI = new FileInputStream(cmf);
+			ZipInputStream zIn = new ZipInputStream(strmI);
+			ZipEntry ent = zIn.getNextEntry();
+			while (ent != null) {
+				String pth = ent.getName();
+				if (pth.startsWith("/"))
+					pth = pth.substring(1);
+				if (pth.equals("mod.manifest.ccfg")) {
+					ccfg = new String(zIn.readAllBytes());
+					break;
+				}
+				ent = zIn.getNextEntry();
+			}
+			zIn.close();
+			strmI.close();
 		} catch (IOException e) {
+			throw new IOException("Invalid mod file, failed to load manifest.", e);
 		}
 
 		if (ccfg == null) {
@@ -1583,10 +1642,23 @@ public class CyanLoader extends ModkitModloader
 
 			ccfg = null;
 			try {
-				InputStream strm = new URL("jar:" + cmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
-				ccfg = new String(strm.readAllBytes());
-				strm.close();
+				FileInputStream strmI = new FileInputStream(cmf);
+				ZipInputStream zIn = new ZipInputStream(strmI);
+				ZipEntry ent = zIn.getNextEntry();
+				while (ent != null) {
+					String pth = ent.getName();
+					if (pth.startsWith("/"))
+						pth = pth.substring(1);
+					if (pth.equals("mod.manifest.ccfg")) {
+						ccfg = new String(zIn.readAllBytes());
+						break;
+					}
+					ent = zIn.getNextEntry();
+				}
+				zIn.close();
+				strmI.close();
 			} catch (IOException e) {
+				throw new IOException("Invalid mod file, failed to load manifest.", e);
 			}
 
 			if (ccfg == null) {
@@ -2108,11 +2180,25 @@ public class CyanLoader extends ModkitModloader
 
 												String ccfg = null;
 												try {
-													strm = new URL("jar:" + cmf.toURI().toURL() + "!/mod.manifest.ccfg")
-															.openStream();
-													ccfg = new String(strm.readAllBytes());
+													FileInputStream strmI = new FileInputStream(cmf);
+													ZipInputStream zIn = new ZipInputStream(strmI);
+													ZipEntry ent = zIn.getNextEntry();
+													while (ent != null) {
+														String pth = ent.getName();
+														if (pth.startsWith("/"))
+															pth = pth.substring(1);
+														if (pth.equals("mod.manifest.ccfg")) {
+															ccfg = new String(zIn.readAllBytes());
+															break;
+														}
+														ent = zIn.getNextEntry();
+													}
+													zIn.close();
+													strmI.close();
 													strm.close();
 												} catch (IOException e) {
+													throw new IOException("Invalid mod file, failed to load manifest.",
+															e);
 												}
 
 												if (ccfg == null) {
