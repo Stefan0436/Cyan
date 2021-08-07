@@ -1557,6 +1557,8 @@ public class CyanLoader extends ModkitModloader
 					}
 				}
 			}
+
+			otherModFileArray = modFiles.toArray(t -> new File[t]);
 		}
 	}
 
