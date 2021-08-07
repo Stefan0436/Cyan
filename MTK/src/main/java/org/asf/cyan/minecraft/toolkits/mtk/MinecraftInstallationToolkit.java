@@ -846,6 +846,10 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 				"caches/natives/" + version.getVersion());
 		File f5 = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/assets/indexes");
 		File f6 = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/assets/objects");
+		File jarDir = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/jars");
+		if (!jarDir.exists())
+			jarDir.mkdirs();
+		File f7 = new File(jarDir, GameSide.CLIENT.toString().toLowerCase() + "-" + version.getVersion() + ".jar");
 
 		if (!ignore_nonexistent) {
 			if (!f3.exists())
@@ -855,6 +859,8 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 			if (!f5.exists())
 				incorrect++;
 			if (!f6.exists())
+				incorrect++;
+			if (!f7.exists())
 				incorrect++;
 		}
 
