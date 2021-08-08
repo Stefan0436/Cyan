@@ -60,6 +60,8 @@ public class MinecraftServerModification_1_15_2 {
 			@TargetType(target = "net.minecraft.server.level.progress.ChunkProgressListenerFactory") Object var9,
 			String var10) {
 		if (firstLoad) {
+			Modloader.getModloader().dispatchEvent("mods.setuploader", MinecraftServerModification_1_15_2.class.getClassLoader());
+			CyanCore.setPhase(LoadPhase.PRELOAD);
 			Modloader.getModloader().dispatchEvent("mods.preinit");
 		}
 	}

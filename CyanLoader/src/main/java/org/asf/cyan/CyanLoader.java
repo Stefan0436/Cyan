@@ -291,9 +291,13 @@ public class CyanLoader extends ModkitModloader
 		progressMax++;
 		progressMax++;
 		progressMax++;
-		progressMax++;
-		progressMax++;
-		progressMax++;
+
+		// Ignore for Forge
+		if (CyanInfo.getPlatform() != LaunchPlatform.MCP) {
+			progressMax++;
+			progressMax++;
+			progressMax++;
+		}
 
 		cyanDir = new File(".cyan-data");
 		if (!cyanDir.exists())
@@ -2934,6 +2938,7 @@ public class CyanLoader extends ModkitModloader
 		} catch (MalformedURLException e) {
 		}
 
+		createEventChannel("mods.setuploader");
 		createEventChannel("mods.aftermodloader");
 		createEventChannel("mods.prestartgame");
 		createEventChannel("mod.loaded");
@@ -3119,9 +3124,27 @@ public class CyanLoader extends ModkitModloader
 	}
 
 	private boolean loadedMods = false;
+	private boolean bootstrap = false;
+
+	@AttachEvent(value = "mods.setuploader", synchronize = true)
+	private void preloadMods(ClassLoader loader) throws IOException {
+		if (getLaunchPlatform() == LaunchPlatform.MCP) {
+			bootstrap = true;
+			loadMods(loader);
+		}
+	}
 
 	@AttachEvent(value = "mods.load.regular.start", synchronize = true)
 	private void loadMods(ClassLoader loader) throws IOException {
+		if (getLaunchPlatform() == LaunchPlatform.MCP) {
+			if (!bootstrap) {
+				return;
+			}
+			if (loadedMods)
+				return;
+			info("Cyan will now load its mods, unlike standalone Cyan, paper and fabric, Cyan mods need to be loaded AFTER forge mods.");
+		}
+
 		if (loadedMods)
 			return;
 		loadedMods = true;
@@ -3170,6 +3193,9 @@ public class CyanLoader extends ModkitModloader
 		dispatchEvent("mods.all.loaded");
 		dispatchEvent("mods.all.loaded", loader);
 		StartupWindow.WindowAppender.increaseProgress();
+
+		if (getLaunchPlatform() == LaunchPlatform.MCP)
+			info("Returning to game code...");
 	}
 
 	private void loadModClasses(ClassLoader loader) {

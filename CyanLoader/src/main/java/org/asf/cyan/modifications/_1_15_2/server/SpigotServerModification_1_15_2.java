@@ -61,6 +61,7 @@ public class SpigotServerModification_1_15_2 {
 			@TargetType(target = "net.minecraft.server.level.progress.ChunkProgressListenerFactory") Object var10,
 			String var11) {
 		if (firstLoad) {
+			Modloader.getModloader().dispatchEvent("mods.setuploader", SpigotServerModification_1_15_2.class.getClassLoader());
 			CyanCore.setPhase(LoadPhase.PRELOAD);
 			Modloader.getModloader().dispatchEvent("mods.preinit");
 		}

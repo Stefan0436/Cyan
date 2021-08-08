@@ -75,6 +75,8 @@ public class MinecraftModification {
 	@Constructor
 	@InjectAt(location = InjectLocation.HEAD)
 	public static void ctor4(@TargetType(target = "net.minecraft.client.main.GameConfig") Object conf) {
+		if (firstLoad)
+			Modloader.getModloader().dispatchEvent("mods.setuploader", MinecraftModification.class.getClassLoader());
 		CyanCore.setPhase(LoadPhase.PRELOAD);
 		if (firstLoad) {
 			Modloader.getModloader().dispatchEvent("mods.preinit");

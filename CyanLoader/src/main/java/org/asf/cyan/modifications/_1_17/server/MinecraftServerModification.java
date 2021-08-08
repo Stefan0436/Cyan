@@ -64,6 +64,9 @@ public class MinecraftServerModification {
 			@TargetType(target = "com.mojang.authlib.GameProfileRepository") Object var10,
 			@TargetType(target = "net.minecraft.server.players.GameProfileCache") Object var11,
 			@TargetType(target = "net.minecraft.server.level.progress.ChunkProgressListenerFactory") Object var12) {
+		if (firstLoad)
+			Modloader.getModloader().dispatchEvent("mods.setuploader", MinecraftServerModification.class.getClassLoader());
+		CyanCore.setPhase(LoadPhase.PRELOAD);
 		if (firstLoad) {
 			Modloader.getModloader().dispatchEvent("mods.preinit");
 		}

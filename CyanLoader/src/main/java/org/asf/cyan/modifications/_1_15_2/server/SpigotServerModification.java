@@ -70,6 +70,7 @@ public class SpigotServerModification {
 			@TargetType(target = "net.minecraft.server.players.GameProfileCache") Object var13,
 			@TargetType(target = "net.minecraft.server.level.progress.ChunkProgressListenerFactory") Object var14) {
 		if (firstLoad) {
+			Modloader.getModloader().dispatchEvent("mods.setuploader", SpigotServerModification.class.getClassLoader());
 			CyanCore.setPhase(LoadPhase.PRELOAD);
 			Modloader.getModloader().dispatchEvent("mods.preinit");
 		}
