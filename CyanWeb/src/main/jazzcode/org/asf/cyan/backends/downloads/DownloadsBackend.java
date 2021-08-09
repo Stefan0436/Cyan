@@ -345,26 +345,20 @@ public class DownloadsBackend extends JWebService {
 		String gameVersion = function.parameters[2];
 		String loaderVersion = function.parameters[3];
 
-		String identifier = gameVersion;
-		if (!platform.equals("vanilla")) {
-			identifier += "-" + loaderVersion;
-		}
-
 		Map<String, String> versions = getVersionMap(platform);
 		if (repository.equals("testing")) {
-			if (checkVersions(versions, platform, gameVersion, loaderVersion, identifier,
+			if (checkVersions(versions, platform, gameVersion, loaderVersion,
 					new String[] { "testing", "latest", "stable", "lts" }))
 				return true;
 		} else if (repository.equals("latest")) {
-			if (checkVersions(versions, platform, gameVersion, loaderVersion, identifier,
+			if (checkVersions(versions, platform, gameVersion, loaderVersion,
 					new String[] { "latest", "stable", "lts" }))
 				return true;
 		} else if (repository.equals("stable")) {
-			if (checkVersions(versions, platform, gameVersion, loaderVersion, identifier,
-					new String[] { "stable", "lts" }))
+			if (checkVersions(versions, platform, gameVersion, loaderVersion, new String[] { "stable", "lts" }))
 				return true;
 		} else if (repository.startsWith("lts-") || repository.equals("lts")) {
-			if (checkVersions(versions, platform, gameVersion, loaderVersion, identifier, new String[] { "lts" }))
+			if (checkVersions(versions, platform, gameVersion, loaderVersion, new String[] { "lts" }))
 				return true;
 		}
 
@@ -393,8 +387,7 @@ public class DownloadsBackend extends JWebService {
 	}
 
 	private boolean checkVersions(Map<String, String> versions, String platform, String gameVersion,
-			String loaderVersion, String identifier, String[] repositories) {
-		boolean first = true;
+			String loaderVersion, String[] repositories) {
 		for (String repo : repositories) {
 			if (repo.equals("lts")) {
 				for (String version : versions.keySet().stream()
@@ -408,19 +401,6 @@ public class DownloadsBackend extends JWebService {
 					&& loaderVersion.equals(versions.get(repo + "-" + platform + "-" + gameVersion))) {
 				return true;
 			}
-
-			if (!first || platform.equals("vanilla")) {
-				if (repo.equals("lts")) {
-					if (versions.keySet().stream()
-							.anyMatch(t -> t.equals(identifier + "-lts") || t.startsWith(identifier + "-lts-"))) {
-						return true;
-					}
-				}
-				if (versions.containsKey(identifier + "-" + repo)) {
-					return true;
-				}
-			}
-			first = false;
 		}
 		return false;
 	}
