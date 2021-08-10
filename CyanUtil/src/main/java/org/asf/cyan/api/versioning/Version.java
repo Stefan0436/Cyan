@@ -89,7 +89,7 @@ public class Version {
 				last.data = "";
 			}
 
-			if (Character.isAlphabetic(ch) && lastWasAlpha) {
+			if (Character.isAlphabetic(ch) && lastWasAlpha && last.data.length() > 0) {
 				if (last.value.equals(BigInteger.valueOf(-1)))
 					last.value = BigInteger.valueOf(last.data.charAt(0));
 				last.data += ch;
