@@ -1,5 +1,6 @@
 package org.asf.cyan;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 /**
@@ -15,7 +16,7 @@ public class Version {
 
 	protected static class VersionSegment {
 		public String data = null;
-		public int value = -1;
+		public BigInteger value = BigInteger.valueOf(-1);
 
 		public int separator = -1;
 		public boolean hasSeparator = false;
@@ -54,12 +55,12 @@ public class Version {
 				if (last.data != null) {
 					if ((Character.isAlphabetic(ch) && !lastWasAlpha) || (Character.isDigit(ch) && lastWasAlpha)) {
 						if (last.data.matches("^[0-9]+$"))
-							last.value = Integer.valueOf(last.data);
+							last.value = new BigInteger(last.data);
 
 						last.hasSeparator = true;
-						if (last.value == -1 && last.data != null && last.data.length() > 0
+						if (last.value.equals(BigInteger.valueOf(-1)) && last.data != null && last.data.length() > 0
 								&& Character.isAlphabetic(last.data.charAt(0)))
-							last.value = last.data.charAt(0);
+							last.value = BigInteger.valueOf(last.data.charAt(0));
 
 						last = new VersionSegment();
 						segments.add(last);
@@ -74,7 +75,7 @@ public class Version {
 
 				if (last.data != null) {
 					if (last.data.matches("^[0-9]+$"))
-						last.value = Integer.valueOf(last.data);
+						last.value = new BigInteger(last.data);
 
 					last.separator = ch;
 					last.hasSeparator = true;
@@ -89,8 +90,8 @@ public class Version {
 			}
 
 			if (Character.isAlphabetic(ch) && lastWasAlpha) {
-				if (last.value == -1)
-					last.value = last.data.charAt(0);
+				if (last.value.equals(BigInteger.valueOf(-1)))
+					last.value = BigInteger.valueOf(last.data.charAt(0));
 				last.data += ch;
 				continue;
 			}
@@ -102,10 +103,10 @@ public class Version {
 		}
 
 		if (last.data != null && last.data.matches("^[0-9]+$"))
-			last.value = Integer.valueOf(last.data);
-		if (last.value == -1 && last.data != null && last.data.length() > 0
+			last.value = new BigInteger(last.data);
+		if (last.value.equals(BigInteger.valueOf(-1)) && last.data != null && last.data.length() > 0
 				&& Character.isAlphabetic(last.data.charAt(0)))
-			last.value = last.data.charAt(0);
+			last.value = BigInteger.valueOf(last.data.charAt(0));
 
 		return this;
 	}
@@ -157,9 +158,9 @@ public class Version {
 			else if (!isSnapshot(segment) && isSnapshot(otherSegment))
 				return false;
 
-			if (segment.value < otherSegment.value)
+			if (segment.value.compareTo(otherSegment.value) == -1)
 				return lastWasGreater;
-			else if (segment.value != otherSegment.value)
+			else if (!segment.value.equals(otherSegment.value))
 				lastWasGreater = true;
 			i++;
 		}
@@ -199,9 +200,9 @@ public class Version {
 			else if (!isSnapshot(otherSegment) && isSnapshot(segment))
 				return true;
 
-			if (segment.value > otherSegment.value)
+			if (segment.value.compareTo(otherSegment.value) == 1)
 				return lastWasLess;
-			lastWasLess = segment.value < otherSegment.value;
+			lastWasLess = segment.value.compareTo(otherSegment.value) == -1;
 
 			i++;
 		}

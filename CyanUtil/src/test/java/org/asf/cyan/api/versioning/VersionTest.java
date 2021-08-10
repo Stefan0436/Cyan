@@ -50,7 +50,9 @@ public class VersionTest {
 		assertTrue(ver2.isGreaterThan(ver));
 		assertTrue(!ver3.isLessThan(ver7));
 		assertTrue(ver.isLessThan(ver6));
+		assertTrue(!ver4.isEqualTo(ver3));
 		assertTrue(!ver4.isGreaterThan(ver3));
+		assertTrue(!ver4.isLessThan(ver3));
 	}
 
 	@Test
