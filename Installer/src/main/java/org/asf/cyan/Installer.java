@@ -794,8 +794,7 @@ public class Installer extends CyanComponent {
 		logger.info("the KickStart Installer will need to deobfuscate the game.");
 		logger.info("");
 		logger.info("This process will take A LOT OF TIME, if you have installed " + project.name);
-		logger.info("for the " + project.game + " " + side.toString().toLowerCase() + " "
-				+ " before, the existing jar will be used.");
+		logger.info("for the " + project.game + " " + side.toString().toLowerCase()	+ " before, the existing jar will be used.");
 		logger.info("");
 		logger.info("");
 		logger.info("");
