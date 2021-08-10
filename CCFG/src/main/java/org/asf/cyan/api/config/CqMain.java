@@ -556,7 +556,7 @@ public class CqMain {
 			if (!view && (!raw || value.toString().contains(" ") || value.toString().contains("\n")
 					|| value.toString().contains("\r")))
 				out.append("\"");
-			String val = (!view && !raw ? value.toString().replace("\n", "\\n") : value.toString());
+			String val = (!view && !raw ? value.toString().replace("\\", "\\\\").replace("\n", "\\n") : value.toString());
 			if (!view && (indent == 0 || !raw || (raw && indent != 0))) {
 				val = val.replace("\\\"", "\\\\\"");
 				val = val.replace("\"", "\\\"");
