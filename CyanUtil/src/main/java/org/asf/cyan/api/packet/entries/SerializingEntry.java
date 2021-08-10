@@ -1,5 +1,6 @@
 package org.asf.cyan.api.packet.entries;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -26,9 +27,14 @@ public class SerializingEntry<T> implements PacketEntry<T> {
 	}
 
 	private T val;
+	private byte[] data = null;
 
 	public SerializingEntry() {
 
+	}
+
+	public SerializingEntry(byte[] data) {
+		this.data = data;
 	}
 
 	public SerializingEntry(T value) {
@@ -57,13 +63,25 @@ public class SerializingEntry<T> implements PacketEntry<T> {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public T get() {
+		if (data != null) {
+			ByteArrayInputStream strm = new ByteArrayInputStream(data);
+			try {
+				val = (T) deserialize(strm);
+				strm.close();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			data = null;
+		}
 		return val;
 	}
 
 	void serialize(Object obj, OutputStream output) throws IOException {
 		ObjectOutputStream serializer = new ObjectOutputStream(output);
 		serializer.writeObject(obj);
+		serializer.close();
 	}
 
 	Object deserialize(InputStream input) throws IOException {
@@ -74,6 +92,7 @@ public class SerializingEntry<T> implements PacketEntry<T> {
 		} catch (ClassNotFoundException | IOException e) {
 			throw new IOException(e);
 		}
+		deserializer.close();
 		return obj;
 	}
 
@@ -82,10 +101,9 @@ public class SerializingEntry<T> implements PacketEntry<T> {
 		serialize(val, destination);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public PacketEntry<T> importStream(InputStream source, long amount) throws IOException {
-		return new SerializingEntry<T>((T) deserialize(source));
+		return new SerializingEntry<T>(source.readNBytes((int)amount));
 	}
 
 }

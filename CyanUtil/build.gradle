@@ -29,7 +29,7 @@ configurePublish {
 	}
 }
 
-version="1.0.0.A18"
+version="1.0.0.A19"
 jar.dependsOn('processResources')
 
 repositories {
