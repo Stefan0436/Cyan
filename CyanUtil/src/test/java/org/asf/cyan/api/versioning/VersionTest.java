@@ -8,12 +8,16 @@ public class VersionTest {
 
 	@Test
 	public void fromStringTest() {
+		Version v = Version.fromString("80650e893678e726b0d5724031344eb2ec47a51a:PB_170");
+		
 		Version ver = Version.fromString("1.0.0.0");
 		Version ver2 = Version.fromString("BETA-1.0.0.B2");
 		Version ver3 = Version.fromString("1.0.0.A3");
 		Version ver4 = Version.fromString("1.0.0.AA3");
 		Version ver5 = Version.fromString("1.0.0.0-SNAPSHOT-1");
 
+		assertTrue(v.toString().equals("80650e893678e726b0d5724031344eb2ec47a51a:PB_170"));
+		assertTrue(v.isEqualTo(Version.fromString("80650e893678e726b0d5724031344eb2ec47a51a:PB_170")));
 		assertTrue(ver.toString().equals("1.0.0.0"));
 		assertTrue(ver2.toString().equals("BETA-1.0.0.B2"));
 		assertTrue(ver3.toString().equals("1.0.0.A3"));
@@ -50,7 +54,7 @@ public class VersionTest {
 		assertTrue(ver2.isGreaterThan(ver));
 		assertTrue(!ver3.isLessThan(ver7));
 		assertTrue(ver.isLessThan(ver6));
-		assertTrue(!ver4.isEqualTo(ver3));
+		assertTrue(ver4.isEqualTo(ver3));
 		assertTrue(!ver4.isGreaterThan(ver3));
 		assertTrue(!ver4.isLessThan(ver3));
 	}

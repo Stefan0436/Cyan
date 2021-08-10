@@ -135,7 +135,7 @@ public class Version {
 		int i = 0;
 		for (VersionSegment segment : segments) {
 			VersionSegment otherSegment = other.segments.get(i);
-			if (segment.value != otherSegment.value)
+			if (!segment.value.equals(otherSegment.value))
 				return false;
 			i++;
 		}
