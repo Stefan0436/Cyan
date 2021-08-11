@@ -31,4 +31,3 @@ mappings> [ {
     name> 'net.minecraft.network.protocol.status.ServerStatus\$Serializer'
     obfuscated> 'net.minecraft.network.protocol.status.ServerPing\$Serializer'
 } ]
-

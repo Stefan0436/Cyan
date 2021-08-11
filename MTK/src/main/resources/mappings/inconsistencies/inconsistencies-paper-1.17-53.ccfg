@@ -44,5 +44,27 @@ mappings> [ {
         mappingType> METHOD
         argumentTypes> [ 'net.minecraft.network.chat.Component' ]
     } ]
+} {
+    mappingType> CLASS
+    name> 'net.minecraft.world.entity.EntityLiving'
+    obfuscated> 'net.minecraft.world.entity.EntityLiving'
+    mappings> [ {
+        type> 'boolean'
+        name> 'addEffect'
+        obfuscated> 'c'
+        mappingType> METHOD
+        argumentTypes> [ 'net.minecraft.world.effect.MobEffectInstance' ]
+    } {
+        type> 'boolean'
+        name> 'addEffect'
+        obfuscated> 'c'
+        mappingType> METHOD
+        argumentTypes> [ 'net.minecraft.world.effect.MobEffectInstance' 'net.minecraft.world.entity.Entity' ]
+    } {
+        type> 'boolean'
+        name> 'forceAddEffect'
+        obfuscated> 'a'
+        mappingType> METHOD
+        argumentTypes> [ 'net.minecraft.world.effect.MobEffectInstance' 'net.minecraft.world.entity.Entity' ]
+    } ]
 } ]
-
