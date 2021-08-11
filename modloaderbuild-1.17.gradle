@@ -1,8 +1,6 @@
 stability 'latest'
 
 fabric(
-    '0.11.3',
-    '0.11.5',
     '0.11.6'
 )
 
