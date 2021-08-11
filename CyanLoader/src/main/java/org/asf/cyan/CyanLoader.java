@@ -1172,6 +1172,7 @@ public class CyanLoader extends ModkitModloader
 			info.platform = CyanInfo.getPlatform().toString();
 			info.platformVersion = CyanInfo.getModloaderName() + "-" + CyanInfo.getModloaderVersion().toString();
 			info.modVersion = manifest.version;
+			info.trustContainers.clear();
 			info.trustContainers.putAll(manifest.trustContainers);
 
 			info("Game version: " + CyanInfo.getMinecraftVersion());
