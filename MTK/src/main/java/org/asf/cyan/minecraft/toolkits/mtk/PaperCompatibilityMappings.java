@@ -129,7 +129,7 @@ public class PaperCompatibilityMappings extends CompatibilityMappings {
 		String mappingsId = "-" + mappingsVersion.replaceAll("[!?/:\\\\]", "-")
 				+ (modloader.isEmpty() ? "" : "-" + modloader);
 
-		setBuild(2);
+		setBuild(3);
 
 		try {
 			if (loadWhenPossible("paper", mappingsId, info, GameSide.SERVER))

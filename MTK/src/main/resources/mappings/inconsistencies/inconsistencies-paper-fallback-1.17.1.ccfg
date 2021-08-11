@@ -30,4 +30,15 @@ mappings> [ {
     mappingType> CLASS
     name> 'net.minecraft.network.protocol.status.ServerStatus\$Serializer'
     obfuscated> 'net.minecraft.network.protocol.status.ServerPing\$Serializer'
+} {
+    mappingType> CLASS
+    name> 'net.minecraft.server.network.ServerGamePacketListenerImpl'
+    obfuscated> 'net.minecraft.server.network.PlayerConnection'
+    mappings> [ {
+        type> 'void'
+        name> 'disconnect'
+        obfuscated> 'disconnect'
+        mappingType> METHOD
+        argumentTypes> [ 'net.minecraft.network.chat.Component' ]
+    } ]
 } ]
