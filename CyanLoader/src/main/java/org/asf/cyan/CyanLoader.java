@@ -3215,11 +3215,11 @@ public class CyanLoader extends ModkitModloader
 	@SuppressWarnings("unchecked")
 	public <T extends IBaseMod> T getModByClass(Class<T> modClass) {
 		for (IMod md : mods) {
-			if (md.getClass().isAssignableFrom(modClass))
+			if (md.getClass().isAssignableFrom(modClass) || md.getClass().getTypeName().equals(modClass.getTypeName()))
 				return (T) md;
 		}
 		for (IMod md : coremods) {
-			if (md.getClass().isAssignableFrom(modClass))
+			if (md.getClass().isAssignableFrom(modClass) || md.getClass().getTypeName().equals(modClass.getTypeName()))
 				return (T) md;
 		}
 		return null;
