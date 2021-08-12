@@ -704,10 +704,6 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 
 	private static void map(Mapping<?> input, Mapping<?> helper, Mapping<?> patch, SimpleMappings fullMappings) {
 		for (Mapping<?> classMapping : input.mappings) {
-			if (classMapping.obfuscated.equals("ww")) {
-				classMapping = classMapping;
-			}
-
 			SimpleMappings mapping = new SimpleMappings();
 			mapping.mappingType = MAPTYPE.CLASS;
 
