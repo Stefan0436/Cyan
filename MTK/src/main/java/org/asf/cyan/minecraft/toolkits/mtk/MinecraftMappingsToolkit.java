@@ -6,19 +6,19 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.stream.Stream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
 import org.asf.cyan.api.common.CYAN_COMPONENT;
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.modloader.Modloader;
@@ -397,10 +397,10 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 									member.type = mp.name;
 							}
 						}
-						
+
 						if (member.argumentTypes != null) {
 							int ind = 0;
-							for (String type : member.argumentTypes) {								
+							for (String type : member.argumentTypes) {
 								if (member.type != null) {
 									Mapping<?> mp = mappings.mapClassToMapping(type, t -> true, false);
 									if (mp != null) {
@@ -409,7 +409,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 											member.argumentTypes[ind] = mp.name;
 									}
 								}
-								
+
 								ind++;
 							}
 						}
@@ -421,7 +421,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 				}
 			}
 			info("Processed " + i + "/" + c + " references.");
-			
+
 			i = 0;
 			for (Mapping<?> cls : mappings.mappings) {
 				if (cls.mappingType == MAPTYPE.CLASS) {
@@ -529,14 +529,14 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 		if (!mappingsDir.exists())
 			mappingsDir.mkdirs();
 
-		File officialMojangYarn = new File(mappingsDir, "official-mojang+yarn.tiny");
-		File mojangYarnSpigotReobf = new File(mappingsDir, "mojang+yarn-spigot-reobf.tiny");
+		File officialMojmap = new File(mappingsDir, "official-mojang+yarn.tiny");
+		File mojangYarnSpigotReobf = new File(mappingsDir, "mojang+yarn-spigot-reobf-patched.tiny");
 
 		File tmpDir = new File(mappingsDir, "tmp");
 		if (tmpDir.exists())
 			deleteDir(tmpDir);
 
-		if (!officialMojangYarn.exists() || !mojangYarnSpigotReobf.exists()) {
+		if (!officialMojmap.exists() || !mojangYarnSpigotReobf.exists()) {
 			info("");
 			info("");
 			info("As of Minecraft 1.17, Cyan will need to compile a part of the Paper server in order to generate compatible mappings.");
@@ -610,11 +610,11 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 			info("");
 			info("Copying mappings into Cyan cache...");
 			File gradleMappingsDir = new File(tmpDir, ".gradle/caches/paperweight/mappings/");
-			if (officialMojangYarn.exists())
-				officialMojangYarn.delete();
 			if (mojangYarnSpigotReobf.exists())
 				mojangYarnSpigotReobf.delete();
-			Files.copy(new File(gradleMappingsDir, officialMojangYarn.getName()).toPath(), officialMojangYarn.toPath());
+			if (officialMojmap.exists())
+				officialMojmap.delete();
+			Files.copy(new File(gradleMappingsDir, officialMojmap.getName()).toPath(), officialMojmap.toPath());
 			Files.copy(new File(gradleMappingsDir, mojangYarnSpigotReobf.getName()).toPath(),
 					mojangYarnSpigotReobf.toPath());
 
@@ -628,17 +628,17 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 		info("Mapping the PAPER mappings into CCFG format...");
 		trace("MAP version PAPER mappings into CCFG, caller: " + CallTrace.traceCallName());
 
-		// load mojang+yarn-spigot-reobf.tiny
-		String mappingsFile = new String(Files.readAllBytes(mojangYarnSpigotReobf.toPath()));
-		SimpleMappings output = new SimpleMappings().parseTinyV2Mappings(mappingsFile, "mojang+yarn", "spigot");
-
 		// load official-mojang+yarn.tiny
-		mappingsFile = new String(Files.readAllBytes(officialMojangYarn.toPath()));
-		SimpleMappings input = new SimpleMappings().parseTinyV2Mappings(mappingsFile, "mojang+yarn", "official");
+		String mappingsFile = new String(Files.readAllBytes(officialMojmap.toPath()));
+		SimpleMappings mojmap = new SimpleMappings().parseTinyV2Mappings(mappingsFile, "official", "mojang+yarn");
+
+		// load mojang+yarn-spigot-reobf.tiny
+		mappingsFile = new String(Files.readAllBytes(mojangYarnSpigotReobf.toPath()));
+		SimpleMappings output = new SimpleMappings().parseTinyV2Mappings(mappingsFile, "mojang+yarn", "spigot");
 
 		// generate the combined mappings
 		SimpleMappings fullMappings = new SimpleMappings();
-		map(input, fallback, output, fullMappings);
+		map(mojmap, fallback, output, fullMappings);
 
 		trace("SET severMappings property, caller: " + CallTrace.traceCallName());
 		serverMappings = fullMappings;
@@ -702,58 +702,172 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 		dir.delete();
 	}
 
-	private static void map(SimpleMappings input, Mapping<?> helper, SimpleMappings output,
-			SimpleMappings fullMappings) {
-		for (Mapping<?> classMapping : output.mappings) {
-			String oldType = classMapping.obfuscated;
-			String type = mapClass(input, classMapping.obfuscated);
+	private static void map(Mapping<?> input, Mapping<?> helper, Mapping<?> patch, SimpleMappings fullMappings) {
+		for (Mapping<?> classMapping : input.mappings) {
+			if (classMapping.obfuscated.equals("ww")) {
+				classMapping = classMapping;
+			}
+
+			SimpleMappings mapping = new SimpleMappings();
+			mapping.mappingType = MAPTYPE.CLASS;
+
+			mapping.obfuscated = classMapping.obfuscated;
+			mapping.name = mapClass(patch, classMapping.name);
+
 			Mapping<?> map = null;
-			for (Mapping<?> classMapping2 : input.mappings) {
-				if (classMapping2.obfuscated.equals(classMapping.obfuscated)) {
+			for (Mapping<?> classMapping2 : patch.mappings) {
+				if (classMapping2.obfuscated.equals(classMapping.name)) {
 					map = classMapping2;
 					break;
 				}
 			}
-			if (!type.equals(classMapping.obfuscated))
-				classMapping.obfuscated = type;
-			else {
-				type = mapClass(helper, classMapping.obfuscated);
-				classMapping.obfuscated = type;
-			}
-			for (Mapping<?> member : classMapping.mappings) {
-				if (member.mappingType == MAPTYPE.PROPERTY) {
-					member.obfuscated = mapProperty(input, oldType, member.obfuscated, true);
-				} else if (member.mappingType == MAPTYPE.METHOD) {
-					member.obfuscated = mapMethod(input, oldType, member.obfuscated, true,
-							mapTypes(input, mapTypes(output, member.argumentTypes, false)));
-				}
-			}
+
 			if (map != null) {
+				ArrayList<Mapping<?>> members = new ArrayList<Mapping<?>>();
+				for (Mapping<?> member : classMapping.mappings) {
+					if (member.mappingType == MAPTYPE.PROPERTY) {
+						boolean skip = false;
+						for (Mapping<?> member2 : map.mappings) {
+							if (member2.mappingType == MAPTYPE.PROPERTY && member2.obfuscated.equals(member.name)) {
+								skip = true;
+								break;
+							}
+						}
+						if (skip)
+							continue;
+
+						SimpleMappings mem = new SimpleMappings();
+						mem.mappingType = MAPTYPE.PROPERTY;
+						mem.obfuscated = mapProperty(input, classMapping.name, member.obfuscated, false);
+						mem.name = member.name;
+						mem.type = mapClass(patch, member.type);
+						members.add(mem);
+					} else if (member.mappingType == MAPTYPE.METHOD) {
+						boolean skip = false;
+						for (Mapping<?> member2 : map.mappings) {
+							if (member2.mappingType == MAPTYPE.METHOD && member2.obfuscated.equals(member.name)) {
+								String[] types = member2.argumentTypes;
+								String[] newTypes = member.argumentTypes;
+								if (newTypes.length != types.length)
+									continue;
+
+								for (int i = 0; i < types.length; i++) {
+									types[i] = mapClass(patch, types[i]);
+								}
+
+								if (Arrays.equals(newTypes, types)) {
+									skip = true;
+									break;
+								}
+							}
+						}
+						if (skip)
+							continue;
+
+						SimpleMappings mem = new SimpleMappings();
+						mem.mappingType = MAPTYPE.METHOD;
+						mem.name = member.name;
+						mem.argumentTypes = mapTypes(input, member.argumentTypes.clone(), false);
+						mem.type = mapClass(patch, member.type);
+						mem.obfuscated = mapMethod(input, classMapping.name, member.obfuscated, false,
+								mapTypes(patch, mem.argumentTypes, false));
+						members.add(mem);
+					}
+				}
 				for (Mapping<?> member : map.mappings) {
 					if (member.mappingType == MAPTYPE.PROPERTY) {
-						if (!Stream.of(classMapping.mappings).anyMatch(t -> t.obfuscated.equals(member.obfuscated))) {
-							Mapping<?> mem = new SimpleMappings();
-							mem.mappingType = member.mappingType;
-							mem.obfuscated = member.name;
-							mem.name = member.obfuscated;
-							mem.type = mapClass(input, member.type, false);
-							classMapping.mappings = ArrayUtil.append(classMapping.mappings, new Mapping[] { mem });
+						Mapping<?> memberOld = null;
+						for (Mapping<?> member2 : classMapping.mappings) {
+							if (member2.mappingType == MAPTYPE.PROPERTY && member2.obfuscated.equals(member.name)) {
+								memberOld = member2;
+								break;
+							}
+						}
+						if (memberOld != null) {
+							SimpleMappings mem = new SimpleMappings();
+							mem.mappingType = MAPTYPE.PROPERTY;
+							mem.obfuscated = memberOld.obfuscated;
+							mem.name = member.name;
+							mem.type = mapClass(patch, memberOld.type);
+							members.add(mem);
+						} else {
+							SimpleMappings mem = new SimpleMappings();
+							mem.mappingType = MAPTYPE.PROPERTY;
+							mem.obfuscated = mapProperty(input, map.obfuscated, member.obfuscated, false);
+							mem.name = member.name;
+							mem.type = mapClass(patch, member.type);
+							members.add(mem);
 						}
 					} else if (member.mappingType == MAPTYPE.METHOD) {
-						if (!Stream.of(classMapping.mappings).anyMatch(t -> t.obfuscated.equals(member.obfuscated)
-								&& Arrays.equals(t.argumentTypes, member.argumentTypes))) {
-							Mapping<?> mem = new SimpleMappings();
-							mem.mappingType = member.mappingType;
-							mem.obfuscated = member.name;
-							mem.name = member.obfuscated;
-							mem.type = mapClass(input, member.type, false);
-							mem.argumentTypes = mapTypes(input, member.argumentTypes, false);
-							classMapping.mappings = ArrayUtil.append(classMapping.mappings, new Mapping[] { mem });
+						Mapping<?> memberOld = null;
+						for (Mapping<?> member2 : classMapping.mappings) {
+							if (member2.mappingType == MAPTYPE.METHOD && member2.obfuscated.equals(member.name)) {
+								String[] types = member2.argumentTypes;
+								String[] newTypes = member.argumentTypes;
+								if (newTypes.length != types.length)
+									continue;
+
+								for (int i = 0; i < types.length; i++) {
+									types[i] = mapClass(patch, types[i]);
+								}
+
+								if (Arrays.equals(newTypes, types)) {
+									memberOld = member2;
+									break;
+								}
+							}
+						}
+						if (memberOld == null) {
+							SimpleMappings mem = new SimpleMappings();
+							mem.mappingType = MAPTYPE.METHOD;
+							mem.name = member.name;
+							mem.argumentTypes = mapTypes(input, member.argumentTypes.clone(), false);
+							mem.type = mapClass(patch, member.type);
+							mem.obfuscated = mapMethod(input, map.obfuscated, member.obfuscated, false,
+									mapTypes(patch, mem.argumentTypes, false));
+							members.add(mem);
+						} else {
+							String[] types = memberOld.argumentTypes;
+							for (int i = 0; i < types.length; i++) {
+								types[i] = mapClass(patch, types[i]);
+							}
+
+							SimpleMappings mem = new SimpleMappings();
+							mem.mappingType = MAPTYPE.METHOD;
+							mem.obfuscated = memberOld.obfuscated;
+							mem.name = member.name;
+							mem.argumentTypes = types;
+							mem.type = mapClass(patch, member.type);
+							members.add(mem);
 						}
 					}
 				}
+				mapping.mappings = members.toArray(t -> new Mapping<?>[t]);
+			} else {
+				ArrayList<Mapping<?>> members = new ArrayList<Mapping<?>>();
+				for (Mapping<?> member : classMapping.mappings) {
+					if (member.mappingType == MAPTYPE.PROPERTY) {
+						SimpleMappings mem = new SimpleMappings();
+						mem.mappingType = MAPTYPE.PROPERTY;
+						mem.obfuscated = mapProperty(input, classMapping.name, member.obfuscated, false);
+						mem.name = member.name;
+						mem.type = mapClass(patch, member.type);
+						members.add(mem);
+					} else if (member.mappingType == MAPTYPE.METHOD) {
+						SimpleMappings mem = new SimpleMappings();
+						mem.mappingType = MAPTYPE.METHOD;
+						mem.name = member.name;
+						mem.argumentTypes = mapTypes(input, member.argumentTypes.clone(), false);
+						mem.type = mapClass(patch, member.type);
+						mem.obfuscated = mapMethod(input, classMapping.name, member.obfuscated, false,
+								mapTypes(patch, mem.argumentTypes, false));
+						members.add(mem);
+					}
+				}
+				mapping.mappings = members.toArray(t -> new Mapping<?>[t]);
 			}
-			fullMappings.add(classMapping);
+
+			fullMappings.add(mapping);
 		}
 	}
 
@@ -808,10 +922,6 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 
 	private static String mapClass(Mapping<?> mp, String input) {
 		return mapClass(mp, input, true);
-	}
-
-	private static String[] mapTypes(Mapping<?> input, String[] argumentTypes) {
-		return mapTypes(input, argumentTypes, true);
 	}
 
 	private static String mapClass(Mapping<?> mp, String input, boolean obfuscated) {

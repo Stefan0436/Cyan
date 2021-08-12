@@ -80,11 +80,18 @@ class CompatibilityMappings extends SimpleMappings {
 		combine(identifier, mappings, combine, false);
 	}
 
-	@SuppressWarnings("unchecked")
 	public void combine(String identifier, Mapping<?> mappings, Mapping<?> combine, boolean alwaysAllowRemap)
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
-		MinecraftToolkit.infoLog("Computing compatibility mappings...");
+		combine(identifier, mappings, combine, alwaysAllowRemap, false);
+	}
+
+	@SuppressWarnings("unchecked")
+	public void combine(String identifier, Mapping<?> mappings, Mapping<?> combine, boolean alwaysAllowRemap,
+			boolean silent) throws InstantiationException, IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException, NoSuchMethodException, SecurityException {
+		if (!silent)
+			MinecraftToolkit.infoLog("Computing compatibility mappings...");
 		ArrayList<Mapping<?>> mappingsLst = new ArrayList<Mapping<?>>();
 		for (Mapping<?> mapping : mappings.mappings) {
 			if (ignoredTypes.contains(mapping.name))
