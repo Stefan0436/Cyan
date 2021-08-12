@@ -9,8 +9,8 @@ public class RiftConfig extends Configuration<RiftConfig> {
 	public String outputDir;
 	public String cacheDir = ".";
 
-	public RiftArtifact[] riftJars;
-	public HashMap<String, String> dependencies;
+	public RiftArtifact[] riftJars = new RiftArtifact[0];
+	public HashMap<String, String> dependencies = new HashMap<String, String>();
 
 	@Override
 	public String filename() {

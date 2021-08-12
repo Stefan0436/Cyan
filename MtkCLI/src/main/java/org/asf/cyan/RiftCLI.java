@@ -33,6 +33,7 @@ public class RiftCLI extends CyanComponent {
 			File output = new File(config.outputDir);
 			if (!output.exists())
 				output.mkdirs();
+			
 			for (RiftArtifact artifact : config.riftJars) {
 				try {
 					System.out.println("Creating rift jar: " + artifact.classifier);
