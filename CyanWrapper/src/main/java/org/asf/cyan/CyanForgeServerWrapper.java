@@ -48,7 +48,8 @@ public class CyanForgeServerWrapper extends CyanComponent {
 				break;
 			}
 		}
-		if (!found) {
+		if (!found && Version.fromString(CyanInfo.getMinecraftVersion())
+				.isGreaterOrEqualTo(Version.fromString("1.17.1"))) {
 			CyanCore.simpleInit();
 			CyanCore.initLoader();
 
