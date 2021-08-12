@@ -43,7 +43,7 @@ mappings> [ {
     } ]
 } {
     mappingType> CLASS
-    name> 'net.minecraft.world.entity.EntityLiving'
+    name> 'net.minecraft.world.entity.LivingEntity'
     obfuscated> 'net.minecraft.world.entity.EntityLiving'
     mappings> [ {
         type> 'boolean'
