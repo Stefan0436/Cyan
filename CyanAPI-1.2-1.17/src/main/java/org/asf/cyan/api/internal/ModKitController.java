@@ -91,7 +91,8 @@ public class ModKitController extends CyanComponent {
 			StartupWindow.WindowAppender.closeWindow();
 		} else {
 			StartupWindow.shown = false;
-			StartupWindow.WindowAppender.frame.frm.setVisible(false);
+			if (StartupWindow.WindowAppender.frame != null && StartupWindow.WindowAppender.frame.frm != null)
+				StartupWindow.WindowAppender.frame.frm.setVisible(false);
 		}
 	}
 }
