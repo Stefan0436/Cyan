@@ -777,6 +777,16 @@ public class Installer extends CyanComponent {
 		}
 
 		logger.info("Preparing vanilla jar...");
+		if (project.platform.equals("MCP")) {
+			if (MinecraftInstallationToolkit.getVersionJar(version, GameSide.CLIENT) == null) {
+				logger.info("Downloading vanilla client jar...");
+				MinecraftInstallationToolkit.downloadVersionJar(version, GameSide.CLIENT);
+				ProgressWindow.WindowAppender.increaseProgress();
+				logger.info("");
+			} else {
+				ProgressWindow.WindowAppender.increaseProgress();
+			}
+		}
 		if (MinecraftInstallationToolkit.getVersionJar(version, side) == null) {
 			logger.info("Downloading vanilla jar...");
 			MinecraftInstallationToolkit.downloadVersionJar(version, side);
@@ -794,12 +804,13 @@ public class Installer extends CyanComponent {
 		logger.info("the KickStart Installer will need to deobfuscate the game.");
 		logger.info("");
 		logger.info("This process will take A LOT OF TIME, if you have installed " + project.name);
-		logger.info("for the " + project.game + " " + side.toString().toLowerCase()	+ " before, the existing jar will be used.");
+		logger.info("for the " + project.game + " " + side.toString().toLowerCase()
+				+ " before, the existing jar will be used.");
 		logger.info("");
 		logger.info("");
 		logger.info("");
 		logger.info("Preparing to deobfuscate... (if needed)");
-		MinecraftMappingsToolkit.loadMappings(version, side);
+		MinecraftMappingsToolkit.loadMappings(version, (project.platform.equals("MCP") ? GameSide.CLIENT : side));
 		logger.info("");
 		ProgressWindow.WindowAppender.increaseProgress();
 		if (side == GameSide.CLIENT && !MinecraftInstallationToolkit.checkInstallation(version, false)) {
@@ -814,10 +825,11 @@ public class Installer extends CyanComponent {
 		File lock = new File(cache, "deobf-" + version + "-" + side + "-" + project.platform + "-" + project.name + "-"
 				+ project.version + ".lck");
 		if (lock.exists())
-			MinecraftModdingToolkit.deobfuscateJar(version, side).delete();
+			MinecraftModdingToolkit.deobfuscateJar(version, (project.platform.equals("MCP") ? GameSide.CLIENT : side))
+					.delete();
 		if (!lock.exists())
 			lock.createNewFile();
-		MinecraftModdingToolkit.deobfuscateJar(version, side);
+		MinecraftModdingToolkit.deobfuscateJar(version, (project.platform.equals("MCP") ? GameSide.CLIENT : side));
 		lock.delete();
 		ProgressWindow.WindowAppender.increaseProgress();
 		logger.info("");
