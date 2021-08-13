@@ -48,6 +48,8 @@ public class CyanForgeServerWrapper extends CyanComponent {
 				break;
 			}
 		}
+		
+		CyanCore.simpleInit();
 		CyanCore.initLoader();
 		CyanCore.initLogger();
 		
