@@ -220,7 +220,7 @@ public class CyanForgeServerWrapper extends CyanComponent {
 		CyanLoader.disableVanillaMappings();
 		CyanLoader.addCompatibilityMappings(CyanLoader.getForgeCompatibilityMappings(GameSide.SERVER, mcp.toString()));
 		CyanLoader.initializeGame("SERVER");
-		String defaultWrapper = "cpw.mods.modlauncher.Launcher";
+		String defaultWrapper = "net.minecraftforge.server.ServerMain";
 		if (Version.fromString(CyanInfo.getMinecraftVersion()).isGreaterOrEqualTo(Version.fromString("1.17.1"))) {
 			defaultWrapper = "cpw.mods.bootstraplauncher.BootstrapLauncher";
 			warn("Forge 1.17 server support is VERY INCOMPLETE!");
