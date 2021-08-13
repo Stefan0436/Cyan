@@ -704,6 +704,10 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 
 	private static void map(Mapping<?> input, Mapping<?> helper, Mapping<?> patch, SimpleMappings fullMappings) {
 		for (Mapping<?> classMapping : input.mappings) {
+			if (classMapping.name.endsWith("ServerPlayer")) {
+				classMapping = classMapping;
+			}
+
 			SimpleMappings mapping = new SimpleMappings();
 			mapping.mappingType = MAPTYPE.CLASS;
 
@@ -762,8 +766,8 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 
 						SimpleMappings mem = new SimpleMappings();
 						mem.mappingType = MAPTYPE.METHOD;
-						mem.name = member.name;
-						mem.argumentTypes = mapTypes(input, member.argumentTypes.clone(), false);
+						mem.argumentTypes = mapTypes(patch, member.argumentTypes.clone(), true);
+						mem.name = mapMethod(patch, classMapping.name, member.name, true, mem.argumentTypes);
 						mem.type = mapClass(patch, member.type);
 						mem.obfuscated = mapMethod(input, classMapping.name, member.obfuscated, false,
 								mapTypes(patch, mem.argumentTypes, false));
@@ -817,10 +821,10 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 							SimpleMappings mem = new SimpleMappings();
 							mem.mappingType = MAPTYPE.METHOD;
 							mem.name = member.name;
-							mem.argumentTypes = mapTypes(input, member.argumentTypes.clone(), false);
+							mem.argumentTypes = mapTypes(patch, member.argumentTypes.clone(), true);
 							mem.type = mapClass(patch, member.type);
 							mem.obfuscated = mapMethod(input, map.obfuscated, member.obfuscated, false,
-									mapTypes(patch, mem.argumentTypes, false));
+									mem.argumentTypes);
 							members.add(mem);
 						} else {
 							String[] types = memberOld.argumentTypes;
@@ -853,7 +857,7 @@ public class MinecraftMappingsToolkit extends CyanComponent {
 						SimpleMappings mem = new SimpleMappings();
 						mem.mappingType = MAPTYPE.METHOD;
 						mem.name = member.name;
-						mem.argumentTypes = mapTypes(input, member.argumentTypes.clone(), false);
+						mem.argumentTypes = mapTypes(patch, member.argumentTypes.clone(), true);
 						mem.type = mapClass(patch, member.type);
 						mem.obfuscated = mapMethod(input, classMapping.name, member.obfuscated, false,
 								mapTypes(patch, mem.argumentTypes, false));

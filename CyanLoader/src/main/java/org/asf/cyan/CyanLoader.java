@@ -402,7 +402,9 @@ public class CyanLoader extends ModkitModloader
 			CyanCore.initLoader();
 
 		CyanCore.simpleInit();
-		CyanCore.initLogger();
+
+		if (LOG == null)
+			CyanCore.initLogger();
 
 		if (side.equals("CLIENT") || !GraphicsEnvironment.isHeadless())
 			StartupWindow.WindowAppender.showWindow();
