@@ -37,13 +37,13 @@ public class RiftForgeToolchainProvider implements IRiftToolchainProvider {
 			MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "mcp", version, side);
 		}
 
-		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, side)) {
-			MinecraftMappingsToolkit.downloadVanillaMappings(version, side);
-			MinecraftMappingsToolkit.saveMappingsToDisk(version, side);
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, GameSide.CLIENT)) {
+			MinecraftMappingsToolkit.downloadVanillaMappings(version, GameSide.CLIENT);
+			MinecraftMappingsToolkit.saveMappingsToDisk(version, GameSide.CLIENT);
 		}
 
 		MinecraftMappingsToolkit.loadMappings(mappingsId, "mcp", version, side);
-		MinecraftMappingsToolkit.loadMappings(version, side);
+		MinecraftMappingsToolkit.loadMappings(version, GameSide.CLIENT);
 
 		if (side == GameSide.CLIENT)
 			verify();
@@ -54,10 +54,10 @@ public class RiftForgeToolchainProvider implements IRiftToolchainProvider {
 	@Override
 	public File getJar() throws IOException {
 		File jarDir = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), "caches/jars");
-		File jarFile = new File(jarDir, side.toString().toLowerCase() + "-" + version.getVersion() + "-deobf.jar");
+		File jarFile = new File(jarDir, "client-" + version.getVersion() + "-deobf.jar");
 
 		if (!jarFile.exists())
-			MinecraftModdingToolkit.deobfuscateJar(version, side);
+			MinecraftModdingToolkit.deobfuscateJar(version, GameSide.CLIENT);
 
 		if (side == GameSide.CLIENT)
 			verify();
