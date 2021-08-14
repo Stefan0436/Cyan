@@ -199,17 +199,23 @@ public class FluidAgent extends CyanComponent {
 				}
 
 				if (!match && !transformerMatch) {
-					pool.readClass(className, classfileBuffer);
+					try {
+						pool.rewriteClass(className, classfileBuffer);
+					} catch (ClassNotFoundException e) {
+						pool.readClass(className, classfileBuffer);
+					}
 					return null;
 				}
 
 				byte[] bytecode = null;
 				if (match) {
-					ClassNode cc = pool.readClass(className, classfileBuffer);
+					ClassNode cls;
 					try {
-						pool.rewriteClass(className, classfileBuffer);
+						cls = pool.rewriteClass(className, classfileBuffer);
 					} catch (ClassNotFoundException e) {
+						cls = pool.readClass(className, classfileBuffer);
 					}
+					ClassNode cc = cls;
 
 					hooks.stream().filter(t -> {
 						String target = t.getTarget();
@@ -246,16 +252,16 @@ public class FluidAgent extends CyanComponent {
 
 					ClassNode cls = null;
 					if (bytecode != null) {
-						cls = pool.readClass(className, bytecode);
 						try {
-							pool.rewriteClass(className, bytecode);
+							cls = pool.rewriteClass(className, bytecode);
 						} catch (ClassNotFoundException e) {
+							cls = pool.readClass(className, bytecode);
 						}
 					} else {
-						cls = pool.readClass(className, classfileBuffer);
 						try {
-							pool.rewriteClass(className, classfileBuffer);
+							cls = pool.rewriteClass(className, classfileBuffer);
 						} catch (ClassNotFoundException e) {
+							cls = pool.readClass(className, classfileBuffer);
 						}
 					}
 
@@ -264,9 +270,17 @@ public class FluidAgent extends CyanComponent {
 					bytecode = pool.getByteCode(cls.name);
 				} else {
 					if (bytecode != null) {
-						pool.readClass(className, bytecode);
+						try {
+							pool.rewriteClass(className, bytecode);
+						} catch (ClassNotFoundException e) {
+							pool.readClass(className, bytecode);
+						}
 					} else {
-						pool.readClass(className, classfileBuffer);
+						try {
+							pool.rewriteClass(className, classfileBuffer);
+						} catch (ClassNotFoundException e) {
+							pool.readClass(className, classfileBuffer);
+						}
 					}
 				}
 
