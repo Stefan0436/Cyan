@@ -71,6 +71,12 @@ public class CyanTransformerMetadata extends TransformerMetadata {
 
 	@Override
 	protected void storeInstance(TransformerMetadata metadata) {
+		for (TransformerMetadata md : new ArrayList<TransformerMetadata>(transformers)) {
+			if (md.getTransfomerClass().equals(metadata.getTransfomerClass())) {
+				transformers.remove(md);
+				break;
+			}
+		}
 		transformers.add(metadata);
 	}
 
@@ -123,11 +129,11 @@ public class CyanTransformerMetadata extends TransformerMetadata {
 	}
 
 	@Override
-	protected MemberMetadata parseMethod(String owner, String transformerMemberName, String name, String desc, String[] types,
-			String returnType, int oldMod, int newMod, boolean isNew) {
+	protected MemberMetadata parseMethod(String owner, String transformerMemberName, String name, String desc,
+			String[] types, String returnType, int oldMod, int newMod, boolean isNew) {
 		MemberMetadata md = this.constructMetadata();
-		this.assignMetadataValues(md, MemberType.METHOD, owner, transformerMemberName, name, desc, returnType, types, oldMod,
-				newMod, isNew);
+		this.assignMetadataValues(md, MemberType.METHOD, owner, transformerMemberName, name, desc, returnType, types,
+				oldMod, newMod, isNew);
 		return md;
 	}
 
@@ -135,8 +141,8 @@ public class CyanTransformerMetadata extends TransformerMetadata {
 	protected MemberMetadata parseField(String owner, String transformerMemberName, String name, String type,
 			int oldMod, int newMod, boolean isNew) {
 		MemberMetadata md = this.constructMetadata();
-		this.assignMetadataValues(md, MemberType.FIELD, owner, transformerMemberName, name, null, type, null, oldMod, newMod,
-				isNew);
+		this.assignMetadataValues(md, MemberType.FIELD, owner, transformerMemberName, name, null, type, null, oldMod,
+				newMod, isNew);
 		return md;
 	}
 

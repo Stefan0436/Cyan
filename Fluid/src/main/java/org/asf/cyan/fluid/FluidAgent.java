@@ -52,7 +52,6 @@ public class FluidAgent extends CyanComponent {
 	private static ArrayList<ClassLoadHook> hooks = new ArrayList<ClassLoadHook>();
 	private static HashMap<String, String> transformerOwners = new HashMap<String, String>();
 	private static HashMap<String, ArrayList<ClassNode>> transformers = new HashMap<String, ArrayList<ClassNode>>();
-	private static ArrayList<String> transformedClasses = new ArrayList<String>();
 	private static boolean initialized = false;
 	private static boolean loaded = false;
 
@@ -207,6 +206,10 @@ public class FluidAgent extends CyanComponent {
 				byte[] bytecode = null;
 				if (match) {
 					ClassNode cc = pool.readClass(className, classfileBuffer);
+					try {
+						pool.rewriteClass(className, classfileBuffer);
+					} catch (ClassNotFoundException e) {
+					}
 
 					hooks.stream().filter(t -> {
 						String target = t.getTarget();
@@ -244,15 +247,20 @@ public class FluidAgent extends CyanComponent {
 					ClassNode cls = null;
 					if (bytecode != null) {
 						cls = pool.readClass(className, bytecode);
+						try {
+							pool.rewriteClass(className, bytecode);
+						} catch (ClassNotFoundException e) {
+						}
 					} else {
 						cls = pool.readClass(className, classfileBuffer);
+						try {
+							pool.rewriteClass(className, classfileBuffer);
+						} catch (ClassNotFoundException e) {
+						}
 					}
 
-					if (!transformedClasses.contains(cls.name)) {
-						Transformer.transform(cls, transformerOwners, transformers, clName, className, pool,
-								Fluid.getTransformerPool(), loader);
-						transformedClasses.add(cls.name);
-					}
+					Transformer.transform(cls, transformerOwners, transformers, clName, className, pool,
+							Fluid.getTransformerPool(), loader);
 					bytecode = pool.getByteCode(cls.name);
 				} else {
 					if (bytecode != null) {
