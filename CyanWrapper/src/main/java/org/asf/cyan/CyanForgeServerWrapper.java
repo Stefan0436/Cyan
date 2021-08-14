@@ -16,6 +16,7 @@ import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.core.CyanCore;
 import org.asf.cyan.core.CyanInfo;
 import org.asf.cyan.fluid.FluidAgent;
+import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit.OsInfo;
 
 public class CyanForgeServerWrapper extends CyanComponent {
@@ -49,6 +50,13 @@ public class CyanForgeServerWrapper extends CyanComponent {
 			}
 		}
 		
+		URL url = CyanLoader.class.getResource("/log4j2-server.xml");
+		if (MinecraftInstallationToolkit.isIDEModeEnabled()) {
+			url = CyanLoader.class.getResource("/log4j2-server-ide.xml");
+		}
+		System.setProperty("log4j2.configurationFile", url.toString());
+		System.setProperty("log4j.configurationFile", url.toString());
+		
 		CyanCore.simpleInit();
 		CyanCore.initLoader();
 		CyanCore.initLogger();
@@ -59,13 +67,6 @@ public class CyanForgeServerWrapper extends CyanComponent {
 			String plat = "unix";
 			if (OsInfo.getCurrent() == OsInfo.windows)
 				plat = "win";
-
-			URL url = CyanLoader.class.getResource("/log4j2-server.xml");
-			if (System.getProperty("ideMode") != null) {
-				url = CyanLoader.class.getResource("/log4j2-server-ide.xml");
-			}
-			System.setProperty("log4j2.configurationFile", url.toString());
-			System.setProperty("log4j.configurationFile", url.toString());
 
 			File argdoc = new File("libraries/net/minecraftforge/forge/" + CyanInfo.getMinecraftVersion() + "-"
 					+ CyanInfo.getModloaderVersion() + "/" + plat + "_args.txt");
