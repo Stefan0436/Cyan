@@ -57,7 +57,7 @@ public abstract class PacketReader {
 
 		public boolean readBoolean() {
 			int data = readByte();
-			if (data == 0)
+			if (data != 0)
 				return true;
 			else
 				return false;

@@ -58,7 +58,7 @@ public abstract class PacketWriter implements Closeable {
 		}
 
 		public RawWriter writeBoolean(boolean data) {
-			writer.writeRawByte(data ? 0 : 1);
+			writer.writeRawByte(data ? 1 : 0);
 			return this;
 		}
 
