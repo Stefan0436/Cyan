@@ -1,5 +1,5 @@
-forge=37.0.32
+forge=37.0.34
 fabric=0.11.6
-paper=172
+paper=189
 
-mappings_paper=fdef125b195f48e76fa61dfdf00fd7530e424877:PB_172
+mappings_paper=f2471d20b4b35d932b58eccd9b87877e7b6d58aa:PB_189
