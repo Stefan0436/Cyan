@@ -7,7 +7,7 @@ public class FriendlyByteBufInputFlow implements ByteFlow {
 
 	private FriendlyByteBuf buffer;
 	
-	private int next = -1;
+	private byte next = -1;
 	private boolean end = false;
 	private boolean hasNext = false;
 
@@ -16,9 +16,9 @@ public class FriendlyByteBufInputFlow implements ByteFlow {
 	}
 
 	@Override
-	public int read() {
+	public byte read() {
 		if (hasNext) {
-			int i = next;
+			byte i = next;
 			next = -1;
 			hasNext = false;
 			return i;

@@ -10,5 +10,5 @@ package modkit.network;
 public interface ByteFlow {
 	public boolean hasNext();
 
-	public int read();
+	public byte read();
 }

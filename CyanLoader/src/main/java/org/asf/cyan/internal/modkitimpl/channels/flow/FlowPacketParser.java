@@ -49,9 +49,9 @@ public class FlowPacketParser extends PacketParser {
 		public static byte[] readNBytes(ByteFlow flow, int count) {
 			byte[] buffer = new byte[count];
 			for (int i = 0; i < count; i++) {
-				int b = flow.read();
 				if (!flow.hasNext())
 					break;
+				int b = flow.read();
 				buffer[i] = (byte) b;
 			}
 			return buffer;

@@ -200,9 +200,9 @@ public abstract class PacketReader {
 	public byte[] readNBytes(int count) {
 		byte[] buffer = new byte[count];
 		for (int i = 0; i < count; i++) {
-			int b = readRawByte();
 			if (!flow.hasNext())
 				break;
+			int b = readRawByte();
 			buffer[i] = (byte) b;
 		}
 		return buffer;
