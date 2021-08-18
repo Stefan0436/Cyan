@@ -2,6 +2,7 @@ package modkit.network;
 
 import java.io.Closeable;
 import java.nio.ByteBuffer;
+import java.util.UUID;
 
 import org.asf.cyan.api.packet.PacketEntry;
 import org.asf.cyan.api.packet.entries.ByteArrayEntry;
@@ -79,6 +80,12 @@ public abstract class PacketWriter implements Closeable {
 
 		public RawWriter writeDouble(double data) {
 			writer.writeRawArray(ByteBuffer.allocate(8).putDouble(data).array());
+			return this;
+		}
+		
+		public RawWriter writeUUID(UUID uuid) {
+			writeLong(uuid.getMostSignificantBits());
+			writeLong(uuid.getLeastSignificantBits());
 			return this;
 		}
 

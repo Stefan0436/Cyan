@@ -33,7 +33,7 @@ public class FlowPacketParser extends PacketParser {
 		 * Reads the next byte
 		 * 
 		 * @param flow Input flow
-		 * @return Byte or -1
+		 * @return Byte
 		 */
 		public static int readRawByte(ByteFlow flow) {
 			return flow.read();
@@ -50,7 +50,7 @@ public class FlowPacketParser extends PacketParser {
 			byte[] buffer = new byte[count];
 			for (int i = 0; i < count; i++) {
 				int b = flow.read();
-				if (b == -1)
+				if (!flow.hasNext())
 					break;
 				buffer[i] = (byte) b;
 			}
@@ -72,7 +72,7 @@ public class FlowPacketParser extends PacketParser {
 					break;
 
 				int b = flow.read();
-				if (b == -1)
+				if (!flow.hasNext())
 					break;
 
 				bytes.add((byte) b);

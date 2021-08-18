@@ -15,8 +15,16 @@ if greaterOrEqualToVersion 1.17 "$minecraft" && [ "$1" != "spigotonly" ]; then
     paper="$(curl -s "https://papermc.io/api/v2/projects/paper/versions/$minecraft/" | jq '.builds[-1]')"
     commit="$(curl -s "https://papermc.io/api/v2/projects/paper/versions/$minecraft/builds/$paper" | jq '.changes[0].commit' -r)"
     
-    echo "version \"$commit:PB_$paper\""
-    echo "modloader \"$paper\""
+    build="$paper"
+    while [ "$commit" == "null" ]; do
+        1>&2 echo "WARNING! Build $paper has no commit hash, switching to $((paper - 1))!"
+        1>&2 echo
+        paper=$((paper - 1))
+        commit="$(curl -s "https://papermc.io/api/v2/projects/paper/versions/$minecraft/builds/$paper" | jq '.changes[0].commit' -r)"
+    done
+    
+    echo "version \"$commit:PB_$build\""
+    echo "modloader \"$build\""
 else
     refs="$(curl "https://hub.spigotmc.org/versions/$minecraft.json" -s | jq .refs)"
     craftbukkit="$(curl "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit/raw/pom.xml?at=$(echo "$refs" | jq -r .CraftBukkit)" -s)"

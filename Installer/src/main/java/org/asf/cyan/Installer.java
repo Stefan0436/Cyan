@@ -91,7 +91,7 @@ import javax.swing.JCheckBox;
 
 public class Installer extends CyanComponent {
 
-	private static final String version = "5.4";
+	private static final String version = "5.5";
 
 	private static Installer impl;
 
@@ -176,7 +176,7 @@ public class Installer extends CyanComponent {
 							project, false);
 				} catch (Exception e) {
 					fatal("Fatal error during installation", e);
-					System.exit(-1);
+					System.exit(1);
 				}
 			} else if (type.equals("server")) {
 				ProjectConfig project = new ProjectConfig();
@@ -185,7 +185,7 @@ public class Installer extends CyanComponent {
 							project, false);
 				} catch (Exception e) {
 					fatal("Fatal error during installation", e);
-					System.exit(-1);
+					System.exit(1);
 				}
 			} else if (type.equals("gui-client")) {
 				ProjectConfig project = new ProjectConfig();
@@ -206,7 +206,7 @@ public class Installer extends CyanComponent {
 					SwingUtilities.invokeLater(() -> {
 						ProgressWindow.WindowAppender.fatalError();
 						ProgressWindow.WindowAppender.closeWindow();
-						System.exit(-1);
+						System.exit(1);
 					});
 				}
 			} else if (type.equals("gui-server")) {
@@ -233,7 +233,7 @@ public class Installer extends CyanComponent {
 					SwingUtilities.invokeLater(() -> {
 						ProgressWindow.WindowAppender.fatalError();
 						ProgressWindow.WindowAppender.closeWindow();
-						System.exit(-1);
+						System.exit(1);
 					});
 				}
 			}
@@ -273,7 +273,7 @@ public class Installer extends CyanComponent {
 				JOptionPane.showMessageDialog(null,
 						"Forge (Pre-1.17) is not compatible with versions above Java 11, please use Java 11 to install.",
 						"Cannot install", JOptionPane.ERROR_MESSAGE);
-				System.exit(-1);
+				System.exit(1);
 			}
 		}
 		Version java = Version.fromString(System.getProperty("java.version"));
@@ -283,7 +283,7 @@ public class Installer extends CyanComponent {
 					project.name
 							+ " 1.17+ is not compatible with versions below Java 16, please use Java 16+ to install.",
 					"Cannot install", JOptionPane.ERROR_MESSAGE);
-			System.exit(-1);
+			System.exit(1);
 		}
 		EventQueue.invokeLater(new Runnable() {
 
@@ -534,7 +534,7 @@ public class Installer extends CyanComponent {
 							ProgressWindow.WindowAppender.fatalError();
 							ProgressWindow.WindowAppender.closeWindow();
 							frmCyanInstaller.dispose();
-							System.exit(-1);
+							System.exit(1);
 						});
 					}
 				}, "Installer").start();
@@ -571,7 +571,7 @@ public class Installer extends CyanComponent {
 							ProgressWindow.WindowAppender.fatalError();
 							ProgressWindow.WindowAppender.closeWindow();
 							frmCyanInstaller.dispose();
-							System.exit(-1);
+							System.exit(1);
 						});
 					}
 				}, "Installer").start();

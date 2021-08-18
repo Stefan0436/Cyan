@@ -3,6 +3,7 @@ package modkit.network;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import org.asf.cyan.api.packet.PacketEntry;
 import org.asf.cyan.api.packet.entries.ByteArrayEntry;
@@ -85,6 +86,10 @@ public abstract class PacketReader {
 
 		public String readVarString() {
 			return new String(readNBytes(readVarInt()));
+		}
+
+		public UUID readUUID() {
+			return new UUID(readLong(), readLong());
 		}
 
 		public int readVarInt() {
@@ -180,7 +185,7 @@ public abstract class PacketReader {
 	/**
 	 * Reads the next byte
 	 * 
-	 * @return Byte or -1
+	 * @return Byte
 	 */
 	public int readRawByte() {
 		return flow.read();
@@ -196,7 +201,7 @@ public abstract class PacketReader {
 		byte[] buffer = new byte[count];
 		for (int i = 0; i < count; i++) {
 			int b = readRawByte();
-			if (b == -1)
+			if (!flow.hasNext())
 				break;
 			buffer[i] = (byte) b;
 		}
@@ -217,7 +222,7 @@ public abstract class PacketReader {
 				break;
 
 			int b = readRawByte();
-			if (b == -1)
+			if (!flow.hasNext())
 				break;
 
 			bytes.add((byte) b);

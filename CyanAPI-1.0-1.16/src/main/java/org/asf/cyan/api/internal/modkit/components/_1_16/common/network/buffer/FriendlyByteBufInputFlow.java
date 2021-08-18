@@ -1,12 +1,15 @@
 package org.asf.cyan.api.internal.modkit.components._1_16.common.network.buffer;
 
-import org.asf.cyan.api.network.ByteFlow;
+import modkit.network.ByteFlow;
 import net.minecraft.network.FriendlyByteBuf;
 
 public class FriendlyByteBufInputFlow implements ByteFlow {
 
 	private FriendlyByteBuf buffer;
-	private int next = -2;
+	
+	private int next = -1;
+	private boolean end = false;
+	private boolean hasNext = false;
 
 	public FriendlyByteBufInputFlow(FriendlyByteBuf buffer) {
 		this.buffer = buffer;
@@ -14,14 +17,17 @@ public class FriendlyByteBufInputFlow implements ByteFlow {
 
 	@Override
 	public int read() {
-		if (next != -2) {
+		if (hasNext) {
 			int i = next;
-			next = -2;
+			next = -1;
+			hasNext = false;
 			return i;
 		}
 
-		if (buffer.readableBytes() == 0)
+		if (buffer.readableBytes() == 0) {
+            end = true;
 			return -1;
+        }
 
 		return buffer.readByte();
 	}
@@ -32,10 +38,15 @@ public class FriendlyByteBufInputFlow implements ByteFlow {
 
 	@Override
 	public boolean hasNext() {
-		if (next == -2) {
+		if (!hasNext) {
 			next = read();
+			hasNext = true;
 		}
-		return next != -1;
+		
+		if (!hasNext && buffer.readableBytes() == 0) {
+            end = true;
+        }
+		return !end;
 	}
 
 }

@@ -98,7 +98,7 @@ public abstract class PacketReader {
 	/**
 	 * Reads the next byte
 	 * 
-	 * @return Byte or -1
+	 * @return Byte number
 	 */
 	public int readRawByte() {
 		return flow.read();
@@ -114,7 +114,7 @@ public abstract class PacketReader {
 		byte[] buffer = new byte[count];
 		for (int i = 0; i < count; i++) {
 			int b = readRawByte();
-			if (b == -1)
+			if (!flow.hasNext())
 				break;
 			buffer[i] = (byte) b;
 		}
@@ -135,7 +135,7 @@ public abstract class PacketReader {
 				break;
 
 			int b = readRawByte();
-			if (b == -1)
+			if (!flow.hasNext())
 				break;
 
 			bytes.add((byte) b);
