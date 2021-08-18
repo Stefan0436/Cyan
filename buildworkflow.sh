@@ -12,4 +12,4 @@ if [ "$2" != "" ]; then
     fi
 fi
 
-eval "./buildlocal.sh $cmd"
+eval "./buildlocal.sh $cmd -- --stacktrace"
