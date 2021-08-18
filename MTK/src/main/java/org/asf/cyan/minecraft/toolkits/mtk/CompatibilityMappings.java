@@ -146,7 +146,7 @@ class CompatibilityMappings extends SimpleMappings {
 					boolean remap = true;
 					String map = mapProperty(combine, mapping.obfuscated, m.obfuscated, true);
 					Mapping<?> mp = mapPropertyMapping(combine, mapping.obfuscated, m.obfuscated, true);
-					if (!map.equals(m.obfuscated)) {
+					if (!map.equals(m.obfuscated) && m.type != null) {
 						Mapping<?> tmap = mapClassToMapping(m.type, t2 -> true, true);
 						if (tmap != null)
 							m.type = tmap.name;
