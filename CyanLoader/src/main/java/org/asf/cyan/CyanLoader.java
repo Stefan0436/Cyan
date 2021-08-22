@@ -664,7 +664,8 @@ public class CyanLoader extends ModkitModloader
 	}
 
 	private void loadCoreMods(ClassLoader loader) {
-		coreModManifests.forEach((k, manifest) -> {
+		coreModManifests.keySet().stream().sorted((t1, t2) -> t1.compareTo(t2)).forEach(k -> {
+			CyanModfileManifest manifest = coreModManifests.get(k);
 			if (k.contains(":") && !manifest.loaded)
 				loadMod(true, manifest, new ArrayList<String>(), loader);
 		});
@@ -3202,7 +3203,8 @@ public class CyanLoader extends ModkitModloader
 	}
 
 	private void loadModClasses(ClassLoader loader) {
-		modManifests.forEach((k, manifest) -> {
+		modManifests.keySet().stream().sorted((t1, t2) -> t1.compareTo(t2)).forEach(k -> {
+			CyanModfileManifest manifest = modManifests.get(k);
 			if (k.contains(":") && !manifest.loaded)
 				loadMod(false, manifest, new ArrayList<String>(), loader);
 		});
