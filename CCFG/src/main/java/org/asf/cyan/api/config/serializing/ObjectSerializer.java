@@ -131,6 +131,20 @@ public class ObjectSerializer {
 
 					return;
 				}
+				if (type.getActualTypeArguments()[1].getTypeName().endsWith("[]")) {
+					String typeNm = type.getActualTypeArguments()[1].getTypeName();
+
+					int arrayTypes = 0;
+					while (typeNm.endsWith("[]")) {
+						arrayTypes++;
+						typeNm = typeNm.substring(0, typeNm.lastIndexOf("[]"));
+					}
+					
+					Class<?> cls = classLoader.loadClass(typeNm);
+					for (int i = 0; i < arrayTypes; i++) {
+						cls = Array.newInstance(cls, 0).getClass();
+					}
+				}
 				Class cls = classLoader.loadClass(type.getActualTypeArguments()[1].getTypeName());
 				Object o = deserialize(txt, cls);
 				mp.put(key, o);

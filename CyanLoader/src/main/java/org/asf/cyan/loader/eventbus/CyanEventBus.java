@@ -47,22 +47,22 @@ class CyanEventBus extends EventBus {
 				completionHook.accept(result);
 		}
 
+		CyanEventList events = new CyanEventList();
 		for (CELEntry entry : listeners) {
+			events.add(entry.listener);
+		}
+
+		for (CELEntry entry : events) {
 			IEventListener listener = entry.listener;
 			entry.result = callListener(listener, params, (container) -> {
-				entry.result = container;
 				if (container.hasError()) {
 					setResult(result, result.hasCompleted(), true);
 				}
 
-				boolean complete = false;
-				for (CELEntry ent : listeners) {
-					boolean completed = false;
-					if (ent.result != null) {
-						completed = ent.result.hasCompleted();
-					}
-					if (completed) {
-						complete = true;
+				boolean complete = true;
+				for (CELEntry ent : events) {
+					if (ent.result == null || !ent.result.hasCompleted()) {
+						complete = false;
 						break;
 					}
 				}
