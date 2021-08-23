@@ -8,7 +8,7 @@ import org.asf.cyan.api.events.extended.EventObject.EventResult;
 
 /**
  * 
- * Extended synchrFonized event listener
+ * Extended synchronized event listener
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
  *

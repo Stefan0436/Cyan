@@ -55,6 +55,7 @@ class CyanEventBus extends EventBus {
 		for (CELEntry entry : events) {
 			IEventListener listener = entry.listener;
 			entry.result = callListener(listener, params, (container) -> {
+				entry.result = container;
 				if (container.hasError()) {
 					setResult(result, result.hasCompleted(), true);
 				}
