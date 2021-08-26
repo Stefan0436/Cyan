@@ -35,7 +35,7 @@ public class FriendlyByteBufInputFlow implements ByteFlow {
 	public FriendlyByteBuf getBuffer() {
 		return buffer;
 	}
-
+	
 	@Override
 	public boolean hasNext() {
 		if (!hasNext) {

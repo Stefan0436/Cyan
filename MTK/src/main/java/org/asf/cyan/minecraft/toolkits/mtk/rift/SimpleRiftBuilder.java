@@ -220,6 +220,7 @@ public class SimpleRiftBuilder implements Closeable {
 
 	/**
 	 * Appends jars that will be mapped before running rift
+	 * 
 	 * @param dep Dependency jar
 	 */
 	public void appendRiftDependencyFile(File dep) {

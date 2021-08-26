@@ -46,26 +46,18 @@ public class MinecraftRifterToolkit extends CyanComponent {
 	}
 
 	private static FabricCompatibilityMappings fabricMappingsClient = null;
-	private static ForgeCompatibilityMappings forgeMappingsClient = null;
-
 	private static FabricCompatibilityMappings fabricMappingsServer = null;
-	private static ForgeCompatibilityMappings forgeMappingsServer = null;
+	private static ForgeCompatibilityMappings forgeMappings = null;
 
 	private static MinecraftVersionInfo fabricMappingsVersionClient = null;
-	private static MinecraftVersionInfo forgeMappingsVersionClient = null;
-
 	private static MinecraftVersionInfo fabricMappingsVersionServer = null;
-	private static MinecraftVersionInfo forgeMappingsVersionServer = null;
+	private static MinecraftVersionInfo forgeMappingsVersion = null;
 
 	private static PaperCompatibilityMappings paperMappings = null;
 	private static MinecraftVersionInfo paperMappingsVersion = null;
 
-	public static ForgeCompatibilityMappings getForgeServerMappings() {
-		return forgeMappingsServer;
-	}
-
-	public static ForgeCompatibilityMappings getForgeClientMappings() {
-		return forgeMappingsClient;
+	public static ForgeCompatibilityMappings getForgeMappings() {
+		return forgeMappings;
 	}
 
 	public static FabricCompatibilityMappings getFabricServerMappings() {
@@ -164,48 +156,37 @@ public class MinecraftRifterToolkit extends CyanComponent {
 	 * jars, uses a version and side
 	 * 
 	 * @param version          Minecraft version
-	 * @param side             Which side (client or server)
 	 * @param modloaderVersion Modloader version
 	 * @param mcpVersion       MCP Version
 	 * @return Mapping object representing the rift targets.
 	 * @throws IOException If the mappings don't match the version given
 	 */
-	public static Mapping<?> generateCyanForgeRiftTargets(MinecraftVersionInfo version, GameSide side,
-			String modloaderVersion, String mcpVersion) throws IOException {
+	public static Mapping<?> generateCyanForgeRiftTargets(MinecraftVersionInfo version, String modloaderVersion,
+			String mcpVersion) throws IOException {
 		String mappingsId = "-" + mcpVersion.replaceAll("[!?/:\\\\]", "-") + "-" + modloaderVersion;
 
-		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, side))
-			throw new IOException("No mappings are present for the " + version + " " + side.toString().toLowerCase());
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, GameSide.CLIENT))
+			throw new IOException("No CLIENT mappings are present for " + version);
 
-		if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "mcp", version, side))
-			throw new IOException(
-					"No MCP mappings are present for the " + version + " " + side.toString().toLowerCase());
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "mcp", version, GameSide.CLIENT))
+			throw new IOException("No MCP mappings are present for " + version);
 
-		if (MinecraftMappingsToolkit.getLoadedMappingsVersion(side) == null)
+		if (MinecraftMappingsToolkit.getLoadedMappingsVersion(GameSide.CLIENT) == null)
 			throw new IOException("Mappings not loaded, please load the version mappings before deobfuscating.");
 
-		if (!MinecraftMappingsToolkit.getLoadedMappingsVersion(side).equals(version)) {
+		if (!MinecraftMappingsToolkit.getLoadedMappingsVersion(GameSide.CLIENT).equals(version)) {
 			throw new IOException(
 					"Mappings version mismatch, please load the right version mappings before deobfuscating.");
 		}
 
-		if (side == GameSide.CLIENT) {
-			if (forgeMappingsVersionClient == null || !forgeMappingsVersionClient.equals(version)) {
-				forgeMappingsVersionClient = version;
-				forgeMappingsClient = new ForgeCompatibilityMappings(MinecraftMappingsToolkit.getMappings(side),
-						modloaderVersion, version, side, false, mcpVersion);
-			}
-		} else {
-			if (forgeMappingsVersionServer == null || !forgeMappingsVersionServer.equals(version)) {
-				forgeMappingsVersionServer = version;
-				forgeMappingsServer = new ForgeCompatibilityMappings(MinecraftMappingsToolkit.getMappings(side),
-						modloaderVersion, version, side, false, mcpVersion);
-			}
+		if (forgeMappingsVersion == null || !forgeMappingsVersion.equals(version)) {
+			forgeMappingsVersion = version;
+			forgeMappings = new ForgeCompatibilityMappings(MinecraftMappingsToolkit.getMappings(GameSide.CLIENT),
+					modloaderVersion, version, GameSide.CLIENT, false, mcpVersion);
 		}
 
-		info("Generating MCP RIFT reverse targeting mappings for " + side.toString().toLowerCase() + " version "
-				+ version + "...");
-		return generateRiftTargets((side == GameSide.CLIENT ? forgeMappingsClient : forgeMappingsServer));
+		info("Generating MCP RIFT reverse targeting mappings for version " + version + "...");
+		return generateRiftTargets(forgeMappings);
 	}
 
 	/**

@@ -21,10 +21,10 @@ public class RiftForgeToolchainProvider implements IRiftToolchainProvider {
 	private String modloaderVersion;
 	private String mcpVersion;
 
-	public RiftForgeToolchainProvider(MinecraftVersionInfo version, GameSide side, String modloaderVersion,
+	public RiftForgeToolchainProvider(MinecraftVersionInfo version,
+			GameSide side, String modloaderVersion,
 			String mcpVersion) {
 		this.version = version;
-		this.side = side;
 		this.modloaderVersion = modloaderVersion;
 		this.mcpVersion = mcpVersion;
 	}
@@ -32,9 +32,9 @@ public class RiftForgeToolchainProvider implements IRiftToolchainProvider {
 	@Override
 	public Mapping<?> getRiftMappings() throws IOException {
 		String mappingsId = "-" + mcpVersion.replaceAll("[!?/:\\\\]", "-") + "-" + modloaderVersion;
-		if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "mcp", version, side)) {
-			MinecraftMappingsToolkit.downloadMCPMappings(version, side, mcpVersion);
-			MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "mcp", version, side);
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(mappingsId, "mcp", version, GameSide.CLIENT)) {
+			MinecraftMappingsToolkit.downloadMCPMappings(version, GameSide.CLIENT, mcpVersion);
+			MinecraftMappingsToolkit.saveMappingsToDisk(mappingsId, "mcp", version, GameSide.CLIENT);
 		}
 
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(version, GameSide.CLIENT)) {
@@ -42,13 +42,13 @@ public class RiftForgeToolchainProvider implements IRiftToolchainProvider {
 			MinecraftMappingsToolkit.saveMappingsToDisk(version, GameSide.CLIENT);
 		}
 
-		MinecraftMappingsToolkit.loadMappings(mappingsId, "mcp", version, side);
+		MinecraftMappingsToolkit.loadMappings(mappingsId, "mcp", version,  GameSide.CLIENT);
 		MinecraftMappingsToolkit.loadMappings(version, GameSide.CLIENT);
 
 		if (side == GameSide.CLIENT)
 			verify();
 
-		return MinecraftRifterToolkit.generateCyanForgeRiftTargets(version, side, modloaderVersion, mcpVersion);
+		return MinecraftRifterToolkit.generateCyanForgeRiftTargets(version, modloaderVersion, mcpVersion);
 	}
 
 	@Override

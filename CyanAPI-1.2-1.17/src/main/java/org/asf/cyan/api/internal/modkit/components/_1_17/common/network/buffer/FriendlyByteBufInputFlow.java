@@ -14,7 +14,7 @@ public class FriendlyByteBufInputFlow implements ByteFlow {
 	public FriendlyByteBufInputFlow(FriendlyByteBuf buffer) {
 		this.buffer = buffer;
 	}
-
+    
 	@Override
 	public byte read() {
 		if (hasNext) {

@@ -125,14 +125,14 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 					new URL("file:////tmp"), OffsetDateTime.now());
 		}
 
-		String mcp = "20210706.113038"; //getLatestMCP(info);
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + mcp+ "-mtktest", "mcp", info, GameSide.CLIENT)) {
+		String mcp = "20210706.113038"; // getLatestMCP(info);
+		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + mcp + "-mtktest", "mcp", info, GameSide.CLIENT)) {
 			MinecraftMappingsToolkit.downloadMCPMappings(info, GameSide.CLIENT, mcp);
-			MinecraftMappingsToolkit.saveMappingsToDisk("-" + mcp+ "-mtktest", "mcp", info, GameSide.CLIENT);
+			MinecraftMappingsToolkit.saveMappingsToDisk("-" + mcp + "-mtktest", "mcp", info, GameSide.CLIENT);
 		}
-		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + mcp+ "-mtktest", "mcp", info, GameSide.SERVER)) {
+		if (!MinecraftMappingsToolkit.areMappingsAvailable("-" + mcp + "-mtktest", "mcp", info, GameSide.SERVER)) {
 			MinecraftMappingsToolkit.downloadMCPMappings(info, GameSide.SERVER, mcp);
-			MinecraftMappingsToolkit.saveMappingsToDisk("-" + mcp+ "-mtktest", "mcp", info, GameSide.SERVER);
+			MinecraftMappingsToolkit.saveMappingsToDisk("-" + mcp + "-mtktest", "mcp", info, GameSide.SERVER);
 		}
 
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(info, GameSide.CLIENT)) {
@@ -145,19 +145,19 @@ public class MinecraftRifterToolkitSpecialTest extends CyanComponent {
 			MinecraftMappingsToolkit.saveMappingsToDisk(info, GameSide.SERVER);
 		}
 
-		MinecraftMappingsToolkit.loadMappings("-" + mcp+ "-mtktest", "mcp", info, GameSide.CLIENT);
-		MinecraftMappingsToolkit.loadMappings("-" + mcp+ "-mtktest", "mcp", info, GameSide.SERVER);
+		MinecraftMappingsToolkit.loadMappings("-" + mcp + "-mtktest", "mcp", info, GameSide.CLIENT);
+		MinecraftMappingsToolkit.loadMappings("-" + mcp + "-mtktest", "mcp", info, GameSide.SERVER);
 
 		MinecraftMappingsToolkit.loadMappings(info, GameSide.CLIENT);
 		MinecraftMappingsToolkit.loadMappings(info, GameSide.SERVER);
 
 		SimpleMappings riftClient = (SimpleMappings) MinecraftRifterToolkit.generateCyanForgeRiftTargets(info,
-				GameSide.CLIENT, "mtktest", mcp);
+				"mtktest", mcp);
 		SimpleMappings riftServer = (SimpleMappings) MinecraftRifterToolkit.generateCyanForgeRiftTargets(info,
-				GameSide.SERVER, "mtktest", mcp);
+				"mtktest", mcp);
 
-		testMappings(riftClient, MinecraftRifterToolkit.getForgeClientMappings(), riftServer,
-				MinecraftRifterToolkit.getForgeServerMappings());
+		testMappings(riftClient, MinecraftRifterToolkit.getForgeMappings(), riftServer,
+				MinecraftRifterToolkit.getForgeMappings());
 	}
 
 	@Test
