@@ -29,6 +29,7 @@ import org.asf.cyan.api.config.serializing.ObjectSerializer;
  *
  */
 public abstract class Configuration<T extends Configuration<T>> {
+
 	/**
 	 * The configuration base directory
 	 */
@@ -37,6 +38,7 @@ public abstract class Configuration<T extends Configuration<T>> {
 
 	private static Consumer<String> warnLogger = null;
 	private static Consumer<String> errorLogger = null;
+	private static ArrayList<Configuration<?>> configStore = new ArrayList<Configuration<?>>();
 
 	public static void setLoggers(Consumer<String> warnLogger, Consumer<String> errorLogger) {
 		Configuration.warnLogger = warnLogger;
@@ -44,14 +46,31 @@ public abstract class Configuration<T extends Configuration<T>> {
 	}
 
 	boolean enableSave = false;
-	static ArrayList<Configuration<?>> configStore = new ArrayList<Configuration<?>>();
 	String localBaseDir = "";
 	File base = null;
 	File conf = null;
+
 	HashMap<String, String> propertiesMemory = new HashMap<String, String>();
 
 	public File getFile() {
 		return conf;
+	}
+
+	/**
+	 * Removes the current configuration from the registry
+	 */
+	protected void unregisterGlobalConfiguration() {
+		if (configStore.contains(this))
+			configStore.remove(this);
+	}
+
+	/**
+	 * Registers the current configuration, allowing it to be reloaded using
+	 * 'readAllConfigurations()'
+	 */
+	protected void registerGlobalConfiguration() {
+		if (!configStore.contains(this))
+			configStore.add(this);
 	}
 
 	/**
@@ -65,6 +84,23 @@ public abstract class Configuration<T extends Configuration<T>> {
 				} catch (IOException e) {
 					if (errorLogger != null)
 						errorLogger.accept("Failed to write configuration " + config.filename() + ", exception: "
+								+ e.getClass().getTypeName() + ": " + e.getMessage());
+				}
+			}
+		}
+	}
+
+	/**
+	 * Reloads all known configuration files
+	 */
+	public static void readAllConfigurations() {
+		for (Configuration<?> config : configStore) {
+			if (config.enableSave) {
+				try {
+					config.readAll();
+				} catch (IOException e) {
+					if (errorLogger != null)
+						errorLogger.accept("Failed to load configuration " + config.filename() + ", exception: "
 								+ e.getClass().getTypeName() + ": " + e.getMessage());
 				}
 			}
@@ -86,8 +122,9 @@ public abstract class Configuration<T extends Configuration<T>> {
 	 */
 	public Configuration(String baseDir) {
 		localBaseDir = baseDir;
-		configStore.add(this);
 		if (filename() != null && folder() != null && localBaseDir != null) {
+			registerGlobalConfiguration();
+
 			base = new File(localBaseDir + "/" + folder());
 			conf = new File(base, filename());
 		}
@@ -95,8 +132,9 @@ public abstract class Configuration<T extends Configuration<T>> {
 
 	protected void assignFile(String baseDir) {
 		localBaseDir = baseDir;
-		configStore.add(this);
 		if (filename() != null && folder() != null && localBaseDir != null) {
+			registerGlobalConfiguration();
+
 			base = new File(localBaseDir + "/" + folder());
 			conf = new File(base, filename());
 		}
@@ -266,7 +304,7 @@ public abstract class Configuration<T extends Configuration<T>> {
 		if (!newfile && hasChanges() && hasChanges(false)) { // FIXME: change when value overwriting is implemented
 			return toString(true, null);
 		}
-		
+
 		String value = ObjectSerializer.getCCFGString(this, new CCFGConfigGenerator<T>(this, newfile, oldContent));
 		if (!newfile) {
 			if (!value.isEmpty())
