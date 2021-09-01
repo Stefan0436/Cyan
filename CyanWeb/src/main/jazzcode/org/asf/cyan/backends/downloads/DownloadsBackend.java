@@ -147,6 +147,7 @@ public class DownloadsBackend extends JWebService {
 				ZipEntry entry = new ZipEntry(prefix + f.getName() + "/");
 				output.putNextEntry(entry);
 				output.closeEntry();
+				zip(f, prefix + f.getName() + "/", output);
 			}
 			for (File f : input.listFiles(t -> !t.isDirectory()))
 				zip(f, prefix, output);
