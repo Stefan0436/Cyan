@@ -345,6 +345,9 @@ public class DownloadsBackend extends JWebService {
 		String repository = function.parameters[1];
 		String gameVersion = function.parameters[2];
 		String loaderVersion = function.parameters[3];
+		
+		if (platform.equals("vanilla"))
+			return true;
 
 		Map<String, String> versions = getVersionMap(platform);
 		if (repository.equals("testing")) {
