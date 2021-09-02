@@ -1534,9 +1534,21 @@ public class CyanLoader extends ModkitModloader
 				for (File cmf : versionMods.listFiles((t) -> !t.isDirectory() && t.getName().endsWith(".cmf"))) {
 					String ccfg2 = null;
 					try {
-						InputStream strm = new URL("jar:" + cmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
-						ccfg2 = new String(strm.readAllBytes());
-						strm.close();
+						FileInputStream strmI = new FileInputStream(cmf);
+						ZipInputStream zIn = new ZipInputStream(strmI);
+						ZipEntry ent = zIn.getNextEntry();
+						while (ent != null) {
+							String pth = ent.getName();
+							if (pth.startsWith("/"))
+								pth = pth.substring(1);
+							if (pth.equals("mod.manifest.ccfg")) {
+								ccfg2 = new String(zIn.readAllBytes());
+								break;
+							}
+							ent = zIn.getNextEntry();
+						}
+						zIn.close();
+						strmI.close();
 					} catch (IOException e) {
 					}
 
@@ -1553,9 +1565,21 @@ public class CyanLoader extends ModkitModloader
 				for (File cmf : mods.listFiles((t) -> !t.isDirectory() && t.getName().endsWith(".cmf"))) {
 					String ccfg2 = null;
 					try {
-						InputStream strm = new URL("jar:" + cmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
-						ccfg2 = new String(strm.readAllBytes());
-						strm.close();
+						FileInputStream strmI = new FileInputStream(cmf);
+						ZipInputStream zIn = new ZipInputStream(strmI);
+						ZipEntry ent = zIn.getNextEntry();
+						while (ent != null) {
+							String pth = ent.getName();
+							if (pth.startsWith("/"))
+								pth = pth.substring(1);
+							if (pth.equals("mod.manifest.ccfg")) {
+								ccfg2 = new String(zIn.readAllBytes());
+								break;
+							}
+							ent = zIn.getNextEntry();
+						}
+						zIn.close();
+						strmI.close();
 					} catch (IOException e) {
 					}
 
@@ -1572,9 +1596,21 @@ public class CyanLoader extends ModkitModloader
 				for (File cmf : versionCoremods.listFiles((t) -> !t.isDirectory() && t.getName().endsWith(".ccmf"))) {
 					String ccfg2 = null;
 					try {
-						InputStream strm = new URL("jar:" + cmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
-						ccfg2 = new String(strm.readAllBytes());
-						strm.close();
+						FileInputStream strmI = new FileInputStream(cmf);
+						ZipInputStream zIn = new ZipInputStream(strmI);
+						ZipEntry ent = zIn.getNextEntry();
+						while (ent != null) {
+							String pth = ent.getName();
+							if (pth.startsWith("/"))
+								pth = pth.substring(1);
+							if (pth.equals("mod.manifest.ccfg")) {
+								ccfg2 = new String(zIn.readAllBytes());
+								break;
+							}
+							ent = zIn.getNextEntry();
+						}
+						zIn.close();
+						strmI.close();
 					} catch (IOException e) {
 					}
 
@@ -1591,9 +1627,21 @@ public class CyanLoader extends ModkitModloader
 				for (File cmf : coremods.listFiles((t) -> !t.isDirectory() && t.getName().endsWith(".ccmf"))) {
 					String ccfg2 = null;
 					try {
-						InputStream strm = new URL("jar:" + cmf.toURI().toURL() + "!/mod.manifest.ccfg").openStream();
-						ccfg2 = new String(strm.readAllBytes());
-						strm.close();
+						FileInputStream strmI = new FileInputStream(cmf);
+						ZipInputStream zIn = new ZipInputStream(strmI);
+						ZipEntry ent = zIn.getNextEntry();
+						while (ent != null) {
+							String pth = ent.getName();
+							if (pth.startsWith("/"))
+								pth = pth.substring(1);
+							if (pth.equals("mod.manifest.ccfg")) {
+								ccfg2 = new String(zIn.readAllBytes());
+								break;
+							}
+							ent = zIn.getNextEntry();
+						}
+						zIn.close();
+						strmI.close();
 					} catch (IOException e) {
 					}
 
@@ -2009,11 +2057,23 @@ public class CyanLoader extends ModkitModloader
 									templateURL = templateURL.replace("%cv", CyanInfo.getCyanVersion());
 
 									try {
-										url = new URL("jar:" + templateURL + "!/mod.manifest.ccfg");
-										strm = url.openStream();
-										CyanModfileManifest man = new CyanModfileManifest()
-												.readAll(new String(strm.readAllBytes()));
-										strm.close();
+										String ccfg2 = "";
+										FileInputStream strmI = new FileInputStream(cmf);
+										ZipInputStream zIn = new ZipInputStream(strmI);
+										ZipEntry ent = zIn.getNextEntry();
+										while (ent != null) {
+											String pth = ent.getName();
+											if (pth.startsWith("/"))
+												pth = pth.substring(1);
+											if (pth.equals("mod.manifest.ccfg")) {
+												ccfg2 = new String(zIn.readAllBytes());
+												break;
+											}
+											ent = zIn.getNextEntry();
+										}
+										zIn.close();
+										strmI.close();
+										CyanModfileManifest man = new CyanModfileManifest().readAll(ccfg2);
 
 										boolean fail = false;
 										if (man.gameVersionRegex != null
@@ -2122,12 +2182,23 @@ public class CyanLoader extends ModkitModloader
 														CyanModfileManifest man2 = otherMods.get(id);
 														checkUpdates(otherModFiles[i], man2, otherMods, otherModFiles);
 
-														url = new URL("jar:" + otherModFiles[i].toURI().toURL()
-																+ "!/mod.manifest.ccfg");
-														strm = url.openStream();
-														man2 = new CyanModfileManifest()
-																.readAll(new String(strm.readAllBytes()));
-														strm.close();
+														ccfg2 = "";
+														strmI = new FileInputStream(cmf);
+														zIn = new ZipInputStream(strmI);
+														ent = zIn.getNextEntry();
+														while (ent != null) {
+															String pth = ent.getName();
+															if (pth.startsWith("/"))
+																pth = pth.substring(1);
+															if (pth.equals("mod.manifest.ccfg")) {
+																ccfg2 = new String(zIn.readAllBytes());
+																break;
+															}
+															ent = zIn.getNextEntry();
+														}
+														zIn.close();
+														strmI.close();
+														man2 = new CyanModfileManifest().readAll(ccfg2);
 
 														String cVersion = man2.version;
 														for (String id2 : man2.incompatibilities.keySet()) {
@@ -2188,9 +2259,9 @@ public class CyanLoader extends ModkitModloader
 
 												String ccfg = null;
 												try {
-													FileInputStream strmI = new FileInputStream(cmf);
-													ZipInputStream zIn = new ZipInputStream(strmI);
-													ZipEntry ent = zIn.getNextEntry();
+													strmI = new FileInputStream(cmf);
+													zIn = new ZipInputStream(strmI);
+													ent = zIn.getNextEntry();
 													while (ent != null) {
 														String pth = ent.getName();
 														if (pth.startsWith("/"))
