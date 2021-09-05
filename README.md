@@ -1,16 +1,7 @@
-[![Build Status 1.16](https://github.com/Stefan0436/Cyan/actions/workflows/cyan-1.16.5.yml/badge.svg)](https://github.com/Stefan0436/Cyan/actions) [![Build Status 1.17.1](https://github.com/Stefan0436/Cyan/actions/workflows/cyan-1.17.1.yml/badge.svg)](https://github.com/Stefan0436/Cyan/actions) [![Latest Release](https://img.shields.io/badge/Latest%20Release-1.0.0.A14-blueviolet)](https://aerialworks.ddns.net/cyan/releases/1.0.0.A14) [![Development Release](https://img.shields.io/badge/Development%20Version-1.0.0.A14-e22bdf)](https://aerialworks.ddns.net/cyan/releases/1.0.0.A14) [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
+[![Build Status 1.16](https://github.com/Stefan0436/Cyan/actions/workflows/cyan-1.16.5.yml/badge.svg)](https://github.com/Stefan0436/Cyan/actions) [![Build Status 1.17.1](https://github.com/Stefan0436/Cyan/actions/workflows/cyan-1.17.1.yml/badge.svg)](https://github.com/Stefan0436/Cyan/actions) [![Latest Release](https://img.shields.io/badge/Latest%20Release-1.0.0.A14-blueviolet)](https://aerialworks.ddns.net/cyan/releases/1.0.0.A14) [![Development Release](https://img.shields.io/badge/Development%20Version-1.0.0.A15-e22bdf)](https://aerialworks.ddns.net/cyan/releases/1.0.0.A15) [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
 # NOTICE
 The github repository mirrors to https://aerialworks.ddns.net/ASF/Cyan.git, you can fork Cyan on github, pull requests will be merged manually.
-
-# Paper 1.17 Support Now Considered Stable
-Paper 1.17 support is now considered stable, no crashes, private server is working pretty well.<br/>
-Some things might still be buggy, so the filing of bug reports is appreciated.
-
-In short: CyanPaper is considered stable, but still, USE IT AT YOUR OWN RISK.<br/>
-The AerialWorks Software Foundation will not be held responsible for damaged server files.
-
-<br/>
 
 # Cyan Mod Loader -- The Compatible Modloader
 Cyan is an upcoming modloader geared towards compatibility,<br/>
@@ -64,8 +55,9 @@ If the '*' is present, the version is not ready for release
 | Cyan version | Forge 1.16 | Fabric 1.16 | Paper 1.16 | Forge 1.17   | Fabric 1.17 | Paper 1.17  | Forge 1.17.1 | Fabric 1.17.1 | Paper 1.17.1 |
 | :----------: | :--------: | :---------: | :--------: | :----------: | :---------: | :---------: | :----------: | :-----------: | :----------: |
 | 1.0.0.A12    | 36.1.13    | 0.11.3      | 634        | Unsupported  | Unsupported | Unsupported | Unsupported  | Unsupported   | Unsupported  |
-| 1.0.0.A13    | 36.1.23    | 0.11.3      | 703        | Unsupported  | Unsupported | Unsupported | Unsupported  | Unsupported   | Unsupported  | 
+| 1.0.0.A13    | 36.1.23    | 0.11.3      | 703        | Unsupported  | Unsupported | Unsupported | Unsupported  | Unsupported   | Unsupported  |
 | 1.0.0.A14    | 36.2.2     | 0.11.6      | 783        | Unsupported  | 0.11.6      | 79          | 37.0.36      | 0.11.6        | 195          |
+| 1.0.0.A15*   | 36.2.2     | 0.11.6      | 783        | Unsupported  | 0.11.6      | 79          | 37.0.36      | 0.11.6        | 195          |
 
 # Projects used
 Please note that not a single project is actually distributed, the mappings are being generated (downloaded and re-formatted) by CYAN on launch, only version information is used.
