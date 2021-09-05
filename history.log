@@ -1,0 +1,128 @@
+
+Cyan Update Changelog: 1.0.0 (Alpha 14):
+ - Overhaul build script
+ - Improved ModKit Protocol Negotiation
+ - Repaired Fluid Deobfuscation Target Mappings (Fluid A27)
+ - CodeControl Local Variable Manipulation (Fluid A27)
+ - ModKit Server Status Modification (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2)
+ - ModKit Key Binding Registry Events (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2)
+ - ModKit World Load Warning if mods have changed (CyanAPI ModKit 1.1)
+ - ModKit ported to 1.17 and fully tested (CyanAPI ModKit 1.1, CyanAPI 1.0.0.A2)
+ - Added scripts to create local installers - ModKit Threads API (CyanAPI ModKit 1.2, CyanAPI 1.0.0.A4, count of threads is displayed in crash logs)
+ - Implemented server list mod compatibility check (CyanAPI ModKit 1.2)
+ - Implemented mod auto update (CyanLoader 16-07-2021 22:28 CEST)
+ - Implemented Mod.byId dependencies (Cornflower 1.0.0.A47)
+ - Added 1.17.1 support (CyanLoader 14-07-2021 14:13 CEST)
+ - MTK MSA Account Support (MTK A32) 
+
+
+Cyan Update Changelog: 1.0.0 (Alpha 13):
+ - Rift Supertype Remapping
+ - ResourceManager modification to allow mods to set textures (CyanAPI ModKit 1.0)
+ - Extended Event Provider (less overhead, CyanUtil 1.0.0.A11)
+ - Fluid Supertype Remapping now creates deobfuscation targets (FLUID A24)
+ - MTK RIFT Supertype Implementation Remapping (MTK A19)
+ - The FLUID transformer system is now an API. (FLUID A25)
+
+ - Cyan Info Command (Cyan 1.0.0.A13)
+ - Cyan Dump Command (Cyan 1.0.0.A13)
+
+ - ModKit Resource API (CyanAPI ModKit 1.0)
+ - ModKit Client Language Manager (server-side system, CyanAPI ModKit 1.0)
+ - ModKit Config Manager (CyanAPI ModKit 1.0)
+
+ - ModKit Entity Registry Events (CyanAPI ModKit 1.0)
+ - ModKit Entity Renderer Registry Events (CyanAPI ModKit 1.0)
+ - ModKit Resource Events (CyanAPI ModKit 1.0)
+ - ModKit Language Manager Events (CyanAPI ModKit 1.0)
+ - ModKit Texture Manager Events (CyanAPI ModKit 1.0)
+ - ModKit Game Reload Events (CyanAPI ModKit 1.0)
+ - ModKit Command Registry Events (CyanAPI ModKit 1.0)
+
+ - ModKit Permission Manager (CyanAPI ModKit 1.0)
+ - ModKit World Load Event (CyanAPI ModKit 1.0)
+ - ModKit Color Code Interface (CyanAPI ModKit 1.0)
+ - ModKit Network Channel API (CyanAPI ModKit 1.0)
+ - ModKit Server/client mod version checking (CyanAPI ModKit 1.0)
+ - ModKit Serverbound Language Packet (CyanAPI ModKit 1.0)
+ - ModKit Client Add Entity Packet Handlers (CyanAPI ModKit 1.0)
+ - ModKit Block Entity Registry Events (CyanAPI ModKit 1.0)
+ - ModKit Block Registry Events (CyanAPI ModKit 1.0)
+ - ModKit Item Registry Events (CyanAPI ModKit 1.0)
+ - ModKit Command Manager (CyanAPI ModKit 1.0)
+
+ - ModKit CyanAPI selected by specific version or if not present, the major version (CyanAPI ModKit 1.0)
+ - ModKit CyanAPI shared implementations in CyanLoader (CyanAPI ModKit 1.0)
+ - Cornflower Rift Version Handler (Cornflower A36, selects normal versions with the ModKit and such)
+ - ModKit EventUtil Event Manager (CyanAPI 1.0.0.A1)
+ - ModKit Tested on Fabric and Forge (CyanAPI 1.0.0.A1)
+
+ - Cyan Version Support Map (Cyan 1.0.0.A13)
+ - Cyan Modloader Version Support Map (Cyan 1.0.0.A13)
+
+ - KickStart Installer (Cyan 1.0.0.A13)
+ - Fixed MTK error on decomp if output already exists (Cornflower A37)
+ - Update CoreModKit (Cyan 1.0.0.A13)
+ - Created a regular ModKit download (Cyan 1.0.0.A13)
+
+ 
+Cyan Update Changelog: 1.0.0 (Alpha 12):
+ - 1.15.2 support (Cyan 1.0.0.A12)
+ - Multiple platforms/versions (Cornflower 1.0.0.A31)
+ - CoreModKit Download (Cyan 1.0.0.A12)
+ - Mod listing on crash (Cyan 1.0.0.A12)
+ - Debugging environment (Cornflower 1.0.0.A31)
+
+
+Cyan Update: Alpha 11, changes:
+ - Implemented Cornflower Eclipse Launch Generation
+ - Implemented MTK Deobfuscation
+ - Implemented MinecraftInstallationToolkit, MSA support is WIP
+ - Implemented changelogs
+ - Created publish.sh script (Linux only, windows is todo)
+ - Created buildlocal.sh script (Linux only, windows is todo)
+ - Implemented FLUID Transformer API (nearly complete, mostly usable as of FLUID A15)
+ - Migrated modifications to FLUID Transformers
+ - ASM Support Layer for FLUID
+ - Implemented MTK Source Jar Creation (buggy)
+ - Moved FLUID Transforming code to its own class so that it can be used (in theory) by another system.
+ - Made sure projects are added to source lookup on eclipse launch generation (Cornflower A21)
+ - Cyan can now be debugged straight from the IDE
+ - Partially implemented local variable support in FLUID A14 (Fully implemented as of FLUID A15)
+ - FLUID-based class writer, when using COMPUTE_FRAMES, it will use a FLUID class pool instead of a class loader (FLUID A14)
+ - Implemented partial local variable support in the FLUID class pool, broken variable names are automatically regenerated (FLUID A14, Fully implemented as of version A15)
+ - Title screen modification stating CYAN version (Loader 03/09/2021)
+ - Added server Eclipse launches (CyanWrapper A5)
+ - Implemented the MTK Rifter Toolkit (MTK A14, use SimpleRiftBuilder as it is far easier than calling rift manually)
+ - Implemented transformer detection based on minecraft versions for the CyanLoader (CyanLoader 04/16/2021)
+ - Created an extended API artifact container for Cornflower (Cornflower A26)
+ - Fixed the FLUID transformer targetCall parsing (FLUID A15)
+ - Made CyanComponents an API and CyanCore an implementation of it (CyanComponents A3, CyanCore A7)
+ - Fixed MTK Rifter Toolkit target generation, updated it to FLUID specification A15, also implemented superclasses (MTK A15)
+ - Paper Support (CyanLoader 03/16/2021, CyanWrapper A5, MTK A14)
+ - Added the SimpleMappings class for FLUID (FLUID A15)
+ - Fixed FLUID local variable indexes (FLUID A15)
+ - Transformer backtrace on crash, also saves modifications made to .cyan-data/transformer-backtrace/classes (FLUID A19)
+ - Implemented lambda support (FLUID A15)
+ - Created a FLUID transformer metadata API (FLUID A15, the crash report uses this)
+ - Implemented IINC support (and fixed arrays by doing so) (FLUID A15)
+ - Versioning API (CyanUtil A6)
+ - PseudoCode Bytecode Exporter API (FLUID A15)
+ - Reporting API (CyanUtil A3)
+ - SideOnly, PlatformOnly, PlatformExclude and VersionRegex annotations for FLUID transformers (CyanUtil A6)
+ - CyanUtil now delivers a modloader API, CyanLoader is such an implementation (CyanUtil A3)
+ - Fixed target calls (FLUID A15, fixed forge support in the process)
+ - FLUID now searches superclasses and interfaces for method injection, if possible (FLUID A15)
+ - FLUID Class Hooks now use ASM instead of Javassist, javassist has been removed. (FLUID A15)
+ - FLUID Class Pool now works with the new IClassSourceProvider system instead of URLs only. (FLUID A15)
+ - New EventBus system (CyanUtil A3, CyanLoader 03/14/2021)
+ - Mostly finished the MixinSupport project, though it will NOT be added to the CyanWrapper, instead, it is going to be a mod.
+ - Fixed forge MCP mappings, implemented TSRG version 2 (MTK A14)
+ - Forge now uses specific MCP version provided by the CyanWrapper build file. (CyanWrapper A5)
+ - Rift Support (Cornflower A28)
+ - CTC Tasks (Cornflower A28)
+ - Fixed SPIGOT mappings (MTK A16)
+ - Cyan Modfile Manifest Generation (Cornflower A29)
+ - Cyan Mod File Archive Task (Cornflower A29)
+ - Implemented maven dependencies (CyanLoader 04/16/2021, Cornflower A29)
+ - Better CTC CLI (TrustExplorer 1.0.0.A4)'

@@ -8,13 +8,13 @@ ext.mixinversion="0.8.3-SNAPSHOT"
 
 ext.timeStartDev="2021-02-07T16:41:37+01:00"
 
-ext.cyanversion="1.0.0.A14"
+ext.cyanversion="1.0.0.A15"
 ext.forgeurltemplate="https://maven.minecraftforge.net/net/minecraftforge/forge/%game%-%forgeversion%/forge-%game%-%forgeversion%-installer.jar"
 
 ext.timeRelease=OffsetDateTime.now().withNano(0).toString()
 
 ext.modloader=""
-ext.modkit="1.2"
+ext.modkit="1.3"
 
 buildscript {
 	repositories {

@@ -1,7 +1,5 @@
 package org.asf.cyan.minecraft.toolkits.mtk.auth.windowed;
 
-import com.sun.javafx.application.PlatformImpl;
-
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -22,6 +20,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.w3c.dom.Document;
+
+import com.sun.javafx.application.PlatformImpl;
 
 /**
  * SwingFXWebView

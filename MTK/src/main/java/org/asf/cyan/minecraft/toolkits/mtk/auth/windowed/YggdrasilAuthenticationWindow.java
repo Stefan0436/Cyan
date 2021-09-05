@@ -92,7 +92,7 @@ public class YggdrasilAuthenticationWindow {
 		panel_2.add(textField);
 		textField.setColumns(10);
 
-		JLabel lblNewLabel = new JLabel("Minecraft Username");
+		JLabel lblNewLabel = new JLabel("Minecraft Login Email Address (or username for legacy accounts)");
 		lblNewLabel.setBounds(0, 48, 600, 15);
 		panel_2.add(lblNewLabel);
 

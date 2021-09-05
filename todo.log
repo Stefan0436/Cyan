@@ -1,0 +1,52 @@
+ // Alpha builds 
+ // A15
+ - ModKit Level Data Wrapper (CyanAPI ModKit 1.3, to get level data by ServerLevel/ResourceKeys) -- TODO
+ - ModKit 1.17 Layer Support (CyanAPI ModKit 1.3) -- TODO 
+ - ModKit Dimension Registry Events (CyanAPI ModKit 1.3) -- TODO
+ - Make sure the login event is dispatched, even if the client brand is never send (CyanAPI ModKit 1.3) -- TODO
+ - Patch for the MTK decompiler with java 16 -- TODO
+ - Implemented mirror support in Cyan and its installer -- TODO
+ 
+ // Beta builds
+ // B1: LTS:
+ - Reliable and usable game source jars -- TODO
+ - Fix CCFG String Splitter Bug -- TODO
+ - More ModKit Server Packet Events (such as block break, interact, and such, CyanAPI ModKit 1.4) -- TODO 
+ - ModKit Block Events (CyanAPI ModKit 1.4) -- TODO
+ - ModKit Item Events (CyanAPI ModKit 1.4) -- TODO
+ - ModKit GUI Events (CyanAPI ModKit 1.4) -- TODO
+ - ModKit Chat Events (CyanAPI ModKit 1.4) -- TODO
+ - Player Login/Logout Message Modification (CyanAPI ModKit 1.4) -- TODO
+ - ModKit Player Display Name Modification (CyanAPI ModKit 1.4) -- TODO
+ - ModKit Player Nametag Modification Event (allows for the change of player name tags, CyanAPI ModKit 1.4) -- TODO
+ 
+ // B2:
+ - ModKit Block API (CyanAPI ModKit 1.5) -- TODO
+ - ModKit Item API (CyanAPI ModKit 1.5) -- TODO
+ - ModKit GUI API (CyanAPI ModKit 1.5) -- TODO
+ - 1.15 support -- TODO
+ - 1.14.4 support -- TODO
+ 
+ // B3:
+ - ModKit Dimension API (CyanAPI ModKit 1.6) -- TODO
+ - ModKit Entity API (CyanAPI ModKit 1.6) -- TODO
+ - ModKit Block Entity API (CyanAPI ModKit 1.6) -- TODO
+ - ModKit Recipe API (CyanAPI ModKit 1.6) -- TODO
+ 
+ // B4:
+ - ModKit Player, Entity and other interface types (ModKit 2.0, replaces the need for vanilla types, they will however be available to modders) -- TODO
+ - ModKit Custom Invenotry Tabs (CyanAPI ModKit 2.0) -- TODO
+
+ // B5: LTS:
+ - Custom mappings based on MCP and mojang, for legacy MC versions (1.7 - 1.12) -- TODO
+ - Support for legacy versions (1.7 - 1.12) -- TODO
+ - Simple loader support system (modularize the system allowing loader support: all forge, fabric, paper and quilt support files should have their own jars) -- TODO
+ - Modularize the downloads platform system (make it so that other platforms can easily be added) -- TODO
+ - Forums page on the website -- TODO
+ - Mod sharing page on the website -- TODO
+
+ // Preview builds
+ // P1:
+ - Clean javadoc, fix all warnings -- TODO
+ 
+ // First release
