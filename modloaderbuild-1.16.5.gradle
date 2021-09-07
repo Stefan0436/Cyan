@@ -1,4 +1,4 @@
-stability 'latest'
+stability 'testing'
 
 forge(
     '36.2.4',
