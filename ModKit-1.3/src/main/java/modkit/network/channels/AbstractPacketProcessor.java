@@ -75,7 +75,18 @@ public abstract class AbstractPacketProcessor extends CyanComponent {
 
 		this.reader = PacketReader.create(flow);
 		process(reader);
+		return shouldCancelAfterCompletion();
+	}
+
+	/**
+	 * Defines whether or not the packet should be cancelled if handled.
+	 * 
+	 * @return True if the packet should not be handled by any other packet
+	 *         processor, false otherwise.s
+	 */
+	protected boolean shouldCancelAfterCompletion() {
 		return true;
 	}
+
 
 }
