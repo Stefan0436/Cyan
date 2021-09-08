@@ -23,7 +23,7 @@ public class FlowPacketParser extends PacketParser {
 
 		@Override
 		public int read() throws IOException {
-			return flow.read();
+			return flow.read() & 0xFF;
 		}
 
 	}
