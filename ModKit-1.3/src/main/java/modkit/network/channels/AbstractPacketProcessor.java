@@ -81,12 +81,12 @@ public abstract class AbstractPacketProcessor extends CyanComponent {
 	/**
 	 * Defines whether or not the packet should be cancelled if handled.
 	 * 
+	 * @since ModKit 1.3
 	 * @return True if the packet should not be handled by any other packet
-	 *         processor, false otherwise.s
+	 *         processor, false otherwise.
 	 */
 	protected boolean shouldCancelAfterCompletion() {
 		return true;
 	}
-
 
 }
