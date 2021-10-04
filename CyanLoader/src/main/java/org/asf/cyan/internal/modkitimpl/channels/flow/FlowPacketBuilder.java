@@ -23,7 +23,7 @@ public class FlowPacketBuilder extends PacketEntryWriter {
 
 		@Override
 		public void write(int arg0) throws IOException {
-			flow.write(arg0);
+			flow.write((byte) arg0);
 		}
 
 	}
@@ -74,9 +74,7 @@ public class FlowPacketBuilder extends PacketEntryWriter {
 			setVersion = true;
 		}
 
-		FlowUtil.write(flow, entry.type());
-		FlowUtil.write(flow, entry.length());
-
+		flow.write(entry.type());
 		try {
 			entry.transfer(stream);
 		} catch (IOException e) {

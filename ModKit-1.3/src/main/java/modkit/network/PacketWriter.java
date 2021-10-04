@@ -59,7 +59,7 @@ public abstract class PacketWriter implements Closeable {
 		}
 
 		public RawWriter writeBoolean(boolean data) {
-			writer.writeRawByte(data ? 1 : 0);
+			writer.writeRawByte(data ? (byte) 1 : (byte) 0);
 			return this;
 		}
 
@@ -82,7 +82,7 @@ public abstract class PacketWriter implements Closeable {
 			writer.writeRawArray(ByteBuffer.allocate(8).putDouble(data).array());
 			return this;
 		}
-		
+
 		public RawWriter writeUUID(UUID uuid) {
 			writeLong(uuid.getMostSignificantBits());
 			writeLong(uuid.getLeastSignificantBits());
@@ -163,7 +163,7 @@ public abstract class PacketWriter implements Closeable {
 
 	private OutputFlow flow;
 
-	protected void writeByteInternal(int data) {
+	protected void writeByteInternal(byte data) {
 		flow.write(data);
 	}
 
@@ -189,7 +189,7 @@ public abstract class PacketWriter implements Closeable {
 	 * 
 	 * @param data Data to write
 	 */
-	public void writeRawByte(int data) {
+	public void writeRawByte(byte data) {
 		flow.write(data);
 	}
 

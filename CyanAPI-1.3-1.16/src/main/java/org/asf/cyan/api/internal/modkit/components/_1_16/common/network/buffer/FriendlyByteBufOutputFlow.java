@@ -9,7 +9,7 @@ public class FriendlyByteBufOutputFlow implements OutputFlow {
 	private FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
 	
 	@Override
-	public void write(int data) {
+	public void write(byte data) {
 		buffer.writeByte(data);
 	}
 

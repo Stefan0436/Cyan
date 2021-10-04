@@ -8,6 +8,12 @@ package modkit.network;
  *
  */
 public interface OutputFlow {
-	public void write(int data);
+	public void write(byte data);
+
+	@Deprecated
+	public default void write(int data) {
+		write((byte) data);
+	}
+
 	public void close();
 }

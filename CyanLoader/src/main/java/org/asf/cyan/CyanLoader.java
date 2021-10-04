@@ -1459,7 +1459,7 @@ public class CyanLoader extends ModkitModloader
 						} catch (IOException ex) {
 						}
 					}
-				} catch (IOException e) {
+				} catch (IOException | IllegalArgumentException e) {
 					update = true;
 					trust.delete();
 				}
@@ -2343,8 +2343,18 @@ public class CyanLoader extends ModkitModloader
 		for (File ctc : trustContainers.listFiles((f) -> f.getName().endsWith(".ctc") && !f.isDirectory())) {
 			try {
 				trust.add(TrustContainer.importContainer(ctc));
-			} catch (Exception e) {
-				error("Trust container " + ctc.getName() + " failed to import.", e);
+			} catch (IOException e) {
+				error("Trust container " + ctc.getName() + " failed to import.");
+			} catch (IllegalArgumentException e) {
+				try {
+					fatal("Trust container is incompatible with Cyan " + CyanInfo.getCyanVersion()
+							+ "\n\nContainer file path:\n" + ctc.getCanonicalPath());
+				} catch (IOException e1) {
+					fatal("Trust container is incompatible with Cyan " + CyanInfo.getCyanVersion()
+							+ "\n\nContainer file path:\n" + ctc.getAbsolutePath());
+				}
+				StartupWindow.WindowAppender.fatalError();
+				System.exit(1);
 			}
 		}
 		for (File dir : trustContainers.listFiles((f) -> f.isDirectory())) {

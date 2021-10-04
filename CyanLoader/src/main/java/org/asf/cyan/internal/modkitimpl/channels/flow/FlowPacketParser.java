@@ -42,7 +42,7 @@ public class FlowPacketParser extends PacketEntryReader {
 		/**
 		 * Reads the given amount of bytes
 		 * 
-		 * @param flow Input flow
+		 * @param flow  Input flow
 		 * @param count Byte count
 		 * @return Byte array
 		 */
@@ -103,13 +103,12 @@ public class FlowPacketParser extends PacketEntryReader {
 		if (!flow.hasNext())
 			return null;
 		else {
-			long type = ByteBuffer.wrap(FlowUtil.readNBytes(flow, 8)).getLong();
-			long length = ByteBuffer.wrap(FlowUtil.readNBytes(flow, 8)).getLong();
+			byte type = flow.read();
 			try {
 				Constructor<? extends PacketEntry> ctor = entryTypes.get(type).getDeclaredConstructor();
 				ctor.setAccessible(true);
 				PacketEntry<T> ent = (PacketEntry<T>) ctor.newInstance();
-				ent = ent.importStream(stream, length);
+				ent = ent.importStream(stream);
 				return ent;
 			} catch (Exception e) {
 				return null;
