@@ -1459,9 +1459,10 @@ public class CyanLoader extends ModkitModloader
 						} catch (IOException ex) {
 						}
 					}
-				} catch (IOException | IllegalArgumentException e) {
+				} catch (IOException e) {
 					update = true;
 					trust.delete();
+				} catch (IllegalArgumentException e) {
 				}
 			} else {
 				update = true;
