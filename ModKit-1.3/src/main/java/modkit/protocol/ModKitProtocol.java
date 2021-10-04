@@ -18,7 +18,7 @@ public class ModKitProtocol {
 	/**
 	 * Minimal ModKit protocol version
 	 */
-	public static final double MIN_PROTOCOL = 1.1d;
+	public static final double MIN_PROTOCOL = 1.3d;
 
 	/**
 	 * Maximum ModKit protocol version

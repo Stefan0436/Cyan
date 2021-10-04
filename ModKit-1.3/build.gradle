@@ -202,7 +202,8 @@ dependencies {
 	
 	MinecraftInstallationToolkit.saveVersionManifest(info)
 	for (String lib : MinecraftInstallationToolkit.getLibrariesMavenFormat(info, true)) {
-		implementation lib
+		if (!lib.contains("guava") && !lib.contains("gson"))
+			implementation lib
 	}
 	 
     testImplementation 'junit:junit:4.12'
