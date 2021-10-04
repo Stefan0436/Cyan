@@ -20,16 +20,15 @@ import org.asf.cyan.api.packet.entries.StringEntry;
 /**
  * 
  * Packet parsing system, parses network packets created by the
- * {@link PacketBuilder PacketBuilder}.
+ * {@link PacketEntryWriter PacketBuilder}.
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public class PacketParser {
+public class PacketEntryReader {
 
 	public class PkHeader {
-		public long type;
-		public long length;
+		public byte type;
 	}
 
 	public class Entry {
@@ -40,12 +39,12 @@ public class PacketParser {
 	protected Entry currentEntry;
 
 	@SuppressWarnings("rawtypes")
-	protected HashMap<Long, Class<? extends PacketEntry>> entryTypes = new HashMap<Long, Class<? extends PacketEntry>>();
+	protected HashMap<Byte, Class<? extends PacketEntry>> entryTypes = new HashMap<Byte, Class<? extends PacketEntry>>();
 
 	/**
 	 * Creates a new parser instance, registers the default entry types.
 	 */
-	public PacketParser() {
+	public PacketEntryReader() {
 		registerType(new StringEntry(null));
 		registerType(new LongEntry(0l));
 		registerType(new IntEntry(0));
@@ -82,7 +81,7 @@ public class PacketParser {
 	 * 
 	 * @throws IOException
 	 */
-	public void importStream(InputStream input) throws IOException {
+	public void read(InputStream input) throws IOException {
 		long ver = ByteBuffer.wrap(input.readNBytes(8)).getLong();
 		if (ver != version)
 			throw new IllegalArgumentException("Packet version mismatch, got: " + ver + ", expected: " + version);
@@ -90,12 +89,8 @@ public class PacketParser {
 		int headers = ByteBuffer.wrap(input.readNBytes(4)).getInt();
 		ArrayList<PkHeader> headersLst = new ArrayList<PkHeader>();
 		for (int i = 0; i < headers; i++) {
-			long type = ByteBuffer.wrap(input.readNBytes(8)).getLong();
-			long length = ByteBuffer.wrap(input.readNBytes(8)).getLong();
-
 			PkHeader head = new PkHeader();
-			head.type = type;
-			head.length = length;
+			head.type = (byte) input.read();
 			headersLst.add(head);
 		}
 
@@ -107,7 +102,7 @@ public class PacketParser {
 				Constructor<? extends PacketEntry> ctor = entryTypes.get(header.type).getDeclaredConstructor();
 				ctor.setAccessible(true);
 				PacketEntry<?> ent = ctor.newInstance();
-				ent = ent.importStream(input, header.length);
+				ent = ent.importStream(input);
 
 				entry.value = ent;
 			} catch (Exception e) {

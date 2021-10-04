@@ -19,13 +19,8 @@ public class ByteEntry implements PacketEntry<Byte> {
 	}
 
 	@Override
-	public long length() {
-		return 1;
-	}
-
-	@Override
-	public long type() {
-		return 114373217l;
+	public byte type() {
+		return 0;
 	}
 
 	@Override
@@ -44,7 +39,7 @@ public class ByteEntry implements PacketEntry<Byte> {
 	}
 
 	@Override
-	public PacketEntry<Byte> importStream(InputStream source, long amount) throws IOException {
+	public PacketEntry<Byte> importStream(InputStream source) throws IOException {
 		return new ByteEntry((byte)source.read());
 	}
 

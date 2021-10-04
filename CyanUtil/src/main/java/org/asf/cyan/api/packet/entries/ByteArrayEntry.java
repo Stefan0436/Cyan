@@ -3,6 +3,7 @@ package org.asf.cyan.api.packet.entries;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 import org.asf.cyan.api.packet.PacketEntry;
 
@@ -19,13 +20,8 @@ public class ByteArrayEntry implements PacketEntry<byte[]> {
 	}
 
 	@Override
-	public long length() {
-		return val.length;
-	}
-
-	@Override
-	public long type() {
-		return 1143732171330301337l;
+	public byte type() {
+		return 1;
 	}
 
 	@Override
@@ -40,12 +36,13 @@ public class ByteArrayEntry implements PacketEntry<byte[]> {
 
 	@Override
 	public void transfer(OutputStream destination) throws IOException {
+		destination.write(ByteBuffer.allocate(4).putInt(val.length).array());
 		destination.write(val);
 	}
 
 	@Override
-	public PacketEntry<byte[]> importStream(InputStream source, long amount) throws IOException {
-		return new ByteArrayEntry(source.readNBytes((int)amount));
+	public PacketEntry<byte[]> importStream(InputStream source) throws IOException {
+		return new ByteArrayEntry(source.readNBytes(ByteBuffer.wrap(source.readNBytes(4)).getInt()));
 	}
 
 }

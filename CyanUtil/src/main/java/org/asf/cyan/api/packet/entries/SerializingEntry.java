@@ -42,19 +42,8 @@ public class SerializingEntry<T> implements PacketEntry<T> {
 	}
 
 	@Override
-	public long length() {
-		CounterOutputStream strm = new CounterOutputStream();
-		try {
-			serialize(val, strm);
-			strm.close();
-		} catch (IOException e) {
-		}
-		return strm.length();
-	}
-
-	@Override
-	public long type() {
-		return 1271422171532l;
+	public byte type() {
+		return 7;
 	}
 
 	@Override
@@ -92,9 +81,9 @@ public class SerializingEntry<T> implements PacketEntry<T> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public PacketEntry<T> importStream(InputStream source, long amount) throws IOException {
+	public PacketEntry<T> importStream(InputStream source) throws IOException {
 		try {
-			return new SerializingEntry<T>((T)deserialize(source));
+			return new SerializingEntry<T>((T) deserialize(source));
 		} catch (IOException e) {
 			return new SerializingEntry<T>(true);
 		}

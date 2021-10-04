@@ -2343,8 +2343,8 @@ public class CyanLoader extends ModkitModloader
 		for (File ctc : trustContainers.listFiles((f) -> f.getName().endsWith(".ctc") && !f.isDirectory())) {
 			try {
 				trust.add(TrustContainer.importContainer(ctc));
-			} catch (IOException e) {
-				error("Trust container " + ctc.getName() + " failed to import.");
+			} catch (Exception e) {
+				error("Trust container " + ctc.getName() + " failed to import.", e);
 			}
 		}
 		for (File dir : trustContainers.listFiles((f) -> f.isDirectory())) {

@@ -22,7 +22,7 @@ import org.asf.cyan.api.packet.entries.StringEntry;
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public class PacketBuilder {
+public class PacketEntryWriter {
 	protected ArrayList<PacketEntry<?>> entries = new ArrayList<PacketEntry<?>>();
 	protected long version = 1l;
 
@@ -31,7 +31,7 @@ public class PacketBuilder {
 	 * 
 	 * @param entry Packet entry
 	 */
-	public PacketBuilder add(PacketEntry<?> entry) {
+	public PacketEntryWriter add(PacketEntry<?> entry) {
 		entries.add(entry);
 		return this;
 	}
@@ -41,7 +41,7 @@ public class PacketBuilder {
 	 * 
 	 * @param entry String entry
 	 */
-	public PacketBuilder add(String entry) {
+	public PacketEntryWriter add(String entry) {
 		return add(new StringEntry(entry));
 	}
 
@@ -50,7 +50,7 @@ public class PacketBuilder {
 	 * 
 	 * @param entry Integer entry
 	 */
-	public PacketBuilder add(int entry) {
+	public PacketEntryWriter add(int entry) {
 		return add(new IntEntry(entry));
 	}
 
@@ -59,7 +59,7 @@ public class PacketBuilder {
 	 * 
 	 * @param entry Float entry
 	 */
-	public PacketBuilder add(float entry) {
+	public PacketEntryWriter add(float entry) {
 		return add(new FloatEntry(entry));
 	}
 
@@ -68,7 +68,7 @@ public class PacketBuilder {
 	 * 
 	 * @param entry Float entry
 	 */
-	public PacketBuilder add(long entry) {
+	public PacketEntryWriter add(long entry) {
 		return add(new LongEntry(entry));
 	}
 
@@ -77,7 +77,7 @@ public class PacketBuilder {
 	 * 
 	 * @param entry Double entry
 	 */
-	public PacketBuilder add(double entry) {
+	public PacketEntryWriter add(double entry) {
 		return add(new DoubleEntry(entry));
 	}
 
@@ -86,7 +86,7 @@ public class PacketBuilder {
 	 * 
 	 * @param entry Byte entry
 	 */
-	public PacketBuilder add(byte entry) {
+	public PacketEntryWriter add(byte entry) {
 		return add(new ByteEntry(entry));
 	}
 
@@ -95,7 +95,7 @@ public class PacketBuilder {
 	 * 
 	 * @param entry Char entry
 	 */
-	public PacketBuilder add(char entry) {
+	public PacketEntryWriter add(char entry) {
 		return add(new CharEntry(entry));
 	}
 
@@ -104,7 +104,7 @@ public class PacketBuilder {
 	 * 
 	 * @param entry Byte array entry
 	 */
-	public PacketBuilder add(byte[] entry) {
+	public PacketEntryWriter add(byte[] entry) {
 		return add(new ByteArrayEntry(entry));
 	}
 
@@ -114,7 +114,21 @@ public class PacketBuilder {
 	 * @param entry Object entry
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public PacketBuilder add(Object entry) {
+	public PacketEntryWriter add(Object entry) {
+		if (entry instanceof Byte)
+			return add((byte) entry);
+		else if (entry instanceof Integer)
+			return add((int) entry);
+		else if (entry instanceof Long)
+			return add((long) entry);
+		else if (entry instanceof Float)
+			return add((float) entry);
+		else if (entry instanceof Double)
+			return add((double) entry);
+		else if (entry instanceof Character)
+			return add((char) entry);
+		else if (entry instanceof String)
+			return add((String) entry);
 		return add(new SerializingEntry(entry));
 	}
 
@@ -123,7 +137,7 @@ public class PacketBuilder {
 	 * 
 	 * @param version Packet version.
 	 */
-	public PacketBuilder setVersion(long version) {
+	public PacketEntryWriter setVersion(long version) {
 		this.version = version;
 		return this;
 	}
@@ -134,13 +148,12 @@ public class PacketBuilder {
 	 * @param destination Destination stream
 	 * @throws IOException If writing fails.
 	 */
-	public void build(OutputStream destination) throws IOException {
+	public void write(OutputStream destination) throws IOException {
 		destination.write(ByteBuffer.allocate(8).putLong(version).array());
 
 		destination.write(ByteBuffer.allocate(4).putInt(entries.size()).array());
 		for (PacketEntry<?> entry : entries) {
-			destination.write(ByteBuffer.allocate(8).putLong(entry.type()).array());
-			destination.write(ByteBuffer.allocate(8).putLong(entry.length()).array());
+			destination.write(entry.type());
 		}
 
 		for (PacketEntry<?> entry : entries) {

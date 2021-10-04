@@ -20,13 +20,8 @@ public class FloatEntry implements PacketEntry<Float> {
 	}
 
 	@Override
-	public long length() {
+	public byte type() {
 		return 4;
-	}
-
-	@Override
-	public long type() {
-		return 11824271332l;
 	}
 
 	@Override
@@ -45,8 +40,8 @@ public class FloatEntry implements PacketEntry<Float> {
 	}
 
 	@Override
-	public PacketEntry<Float> importStream(InputStream source, long amount) throws IOException {
-		return new FloatEntry(ByteBuffer.wrap(source.readNBytes((int)amount)).getFloat());
+	public PacketEntry<Float> importStream(InputStream source) throws IOException {
+		return new FloatEntry(ByteBuffer.wrap(source.readNBytes(4)).getFloat());
 	}
 
 }

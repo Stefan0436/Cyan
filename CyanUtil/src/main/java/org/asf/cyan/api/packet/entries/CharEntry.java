@@ -19,13 +19,8 @@ public class CharEntry implements PacketEntry<Character> {
 	}
 
 	@Override
-	public long length() {
+	public byte type() {
 		return 2;
-	}
-
-	@Override
-	public long type() {
-		return 115201330l;
 	}
 
 	@Override
@@ -44,8 +39,8 @@ public class CharEntry implements PacketEntry<Character> {
 	}
 
 	@Override
-	public PacketEntry<Character> importStream(InputStream source, long amount) throws IOException {
-		return new CharEntry(ByteBuffer.wrap(source.readNBytes((int)amount)).getChar());
+	public PacketEntry<Character> importStream(InputStream source) throws IOException {
+		return new CharEntry(ByteBuffer.wrap(source.readNBytes(2)).getChar());
 	}
 
 }

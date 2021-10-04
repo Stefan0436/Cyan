@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-import org.asf.cyan.api.packet.PacketBuilder;
+import org.asf.cyan.api.packet.PacketEntryWriter;
 import org.asf.cyan.api.packet.PacketEntry;
 
 import modkit.network.OutputFlow;
 
-public class FlowPacketBuilder extends PacketBuilder {
+public class FlowPacketBuilder extends PacketEntryWriter {
 
 	private OutputFlow flow;
 	private FlowOutputStream stream;
@@ -58,7 +58,7 @@ public class FlowPacketBuilder extends PacketBuilder {
 	private boolean setVersion = false;
 
 	@Override
-	public PacketBuilder setVersion(long version) {
+	public PacketEntryWriter setVersion(long version) {
 		if (setVersion)
 			throw new IllegalStateException("Version already set, or a packet has already been written");
 		super.setVersion(version);
@@ -68,7 +68,7 @@ public class FlowPacketBuilder extends PacketBuilder {
 	}
 
 	@Override
-	public PacketBuilder add(PacketEntry<?> entry) {
+	public PacketEntryWriter add(PacketEntry<?> entry) {
 		if (!setVersion) {
 			FlowUtil.write(flow, version);
 			setVersion = true;

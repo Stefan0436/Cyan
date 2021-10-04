@@ -20,13 +20,8 @@ public class DoubleEntry implements PacketEntry<Double> {
 	}
 
 	@Override
-	public long length() {
-		return 8;
-	}
-
-	@Override
-	public long type() {
-		return 1162733142417l;
+	public byte type() {
+		return 6;
 	}
 
 	@Override
@@ -45,8 +40,8 @@ public class DoubleEntry implements PacketEntry<Double> {
 	}
 
 	@Override
-	public PacketEntry<Double> importStream(InputStream source, long amount) throws IOException {
-		return new DoubleEntry(ByteBuffer.wrap(source.readNBytes((int)amount)).getDouble());
+	public PacketEntry<Double> importStream(InputStream source) throws IOException {
+		return new DoubleEntry(ByteBuffer.wrap(source.readNBytes(8)).getDouble());
 	}
 
 }

@@ -13,8 +13,8 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.stream.Stream;
 
-import org.asf.cyan.api.packet.PacketBuilder;
-import org.asf.cyan.api.packet.PacketParser;
+import org.asf.cyan.api.packet.PacketEntryWriter;
+import org.asf.cyan.api.packet.PacketEntryReader;
 
 /**
  * 
@@ -69,8 +69,9 @@ public class TrustContainer {
 		TrustContainer store = new TrustContainer();
 
 		FileInputStream strm = new FileInputStream(input);
-		PacketParser parser = new PacketParser();
-		parser.importStream(strm);
+		PacketEntryReader parser = new PacketEntryReader();
+		parser.setSupportedVersion(2);
+		parser.read(strm);
 
 		store.name = parser.<String>nextEntry().get();
 		store.version = parser.<String>nextEntry().get();
@@ -107,7 +108,8 @@ public class TrustContainer {
 	 * @throws IOException If exporting fails
 	 */
 	public void exportContainer(File output) throws IOException {
-		PacketBuilder builder = new PacketBuilder();
+		PacketEntryWriter builder = new PacketEntryWriter();
+		builder.setVersion(2);
 		builder.add(name);
 		ZonedDateTime tm = ZonedDateTime.ofInstant(new Date().toInstant(), ZoneId.of("UTC"));
 		String newVer = tm.toEpochSecond() + "-" + tm.getNano();
@@ -127,7 +129,7 @@ public class TrustContainer {
 		}
 
 		FileOutputStream destination = new FileOutputStream(output);
-		builder.build(destination);
+		builder.write(destination);
 		destination.close();
 	}
 

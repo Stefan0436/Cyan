@@ -20,13 +20,8 @@ public class LongEntry implements PacketEntry<Long> {
 	}
 
 	@Override
-	public long length() {
-		return 8;
-	}
-
-	@Override
-	public long type() {
-		return 124272619l;
+	public byte type() {
+		return 5;
 	}
 
 	@Override
@@ -45,8 +40,8 @@ public class LongEntry implements PacketEntry<Long> {
 	}
 
 	@Override
-	public PacketEntry<Long> importStream(InputStream source, long amount) throws IOException {
-		return new LongEntry(ByteBuffer.wrap(source.readNBytes((int)amount)).getLong());
+	public PacketEntry<Long> importStream(InputStream source) throws IOException {
+		return new LongEntry(ByteBuffer.wrap(source.readNBytes(8)).getLong());
 	}
 
 }

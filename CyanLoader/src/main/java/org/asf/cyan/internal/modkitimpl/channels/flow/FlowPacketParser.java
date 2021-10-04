@@ -7,11 +7,11 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import org.asf.cyan.api.packet.PacketEntry;
-import org.asf.cyan.api.packet.PacketParser;
+import org.asf.cyan.api.packet.PacketEntryReader;
 
 import modkit.network.ByteFlow;
 
-public class FlowPacketParser extends PacketParser {
+public class FlowPacketParser extends PacketEntryReader {
 
 	public class ByteFlowStream extends InputStream {
 
