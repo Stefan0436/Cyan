@@ -110,7 +110,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 		if (manifest_data_version > manifest_data) {
 			changed = true;
 
-			deleteDir(new File(minecraft_directory, "caches/assets"));
+			deleteDir(new File(minecraft_directory, "caches/manifests"));
 		}
 
 		if (changed) {
