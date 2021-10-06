@@ -188,9 +188,14 @@ class CompatibilityMappings extends SimpleMappings {
 					if (remap || alwaysAllowRemap) {
 						int i = 0;
 						for (String type : m.argumentTypes) {
+							String tSuffix = "";
+							if (type.contains("[]")) {
+								tSuffix = type.substring(type.indexOf("["));
+								type = type.substring(0, type.indexOf("["));
+							}
 							Mapping<?> tmap = mapClassToMapping(type, t2 -> true, true);
 							if (tmap != null) {
-								m.argumentTypes[i++] = tmap.name;
+								m.argumentTypes[i++] = tmap.name + tSuffix;
 							} else
 								i++;
 						}
