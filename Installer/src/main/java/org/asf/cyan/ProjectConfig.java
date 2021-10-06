@@ -3,11 +3,12 @@ package org.asf.cyan;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import org.asf.cyan.api.config.Configuration;
 
 public class ProjectConfig extends Configuration<ProjectConfig> {
-	
+
 	public static class DefaultContentProvider extends ContentProvider {
 
 		@Override
@@ -19,9 +20,9 @@ public class ProjectConfig extends Configuration<ProjectConfig> {
 		}
 
 	}
-	
+
 	public static ContentProvider contentProvider = new DefaultContentProvider();
-	
+
 	public static abstract class ContentProvider {
 		public abstract String provide() throws IOException;
 	}
@@ -42,7 +43,7 @@ public class ProjectConfig extends Configuration<ProjectConfig> {
 
 	public String profileName;
 	public String profileIcon;
-	
+
 	public String wrapper;
 	public String manifest;
 
@@ -66,9 +67,9 @@ public class ProjectConfig extends Configuration<ProjectConfig> {
 	public String[] loadFirst = new String[0];
 	public String[] fatServer = new String[0];
 
-	public HashMap<String, String> jarManifest = new HashMap<String, String>();
+	public LinkedHashMap<String, String> jarManifest = new LinkedHashMap<String, String>();
 
-	public HashMap<String, String> repositories = new HashMap<String, String>();
-	public HashMap<String, HashMap<String, String>> artifactModifications = new HashMap<String, HashMap<String, String>>();
+	public LinkedHashMap<String, String> repositories = new LinkedHashMap<String, String>();
+	public LinkedHashMap<String, HashMap<String, String>> artifactModifications = new LinkedHashMap<String, HashMap<String, String>>();
 
 }

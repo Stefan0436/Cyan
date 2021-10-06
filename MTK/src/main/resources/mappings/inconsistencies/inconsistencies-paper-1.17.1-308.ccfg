@@ -1,0 +1,68 @@
+#
+# Cyan Inconsistency Mappings, for Paper 1.17.1 compatibility.
+# Written by hand, Copyright(c) 2021 Sky Swimmer, LGPL-3.0.
+#
+
+mappingsVersion> 'e155002b317c6804a2a3e45c5eb05401060b5816:PB_308'
+
+mappings> [ {
+    mappingType> CLASS
+    name> 'net.minecraft.server.level.ServerLevel'
+    obfuscated> 'net.minecraft.server.level.WorldServer'
+    mappings> [ {
+        mappingType> METHOD
+        type> 'net.minecraft.core.BlockPosition'
+        name> 'getSharedSpawnPos'
+        obfuscated> 'getSpawn'
+    } ]
+} {
+    mappingType> CLASS
+    name> 'net.minecraft.server.gui.MinecraftServerGui'
+    obfuscated> 'net.minecraft.server.gui.ServerGUI'
+    mappings> [ {
+        type> 'void'
+        name> 'print'
+        obfuscated> 'a'
+        mappingType> METHOD
+        argumentTypes> [ 'javax.swing.JTextArea' 'javax.swing.JScrollPane' 'java.lang.String' ]
+    } ]
+} {
+    mappingType> CLASS
+    name> 'net.minecraft.network.protocol.status.ServerStatus\$Serializer'
+    obfuscated> 'net.minecraft.network.protocol.status.ServerPing\$Serializer'
+} {
+    mappingType> CLASS
+    name> 'net.minecraft.server.network.ServerGamePacketListenerImpl'
+    obfuscated> 'net.minecraft.server.network.PlayerConnection'
+    mappings> [ {
+        type> 'void'
+        name> 'disconnect'
+        obfuscated> 'disconnect'
+        mappingType> METHOD
+        argumentTypes> [ 'net.minecraft.network.chat.Component' ]
+    } ]
+} {
+    mappingType> CLASS
+    name> 'net.minecraft.world.entity.LivingEntity'
+    obfuscated> 'net.minecraft.world.entity.EntityLiving'
+    mappings> [ {
+        type> 'boolean'
+        name> 'addEffect'
+        obfuscated> 'c'
+        mappingType> METHOD
+        argumentTypes> [ 'net.minecraft.world.effect.MobEffectInstance' ]
+    } {
+        type> 'boolean'
+        name> 'addEffect'
+        obfuscated> 'c'
+        mappingType> METHOD
+        argumentTypes> [ 'net.minecraft.world.effect.MobEffectInstance' 'net.minecraft.world.entity.Entity' ]
+    } {
+        type> 'boolean'
+        name> 'forceAddEffect'
+        obfuscated> 'a'
+        mappingType> METHOD
+        argumentTypes> [ 'net.minecraft.world.effect.MobEffectInstance' 'net.minecraft.world.entity.Entity' ]
+    } ]
+} ]
+

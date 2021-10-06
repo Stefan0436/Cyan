@@ -8,8 +8,9 @@ import org.asf.cyan.fluid.api.transforming.TargetClass;
 import org.asf.cyan.fluid.api.transforming.enums.InjectLocation;
 
 import modkit.events.core.ServerShutdownEvent;
+import modkit.events.core.ServerStartupEvent;
 import modkit.events.ingame.level.ServerLevelLoadEvent;
-import modkit.events.objects.core.ServerShutdownEventObject;
+import modkit.events.objects.core.ServerEventObject;
 import modkit.events.objects.ingame.level.ServerLevelLoadEventObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -22,6 +23,13 @@ import net.minecraft.server.level.progress.ChunkProgressListener;
 @PlatformOnly(LaunchPlatform.SPIGOT)
 public abstract class MinecraftSpigotServerModification {
 
+	@InjectAt(location = InjectLocation.HEAD, targetCall = "getMillis()", targetOwner = "net.minecraft.Util")
+	protected void runServer() {
+		Object obj = this;
+		MinecraftServer protocolHooksServer = (MinecraftServer) obj;
+		ServerStartupEvent.getInstance().dispatch(new ServerEventObject(protocolHooksServer)).getResult();
+	}
+
 	@InjectAt(location = InjectLocation.TAIL)
 	private void loadSpawn(ChunkProgressListener listener, ServerLevel world) {
 		BlockPos spawn = world.getSharedSpawnPos();
@@ -33,6 +41,6 @@ public abstract class MinecraftSpigotServerModification {
 	@InjectAt(location = InjectLocation.HEAD)
 	public void safeShutdown(boolean wait, boolean restart) {
 		Object self = this;
-		ServerShutdownEvent.getInstance().dispatch(new ServerShutdownEventObject((MinecraftServer) self)).getResult();
+		ServerShutdownEvent.getInstance().dispatch(new ServerEventObject((MinecraftServer) self)).getResult();
 	}
 }

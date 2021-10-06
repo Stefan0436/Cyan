@@ -62,7 +62,7 @@ dependencies {
 	
 	implementation group: 'org.asf.cyan', name: 'CCFG', version: '1.0.0.A19'
 	implementation group: 'org.asf.cyan', name: 'Fluid', version: '1.0.0.A31'
-	implementation group: 'org.asf.cyan', name: 'MTK', version: '1.0.0.A33'
+	implementation group: 'org.asf.cyan', name: 'MTK', version: '1.0.0.A36'
 	implementation group: 'org.asf.cyan', name: 'CyanUtil', version: '1.0.0.A18'
 	implementation group: 'org.asf.cyan', name: 'CyanCore', version: '1.0.0.A17-1.16.5-1.0.0.A14'
 	implementation group: 'org.asf.cyan', name: 'CyanComponents', version: '1.0.0.A9'

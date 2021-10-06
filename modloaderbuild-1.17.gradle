@@ -1,6 +1,7 @@
 stability 'testing'
 
 fabric(
+    '0.11.7',
     '0.11.6'
 )
 

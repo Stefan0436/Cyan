@@ -68,4 +68,8 @@ public abstract class HandshakeUtils extends CyanComponent {
 
 	public abstract boolean handhakeCheck(JsonObject cyanGetServerData);
 
+	public abstract void disconnect(Object player, String message);
+
+	public abstract void disconnect(Object player, String message, Object[] args);
+
 }

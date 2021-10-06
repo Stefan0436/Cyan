@@ -91,7 +91,7 @@ import javax.swing.JCheckBox;
 
 public class Installer extends CyanComponent {
 
-	private static final String version = "5.7";
+	private static final String version = "5.9";
 
 	private static Installer impl;
 
@@ -113,7 +113,7 @@ public class Installer extends CyanComponent {
 		}
 	}
 
-	@Override
+	@Override 
 	protected void setupComponents() {
 		if (init)
 			throw new IllegalStateException("Cyan components have already been initialized.");

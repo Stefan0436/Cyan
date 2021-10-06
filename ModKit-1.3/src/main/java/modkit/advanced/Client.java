@@ -26,6 +26,23 @@ public abstract class Client {
 	public abstract String getName();
 
 	/**
+	 * Disconnects the client with a message
+	 * 
+	 * @param message Disconnect message
+	 * @since ModKit 1.3
+	 */
+	public abstract void disconnect(String message);
+
+	/**
+	 * Disconnects the client with a translatable message
+	 * 
+	 * @param message Translatable disconnect message
+	 * @param args    Message arguments
+	 * @since ModKit 1.3
+	 */
+	public abstract void disconnectTranslatable(String message, Object... args);
+
+	/**
 	 * Retrieves the game type player instance
 	 * 
 	 * @return Player instance or null

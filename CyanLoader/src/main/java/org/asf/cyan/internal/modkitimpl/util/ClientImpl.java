@@ -172,4 +172,14 @@ public class ClientImpl extends Client implements IPostponedComponent {
 		return Map.copyOf(clientMods);
 	}
 
+	@Override
+	public void disconnect(String message) {
+		HandshakeUtils.getImpl().disconnect(player, message);
+	}
+
+	@Override
+	public void disconnectTranslatable(String message, Object... args) {
+		HandshakeUtils.getImpl().disconnect(player, message, args);
+	}
+
 }

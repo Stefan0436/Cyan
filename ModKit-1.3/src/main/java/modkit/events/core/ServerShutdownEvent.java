@@ -2,7 +2,7 @@ package modkit.events.core;
 
 import org.asf.cyan.api.events.extended.AbstractExtendedEvent;
 
-import modkit.events.objects.core.ServerShutdownEventObject;
+import modkit.events.objects.core.ServerEventObject;
 
 /**
  * 
@@ -11,7 +11,7 @@ import modkit.events.objects.core.ServerShutdownEventObject;
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public class ServerShutdownEvent extends AbstractExtendedEvent<ServerShutdownEventObject> {
+public class ServerShutdownEvent extends AbstractExtendedEvent<ServerEventObject> {
 
 	private static ServerShutdownEvent implementation;
 

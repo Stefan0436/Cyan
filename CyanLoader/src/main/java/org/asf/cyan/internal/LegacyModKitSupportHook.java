@@ -125,6 +125,14 @@ public class LegacyModKitSupportHook extends ClassLoadHook {
 		types.put("modkit.events.objects.ingame.blocks.BlockEntityRendererRegistryEventObject",
 				"modkit.events.objects.ingame.rendering.entity.EntityRendererRegistryEventObject");
 		remappers.add(new ModKitClassRemapper(packages, types, "1.1"));
+
+		// ModKit 1.2 support
+		types = new HashMap<String, String>();
+		packages = new HashMap<String, String>();
+		types.put(
+				"modkit.events.objects.core.ServerShutdownEventObject",
+				"modkit.events.objects.core.ServerEventObject");
+		remappers.add(new ModKitClassRemapper(packages, types, "1.2"));
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package modkit.network.channels;
 
 import org.asf.cyan.api.modloader.information.game.GameSide;
 
+import modkit.util.server.Tasks;
 import modkit.util.server.language.ClientLanguage;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.BaseComponent;
@@ -55,7 +56,7 @@ public abstract class ServerPacketProcessor extends AbstractPacketProcessor {
 	protected void disconnect(String languageKey) {
 		if (getChannel().getPlayer() == null)
 			return;
-		getChannel().getConnection().disconnect(createComponent(languageKey));
+		Tasks.oneshot(() -> getChannel().getConnection().disconnect(createComponent(languageKey)));
 	}
 
 	/**

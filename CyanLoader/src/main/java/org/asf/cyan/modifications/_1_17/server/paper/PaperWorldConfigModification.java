@@ -2,6 +2,7 @@ package org.asf.cyan.modifications._1_17.server.paper;
 
 import java.util.Map;
 
+import org.asf.cyan.api.fluid.annotations.LoaderVersionLessThan;
 import org.asf.cyan.api.fluid.annotations.PlatformOnly;
 import org.asf.cyan.api.modloader.information.game.LaunchPlatform;
 import org.asf.cyan.fluid.api.FluidTransformer;
@@ -11,6 +12,7 @@ import org.asf.cyan.fluid.api.transforming.TargetType;
 
 @FluidTransformer
 @PlatformOnly(LaunchPlatform.SPIGOT)
+@LoaderVersionLessThan(name = "paper", version = "229", gameVersionList = "1.17.1")
 @TargetClass(target = "com.destroystokyo.paper.PaperWorldConfig")
 public abstract class PaperWorldConfigModification {
 

@@ -417,6 +417,13 @@ public abstract class Modloader extends CyanComponent {
 	}
 
 	private EventBus getBusRecursive(String name, String caller) {
+		if (modloaderEventBus == null) {
+			if (getNextImplementation() == null)
+				throw new IllegalStateException("Event channel " + name + " could not be found, caller: " + caller);
+
+			return getNextImplementation().getBusRecursive(name, caller);
+		}
+
 		name = name.toLowerCase();
 		if (getBus(modloaderEventBus.getChannel() + "." + name) == null) {
 			if (getNextImplementation() == null)
@@ -734,7 +741,27 @@ public abstract class Modloader extends CyanComponent {
 	}
 
 	/**
-	 * Get the mods loaded by this modloader.
+	 * Retrieves the mods registered for loading by this modloader.
+	 */
+	public IModManifest[] getKnownMods() {
+		if (modProvider == null && !noModProvider) {
+			for (IModloaderInfoProvider info : informationProviders) {
+				if (info instanceof IModProvider) {
+					modProvider = (IModProvider) info;
+					return modProvider.getKnownNormalMods();
+				}
+			}
+			noModProvider = true;
+		} else if (!noModProvider) {
+			return modProvider.getKnownNormalMods();
+		}
+
+		noModSupport = true;
+		return new IModManifest[0];
+	}
+
+	/**
+	 * Retrieves the mods loaded by this modloader.
 	 */
 	public IModManifest[] getLoadedMods() {
 		if (modProvider == null && !noModProvider) {
@@ -754,7 +781,27 @@ public abstract class Modloader extends CyanComponent {
 	}
 
 	/**
-	 * Get the core mods loaded by this modloader.
+	 * Retrieves the core mods registered for loading by this modloader.
+	 */
+	public IModManifest[] getKnownCoremods() {
+		if (modProvider == null && !noModProvider) {
+			for (IModloaderInfoProvider info : informationProviders) {
+				if (info instanceof IModProvider) {
+					modProvider = (IModProvider) info;
+					return modProvider.getKnownCoreMods();
+				}
+			}
+			noModProvider = true;
+		} else if (!noModProvider) {
+			return modProvider.getKnownCoreMods();
+		}
+
+		noCoreModSupport = true;
+		return new IModManifest[0];
+	}
+
+	/**
+	 * Retrieves the core mods loaded by this modloader.
 	 */
 	public IModManifest[] getLoadedCoremods() {
 		if (modProvider == null && !noModProvider) {

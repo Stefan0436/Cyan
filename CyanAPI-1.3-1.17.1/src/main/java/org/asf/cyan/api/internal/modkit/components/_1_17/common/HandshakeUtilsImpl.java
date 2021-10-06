@@ -25,6 +25,8 @@ import modkit.network.channels.ClientPacketProcessor;
 import modkit.network.channels.PacketChannel;
 import modkit.network.channels.ServerPacketProcessor;
 import modkit.protocol.handshake.Handshake;
+import modkit.util.server.Tasks;
+import modkit.util.server.language.ClientLanguage;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
@@ -33,6 +35,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.status.ClientStatusPacketListener;
@@ -163,8 +166,9 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 	@Override
 	public void disconnect(ClientPacketProcessor processor, HandshakeFailedPacket response,
 			HandshakeLoaderPacket packet) {
-		processor.getChannel().getConnection().disconnect(new TranslatableComponent(response.language,
-				packet.version.toString(), response.displayVersion, response.version));
+		Tasks.oneshot(
+				() -> processor.getChannel().getConnection().disconnect(new TranslatableComponent(response.language,
+						packet.version.toString(), response.displayVersion, response.version)));
 	}
 
 	@Override
@@ -181,10 +185,8 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 
 	@Override
 	public void disconnectColored1(ServerPacketProcessor processor, HandshakeFailedPacket response, double protocol) {
-		synchronized (processor.getPlayer().connection) {
-			processor.getPlayer().connection.disconnect(new TranslatableComponent(response.language,
-					"\u00A76" + protocol, "\u00A76" + response.displayVersion, "\u00A76" + response.version));
-		}
+		Tasks.oneshot(() -> processor.getPlayer().connection.disconnect(new TranslatableComponent(response.language,
+				"\u00A76" + protocol, "\u00A76" + response.displayVersion, "\u00A76" + response.version)));
 	}
 
 	@Override
@@ -204,9 +206,7 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 
 	@Override
 	public void disconnectSimple(ServerPacketProcessor processor, String lang, Object... args) {
-		synchronized (processor.getPlayer().connection) {
-			processor.getPlayer().connection.disconnect(new TranslatableComponent(lang, args));
-		}
+		Tasks.oneshot(() -> processor.getPlayer().connection.disconnect(new TranslatableComponent(lang, args)));
 	}
 
 	@Override
@@ -264,6 +264,22 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 	@Override
 	public boolean handhakeCheck(JsonObject cyanGetServerData) {
 		return Handshake.serverListHandshake(cyanGetServerData);
+	}
+
+	@Override
+	public void disconnect(Object player, String message) {
+		ServerPlayer pl = (ServerPlayer) player;
+		Tasks.oneshot(() -> {
+			pl.connection.disconnect(new TextComponent(message));
+		});
+	}
+
+	@Override
+	public void disconnect(Object player, String message, Object[] args) {
+		ServerPlayer pl = (ServerPlayer) player;
+		Tasks.oneshot(() -> {
+			pl.connection.disconnect(ClientLanguage.createComponent(pl, message, args));
+		});
 	}
 
 }

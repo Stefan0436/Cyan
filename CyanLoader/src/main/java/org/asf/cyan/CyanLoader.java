@@ -37,6 +37,8 @@ import org.asf.cyan.api.config.serializing.internal.Splitter;
 import org.asf.cyan.api.events.IEventProvider;
 import org.asf.cyan.api.events.core.EventBusFactory;
 import org.asf.cyan.api.events.extended.IExtendedEvent;
+import org.asf.cyan.api.fluid.annotations.LoaderVersionGreaterThan;
+import org.asf.cyan.api.fluid.annotations.LoaderVersionLessThan;
 import org.asf.cyan.api.fluid.annotations.PlatformExclude;
 import org.asf.cyan.api.fluid.annotations.PlatformOnly;
 import org.asf.cyan.api.fluid.annotations.SideOnly;
@@ -2347,14 +2349,19 @@ public class CyanLoader extends ModkitModloader
 			} catch (IOException e) {
 				error("Trust container " + ctc.getName() + " failed to import.");
 			} catch (IllegalArgumentException e) {
+				fatal("");
 				try {
-					fatal("Trust container is incompatible with Cyan " + CyanInfo.getCyanVersion()
+					fatal("Trust container is incompatible with Cyan " + CyanInfo.getCyanVersion() + "."
 							+ "\n\nContainer file path:\n" + ctc.getCanonicalPath());
 				} catch (IOException e1) {
-					fatal("Trust container is incompatible with Cyan " + CyanInfo.getCyanVersion()
+					fatal("Trust container is incompatible with Cyan " + CyanInfo.getCyanVersion() + "."
 							+ "\n\nContainer file path:\n" + ctc.getAbsolutePath());
 				}
-				StartupWindow.WindowAppender.fatalError();
+
+				fatal("Please update or remove the trust file and its coremod.");
+				fatal("If the mod is incompatible, you could attempt to downgrade Cyan.");
+				StartupWindow.WindowAppender.fatalError("Trust container '" + ctc.getName()
+						+ "' is incompatible with Cyan " + CyanInfo.getCyanVersion());
 				System.exit(1);
 			}
 		}
@@ -2436,6 +2443,80 @@ public class CyanLoader extends ModkitModloader
 
 	public static void disableVanillaMappings() {
 		vanillaMappings = false;
+	}
+
+	@Override
+	public IModManifest[] getKnownNormalMods() {
+		return modManifests.values().stream().map(t -> new IModManifest() {
+
+			@Override
+			public String id() {
+				return t.modGroup + ":" + t.modId;
+			}
+
+			@Override
+			public String displayName() {
+				return t.displayName;
+			}
+
+			@Override
+			public Version version() {
+				return Version.fromString(t.version);
+			}
+
+			@Override
+			public String[] dependencies() {
+				return t.dependencies.keySet().toArray(t -> new String[t]);
+			}
+
+			@Override
+			public String[] optionalDependencies() {
+				return t.optionalDependencies.keySet().toArray(t -> new String[t]);
+			}
+
+			@Override
+			public String description() {
+				return t.fallbackDescription;
+			}
+
+		}).toArray(t -> new IModManifest[t]);
+	}
+
+	@Override
+	public IModManifest[] getKnownCoreMods() {
+		return coreModManifests.values().stream().map(t -> new IModManifest() {
+
+			@Override
+			public String id() {
+				return t.modGroup + ":" + t.modId;
+			}
+
+			@Override
+			public String displayName() {
+				return t.displayName;
+			}
+
+			@Override
+			public Version version() {
+				return Version.fromString(t.version);
+			}
+
+			@Override
+			public String[] dependencies() {
+				return t.dependencies.keySet().toArray(t -> new String[t]);
+			}
+
+			@Override
+			public String[] optionalDependencies() {
+				return t.optionalDependencies.keySet().toArray(t -> new String[t]);
+			}
+
+			@Override
+			public String description() {
+				return t.fallbackDescription;
+			}
+
+		}).toArray(t -> new IModManifest[t]);
 	}
 
 	@Override
@@ -2830,6 +2911,86 @@ public class CyanLoader extends ModkitModloader
 							&& cls.getAnnotation(VersionRegex.class).modloaderVersion() && !getModloaderVersion()
 									.toString().matches(cls.getAnnotation(VersionRegex.class).value())) {
 						continue;
+					} else if (cls.isAnnotationPresent(LoaderVersionGreaterThan.class)) {
+						LoaderVersionGreaterThan anno = cls.getAnnotation(LoaderVersionGreaterThan.class);
+						String[] loaders = anno.name().split("\\|");
+						String[] versions = anno.version().split("\\|");
+						String[] gameVersions = anno.gameVersionList().split("\\|");
+
+						boolean valid = true;
+						if (gameVersions.length > 0) {
+							valid = false;
+							for (String v : gameVersions) {
+								if (CheckString.validateCheckString(v,
+										Version.fromString(CyanInfo.getMinecraftVersion()))) {
+									valid = true;
+									break;
+								}
+							}
+						}
+						if (versions.length > 0 && valid) {
+							int i = 0;
+							Version version = Version.fromString(versions[0]);
+
+							boolean end = false;
+							for (String loader : loaders) {
+								if (i > versions.length)
+									version = Version.fromString(versions[0]);
+								else
+									version = Version.fromString(versions[i]);
+
+								Modloader ld = Modloader.getModloader(loader);
+								if (ld != null && version.isGreaterThan(ld.getVersion())) {
+									end = true;
+									break;
+								}
+
+								i++;
+							}
+
+							if (end)
+								continue;
+						}
+					} else if (cls.isAnnotationPresent(LoaderVersionLessThan.class)) {
+						LoaderVersionLessThan anno = cls.getAnnotation(LoaderVersionLessThan.class);
+						String[] loaders = anno.name().split("\\|");
+						String[] versions = anno.version().split("\\|");
+						String[] gameVersions = anno.gameVersionList().split("\\|");
+
+						boolean valid = true;
+						if (gameVersions.length > 0) {
+							valid = false;
+							for (String v : gameVersions) {
+								if (CheckString.validateCheckString(v,
+										Version.fromString(CyanInfo.getMinecraftVersion()))) {
+									valid = true;
+									break;
+								}
+							}
+						}
+						if (versions.length > 0 && valid) {
+							int i = 0;
+							Version version = Version.fromString(versions[0]);
+
+							boolean end = false;
+							for (String loader : loaders) {
+								if (i > versions.length)
+									version = Version.fromString(versions[0]);
+								else
+									version = Version.fromString(versions[i]);
+
+								Modloader ld = Modloader.getModloader(loader);
+								if (ld != null && version.isLessThan(ld.getVersion())) {
+									end = true;
+									break;
+								}
+
+								i++;
+							}
+
+							if (end)
+								continue;
+						}
 					}
 
 					Fluid.registerHook(hook);
@@ -2853,6 +3014,85 @@ public class CyanLoader extends ModkitModloader
 							&& hook.getAnnotation(VersionRegex.class).modloaderVersion() && !getModloaderVersion()
 									.toString().matches(hook.getAnnotation(VersionRegex.class).value())) {
 						continue;
+					} else if (hook.isAnnotationPresent(LoaderVersionGreaterThan.class)) {
+						LoaderVersionGreaterThan anno = hook.getAnnotation(LoaderVersionGreaterThan.class);
+						String[] loaders = anno.name().split("\\|");
+						String[] versions = anno.version().split("\\|");
+						String[] gameVersions = anno.gameVersionList().split("\\|");
+
+						boolean valid = true;
+						if (gameVersions.length > 0) {
+							valid = false;
+							for (String v : gameVersions) {
+								if (CheckString.validateCheckString(v,
+										Version.fromString(CyanInfo.getMinecraftVersion()))) {
+									valid = true;
+									break;
+								}
+							}
+						}
+						if (versions.length > 0 && valid) {
+							int i = 0;
+							Version version = Version.fromString(versions[0]);
+
+							boolean end = false;
+							for (String loader : loaders) {
+								if (i > versions.length)
+									version = Version.fromString(versions[0]);
+								else
+									version = Version.fromString(versions[i]);
+
+								Modloader ld = Modloader.getModloader(loader);
+								if (ld != null && version.isGreaterThan(ld.getVersion())) {
+									end = true;
+									break;
+								}
+
+								i++;
+							}
+
+							if (end)
+								continue;
+						}
+					} else if (hook.isAnnotationPresent(LoaderVersionLessThan.class)) {
+						LoaderVersionLessThan anno = hook.getAnnotation(LoaderVersionLessThan.class);
+						String[] loaders = anno.name().split("\\|");
+						String[] versions = anno.version().split("\\|");
+						String[] gameVersions = anno.gameVersionList().split("\\|");
+
+						boolean valid = true;
+						if (gameVersions.length > 0) {
+							valid = false;
+							for (String v : gameVersions) {
+								if (CheckString.validateCheckString(v,
+										Version.fromString(CyanInfo.getMinecraftVersion()))) {
+									valid = true;
+									break;
+								}
+							}
+						}
+						if (versions.length > 0 && valid) {
+							int i = 0;
+							Version version = Version.fromString(versions[0]);
+
+							boolean end = false;
+							for (String loader : loaders) {
+								if (i > versions.length)
+									version = Version.fromString(versions[0]);
+								else
+									version = Version.fromString(versions[i]);
+
+								Modloader ld = Modloader.getModloader(loader);
+								if (ld != null && version.isLessThan(ld.getVersion())) {
+									end = true;
+									break;
+								}
+
+								i++;
+							}
+							if (end)
+								continue;
+						}
 					}
 
 					classHookPackages.forEach((pkg) -> {
@@ -2932,6 +3172,84 @@ public class CyanLoader extends ModkitModloader
 								&& !getModloaderVersion().toString()
 										.matches(transformer.getAnnotation(VersionRegex.class).value())) {
 							continue;
+						} else if (transformer.isAnnotationPresent(LoaderVersionGreaterThan.class)) {
+							LoaderVersionGreaterThan anno = transformer.getAnnotation(LoaderVersionGreaterThan.class);
+							String[] loaders = anno.name().split("\\|");
+							String[] versions = anno.version().split("\\|");
+							String[] gameVersions = anno.gameVersionList().split("\\|");
+
+							boolean valid = true;
+							if (gameVersions.length > 0) {
+								valid = false;
+								for (String v : gameVersions) {
+									if (CheckString.validateCheckString(v,
+											Version.fromString(CyanInfo.getMinecraftVersion()))) {
+										valid = true;
+										break;
+									}
+								}
+							}
+							if (versions.length > 0 && valid) {
+								int i = 0;
+								Version version = Version.fromString(versions[0]);
+
+								boolean end = false;
+								for (String loader : loaders) {
+									if (i > versions.length)
+										version = Version.fromString(versions[0]);
+									else
+										version = Version.fromString(versions[i]);
+
+									Modloader ld = Modloader.getModloader(loader);
+									if (ld != null && version.isGreaterThan(ld.getVersion())) {
+										end = true;
+										break;
+									}
+
+									i++;
+								}
+								if (end)
+									continue;
+							}
+						} else if (transformer.isAnnotationPresent(LoaderVersionLessThan.class)) {
+							LoaderVersionLessThan anno = transformer.getAnnotation(LoaderVersionLessThan.class);
+							String[] loaders = anno.name().split("\\|");
+							String[] versions = anno.version().split("\\|");
+							String[] gameVersions = anno.gameVersionList().split("\\|");
+
+							boolean valid = true;
+							if (gameVersions.length > 0) {
+								valid = false;
+								for (String v : gameVersions) {
+									if (CheckString.validateCheckString(v,
+											Version.fromString(CyanInfo.getMinecraftVersion()))) {
+										valid = true;
+										break;
+									}
+								}
+							}
+							if (versions.length > 0 && valid) {
+								int i = 0;
+								Version version = Version.fromString(versions[0]);
+
+								boolean end = false;
+								for (String loader : loaders) {
+									if (i > versions.length)
+										version = Version.fromString(versions[0]);
+									else
+										version = Version.fromString(versions[i]);
+
+									Modloader ld = Modloader.getModloader(loader);
+									if (ld != null && version.isLessThan(ld.getVersion())) {
+										end = true;
+										break;
+									}
+
+									i++;
+								}
+								if (end)
+									continue;
+							}
 						}
 
 						Fluid.registerTransformer(transformer.getTypeName(),
@@ -2971,6 +3289,76 @@ public class CyanLoader extends ModkitModloader
 								&& cls.getAnnotation(VersionRegex.class).modloaderVersion() && !getModloaderVersion()
 										.toString().matches(cls.getAnnotation(VersionRegex.class).value())) {
 							continue;
+						} else if (cls.isAnnotationPresent(LoaderVersionGreaterThan.class)) {
+							LoaderVersionGreaterThan anno = cls.getAnnotation(LoaderVersionGreaterThan.class);
+							String[] loaders = anno.name().split("\\|");
+							String[] versions = anno.version().split("\\|");
+							String[] gameVersions = anno.gameVersionList().split("\\|");
+
+							boolean valid = true;
+							if (gameVersions.length > 0) {
+								valid = false;
+								for (String v : gameVersions) {
+									if (CheckString.validateCheckString(v,
+											Version.fromString(CyanInfo.getMinecraftVersion()))) {
+										valid = true;
+										break;
+									}
+								}
+							}
+							if (versions.length > 0 && valid) {
+								int i = 0;
+								Version version = Version.fromString(versions[0]);
+
+								for (String loader : loaders) {
+									if (i > versions.length)
+										version = Version.fromString(versions[0]);
+									else
+										version = Version.fromString(versions[i]);
+
+									Modloader ld = Modloader.getModloader(loader);
+									if (ld != null && version.isGreaterThan(ld.getVersion())) {
+										continue;
+									}
+
+									i++;
+								}
+							}
+						} else if (cls.isAnnotationPresent(LoaderVersionLessThan.class)) {
+							LoaderVersionLessThan anno = cls.getAnnotation(LoaderVersionLessThan.class);
+							String[] loaders = anno.name().split("\\|");
+							String[] versions = anno.version().split("\\|");
+							String[] gameVersions = anno.gameVersionList().split("\\|");
+
+							boolean valid = true;
+							if (gameVersions.length > 0) {
+								valid = false;
+								for (String v : gameVersions) {
+									if (CheckString.validateCheckString(v,
+											Version.fromString(CyanInfo.getMinecraftVersion()))) {
+										valid = true;
+										break;
+									}
+								}
+							}
+							if (versions.length > 0 && valid) {
+								int i = 0;
+								Version version = Version.fromString(versions[0]);
+
+								for (String loader : loaders) {
+									if (i > versions.length)
+										version = Version.fromString(versions[0]);
+									else
+										version = Version.fromString(versions[i]);
+
+									Modloader ld = Modloader.getModloader(loader);
+									if (ld != null && version.isLessThan(ld.getVersion())) {
+										continue;
+									}
+
+									i++;
+								}
+							}
 						}
 
 						Fluid.registerTransformer(transformer, owner, source);
@@ -2998,6 +3386,76 @@ public class CyanLoader extends ModkitModloader
 							&& !getModloaderVersion().toString()
 									.matches(transformer.getAnnotation(VersionRegex.class).value())) {
 						continue;
+					} else if (transformer.isAnnotationPresent(LoaderVersionGreaterThan.class)) {
+						LoaderVersionGreaterThan anno = transformer.getAnnotation(LoaderVersionGreaterThan.class);
+						String[] loaders = anno.name().split("\\|");
+						String[] versions = anno.version().split("\\|");
+						String[] gameVersions = anno.gameVersionList().split("\\|");
+
+						boolean valid = true;
+						if (gameVersions.length > 0) {
+							valid = false;
+							for (String v : gameVersions) {
+								if (CheckString.validateCheckString(v,
+										Version.fromString(CyanInfo.getMinecraftVersion()))) {
+									valid = true;
+									break;
+								}
+							}
+						}
+						if (versions.length > 0 && valid) {
+							int i = 0;
+							Version version = Version.fromString(versions[0]);
+
+							for (String loader : loaders) {
+								if (i > versions.length)
+									version = Version.fromString(versions[0]);
+								else
+									version = Version.fromString(versions[i]);
+
+								Modloader ld = Modloader.getModloader(loader);
+								if (ld != null && version.isGreaterThan(ld.getVersion())) {
+									continue;
+								}
+
+								i++;
+							}
+						}
+					} else if (transformer.isAnnotationPresent(LoaderVersionLessThan.class)) {
+						LoaderVersionLessThan anno = transformer.getAnnotation(LoaderVersionLessThan.class);
+						String[] loaders = anno.name().split("\\|");
+						String[] versions = anno.version().split("\\|");
+						String[] gameVersions = anno.gameVersionList().split("\\|");
+
+						boolean valid = true;
+						if (gameVersions.length > 0) {
+							valid = false;
+							for (String v : gameVersions) {
+								if (CheckString.validateCheckString(v,
+										Version.fromString(CyanInfo.getMinecraftVersion()))) {
+									valid = true;
+									break;
+								}
+							}
+						}
+						if (versions.length > 0 && valid) {
+							int i = 0;
+							Version version = Version.fromString(versions[0]);
+
+							for (String loader : loaders) {
+								if (i > versions.length)
+									version = Version.fromString(versions[0]);
+								else
+									version = Version.fromString(versions[i]);
+
+								Modloader ld = Modloader.getModloader(loader);
+								if (ld != null && version.isLessThan(ld.getVersion())) {
+									continue;
+								}
+
+								i++;
+							}
+						}
 					}
 
 					transformerPackages.forEach((pkgInfo, source) -> {

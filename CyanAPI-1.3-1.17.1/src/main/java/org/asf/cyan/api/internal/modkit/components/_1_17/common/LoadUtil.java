@@ -25,10 +25,10 @@ public class LoadUtil {
 
 		for (Modloader loader : Modloader.getAllModloaders()) {
 			localEntries.put(loader.getName(), new String[] { loader.getVersion().toString(), loader.getName() });
-			for (IModManifest manifest : loader.getLoadedCoremods()) {
+			for (IModManifest manifest : loader.getKnownCoremods()) {
 				localEntries.put(manifest.id(), new String[] { manifest.version().toString(), manifest.displayName() });
 			}
-			for (IModManifest manifest : loader.getLoadedMods()) {
+			for (IModManifest manifest : loader.getKnownMods()) {
 				localEntries.put(manifest.id(), new String[] { manifest.version().toString(), manifest.displayName() });
 			}
 		}
