@@ -113,7 +113,7 @@ public class Installer extends CyanComponent {
 		}
 	}
 
-	@Override 
+	@Override
 	protected void setupComponents() {
 		if (init)
 			throw new IllegalStateException("Cyan components have already been initialized.");
@@ -1236,14 +1236,15 @@ public class Installer extends CyanComponent {
 					profile.remove("lastVersionId");
 					profile.remove("created");
 					profile.remove("javaDir");
+					profile.remove("name");
 					profileList
 							.remove(project.name + "-" + project.version + "-" + project.game + "-" + project.platform);
 				} else {
 					profile.addProperty("type", "custom");
 					profile.addProperty("icon", project.profileIcon);
-					profile.addProperty("name",
-							project.profileName.replace("%v", project.version).replace("%gv", project.game));
 				}
+				profile.addProperty("name",
+						project.profileName.replace("%v", project.version).replace("%gv", project.game));
 				profile.addProperty("javaDir", ProcessHandle.current().info().command().get());
 				profile.addProperty("created", new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss.ms'Z'").format(new Date()));
 				profile.addProperty("lastVersionId", manifest.get("id").getAsString());
