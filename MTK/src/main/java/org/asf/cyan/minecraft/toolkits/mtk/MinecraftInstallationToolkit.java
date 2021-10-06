@@ -92,7 +92,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 			}
 		}
 
-		if (manifest_data_version > mappings_data) {
+		if (mappings_data_version > mappings_data) {
 			changed = true;
 			deleteDir(new File(minecraft_directory, "caches/mappings"));
 		}
@@ -115,6 +115,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 
 		if (changed) {
 			try {
+				versionDataFile.getParentFile().mkdirs();
 				FileOutputStream strm = new FileOutputStream(versionDataFile);
 				strm.write(ByteBuffer.allocate(8).putDouble(mappings_data).array());
 				strm.write(ByteBuffer.allocate(8).putDouble(jar_data).array());
