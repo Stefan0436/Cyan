@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -52,8 +53,105 @@ import com.google.gson.JsonSyntaxException;
  */
 @CYAN_COMPONENT
 public class MinecraftInstallationToolkit extends CyanComponent {
+
+	private static final double mappings_data_version = 2.0;
+	private static final double jar_data_version = 1.0;
+	private static final double manifest_data_version = 1.0;
+	private static final double asset_data_version = 1.0;
+
 	static boolean initialized = false;
 	static boolean ide = false;
+
+	private static void processDataVersions() {
+		boolean changed = false;
+
+		double mappings_data = 1;
+		double jar_data = 1;
+		double manifest_data = 1;
+		double asset_data = 1;
+
+		File versionDataFile = new File(minecraft_directory, "caches/cache.data.version");
+
+		if (!minecraft_directory.exists()) {
+			mappings_data = mappings_data_version;
+			jar_data = jar_data_version;
+			manifest_data = manifest_data_version;
+			asset_data = asset_data_version;
+
+			minecraft_directory.mkdirs();
+			changed = true;
+		} else if (versionDataFile.exists()) {
+			try {
+				FileInputStream strm = new FileInputStream(versionDataFile);
+				mappings_data = ByteBuffer.wrap(strm.readNBytes(8)).getDouble();
+				jar_data = ByteBuffer.wrap(strm.readNBytes(8)).getDouble();
+				manifest_data = ByteBuffer.wrap(strm.readNBytes(8)).getDouble();
+				asset_data = ByteBuffer.wrap(strm.readNBytes(8)).getDouble();
+				strm.close();
+			} catch (IOException e) {
+			}
+		}
+
+		if (manifest_data_version > mappings_data) {
+			changed = true;
+			deleteDir(new File(minecraft_directory, "caches/mappings"));
+		}
+		if (jar_data_version > jar_data) {
+			changed = true;
+
+			deleteDir(new File(minecraft_directory, "caches/jars"));
+			deleteDir(new File(minecraft_directory, "caches/libraries"));
+		}
+		if (asset_data_version > asset_data) {
+			changed = true;
+
+			deleteDir(new File(minecraft_directory, "caches/assets"));
+		}
+		if (manifest_data_version > manifest_data) {
+			changed = true;
+
+			deleteDir(new File(minecraft_directory, "caches/assets"));
+		}
+
+		if (changed) {
+			try {
+				FileOutputStream strm = new FileOutputStream(versionDataFile);
+				strm.write(ByteBuffer.allocate(8).putDouble(mappings_data).array());
+				strm.write(ByteBuffer.allocate(8).putDouble(jar_data).array());
+				strm.write(ByteBuffer.allocate(8).putDouble(manifest_data).array());
+				strm.write(ByteBuffer.allocate(8).putDouble(asset_data).array());
+				strm.close();
+			} catch (IOException e) {
+			}
+		}
+	}
+
+	private static void deleteDir(File file) {
+		if (!file.exists())
+			return;
+
+		for (File f : file.listFiles(new FileFilter() {
+
+			@Override
+			public boolean accept(File arg0) {
+				return !arg0.isDirectory();
+			}
+
+		})) {
+			f.delete();
+		}
+		for (File f : file.listFiles(new FileFilter() {
+
+			@Override
+			public boolean accept(File arg0) {
+				return arg0.isDirectory();
+			}
+
+		})) {
+			deleteDir(f);
+		}
+		file.delete();
+	}
 
 	public static boolean isIDEModeEnabled() {
 		return ide;
@@ -133,6 +231,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 				MinecraftToolkit.trace("SET Minecraft Installation directory to "
 						+ new File("./Cyan-MTK").getCanonicalPath() + ", caller: " + CallTrace.traceCallName());
 				minecraft_directory = new File("./Cyan-MTK").getCanonicalFile();
+				processDataVersions();
 			}
 			if (!minecraft_directory.exists())
 				minecraft_directory.mkdir();
@@ -189,6 +288,7 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 					"The Minecraft installation directory was set after the toolkit was initialized, this is **bad** practice, caller: "
 							+ CallTrace.traceCallName());
 		minecraft_directory = directory.getCanonicalFile();
+		processDataVersions();
 	}
 
 	/**
