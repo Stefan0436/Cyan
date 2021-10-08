@@ -220,12 +220,9 @@ public abstract class PacketReader {
 		while (true) {
 			if (count + 1l > Integer.MAX_VALUE)
 				break;
-
-			int b = readRawByte();
 			if (!flow.hasNext())
 				break;
-
-			bytes.add((byte) b);
+			bytes.add((byte) readRawByte());
 			count++;
 		}
 
