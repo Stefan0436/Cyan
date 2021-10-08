@@ -40,8 +40,16 @@ public abstract class PacketReader {
 			return reader.readAllBytes();
 		}
 
+		/**
+		 * @deprecated Incorrect return type, use readSingleByte() instead
+		 */
+		@Deprecated
 		public int readByte() {
-			return reader.readRawByte();
+			return reader.readByte();
+		}
+
+		public byte readSingleByte() {
+			return reader.readByte();
 		}
 
 		public String readString() {
@@ -187,8 +195,18 @@ public abstract class PacketReader {
 	 * 
 	 * @return Byte
 	 */
-	public int readRawByte() {
+	public byte readByte() {
 		return flow.read();
+	}
+
+	/**
+	 * Reads the next byte
+	 * 
+	 * @return Byte
+	 * @deprecated Incorrect return type, readByte() instead
+	 */
+	public int readRawByte() {
+		return readByte();
 	}
 
 	/**
@@ -220,12 +238,9 @@ public abstract class PacketReader {
 		while (true) {
 			if (count + 1l > Integer.MAX_VALUE)
 				break;
-
-			int b = readRawByte();
 			if (!flow.hasNext())
 				break;
-
-			bytes.add((byte) b);
+			bytes.add(readByte());
 			count++;
 		}
 

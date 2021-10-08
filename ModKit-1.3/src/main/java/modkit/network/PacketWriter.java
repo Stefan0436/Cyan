@@ -41,6 +41,15 @@ public abstract class PacketWriter implements Closeable {
 			return this;
 		}
 
+		/**
+		 * @deprecated Incorrect parameter type, please use writeByte(byte) instead.
+		 */
+		@Deprecated
+		public RawWriter writeByte(int data) {
+			writer.writeRawByte((byte) data);
+			return this;
+		}
+
 		public RawWriter writeString(String str) {
 			byte[] buff = str.getBytes();
 			writeInt(buff.length);
@@ -190,6 +199,17 @@ public abstract class PacketWriter implements Closeable {
 	 * @param data Data to write
 	 */
 	public void writeRawByte(byte data) {
+		flow.write(data);
+	}
+
+	/**
+	 * Writes the next byte
+	 * 
+	 * @param data Data to write
+	 * @deprecated Incorrect parameter type, please use writeRawByte(byte) instead.
+	 */
+	@Deprecated
+	public void writeRawByte(int data) {
 		flow.write(data);
 	}
 

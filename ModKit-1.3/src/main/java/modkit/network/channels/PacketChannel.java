@@ -250,7 +250,7 @@ public abstract class PacketChannel {
 	 * @param writer  Packet content
 	 */
 	public void sendPacket(String channel, String id, PacketWriter writer) {
-		context.sendPacket(channel, id, writer);
+		context.sendPacket(channel, id, writer, supportSplitPackets());
 	}
 
 	/**
@@ -286,6 +286,15 @@ public abstract class PacketChannel {
 	public void disconnectClient() {
 		if (getSide() == GameSide.CLIENT)
 			context.disconnectClient();
+	}
+
+	/**
+	 * Determines if this channel support packet splitting
+	 * 
+	 * @since ModKit 1.3
+	 */
+	public boolean supportSplitPackets() {
+		return false;
 	}
 
 }

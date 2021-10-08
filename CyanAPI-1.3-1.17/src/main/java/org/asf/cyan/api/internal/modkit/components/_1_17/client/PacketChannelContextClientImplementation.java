@@ -1,9 +1,11 @@
 package org.asf.cyan.api.internal.modkit.components._1_17.client;
 
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 import org.asf.cyan.api.internal.ClientPacketListenerExtension;
 import org.asf.cyan.api.internal.IModKitComponent;
+import org.asf.cyan.api.internal.modkit.components._1_17.common.network.NetworkHooks;
 import org.asf.cyan.api.internal.modkit.components._1_17.common.network.buffer.FriendlyByteBufOutputFlow;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.internal.modkitimpl.channels.PacketProcessorList;
@@ -107,13 +109,19 @@ public class PacketChannelContextClientImplementation extends PacketChannelConte
 	}
 
 	@Override
-	protected void sendPacket(String channel, String id, PacketWriter writer) {
+	protected void sendPacket(String channel, String id, PacketWriter writer, boolean allowSplit) {
 		FriendlyByteBuf buffer = null;
 		if (writer == null) {
 			buffer = new FriendlyByteBuf(Unpooled.buffer(0));
 		} else {
 			if (writer.getOutput() instanceof FriendlyByteBufOutputFlow)
 				buffer = ((FriendlyByteBufOutputFlow) writer.getOutput()).toBuffer();
+			if (allowSplit && buffer.readableBytes() > 32767) {
+				NetworkHooks.splitSendServer(channel + ":" + id,
+								Arrays.copyOfRange(buffer.array(), 0, buffer.writerIndex()), getConnection(),
+								System.currentTimeMillis(), player.tickCount);
+				return;
+			}
 		}
 		if (buffer != null) {
 			getConnection().send(new ServerboundCustomPayloadPacket(new ResourceLocation(channel, id), buffer));

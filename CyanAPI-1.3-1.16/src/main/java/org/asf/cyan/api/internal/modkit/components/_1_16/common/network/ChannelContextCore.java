@@ -128,7 +128,7 @@ public class ChannelContextCore extends PacketChannelContext implements IModKitC
 	}
 
 	@Override
-	protected void sendPacket(String channel, String id, PacketWriter writer) {
+	protected void sendPacket(String channel, String id, PacketWriter writer, boolean allowSplit) {
 	}
 
 	@Override

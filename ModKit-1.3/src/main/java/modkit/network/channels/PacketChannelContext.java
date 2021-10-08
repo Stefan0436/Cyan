@@ -61,7 +61,7 @@ public abstract class PacketChannelContext extends CyanComponent {
 
 	protected abstract Level getLevel();
 
-	protected abstract void sendPacket(String channel, String id, PacketWriter writer);
+	protected abstract void sendPacket(String channel, String id, PacketWriter writer, boolean allowSplit);
 
 	protected abstract PacketWriter newPacketWriter();
 

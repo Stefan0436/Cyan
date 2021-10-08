@@ -6,7 +6,7 @@ import net.minecraft.network.FriendlyByteBuf;
 public class FriendlyByteBufInputFlow implements ByteFlow {
 
 	private FriendlyByteBuf buffer;
-	
+
 	private byte next = -1;
 	private boolean end = false;
 	private boolean hasNext = false;
@@ -14,20 +14,23 @@ public class FriendlyByteBufInputFlow implements ByteFlow {
 	public FriendlyByteBufInputFlow(FriendlyByteBuf buffer) {
 		this.buffer = buffer;
 	}
-    
+
 	@Override
 	public byte read() {
+		if (end)
+			return -1;
+
 		if (hasNext) {
-			byte i = next;
-			next = -1;
 			hasNext = false;
-			return i;
+			byte b = next;
+			next = -1;
+			return b;
 		}
 
 		if (buffer.readableBytes() == 0) {
-            end = true;
+			end = true;
 			return -1;
-        }
+		}
 
 		return buffer.readByte();
 	}
@@ -42,10 +45,7 @@ public class FriendlyByteBufInputFlow implements ByteFlow {
 			next = read();
 			hasNext = true;
 		}
-		
-		if (!hasNext && buffer.readableBytes() == 0) {
-            end = true;
-        }
+
 		return !end;
 	}
 

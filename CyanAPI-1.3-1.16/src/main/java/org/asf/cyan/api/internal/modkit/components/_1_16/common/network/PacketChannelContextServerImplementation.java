@@ -1,5 +1,6 @@
 package org.asf.cyan.api.internal.modkit.components._1_16.common.network;
 
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 import org.asf.cyan.api.internal.IModKitComponent;
@@ -94,13 +95,19 @@ public class PacketChannelContextServerImplementation extends PacketChannelConte
 	}
 
 	@Override
-	protected void sendPacket(String channel, String id, PacketWriter writer) {
+	protected void sendPacket(String channel, String id, PacketWriter writer, boolean allowSplit) {
 		FriendlyByteBuf buffer = null;
 		if (writer == null) {
 			buffer = new FriendlyByteBuf(Unpooled.buffer(0));
 		} else {
 			if (writer.getOutput() instanceof FriendlyByteBufOutputFlow)
 				buffer = ((FriendlyByteBufOutputFlow) writer.getOutput()).toBuffer();
+			if (allowSplit && buffer.readableBytes() > 32767) {
+				NetworkHooks.splitSendClient(channel + ":" + id,
+						Arrays.copyOfRange(buffer.array(), 0, buffer.writerIndex()), getConnection(),
+						System.currentTimeMillis(), player.tickCount);
+				return;
+			}
 		}
 		if (buffer != null) {
 			getConnection().send(new ClientboundCustomPayloadPacket(new ResourceLocation(channel, id), buffer));

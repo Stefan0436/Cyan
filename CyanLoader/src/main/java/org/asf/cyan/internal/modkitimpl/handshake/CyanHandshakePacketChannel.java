@@ -26,5 +26,10 @@ public class CyanHandshakePacketChannel extends PacketChannel {
 	protected PacketChannel newInstance() {
 		return new CyanHandshakePacketChannel();
 	}
+	
+	@Override
+	public boolean supportSplitPackets() {
+		return true;
+	}
 
 }
