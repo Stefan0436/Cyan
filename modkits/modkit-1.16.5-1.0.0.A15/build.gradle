@@ -198,6 +198,9 @@ cmf {
 
 			// Sets the remote dependencies
 			maven_dependency remoteDependencies
+			
+			// Make sure the right version of Cyan is specified
+			supported_modloader "cyanloader", ">=" + cyanVersion
 
 			//
 			// Add dependencies like this:

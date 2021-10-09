@@ -258,6 +258,22 @@ public class CyanModfileManifestGenerator {
 		manifest.gameVersionMessage = message;
 	}
 
+	public void supported_modloader(String modloader) {
+		manifest.supportedModLoaders.put(modloader, "*");
+	}
+
+	public void supported_modloader(String modloader, String version) {
+		manifest.supportedModLoaders.put(modloader, version);
+	}
+
+	public void incompatible_modloader(String modloader) {
+		manifest.incompatibleLoaderVersions.put(modloader, "*");
+	}
+
+	public void incompatible_modloader(String modloader, String version) {
+		manifest.incompatibleLoaderVersions.put(modloader, version);
+	}
+
 	public void display_name(String name) {
 		manifest.displayName = name;
 	}
@@ -352,7 +368,7 @@ public class CyanModfileManifestGenerator {
 	public void updateserver(String server) {
 		manifest.updateserver = server;
 	}
-	
+
 	public void platform(LaunchPlatform platform, String version) {
 		String checkStr = version;
 		if (manifest.platforms.containsKey(platform.toString().toUpperCase()))

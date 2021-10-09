@@ -192,6 +192,8 @@ public class MinecraftGameProvider implements IGame {
 			config.mavenDependencies.clear();
 			config.mavenRepositories.clear();
 			config.trustContainers.clear();
+			config.supportedModLoaders.clear();
+			config.incompatibleLoaderVersions.clear();
 			config.jars.clear();
 
 			tsk.doLast((tsk2) -> {

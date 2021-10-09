@@ -93,6 +93,26 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> impl
 	@Comment("Mods and versions incompatible with this mod's version")
 	public HashMap<String, String> incompatibilities = new HashMap<String, String>();
 
+	@Comment("Map of supported mod loaders")
+	@Comment("Disabled if empty, if used, only the specified mod loaders should attempt to load this mod.")
+	@Comment("")
+	@Comment("Uses the same format as dependencies.")
+	@Comment("Mod loader IDs (lowercase only):")
+	@Comment(" - Cyan: cyanloader")
+	public HashMap<String, String> supportedModLoaders = new HashMap<String, String>();
+
+	@Comment("Map of incompatible mod loaders")
+	@Comment("The specified mod loaders should not be able to load this mod.")
+	@Comment("If any are active in the user's installation, the loading process will be aborted.")
+	@Comment("")
+	@Comment("Uses the same format as dependencies.")
+	@Comment("Mod loader IDs (case-insensitive):")
+	@Comment(" - Cyan: cyanloader")
+	@Comment(" - Forge: forge")
+	@Comment(" - Fabric: fabric")
+	@Comment(" - Paper: paper")
+	public HashMap<String, String> incompatibleLoaderVersions = new HashMap<String, String>();
+
 	@Comment("Maven repositories, format: name> url")
 	public HashMap<String, String> mavenRepositories = new HashMap<String, String>();
 
@@ -113,7 +133,7 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> impl
 	@Comment("")
 	@Comment("Same checkstring system as dependencies")
 	public HashMap<String, String> platforms = new HashMap<String, String>();
-	
+
 	@Comment("The update server for this mod, updates are downloaded from this URL")
 	public String updateserver = null;
 

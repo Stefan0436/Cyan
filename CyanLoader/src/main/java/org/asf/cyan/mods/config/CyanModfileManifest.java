@@ -45,6 +45,10 @@ public class CyanModfileManifest extends Configuration<CyanModfileManifest> {
 	public String fallbackDescription = null;
 	public String updateserver = null;
 
+	public HashMap<String, String> supportedModLoaders = new HashMap<String, String>();
+
+	public HashMap<String, String> incompatibleLoaderVersions = new HashMap<String, String>();
+
 	public HashMap<String, String> jars = new HashMap<String, String>();
 
 	public HashMap<String, String> dependencies = new HashMap<String, String>();

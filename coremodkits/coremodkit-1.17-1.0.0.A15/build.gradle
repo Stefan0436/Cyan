@@ -232,6 +232,9 @@ cmf {
 			// Sets the remote dependencies and trust
 			maven_dependency remoteDependencies
 			trust_container tasks.ctcPack, "https://aerialworks.ddns.net/cyan/trust/download"
+			
+			// Make sure the right version of Cyan is specified
+			supported_modloader "cyanloader", ">=" + cyanVersion
 
 			//
 			// Add dependencies like this:
