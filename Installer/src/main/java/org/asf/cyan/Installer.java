@@ -91,7 +91,7 @@ import javax.swing.JCheckBox;
 
 public class Installer extends CyanComponent {
 
-	private static final String version = "5.10";
+	private static final String version = "5.10.1";
 
 	private static Installer impl;
 
@@ -1772,7 +1772,7 @@ public class Installer extends CyanComponent {
 						continue;
 					knownentries.add(path);
 
-					strm.putNextEntry(entry);
+					strm.putNextEntry(new ZipEntry(entry.getName()));
 					loaderJar.getInputStream(entry).transferTo(strm);
 					strm.closeEntry();
 				}
@@ -1785,7 +1785,7 @@ public class Installer extends CyanComponent {
 						continue;
 					knownentries.add(path);
 
-					strm.putNextEntry(entry);
+					strm.putNextEntry(new ZipEntry(entry.getName()));
 					intermediaryJar.getInputStream(entry).transferTo(strm);
 					strm.closeEntry();
 				}

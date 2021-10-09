@@ -2665,7 +2665,7 @@ task serverJar (type: Jar, dependsOn: build) {
 				if (knownentries.contains(path)) continue;
 				knownentries.add(path)
 
-				strm.putNextEntry(entry)
+				strm.putNextEntry(new ZipEntry(entry.getName()))
 				loaderJar.getInputStream(entry).transferTo(strm)
 				strm.closeEntry()
 			}
@@ -2676,7 +2676,7 @@ task serverJar (type: Jar, dependsOn: build) {
 				if (knownentries.contains(path)) continue;
 				knownentries.add(path)
 
-				strm.putNextEntry(entry)
+				strm.putNextEntry(new ZipEntry(entry.getName()))
 				intermediaryJar.getInputStream(entry).transferTo(strm)
 				strm.closeEntry()
 			}
