@@ -2137,6 +2137,41 @@ public class CyanLoader extends ModkitModloader
 										}
 
 										if (!fail) {
+											if (man.supportedModLoaders.size() != 0
+													&& (!man.supportedModLoaders.containsKey("cyanloader")
+															|| !CheckString.validateCheckString(
+																	manifest.supportedModLoaders.get("cyanloader"),
+																	getVersion()))) {
+												info("No update available (update is incompatible with the current Cyan version)");
+												try {
+													Thread.sleep(500);
+												} catch (InterruptedException e2) {
+												}
+												fail = true;
+											}
+										}
+
+										if (!fail) {
+											if (man.incompatibleLoaderVersions.size() != 0) {
+												for (String loader : man.incompatibleLoaderVersions.keySet()) {
+													Modloader ld = Modloader.getModloader(loader);
+													if (ld != null && CheckString.validateCheckString(
+															man.incompatibleLoaderVersions.get(loader),
+															ld.getVersion())) {
+														info("No update available (update is incompatible with current version of "
+																+ ld.getName() + ")");
+														try {
+															Thread.sleep(500);
+														} catch (InterruptedException e2) {
+														}
+														fail = true;
+														break;
+													}
+												}
+											}
+										}
+
+										if (!fail) {
 											for (String id : man.incompatibilities.keySet()) {
 												String ver = man.incompatibilities.get(id);
 												String currentVer = null;
