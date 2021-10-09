@@ -1098,6 +1098,31 @@ public class CyanLoader extends ModkitModloader
 			System.exit(-1);
 		}
 
+		if (manifest.supportedModLoaders.size() != 0 && (!manifest.supportedModLoaders.containsKey("cyanloader")
+				|| !CheckString.validateCheckString(manifest.supportedModLoaders.get("cyanloader"), getVersion()))) {
+			if (!manifest.supportedModLoaders.containsKey("cyanloader")) {
+				fatal("The mod '" + manifest.displayName + "' does not support Cyan.");
+			} else {
+				fatal("The mod '" + manifest.displayName + "' does not support Cyan version "
+						+ CyanInfo.getCyanVersion() + ".");
+			}
+			StartupWindow.WindowAppender.fatalError();
+			System.exit(-1);
+		}
+
+		if (manifest.incompatibleLoaderVersions.size() != 0) {
+			for (String loader : manifest.incompatibleLoaderVersions.keySet()) {
+				Modloader ld = Modloader.getModloader(loader);
+				if (ld != null && CheckString.validateCheckString(manifest.incompatibleLoaderVersions.get(loader),
+						ld.getVersion())) {
+					fatal("The mod '" + manifest.displayName + "' does not support " + ld.getSimpleName() + " version "
+							+ ld.getVersion() + ".");
+					StartupWindow.WindowAppender.fatalError();
+					System.exit(-1);
+				}
+			}
+		}
+
 		if (CyanInfo.getPlatform() != LaunchPlatform.DEOBFUSCATED && CyanInfo.getPlatform() != LaunchPlatform.VANILLA
 				&& CyanInfo.getPlatform() != LaunchPlatform.UNKNOWN) {
 			if (!manifest.platforms.containsKey(CyanInfo.getPlatform().toString())) {
@@ -1737,6 +1762,31 @@ public class CyanLoader extends ModkitModloader
 					+ " wants " + manifest.gameVersionMessage);
 			StartupWindow.WindowAppender.fatalError();
 			System.exit(-1);
+		}
+
+		if (manifest.supportedModLoaders.size() != 0 && (!manifest.supportedModLoaders.containsKey("cyanloader")
+				|| !CheckString.validateCheckString(manifest.supportedModLoaders.get("cyanloader"), getVersion()))) {
+			if (!manifest.supportedModLoaders.containsKey("cyanloader")) {
+				fatal("The mod '" + manifest.displayName + "' does not support Cyan.");
+			} else {
+				fatal("The mod '" + manifest.displayName + "' does not support Cyan version "
+						+ CyanInfo.getCyanVersion() + ".");
+			}
+			StartupWindow.WindowAppender.fatalError();
+			System.exit(-1);
+		}
+
+		if (manifest.incompatibleLoaderVersions.size() != 0) {
+			for (String loader : manifest.incompatibleLoaderVersions.keySet()) {
+				Modloader ld = Modloader.getModloader(loader);
+				if (ld != null && CheckString.validateCheckString(manifest.incompatibleLoaderVersions.get(loader),
+						ld.getVersion())) {
+					fatal("The mod '" + manifest.displayName + "' does not support " + ld.getSimpleName() + " version "
+							+ ld.getVersion() + ".");
+					StartupWindow.WindowAppender.fatalError();
+					System.exit(-1);
+				}
+			}
 		}
 
 		if (CyanInfo.getPlatform() != LaunchPlatform.DEOBFUSCATED && CyanInfo.getPlatform() != LaunchPlatform.VANILLA
