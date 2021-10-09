@@ -54,7 +54,7 @@ import com.google.gson.JsonSyntaxException;
 @CYAN_COMPONENT
 public class MinecraftInstallationToolkit extends CyanComponent {
 
-	private static final double mappings_data_version = 2.0;
+	private static final double mappings_data_version = 2.1;
 	private static final double jar_data_version = 1.0;
 	private static final double manifest_data_version = 1.0;
 	private static final double asset_data_version = 1.0;
@@ -94,22 +94,25 @@ public class MinecraftInstallationToolkit extends CyanComponent {
 
 		if (mappings_data_version > mappings_data) {
 			changed = true;
+			mappings_data = mappings_data_version;
 			deleteDir(new File(minecraft_directory, "caches/mappings"));
 		}
 		if (jar_data_version > jar_data) {
 			changed = true;
 
+			jar_data = jar_data_version;
 			deleteDir(new File(minecraft_directory, "caches/jars"));
 			deleteDir(new File(minecraft_directory, "caches/libraries"));
 		}
 		if (asset_data_version > asset_data) {
 			changed = true;
-
+			asset_data = asset_data_version;
 			deleteDir(new File(minecraft_directory, "caches/assets"));
 		}
 		if (manifest_data_version > manifest_data) {
 			changed = true;
 
+			manifest_data = manifest_data_version;
 			deleteDir(new File(minecraft_directory, "caches/manifests"));
 		}
 

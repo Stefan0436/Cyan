@@ -255,6 +255,11 @@ public abstract class Modloader extends CyanComponent {
 				return impl;
 			impl = impl.getNextImplementation();
 		}
+		while (impl != null) {
+			if (impl.getSimpleName().equalsIgnoreCase(name))
+				return impl;
+			impl = impl.getNextImplementation();
+		}
 		return null;
 	}
 
