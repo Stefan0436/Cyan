@@ -25,7 +25,7 @@ public class IntEntry implements PacketEntry<Integer> {
 	}
 
 	@Override
-	public boolean isCompatible(long type) {
+	public boolean isCompatible(byte type) {
 		return type == type();
 	}
 

@@ -10,7 +10,7 @@ public interface PacketEntry<T> {
 
 	public void transfer(OutputStream destination) throws IOException;
 
-	public boolean isCompatible(long type);
+	public boolean isCompatible(byte type);
 
 	public PacketEntry<T> importStream(InputStream source) throws IOException;
 

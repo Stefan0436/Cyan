@@ -18,6 +18,8 @@ import net.minecraft.commands.CommandSourceStack;
 public class CommandContainerImpl extends CommandContainer implements IModKitComponent {
 
 	private Command owner;
+	private ArrayList<Byte> earlyTasks = new ArrayList<Byte>();
+	private ArrayList<Object> earlyTaskArguments = new ArrayList<Object>();
 	private ArrayList<Object> nodes = new ArrayList<Object>();
 	private ArgumentBuilder<CommandSourceStack, ?> current;
 
@@ -35,7 +37,12 @@ public class CommandContainerImpl extends CommandContainer implements IModKitCom
 
 	@Override
 	public void attachExecutionEngine() {
-		current.executes(t -> {
+		if (current == null) {
+			earlyTasks.add((byte) 0);
+			earlyTaskArguments.add(null);
+			return;
+		}
+		current = current.executes(t -> {
 			return owner.execute(new CommandExecutionContextImpl(t));
 		});
 	}
@@ -62,8 +69,14 @@ public class CommandContainerImpl extends CommandContainer implements IModKitCom
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void attachPermission(String perm, int level) {
-		current = current.requires(t -> {
+		if (current == null) {
+			earlyTasks.add((byte) 2);
+			earlyTaskArguments.add(new Object[] { perm, level });
+			return;
+		}
+		current = (ArgumentBuilder<CommandSourceStack, ?>) nodes.set(nodes.indexOf(current), current.requires(t -> {
 			try {
 				return PermissionManager.getInstance().hasPermission(t.getEntityOrException(), perm);
 			} catch (CommandSyntaxException ex) {
@@ -72,39 +85,95 @@ public class CommandContainerImpl extends CommandContainer implements IModKitCom
 				else
 					return t.hasPermission(level);
 			}
-		});
+		}));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public LiteralArgumentBuilder<CommandSourceStack> build(LiteralArgumentBuilder<CommandSourceStack> newOwner) {
+		while (!earlyTasks.isEmpty()) {
+			byte b = earlyTasks.remove(0);
+			Object a = earlyTaskArguments.remove(0);
+
+			switch (b) {
+			case 0:
+				newOwner = newOwner.executes(t -> {
+					return owner.execute(new CommandExecutionContextImpl(t));
+				});
+				break;
+			case 1:
+				Function<CommandExecutionContext, Integer> engine = (Function<CommandExecutionContext, Integer>) a;
+				newOwner = newOwner.executes(t -> {
+					return engine.apply(new CommandExecutionContextImpl(t));
+				});
+				break;
+			case 2:
+				String perm = ((Object[]) a)[0].toString();
+				int level = (int) ((Object[]) a)[1];
+				newOwner = newOwner.requires(t -> {
+					try {
+						return PermissionManager.getInstance().hasPermission(t.getEntityOrException(), perm);
+					} catch (CommandSyntaxException ex) {
+						if (level == 0 || level == -1)
+							return true;
+						else
+							return t.hasPermission(level);
+					}
+				});
+				break;
+			}
+		}
+
 		boolean hasNext = true;
 		int ind = 0;
+		ArrayList<Object> nodesb = new ArrayList<Object>(nodes);
+
 		while (hasNext) {
-			if (ind >= nodes.size())
+			if (ind >= nodesb.size())
 				break;
-			if (nodes.get(ind) instanceof Integer) {
+			if (nodesb.get(ind) instanceof Integer) {
 				ind++;
 				continue;
 			}
 			hasNext = false;
-			
-			ArgumentBuilder<CommandSourceStack, ?> nd = (ArgumentBuilder<CommandSourceStack, ?>) nodes.get(ind);
+
+			ArgumentBuilder<CommandSourceStack, ?> nd = (ArgumentBuilder<CommandSourceStack, ?>) nodesb.get(ind);
+			ArgumentBuilder<CommandSourceStack, ?> ndm = nd;
+			ArgumentBuilder<CommandSourceStack, ?> ndmf = nd;
+
+			int depth = 0;
 			boolean first = true;
-			for (Object obj : nodes) {
+			for (Object obj : new ArrayList<Object>(nodes)) {
+				nodes.remove(obj);
 				if (obj instanceof Integer) {
+					if (depth > 1)
+						nd = nd.then(ndmf);
+					newOwner = newOwner.then(nd);
 					hasNext = true;
 					ind++;
 					break;
 				}
+
 				ArgumentBuilder<CommandSourceStack, ?> node = (ArgumentBuilder<CommandSourceStack, ?>) obj;
 				if (first) {
 					first = false;
 					continue;
 				}
+
+				depth++;
 				ind++;
-				nd = nd.then(node);
+				if (depth > 1) {
+					ndm = ndm.then(node);
+					if (depth == 2)
+						ndmf = ndm;
+					else
+						ndmf = ndmf.then(ndm);
+				} else
+					nd = nd.then(node);
+				ndm = node;
 			}
+			if (depth > 1)
+				nd = nd.then(ndmf);
 			newOwner = newOwner.then(nd);
 		}
 		nodes.clear();
@@ -113,10 +182,16 @@ public class CommandContainerImpl extends CommandContainer implements IModKitCom
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void attachExecutionEngine(Function<CommandExecutionContext, Integer> engine) {
-		current.executes(t -> {
+		if (current == null) {
+			earlyTasks.add((byte) 1);
+			earlyTaskArguments.add(engine);
+			return;
+		}
+		current = (ArgumentBuilder<CommandSourceStack, ?>) nodes.set(nodes.indexOf(current), current.executes(t -> {
 			return engine.apply(new CommandExecutionContextImpl(t));
-		});
+		}));
 	}
 
 	@Override

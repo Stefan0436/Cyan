@@ -24,7 +24,7 @@ public class CharEntry implements PacketEntry<Character> {
 	}
 
 	@Override
-	public boolean isCompatible(long type) {
+	public boolean isCompatible(byte type) {
 		return type == type();
 	}
 

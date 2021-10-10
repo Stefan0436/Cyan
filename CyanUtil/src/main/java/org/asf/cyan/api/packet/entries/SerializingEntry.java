@@ -1,10 +1,13 @@
 package org.asf.cyan.api.packet.entries;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 import org.asf.cyan.api.packet.PacketEntry;
 
@@ -47,7 +50,7 @@ public class SerializingEntry<T> implements PacketEntry<T> {
 	}
 
 	@Override
-	public boolean isCompatible(long type) {
+	public boolean isCompatible(byte type) {
 		return type == type();
 	}
 
@@ -59,18 +62,26 @@ public class SerializingEntry<T> implements PacketEntry<T> {
 	}
 
 	void serialize(Object obj, OutputStream output) throws IOException {
-		ObjectOutputStream serializer = new ObjectOutputStream(output);
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		ObjectOutputStream serializer = new ObjectOutputStream(buffer);
 		serializer.writeObject(obj);
+		byte[] val = buffer.toByteArray();
+		output.write(ByteBuffer.allocate(4).putInt(val.length).array());
+		output.write(val);
+		buffer.close();
 	}
 
 	Object deserialize(InputStream input) throws IOException {
-		ObjectInputStream deserializer = new ObjectInputStream(input);
+		ByteArrayInputStream buffer = new ByteArrayInputStream(
+				input.readNBytes(ByteBuffer.wrap(input.readNBytes(4)).getInt()));
+		ObjectInputStream deserializer = new ObjectInputStream(buffer);
 		Object obj;
 		try {
 			obj = deserializer.readObject();
 		} catch (ClassNotFoundException | IOException e) {
 			throw new IOException(e);
 		}
+		buffer.close();
 		return obj;
 	}
 

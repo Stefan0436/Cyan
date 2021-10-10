@@ -25,7 +25,7 @@ public class ByteArrayEntry implements PacketEntry<byte[]> {
 	}
 
 	@Override
-	public boolean isCompatible(long type) {
+	public boolean isCompatible(byte type) {
 		return type == type();
 	}
 

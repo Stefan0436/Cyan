@@ -25,7 +25,7 @@ public class FloatEntry implements PacketEntry<Float> {
 	}
 
 	@Override
-	public boolean isCompatible(long type) {
+	public boolean isCompatible(byte type) {
 		return type == type();
 	}
 

@@ -25,7 +25,7 @@ public class DoubleEntry implements PacketEntry<Double> {
 	}
 
 	@Override
-	public boolean isCompatible(long type) {
+	public boolean isCompatible(byte type) {
 		return type == type();
 	}
 
