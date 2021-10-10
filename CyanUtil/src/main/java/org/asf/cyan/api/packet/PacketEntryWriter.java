@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
+import org.asf.cyan.api.packet.entries.BooleanEntry;
 import org.asf.cyan.api.packet.entries.ByteArrayEntry;
 import org.asf.cyan.api.packet.entries.ByteEntry;
 import org.asf.cyan.api.packet.entries.CharEntry;
@@ -43,6 +44,15 @@ public class PacketEntryWriter {
 	 */
 	public PacketEntryWriter add(String entry) {
 		return add(new StringEntry(entry));
+	}
+
+	/**
+	 * Adds a boolean value
+	 * 
+	 * @param entry Boolean entry
+	 */
+	public PacketEntryWriter add(boolean entry) {
+		return add(new BooleanEntry(entry));
 	}
 
 	/**
@@ -129,6 +139,10 @@ public class PacketEntryWriter {
 			return add((char) entry);
 		else if (entry instanceof String)
 			return add((String) entry);
+		else if (entry instanceof Boolean)
+			return add((boolean) entry);
+		else if (entry instanceof PacketEntry)
+			return add((PacketEntry<?>) entry);
 		return add(new SerializingEntry(entry));
 	}
 

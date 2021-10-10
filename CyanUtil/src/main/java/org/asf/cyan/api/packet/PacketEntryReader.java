@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.asf.cyan.api.packet.entries.BooleanEntry;
 import org.asf.cyan.api.packet.entries.ByteArrayEntry;
 import org.asf.cyan.api.packet.entries.ByteEntry;
 import org.asf.cyan.api.packet.entries.CharEntry;
@@ -54,6 +55,7 @@ public class PacketEntryReader {
 		registerType(new FloatEntry(0f));
 		registerType(new DoubleEntry(0d));
 		registerType(new CharEntry('\000'));
+		registerType(new BooleanEntry(false));
 	}
 
 	/**
