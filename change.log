@@ -14,13 +14,14 @@ Cyan Update Changelog: 1.0.0 (Alpha 15):
  - [     ModKit 1.3      ] Renamed ServerShutdownEventObject to ServerEventObject
  - [     ModKit 1.3      ] Added the ServerStartupEvent type
  - [     ModKit 1.3      ] Added the Tasks utility (for scheduling tick tasks)
+ - [     ModKit 1.3      ] Renamed 'Client' to 'ClientSoftware'
  - [ModKit Implementation] Fixed NullPointerException when trying to assign permissions/execution-engine to the default command node
  - [ModKit Implementation] Fixed add() in the command wrapper
- - [     ModKit 1.3      ] Renamed 'Client' to 'ClientSoftware'
  - [ModKit Implementation] Rewrote the Cyan handshake according to the document saved in our git repository
  - [ModKit Implementation] Packet channels can now have multiple packet processors for the same packet, the system will loop until a compatible processor is found
- - [     CyanLoader      ] Cyan will no longer attempt to load mappings in the deobfuscated development environment, speeding up the load time
  - [ModKit Implementation] Fixed server compatibility tooltips
  - [ModKit Implementation] Vanilla servers will also show as 'incompatible' when the client requires server mods
  - [ModKit Implementation] Improved handshake failure tooltips
+ - [     CyanLoader      ] Cyan will no longer attempt to load mappings in the deobfuscated development environment, speeding up the load time
  - [         MTK         ] Fixed MSA login uuid parsing issue
+ - [     CyanLoader      ] Fix incorrect namings in the 'DoNotTransform' list

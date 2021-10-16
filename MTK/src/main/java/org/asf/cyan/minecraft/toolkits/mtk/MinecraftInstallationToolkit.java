@@ -54,10 +54,10 @@ import com.google.gson.JsonSyntaxException;
 @CYAN_COMPONENT
 public class MinecraftInstallationToolkit extends CyanComponent {
 
-	private static final double mappings_data_version = 2.1;
-	private static final double jar_data_version = 1.0;
-	private static final double manifest_data_version = 1.0;
-	private static final double asset_data_version = 1.0;
+	private static final double mappings_data_version = 2.2;
+	private static final double jar_data_version = 1.1;
+	private static final double manifest_data_version = 1.1;
+	private static final double asset_data_version = 1.1;
 
 	static boolean initialized = false;
 	static boolean ide = false;

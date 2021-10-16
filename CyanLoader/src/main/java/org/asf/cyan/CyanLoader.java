@@ -307,7 +307,7 @@ public class CyanLoader extends ModKitModloader
 			progressMax++;
 			progressMax++;
 		}
-		
+
 		// Final loading
 		progressMax++;
 		progressMax++;
@@ -3854,12 +3854,14 @@ public class CyanLoader extends ModKitModloader
 			if (!cyanDir.exists())
 				cyanDir.mkdirs();
 			conf.readAll(new String(Files.readAllBytes(installs.toPath())));
+
 			ArrayList<KickStartConfig.KickStartInstallation> configs = new ArrayList<KickStartConfig.KickStartInstallation>();
 			for (KickStartConfig.KickStartInstallation install : conf.installations) {
 				if (install.cyanData != null && new File(install.cyanData).exists()
 						&& !install.cyanData.equals(cyanDir.getCanonicalPath()))
 					configs.add(install);
 			}
+
 			KickStartConfig.KickStartInstallation install = new KickStartConfig.KickStartInstallation();
 			install.side = Modloader.getModloaderGameSide();
 			install.cyanData = cyanDir.getCanonicalPath();
@@ -3885,7 +3887,7 @@ public class CyanLoader extends ModKitModloader
 
 		if (getLaunchPlatform() == LaunchPlatform.MCP)
 			info("Returning to game code...");
-		
+
 		StartupWindow.WindowAppender.increaseProgress();
 	}
 
@@ -3937,9 +3939,9 @@ public class CyanLoader extends ModKitModloader
 			"org.asf.cyan.api.internal.CyanAPIComponent", "org.asf.cyan.mods.config.CyanModfileManifest",
 			"org.asf.cyan.internal.modkitimpl.info.Protocols", "org.asf.cyan.internal.modkitimpl.util.EventUtilImpl",
 			"org.asf.cyan.api.events.extended.IExtendedEvent", "org.asf.cyan.api.events.extended.EventObject",
-			"modkit.protocol.ModkitModloader", "modkit.protocol.ModKitProtocol",
+			"modkit.protocol.ModKitModloader", "modkit.protocol.ModKitProtocol",
 			"modkit.protocol.handshake.HandshakeRule", "modkit.protocol.IncompatibleProtocolException",
-			"modkit.protocol.ModkitModloader$ModkitProtocolRules" };
+			"modkit.protocol.ModKitModloader$ModKitProtocolRules" };
 	static String[] dntPackages = new String[] { "com.google.gson", "org.apache.logging", "com.google.common",
 			"org.asf.cyan.api.packet", "org.asf.cyan.fluid" };
 
