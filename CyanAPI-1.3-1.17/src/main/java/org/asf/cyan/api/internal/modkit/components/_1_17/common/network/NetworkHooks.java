@@ -10,7 +10,8 @@ import org.asf.cyan.api.internal.modkit.components._1_17.common.network.buffer.F
 import org.asf.cyan.api.internal.modkit.transformers._1_17.common.network.ServerboundCustomPayloadPacketExtension;
 import org.asf.cyan.api.modloader.information.game.GameSide;
 import org.asf.cyan.internal.modkitimpl.HandshakeComponent;
-import org.asf.cyan.internal.modkitimpl.util.ClientImpl;
+import org.asf.cyan.internal.modkitimpl.util.ClientSoftwareImpl;
+import org.asf.cyan.internal.modkitimpl.util.HandshakeUtils;
 
 import io.netty.buffer.Unpooled;
 import modkit.events.network.ServerSideConnectedEvent;
@@ -107,6 +108,10 @@ public class NetworkHooks {
 				minecraft.getConnection().getConnection()
 						.disconnect(new TranslatableComponent("modkit.missingmodded.server"));
 			}
+			if (!brand.startsWith("Cyan")) {
+				HandshakeUtils.getImpl().closeLevelScreen();
+			}
+
 			return true;
 		} else {
 			if (type.getNamespace().equals("modkit") && type.getPath().equals("splitpacket")) {
@@ -314,8 +319,8 @@ public class NetworkHooks {
 			clientBrand = buffer.readUtf(32767);
 
 			brandOutput.accept(clientBrand);
-			ClientImpl.assignBrand(player.getUUID(), clientBrand);
-			ClientImpl.assignPlayerObjects(player.getName().getString(), player.getUUID(), player);
+			ClientSoftwareImpl.assignBrand(player.getUUID(), clientBrand);
+			ClientSoftwareImpl.assignPlayerObjects(player.getName().getString(), player.getUUID(), player);
 
 			if (first) {
 				connection.send(new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.BRAND,

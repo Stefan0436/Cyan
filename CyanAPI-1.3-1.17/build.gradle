@@ -26,7 +26,7 @@ apply plugin: 'org.asf.cyan.cornflower'
 apply from: '../asf.mvn.publish.gradle'
 apply from: '../config.gradle'
 
-version="1.0.0.A4"
+version="1.0.0.A5"
 ext.specVersion = "1.3"
 
 buildDir = "../build/CyanAPI-$minecraft-$specVersion"

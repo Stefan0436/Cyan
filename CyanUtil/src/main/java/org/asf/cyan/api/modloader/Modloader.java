@@ -6,6 +6,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.asf.cyan.api.common.CyanComponent;
@@ -257,6 +259,22 @@ public abstract class Modloader extends CyanComponent {
 		}
 		while (impl != null) {
 			if (impl.getSimpleName().equalsIgnoreCase(name))
+				return impl;
+			impl = impl.getNextImplementation();
+		}
+		return null;
+	}
+
+	/**
+	 * Retrieve a specific modloader by type name.
+	 * 
+	 * @param type Modloader type name.
+	 * @return The modloader instance, null if it was not found.
+	 */
+	public static Modloader getModloaderByTypeName(String type) {
+		Modloader impl = selectedImplementation;
+		while (impl != null) {
+			if (impl.getClass().getTypeName().equals(type))
 				return impl;
 			impl = impl.getNextImplementation();
 		}
@@ -644,7 +662,7 @@ public abstract class Modloader extends CyanComponent {
 			return gameProvider.getGameVersion();
 		}
 
-		if (getNextImplementation() == null)
+		if (getNextImplementation() == null || selectedImplementation != this)
 			return null;
 
 		return getNextImplementation().getGameVersion();
@@ -666,7 +684,7 @@ public abstract class Modloader extends CyanComponent {
 			return gameProvider.getGameName();
 		}
 
-		if (getNextImplementation() == null)
+		if (getNextImplementation() == null || selectedImplementation != this)
 			return null;
 
 		return getNextImplementation().getGameName();
@@ -1046,6 +1064,42 @@ public abstract class Modloader extends CyanComponent {
 	 */
 	public static Modloader getModOwner(IModManifest mod) {
 		return getModOwner(mod.id());
+	}
+
+	/**
+	 * Retrieves a loaded mod instance by manifest
+	 * 
+	 * @param mod Mod manifest
+	 * @return IBaseMod instance or null
+	 */
+	public IBaseMod getModInstance(IModManifest mod) {
+		return null;
+	}
+
+	/**
+	 * Retrieves a loaded coremod instance by manifest
+	 * 
+	 * @param mod Coremod manifest
+	 * @return IBaseMod instance or null
+	 */
+	public IBaseMod getCoremodInstance(IModManifest mod) {
+		return null;
+	}
+
+	/**
+	 * Retrieves the modloader handshake rule entries
+	 * 
+	 * @return Map of handshake rule entries
+	 */
+	public Map<String, Version> getRuleEntries() {
+		LinkedHashMap<String, Version> ruleEntries = new LinkedHashMap<String, Version>();
+
+		for (IModManifest mod : getLoadedMods())
+			ruleEntries.put(mod.id(), mod.version());
+		for (IModManifest mod : getLoadedCoremods())
+			ruleEntries.put(mod.id(), mod.version());
+
+		return ruleEntries;
 	}
 
 }

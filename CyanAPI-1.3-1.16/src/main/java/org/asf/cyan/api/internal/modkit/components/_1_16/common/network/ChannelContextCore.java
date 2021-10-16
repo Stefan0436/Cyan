@@ -14,6 +14,7 @@ import org.asf.cyan.core.CyanCore;
 
 import modkit.events.objects.network.ClientConnectionEventObject;
 import modkit.events.objects.network.ServerConnectionEventObject;
+import modkit.network.ByteFlow;
 import modkit.network.PacketWriter;
 import modkit.network.channels.AbstractPacketProcessor;
 import modkit.network.channels.PacketChannel;
@@ -141,8 +142,9 @@ public class ChannelContextCore extends PacketChannelContext implements IModKitC
 	}
 
 	@Override
-	protected AbstractPacketProcessor getProcessor(String id) {
-		return null;
+	protected boolean runProcessor(PacketChannel channel, String id, ByteFlow flow, PrepareCall prepare,
+			ProcessCall process) {
+		return false;
 	}
 
 	@Override

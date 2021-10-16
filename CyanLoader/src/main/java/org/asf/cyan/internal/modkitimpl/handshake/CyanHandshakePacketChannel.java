@@ -1,9 +1,13 @@
 package org.asf.cyan.internal.modkitimpl.handshake;
 
-import org.asf.cyan.internal.modkitimpl.handshake.packets.processors.HandshakeCompletionPacketProcessor;
-import org.asf.cyan.internal.modkitimpl.handshake.packets.processors.HandshakeLoaderPacketProcessor;
-import org.asf.cyan.internal.modkitimpl.handshake.packets.processors.HandshakeModPacketProcessor;
-import org.asf.cyan.internal.modkitimpl.handshake.packets.processors.HandshakeProtocolPacketProcessor;
+import org.asf.cyan.internal.modkitimpl.handshake.processors.HandshakeCompletionPacketProcessor;
+import org.asf.cyan.internal.modkitimpl.handshake.processors.HandshakeLevelScreenPacketProcessor;
+import org.asf.cyan.internal.modkitimpl.handshake.processors.HandshakeLoaderListPacketProcessorClient;
+import org.asf.cyan.internal.modkitimpl.handshake.processors.HandshakeLoaderListPacketProcessorServer;
+import org.asf.cyan.internal.modkitimpl.handshake.processors.HandshakeProtocolPacketProcessorServer;
+import org.asf.cyan.internal.modkitimpl.handshake.processors.HandshakeResetPacketProcessor;
+import org.asf.cyan.internal.modkitimpl.handshake.processors.HandshakeRulePacketProcessor;
+import org.asf.cyan.internal.modkitimpl.handshake.processors.HandshakeProtocolPacketProcessorClient;
 
 import modkit.network.channels.PacketChannel;
 
@@ -16,17 +20,24 @@ public class CyanHandshakePacketChannel extends PacketChannel {
 
 	@Override
 	public void setup() {
-		register(HandshakeProtocolPacketProcessor.class);
-		register(HandshakeLoaderPacketProcessor.class);
+		register(HandshakeProtocolPacketProcessorServer.class);
+		register(HandshakeProtocolPacketProcessorClient.class);
+
+		register(HandshakeLoaderListPacketProcessorServer.class);
+		register(HandshakeLoaderListPacketProcessorClient.class);
+
+		register(HandshakeRulePacketProcessor.class);
+
 		register(HandshakeCompletionPacketProcessor.class);
-		register(HandshakeModPacketProcessor.class);
+		register(HandshakeResetPacketProcessor.class);
+		register(HandshakeLevelScreenPacketProcessor.class);
 	}
 
 	@Override
 	protected PacketChannel newInstance() {
 		return new CyanHandshakePacketChannel();
 	}
-	
+
 	@Override
 	public boolean supportSplitPackets() {
 		return true;

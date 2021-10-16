@@ -7,8 +7,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import modkit.protocol.ModKitProtocol;
-import modkit.protocol.ModkitModloader;
-import modkit.protocol.ModkitModloader.ModkitProtocolRules;
+import modkit.protocol.ModKitModloader;
+import modkit.protocol.ModKitModloader.ModKitProtocolRules;
 import modkit.protocol.handshake.HandshakeRule;
 
 /**
@@ -29,7 +29,7 @@ public class VersionStatusTransformer {
 	 * @param input Input JsonObject
 	 */
 	public static void applySerializeMethodTransformer(JsonObject input) {
-		ModkitModloader root = ModkitModloader.getModKitRootModloader();
+		ModKitModloader root = ModKitModloader.getModKitRootModloader();
 
 		JsonObject modkitData = new JsonObject();
 		modkitData.addProperty("protocol", ModKitProtocol.CURRENT);
@@ -66,8 +66,8 @@ public class VersionStatusTransformer {
 		loader.addProperty("version", modloader.getVersion().toString());
 		loader.addProperty("game.version", modloader.getGameVersion());
 		loader.addProperty("type", modloader.getClass().getTypeName());
-		if (modloader instanceof ModkitProtocolRules) {
-			ModkitProtocolRules rules = (ModkitProtocolRules) modloader;
+		if (modloader instanceof ModKitProtocolRules) {
+			ModKitProtocolRules rules = (ModKitProtocolRules) modloader;
 			JsonObject protocol = new JsonObject();
 			protocol.addProperty("version", rules.modloaderProtocol());
 			protocol.addProperty("min", rules.modloaderMinProtocol());

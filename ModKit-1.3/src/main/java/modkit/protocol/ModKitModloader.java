@@ -10,13 +10,13 @@ import org.asf.cyan.api.modloader.Modloader;
  * ModKit Modloader - Extension interface for the Modloader abstract.
  * 
  * @author Stefan0436 - AerialWorks Software Foundation
- * @since 1.1
+ * @since 1.1, renamed in 1.3
  *
  */
-public abstract class ModkitModloader extends Modloader {
-	
+public abstract class ModKitModloader extends Modloader {
+
 	private boolean isRoot = false;
-	
+
 	/**
 	 * Determines whether or not this modloader is the root modloader.
 	 */
@@ -24,12 +24,13 @@ public abstract class ModkitModloader extends Modloader {
 		getModKitRootModloader();
 		return isRoot;
 	}
-	
+
 	/**
 	 * Retrieves the ModKit root modloader
+	 * 
 	 * @return Root modloader instance
 	 */
-	public static ModkitModloader getModKitRootModloader() {
+	public static ModKitModloader getModKitRootModloader() {
 		if (RootModloader.getRoot() == null)
 			RootModloader.select();
 		return RootModloader.getRoot();
@@ -44,7 +45,7 @@ public abstract class ModkitModloader extends Modloader {
 	 * @since 1.1
 	 *
 	 */
-	public static interface ModkitProtocolRules {
+	public static interface ModKitProtocolRules {
 		public double modloaderProtocol();
 
 		public double modloaderMinProtocol();
@@ -98,15 +99,15 @@ public abstract class ModkitModloader extends Modloader {
 	 *
 	 */
 	protected static class RootModloader {
-		private static ModkitModloader root = null;
-		private static HashMap<ModkitModloader, RootRules> participants = new HashMap<ModkitModloader, RootRules>();
+		private static ModKitModloader root = null;
+		private static HashMap<ModKitModloader, RootRules> participants = new HashMap<ModKitModloader, RootRules>();
 
 		/**
 		 * Makes the modloader a participant for becoming the ModKit Root Modloader.
 		 * 
 		 * @param modloader The modloader instance
 		 */
-		public static <T extends ModkitModloader & ModkitProtocolRules> void participate(T modloader, RootRules rules) {
+		public static <T extends ModKitModloader & ModKitProtocolRules> void participate(T modloader, RootRules rules) {
 			if (modloader.modkitProtocolVersion() < ModKitProtocol.MIN_PROTOCOL) {
 				throw new IncompatibleProtocolException(modloader.getName() + " uses dated protocol "
 						+ modloader.modkitProtocolVersion() + ", ModKit requires " + ModKitProtocol.MIN_PROTOCOL + "+");
@@ -123,14 +124,14 @@ public abstract class ModkitModloader extends Modloader {
 		}
 
 		static void select() {
-			Optional<ModkitModloader> root = participants.keySet().stream().sorted((t1, t2) -> {
+			Optional<ModKitModloader> root = participants.keySet().stream().sorted((t1, t2) -> {
 				int level1 = participants.get(t1).level;
 				int level2 = participants.get(t2).level;
 				if (participants.get(t1).level != 0 && participants.get(t2).level != 0) {
-					if (((ModkitProtocolRules) t1).modkitProtocolVersion() > ((ModkitProtocolRules) t2)
+					if (((ModKitProtocolRules) t1).modkitProtocolVersion() > ((ModKitProtocolRules) t2)
 							.modkitProtocolVersion())
 						level1--;
-					if (((ModkitProtocolRules) t2).modkitProtocolVersion() > ((ModkitProtocolRules) t1)
+					if (((ModKitProtocolRules) t2).modkitProtocolVersion() > ((ModKitProtocolRules) t1)
 							.modkitProtocolVersion())
 						level2--;
 				}
@@ -148,7 +149,7 @@ public abstract class ModkitModloader extends Modloader {
 		 * 
 		 * @return Root modloader or null
 		 */
-		public static ModkitModloader getRoot() {
+		public static ModKitModloader getRoot() {
 			return root;
 		}
 	}

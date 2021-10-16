@@ -9,10 +9,14 @@ import java.util.UUID;
 
 import org.asf.cyan.api.internal.IModKitComponent;
 import org.asf.cyan.api.internal.ServerGamePacketListenerExtension;
+import org.asf.cyan.api.internal.modkit.transformers._1_17.common.network.ConnectionAccessor;
 import org.asf.cyan.api.internal.modkit.transformers._1_17.common.network.ServerStatusInterface;
+import org.asf.cyan.api.modloader.Modloader;
+import org.asf.cyan.api.modloader.information.game.GameSide;
+import org.asf.cyan.core.CyanInfo;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket;
-import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeLoaderPacket;
 import org.asf.cyan.internal.modkitimpl.util.HandshakeUtils;
+import org.asf.cyan.internal.modkitimpl.util.ServerSoftwareImpl;
 
 import com.google.gson.JsonObject;
 
@@ -25,11 +29,13 @@ import modkit.network.channels.ClientPacketProcessor;
 import modkit.network.channels.PacketChannel;
 import modkit.network.channels.ServerPacketProcessor;
 import modkit.protocol.handshake.Handshake;
+import modkit.util.client.ServerSoftware;
 import modkit.util.server.Tasks;
 import modkit.util.server.language.ClientLanguage;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
@@ -132,6 +138,16 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 	}
 
 	@Override
+	public ServerSoftware getSoftware() {
+		ConnectionAccessor acc = (ConnectionAccessor) Minecraft.getInstance().getConnection().getConnection();
+		if (acc == null)
+			return null;
+		if (acc.cyanGetData("serversoftware", ServerSoftware.class) == null)
+			acc.cyanSetData("serversoftware", new ServerSoftwareImpl(), ServerSoftware.class);
+		return acc.cyanGetData("serversoftware", ServerSoftware.class);
+	}
+
+	@Override
 	public void initializeComponent() {
 		impl = this;
 	}
@@ -164,11 +180,9 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 	}
 
 	@Override
-	public void disconnect(ClientPacketProcessor processor, HandshakeFailedPacket response,
-			HandshakeLoaderPacket packet) {
-		Tasks.oneshot(
-				() -> processor.getChannel().getConnection().disconnect(new TranslatableComponent(response.language,
-						packet.version.toString(), response.displayVersion, response.version)));
+	public void disconnect(ClientPacketProcessor processor, HandshakeFailedPacket response, String version) {
+		Tasks.oneshot(() -> processor.getChannel().getConnection().disconnect(
+				new TranslatableComponent(response.language, version, response.displayVersion, response.version)));
 	}
 
 	@Override
@@ -280,6 +294,52 @@ public class HandshakeUtilsImpl extends HandshakeUtils implements IModKitCompone
 		Tasks.oneshot(() -> {
 			pl.connection.disconnect(ClientLanguage.createComponent(pl, message, args));
 		});
+	}
+
+	@Override
+	@SuppressWarnings("resource")
+	public boolean isInGame() {
+		return Minecraft.getInstance().level != null;
+	}
+
+	@Override
+	public String getServerBrand() {
+		if (CyanInfo.getSide() == GameSide.CLIENT) {
+			return getServerBrandClient();
+		} else {
+			return Modloader.getModloaderGameBrand();
+		}
+	}
+
+	@SuppressWarnings("resource")
+	private String getServerBrandClient() {
+		return Minecraft.getInstance().player.getServerBrand();
+	}
+
+	private static class ClientImpl {
+
+		private static void openLdScreenImpl() {
+			Minecraft.getInstance().setScreen(new ReceivingLevelScreen());
+		}
+
+		@SuppressWarnings("resource")
+		private static void closeScreenImpl() {
+			if (Minecraft.getInstance().screen instanceof ReceivingLevelScreen)
+				Minecraft.getInstance().setScreen(null);
+		}
+
+	}
+
+	@Override
+	public void reopenLevelScreen() {
+		if (CyanInfo.getSide() == GameSide.CLIENT)
+			ClientImpl.openLdScreenImpl();
+	}
+
+	@Override
+	public void closeLevelScreen() {
+		if (CyanInfo.getSide() == GameSide.CLIENT)
+			ClientImpl.closeScreenImpl();
 	}
 
 }

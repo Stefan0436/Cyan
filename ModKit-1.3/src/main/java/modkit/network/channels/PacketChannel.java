@@ -273,11 +273,8 @@ public abstract class PacketChannel {
 	 * @return True if compatible, false otherwise
 	 */
 	public boolean process(String id, ByteFlow flow) {
-		AbstractPacketProcessor processor = context.getProcessor(id);
-		if (processor == null)
-			return false;
-
-		return processor.run(this, id, flow);
+		return context.runProcessor(this, id, flow, (ch, proc) -> proc.prepare(ch),
+				(ch, proc, id2, flow2) -> proc.run(ch, id2, flow2));
 	}
 
 	/**

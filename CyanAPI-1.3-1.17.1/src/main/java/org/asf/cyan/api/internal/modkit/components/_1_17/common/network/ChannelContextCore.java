@@ -14,6 +14,7 @@ import org.asf.cyan.core.CyanCore;
 
 import modkit.events.objects.network.ClientConnectionEventObject;
 import modkit.events.objects.network.ServerConnectionEventObject;
+import modkit.network.ByteFlow;
 import modkit.network.PacketWriter;
 import modkit.network.channels.AbstractPacketProcessor;
 import modkit.network.channels.PacketChannel;
@@ -141,11 +142,6 @@ public class ChannelContextCore extends PacketChannelContext implements IModKitC
 	}
 
 	@Override
-	protected AbstractPacketProcessor getProcessor(String id) {
-		return null;
-	}
-
-	@Override
 	protected Supplier<Minecraft> getClientSupplier(Object connection) {
 		return () -> ((ClientPacketListenerExtension) ((LocalPlayer) connection).connection).cyanGetMinecraft();
 	}
@@ -153,5 +149,11 @@ public class ChannelContextCore extends PacketChannelContext implements IModKitC
 	@Override
 	public String getClientBrand(ServerPlayer player) {
 		return ((ServerGamePacketListenerExtension) player.connection).cyanClientBrand();
+	}
+
+	@Override
+	protected boolean runProcessor(PacketChannel channel, String id, ByteFlow flow, PrepareCall prepare,
+			ProcessCall process) {
+		return false;
 	}
 }

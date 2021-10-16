@@ -5,12 +5,22 @@ Cyan Update Changelog: 1.0.0 (Alpha 15):
  - [     Channel API     ] OutputFlow and ByteFlow now use 'byte read()' and 'void write(byte)' instead of using incorrect int values
  - [    Modloader API    ] Added 'getKnownNormalMods()' and 'getKnownCoreMods()' for retrieving all recognized mod manifests, before loading (fixes the forge backup issue)
  - [  Modloader Support  ] Updated modloader support for Forge 1.16.5 from '36.2.2' to '36.2.8'
- - [  Modloader Support  ] Updated modloader support for Forge 1.17.1 from '37.0.36' to '37.0.84'
+ - [  Modloader Support  ] Updated modloader support for Forge 1.17.1 from '37.0.36' to '37.0.95'
  - [  Modloader Support  ] Updated modloader support for Fabric on all versions from '0.11.6' to '0.12.1'
  - [  Modloader Support  ] Updated modloader support for Paper 1.16.5 from '783' to '788'
- - [  Modloader Support  ] Updated modloader support for Paper 1.17.1 from '195' to '324'
+ - [  Modloader Support  ] Updated modloader support for Paper 1.17.1 from '195' to '333'
  - [  Modloader Support  ] Fixed Paper issue with async disconnects
  - [  Modloader Support  ] Fixed Forge world backups displaying all Cyan mods as 'removed'
  - [     ModKit 1.3      ] Renamed ServerShutdownEventObject to ServerEventObject
  - [     ModKit 1.3      ] Added the ServerStartupEvent type
  - [     ModKit 1.3      ] Added the Tasks utility (for scheduling tick tasks)
+ - [ModKit Implementation] Fixed NullPointerException when trying to assign permissions/execution-engine to the default command node
+ - [ModKit Implementation] Fixed add() in the command wrapper
+ - [     ModKit 1.3      ] Renamed 'Client' to 'ClientSoftware'
+ - [ModKit Implementation] Rewrote the Cyan handshake according to the document saved in our git repository
+ - [ModKit Implementation] Packet channels can now have multiple packet processors for the same packet, the system will loop until a compatible processor is found
+ - [     CyanLoader      ] Cyan will no longer attempt to load mappings in the deobfuscated development environment, speeding up the load time
+ - [ModKit Implementation] Fixed server compatibility tooltips
+ - [ModKit Implementation] Vanilla servers will also show as 'incompatible' when the client requires server mods
+ - [ModKit Implementation] Improved handshake failure tooltips
+ - [         MTK         ] Fixed MSA login uuid parsing issue

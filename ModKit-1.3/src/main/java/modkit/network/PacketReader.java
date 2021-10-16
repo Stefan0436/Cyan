@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import org.asf.cyan.api.packet.PacketEntry;
+import org.asf.cyan.api.packet.entries.BooleanEntry;
 import org.asf.cyan.api.packet.entries.ByteArrayEntry;
 import org.asf.cyan.api.packet.entries.CharEntry;
 import org.asf.cyan.api.packet.entries.DoubleEntry;
@@ -376,6 +377,8 @@ public abstract class PacketReader {
 				return (boolean) obj;
 			else
 				return false;
+		} else if (entry instanceof BooleanEntry) {
+			return ((BooleanEntry) entry).get();
 		} else
 			return false;
 	}

@@ -1,0 +1,212 @@
+Steps:
+----------------------------------------------------------------
+
+_
+1|
+S| Wait for the brand packet, if it is cyan-compatible, send the 'START' packet with no content to the client
+ |
+_
+2|
+C| When the 'START' packet is received, send a 'PROTOCOL' packet to the server
+ |
+_
+3|
+S| After receiving the 'PROTOCOL' packet, check compaptibility, disconnect if incompatible, send 'PROTOCOL' if compatible
+ |
+_
+4|
+C| After receiving the server 'PROTOCOL' packet, save information in ServerSoftware and send 'LOADERLIST'
+ |
+_
+5|
+S| After receiving the client 'LOADERLIST' packet, save information in ClientSoftware and send 'LOADERLIST'
+ |
+_
+6|
+C| After receiving the server 'LOADERLIST' packet, save information in ServerSoftware and send 'HANDSHAKERULES' to the server
+ |
+_
+7|
+S| After receiving the clinet 'HANDSHAKERULES' packet, validate the handskake rules
+ | Disconnect if incompatible, send 'FINISHED' if compatible
+ |
+_
+8|
+C| After receiving 'FINISHED', dispatch connection events, lock handshake
+ |
+
+_
+9|
+C| If 'RESET' is received, clear ServerSoftware and unlock the handshake.
+ | This packet can be send regardless of state, it will not crash the client or throw an error message.
+ | 
+ | 
+ | If you are building a proxy, you can send this packet for every server switch.
+ | You don't need to do much else, as long as your proxy re-sends the vanilla brand packet.
+ | If it does, and forwards plugin messages, the handshake will be run automatically.
+ | 
+ | Also, Cyan clients will not disconnect on their own, the server handles most of the handshake.
+ | If the client is incompatible, the server uses vanilla disconnect packets to end the connection.
+ | You can use this to send the player back to a lobby.
+ |
+ | If you want to have a clean server-switch, you can send the 'LEVELSCREEN' packet after 'RESET' to re-open the 'receiving-level'
+ | screen until the client receives the 'FINISHED' packet. This packet is used by regular Cyan servers when the handshake fails.
+ | 
+
+
+----------------------------------------------------------------
+
+
+Specification:
+----------------------------------------------------------------
+
+_____
+START|
+Format type: Empty packet
+Channel: cyan:cyan.handshake.start
+
+Content:_______________________________
+[TYPE]    [DESCRIPTION]
+        |
+EMPTY   | Empty packet
+        |
+_______________________________________
+
+________
+PROTOCOL|
+Format type: ByteBuffer
+Channel: cyan.handshake:core
+
+Content:_______________________________
+[TYPE]    [DESCRIPTION]
+        |
+Double  | The current protocol version
+Double  | Minimal protocol version
+Double  | Maximal protocol version
+        |
+_______________________________________
+
+__________
+LOADERLIST|
+Format type: Cyan Networking Specification
+Channel: cyan.handshake:mods
+
+Content:_______________________________
+[TYPE]    [DESCRIPTION]
+        |
+DOUBLE  | Cyan protocol version
+DOUBLE  | Max protocol version
+DOUBLE  | Min protocol version
+        |
+INT     | Amount of mod loaders
+LOADER[]| Array of mod loaders
+        |
+_______________________________________
+
+'LOADER' type:_________________________
+[TYPE]    [DESCRIPTION]
+        |
+BOOLEAN | Has protocol specifications?
+BOOLEAN?| Is root modloader?
+DOUBLE? | Current modkit version
+DOUBLE? | Current protocol version
+DOUBLE? | Minimal protocol version
+DOUBLE? | Maximal protocol version
+        |
+STRING  | Modloader name
+STRING  | Modloader simple name
+STRING  | Modloader type name
+STRING  | Modloader version
+        |
+BOOLEAN | Has game version?
+STRING? | Modloader game version
+        |
+INT     | Count of regular mods
+MOD[]   | Array of regular mods
+INT     | Count of core mods
+MOD[]   | Array of core mods
+        |
+INT     | Rule entry count
+ENTRY[] | Array of rule entries
+        |
+_______________________________________
+
+'MOD' type:____________________________
+[TYPE]    [DESCRIPTION]
+        |
+STRING  | Mod ID
+STRING  | Mod Display Name
+STRING  | Mod Version
+        |
+_______________________________________
+
+'ENTRY' type:__________________________
+[TYPE]    [DESCRIPTION]
+        |
+STRING  | Entry Key
+STRING  | Entry Version
+        |
+_______________________________________
+
+______________
+HANDSHAKERULES|
+Format type: Cyan Networking Specification
+Channel: cyan.handshake:rules
+
+Content:_______________________________
+[TYPE]    [DESCRIPTION]
+        |
+INT     | Amount of handshake rules
+RULE[]  | Array of handshake rules
+        |
+_______________________________________
+
+'RULE' type:____________________________
+[TYPE]    [DESCRIPTION]
+        |
+BYTE    | Side:
+        | 0 = CLIENT
+        | 1 = SERVER
+STRING  | Rule key
+STRING  | Rule check string
+        |
+_______________________________________
+
+________
+FINISHED|
+Format type: Empty packet
+Channel: cyan.handshake:done
+
+Content:_______________________________
+[TYPE]    [DESCRIPTION]
+        |
+EMPTY   | Empty packet
+        |
+_______________________________________
+
+___________
+LEVELSCREEN|
+Format type: Empty packet
+Channel: cyan.handshake:ldscn
+
+Content:_______________________________
+[TYPE]    [DESCRIPTION]
+        |
+EMPTY   | Empty packet
+        |
+_______________________________________
+
+_____
+RESET|
+Format type: Empty packet
+Channel: cyan.handshake:reset
+
+Content:_______________________________
+[TYPE]    [DESCRIPTION]
+        |
+EMPTY   | Empty packet
+        |
+_______________________________________
+
+
+----------------------------------------------------------------

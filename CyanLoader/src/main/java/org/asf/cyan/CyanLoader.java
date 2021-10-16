@@ -98,7 +98,7 @@ import org.asf.cyan.mods.internal.IAcceptableComponent;
 import org.asf.cyan.mods.internal.ModInfoCache;
 import org.asf.cyan.security.TrustContainer;
 
-import modkit.protocol.ModkitModloader;
+import modkit.protocol.ModKitModloader;
 import modkit.threading.ThreadManager;
 import modkit.util.CheckString;
 
@@ -109,8 +109,8 @@ import modkit.util.CheckString;
  * @author Stefan0436 - AerialWorks Software Foundation
  *
  */
-public class CyanLoader extends ModkitModloader
-		implements IModProvider, ModkitModloader.ModkitProtocolRules, IEventListenerContainer {
+public class CyanLoader extends ModKitModloader
+		implements IModProvider, ModKitModloader.ModKitProtocolRules, IEventListenerContainer {
 
 	private static File[] extraClassPath = new File[0];
 
@@ -232,6 +232,10 @@ public class CyanLoader extends ModkitModloader
 	private ArrayList<IMod> mods = new ArrayList<IMod>();
 	private ArrayList<ICoremod> coremods = new ArrayList<ICoremod>();
 
+	public static boolean isDeveloperModeEnabled() {
+		return developerMode;
+	}
+
 	private static HashMap<String, HashMap<String, byte[]>> classesMap = new HashMap<String, HashMap<String, byte[]>>();
 
 	private HashMap<String, IAcceptableComponent> loadedComponents = new HashMap<String, IAcceptableComponent>();
@@ -273,7 +277,8 @@ public class CyanLoader extends ModkitModloader
 		progressMax++; // load version
 
 		if (!MinecraftMappingsToolkit.areMappingsAvailable(
-				new MinecraftVersionInfo(CyanInfo.getMinecraftVersion(), null, null, null), CyanCore.getSide())) {
+				new MinecraftVersionInfo(CyanInfo.getMinecraftVersion(), null, null, null), CyanCore.getSide())
+				&& vanillaMappings) {
 			progressMax++; // resolve
 			progressMax++; // download version
 			progressMax++; // download mappings
@@ -281,7 +286,9 @@ public class CyanLoader extends ModkitModloader
 		}
 
 		// Base loading
-		progressMax++; // load mappings
+		if (vanillaMappings) {
+			progressMax++; // load mappings
+		}
 		progressMax++; // load postponed components
 		progressMax++; // load events
 		progressMax++; // load coremods
@@ -300,6 +307,10 @@ public class CyanLoader extends ModkitModloader
 			progressMax++;
 			progressMax++;
 		}
+		
+		// Final loading
+		progressMax++;
+		progressMax++;
 
 		cyanDir = new File(".cyan-data");
 		if (!cyanDir.exists())
@@ -326,7 +337,7 @@ public class CyanLoader extends ModkitModloader
 		MinecraftVersionInfo mcVersion = new MinecraftVersionInfo(CyanInfo.getMinecraftVersion(), null, null, null);
 		StartupWindow.WindowAppender.increaseProgress();
 
-		if (!MinecraftMappingsToolkit.areMappingsAvailable(mcVersion, CyanCore.getSide())) {
+		if (!MinecraftMappingsToolkit.areMappingsAvailable(mcVersion, CyanCore.getSide()) && vanillaMappings) {
 			info("First time loading, downloading " + side.toLowerCase() + " mappings...");
 
 			MinecraftToolkit.resolveVersions();
@@ -342,8 +353,10 @@ public class CyanLoader extends ModkitModloader
 			StartupWindow.WindowAppender.increaseProgress();
 		}
 
-		mappings = MinecraftMappingsToolkit.loadMappings(mcVersion, CyanCore.getSide());
-		StartupWindow.WindowAppender.increaseProgress();
+		if (vanillaMappings) {
+			mappings = MinecraftMappingsToolkit.loadMappings(mcVersion, CyanCore.getSide());
+			StartupWindow.WindowAppender.increaseProgress();
+		}
 	}
 
 	private static boolean setup = false;
@@ -2140,6 +2153,41 @@ public class CyanLoader extends ModkitModloader
 										}
 
 										if (!fail) {
+											if (man.supportedModLoaders.size() != 0
+													&& (!man.supportedModLoaders.containsKey("cyanloader")
+															|| !CheckString.validateCheckString(
+																	manifest.supportedModLoaders.get("cyanloader"),
+																	getVersion()))) {
+												info("No update available (update is incompatible with the current Cyan version)");
+												try {
+													Thread.sleep(500);
+												} catch (InterruptedException e2) {
+												}
+												fail = true;
+											}
+										}
+
+										if (!fail) {
+											if (man.incompatibleLoaderVersions.size() != 0) {
+												for (String loader : man.incompatibleLoaderVersions.keySet()) {
+													Modloader ld = Modloader.getModloader(loader);
+													if (ld != null && CheckString.validateCheckString(
+															man.incompatibleLoaderVersions.get(loader),
+															ld.getVersion())) {
+														info("No update available (update is incompatible with current version of "
+																+ ld.getName() + ")");
+														try {
+															Thread.sleep(500);
+														} catch (InterruptedException e2) {
+														}
+														fail = true;
+														break;
+													}
+												}
+											}
+										}
+
+										if (!fail) {
 											for (String id : man.incompatibilities.keySet()) {
 												String ver = man.incompatibilities.get(id);
 												String currentVer = null;
@@ -2464,6 +2512,22 @@ public class CyanLoader extends ModkitModloader
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+		if (mappings == null) {
+			try {
+				MinecraftVersionInfo mcVersion = new MinecraftVersionInfo(CyanInfo.getMinecraftVersion(), null, null,
+						null);
+				if (!MinecraftMappingsToolkit.areMappingsAvailable(mcVersion, CyanCore.getSide())) {
+					info("First time loading, downloading " + side.toString().toLowerCase() + " mappings...");
+					MinecraftToolkit.resolveVersions();
+					MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(CyanInfo.getMinecraftVersion());
+					MinecraftMappingsToolkit.downloadVanillaMappings(version, CyanCore.getSide());
+					MinecraftMappingsToolkit.saveMappingsToDisk(version, CyanCore.getSide());
+				}
+				mappings = MinecraftMappingsToolkit.loadMappings(mcVersion, CyanCore.getSide());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 		return new FabricCompatibilityMappings(mappings, side);
 	}
 
@@ -2474,6 +2538,22 @@ public class CyanLoader extends ModkitModloader
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+		if (mappings == null) {
+			try {
+				MinecraftVersionInfo mcVersion = new MinecraftVersionInfo(CyanInfo.getMinecraftVersion(), null, null,
+						null);
+				if (!MinecraftMappingsToolkit.areMappingsAvailable(mcVersion, CyanCore.getSide())) {
+					info("First time loading, downloading " + side.toString().toLowerCase() + " mappings...");
+					MinecraftToolkit.resolveVersions();
+					MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(CyanInfo.getMinecraftVersion());
+					MinecraftMappingsToolkit.downloadVanillaMappings(version, CyanCore.getSide());
+					MinecraftMappingsToolkit.saveMappingsToDisk(version, CyanCore.getSide());
+				}
+				mappings = MinecraftMappingsToolkit.loadMappings(mcVersion, CyanCore.getSide());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 		return new ForgeCompatibilityMappings(mappings, side, mcpVersion);
 	}
 
@@ -2483,6 +2563,22 @@ public class CyanLoader extends ModkitModloader
 				prepare(GameSide.SERVER.toString());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		}
+		if (mappings == null) {
+			try {
+				MinecraftVersionInfo mcVersion = new MinecraftVersionInfo(CyanInfo.getMinecraftVersion(), null, null,
+						null);
+				if (!MinecraftMappingsToolkit.areMappingsAvailable(mcVersion, CyanCore.getSide())) {
+					info("First time loading, downloading server mappings...");
+					MinecraftToolkit.resolveVersions();
+					MinecraftVersionInfo version = MinecraftVersionToolkit.getVersion(CyanInfo.getMinecraftVersion());
+					MinecraftMappingsToolkit.downloadVanillaMappings(version, CyanCore.getSide());
+					MinecraftMappingsToolkit.saveMappingsToDisk(version, CyanCore.getSide());
+				}
+				mappings = MinecraftMappingsToolkit.loadMappings(mcVersion, CyanCore.getSide());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 		return new PaperCompatibilityMappings(mappings, mappingsVersion);
 	}
@@ -3786,10 +3882,11 @@ public class CyanLoader extends ModkitModloader
 
 		dispatchEvent("mods.all.loaded");
 		dispatchEvent("mods.all.loaded", loader);
-		StartupWindow.WindowAppender.increaseProgress();
 
 		if (getLaunchPlatform() == LaunchPlatform.MCP)
 			info("Returning to game code...");
+		
+		StartupWindow.WindowAppender.increaseProgress();
 	}
 
 	private void loadModClasses(ClassLoader loader) {
@@ -3986,6 +4083,26 @@ public class CyanLoader extends ModkitModloader
 				setDetail.accept("Loaded " + modloader.getSimpleName().toUpperCase() + " Coremods",
 						modloader.getLoadedCoremods().length);
 		}
+	}
+
+	@Override
+	public IBaseMod getModInstance(IModManifest mod) {
+		for (IMod md : mods) {
+			if (md.getManifest().id().equals(mod.id()))
+				return md;
+		}
+
+		return null;
+	}
+
+	@Override
+	public IBaseMod getCoremodInstance(IModManifest mod) {
+		for (ICoremod md : coremods) {
+			if (md.getManifest().id().equals(mod.id()))
+				return md;
+		}
+
+		return null;
 	}
 
 }

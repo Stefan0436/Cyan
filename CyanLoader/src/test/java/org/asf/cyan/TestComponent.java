@@ -11,11 +11,15 @@ import org.asf.cyan.api.modloader.information.providers.IVersionProvider;
 import org.asf.cyan.api.versioning.Version;
 import org.asf.cyan.mods.events.AttachEvent;
 import org.asf.cyan.mods.events.IEventListenerContainer;
+import org.asf.cyan.mods.events.SimpleEvent;
 import org.asf.cyan.mods.internal.BaseEventController;
 
+import modkit.events.network.ModKitClientHandshakeEvent;
+import modkit.events.objects.network.ClientConnectionEventObject;
 import modkit.protocol.handshake.HandshakeRule;
 import modkit.threading.ModThread;
 import modkit.threading.ThreadManager;
+import modkit.util.client.ServerSoftware;
 
 public class TestComponent extends CyanComponent implements IPostponedComponent, IBaseMod, IEventListenerContainer {
 
@@ -82,6 +86,16 @@ public class TestComponent extends CyanComponent implements IPostponedComponent,
 		th.sleep(400, false);
 		manager.createThread().store();
 		manager.createThread().suspend();
+
+		BaseEventController.addEventContainer(new IEventListenerContainer() {
+
+			@SimpleEvent(ModKitClientHandshakeEvent.class)
+			public void join(ClientConnectionEventObject event) {
+				ServerSoftware current = ServerSoftware.getInstance();
+				event = event;
+			}
+
+		});
 	}
 
 	@Override

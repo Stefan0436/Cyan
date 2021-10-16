@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import org.asf.cyan.api.packet.PacketEntry;
+import org.asf.cyan.api.packet.entries.BooleanEntry;
 import org.asf.cyan.api.packet.entries.ByteArrayEntry;
 import org.asf.cyan.api.packet.entries.CharEntry;
 import org.asf.cyan.api.packet.entries.DoubleEntry;
@@ -312,7 +313,7 @@ public abstract class PacketWriter implements Closeable {
 	 * @param data Packet entry data
 	 */
 	public PacketWriter writeBoolean(boolean data) {
-		return writeEntry(new SerializingEntry<Boolean>(data));
+		return writeEntry(new BooleanEntry(data));
 	}
 
 	/**

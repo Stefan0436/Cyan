@@ -26,7 +26,7 @@ public class GitAccessConfig extends Configuration<GitAccessConfig> {
 	@Comment("The credential group used for the repository security")
 	public String accessGroup = "git";
 
-	@Comment("Default authorization rules, true means the method needs authorization, false means it doesn't")
+	@Comment("Default authorization rules, true means the method needs authorization, false means it doesnt")
 	public HashMap<String, Boolean> authorizationRules = new HashMap<String, Boolean>();
 	
 }

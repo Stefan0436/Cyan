@@ -1,5 +1,6 @@
 package org.asf.cyan.api.internal.modkit.components._1_17.common.commands.cyan.tasks;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.asf.cyan.api.common.CyanComponent;
@@ -7,8 +8,9 @@ import org.asf.cyan.api.internal.modkit.components._1_17.common.commands.cyan.Cy
 import org.asf.cyan.api.modloader.Modloader;
 import org.asf.cyan.api.modloader.information.mods.IModManifest;
 
-import modkit.advanced.Client;
 import modkit.commands.Command;
+import modkit.util.remotedata.RemoteMod;
+import modkit.util.server.ClientSoftware;
 import modkit.util.server.language.ClientLanguage;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -45,7 +47,7 @@ public class ModsCommand extends CyanComponent implements Command {
 		ServerPlayer player = CyanCommandProvider.header(context);
 		String serverMods = "";
 		String clientMods = "";
-		Client client = Client.getForPlayer(player);
+		ClientSoftware client = ClientSoftware.getForPlayer(player);
 		for (IModManifest mod : Modloader.getAllMods()) {
 			if (!serverMods.isEmpty())
 				serverMods += "\u00A77, ";
@@ -56,7 +58,12 @@ public class ModsCommand extends CyanComponent implements Command {
 			serverMods += "\u00A77)";
 			serverMods += "\u00A77";
 		}
-		Map<String, String> mods = client.getMods();
+
+		Map<String, String> mods = new LinkedHashMap<String, String>();
+		for (RemoteMod mod : client.getAllMods()) {
+			mods.put(mod.getModID(), mod.getVersion().toString());
+		}
+
 		for (String mod : mods.keySet()) {
 			if (!clientMods.isEmpty())
 				clientMods += "\u00A77, ";

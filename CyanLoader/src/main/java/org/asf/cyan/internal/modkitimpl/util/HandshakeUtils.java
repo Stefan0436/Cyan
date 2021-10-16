@@ -5,13 +5,13 @@ import java.util.UUID;
 
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeFailedPacket;
-import org.asf.cyan.internal.modkitimpl.handshake.packets.HandshakeLoaderPacket;
 
 import com.google.gson.JsonObject;
 
 import modkit.network.channels.ClientPacketProcessor;
 import modkit.network.channels.PacketChannel;
 import modkit.network.channels.ServerPacketProcessor;
+import modkit.util.client.ServerSoftware;
 
 public abstract class HandshakeUtils extends CyanComponent {
 
@@ -25,6 +25,10 @@ public abstract class HandshakeUtils extends CyanComponent {
 
 	public abstract UUID getUUID(Object player);
 
+	public ServerSoftware getSoftware() {
+		return null;
+	}
+
 	public abstract boolean isServerRunning(ServerPacketProcessor processor);
 
 	public abstract boolean isUUIDPresentInPlayerList(ServerPacketProcessor processor, String key);
@@ -35,8 +39,7 @@ public abstract class HandshakeUtils extends CyanComponent {
 
 	public abstract void disconnectSimple(ServerPacketProcessor processor, String lang, Object... args);
 
-	public abstract void disconnect(ClientPacketProcessor processor, HandshakeFailedPacket response,
-			HandshakeLoaderPacket packet);
+	public abstract void disconnect(ClientPacketProcessor processor, HandshakeFailedPacket response, String version);
 
 	public abstract void logWarnModsClientOnly(ServerPacketProcessor processor, HashMap<String, String> mods,
 			String modsPretty);
@@ -71,5 +74,13 @@ public abstract class HandshakeUtils extends CyanComponent {
 	public abstract void disconnect(Object player, String message);
 
 	public abstract void disconnect(Object player, String message, Object[] args);
+
+	public abstract boolean isInGame();
+
+	public abstract String getServerBrand();
+
+	public abstract void reopenLevelScreen();
+
+	public abstract void closeLevelScreen();
 
 }

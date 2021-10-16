@@ -7,6 +7,7 @@ import org.asf.cyan.api.modloader.information.game.GameSide;
 
 import modkit.events.objects.network.ClientConnectionEventObject;
 import modkit.events.objects.network.ServerConnectionEventObject;
+import modkit.network.ByteFlow;
 import modkit.network.PacketWriter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.Connection;
@@ -67,7 +68,16 @@ public abstract class PacketChannelContext extends CyanComponent {
 
 	protected abstract <T extends AbstractPacketProcessor> void registerProcessor(Class<T> processor);
 
-	protected abstract AbstractPacketProcessor getProcessor(String id);
+	protected interface PrepareCall {
+		public boolean call(PacketChannel channel, AbstractPacketProcessor proc);
+	}
+
+	protected interface ProcessCall {
+		public boolean call(PacketChannel channel, AbstractPacketProcessor proc, String id, ByteFlow flow);
+	}
+
+	protected abstract boolean runProcessor(PacketChannel channel, String id, ByteFlow flow, PrepareCall prepare,
+			ProcessCall process);
 
 	public static PacketChannelContext getCore() {
 		return coreImplementation;

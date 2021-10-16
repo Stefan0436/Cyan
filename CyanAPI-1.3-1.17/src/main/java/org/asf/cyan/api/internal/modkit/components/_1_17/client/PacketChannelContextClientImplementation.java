@@ -15,8 +15,10 @@ import com.mojang.realmsclient.RealmsMainScreen;
 import io.netty.buffer.Unpooled;
 import modkit.events.objects.network.ClientConnectionEventObject;
 import modkit.events.objects.network.ServerConnectionEventObject;
+import modkit.network.ByteFlow;
 import modkit.network.PacketWriter;
 import modkit.network.channels.AbstractPacketProcessor;
+import modkit.network.channels.PacketChannel;
 import modkit.network.channels.PacketChannelContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
@@ -118,8 +120,8 @@ public class PacketChannelContextClientImplementation extends PacketChannelConte
 				buffer = ((FriendlyByteBufOutputFlow) writer.getOutput()).toBuffer();
 			if (allowSplit && buffer.readableBytes() > 32767) {
 				NetworkHooks.splitSendServer(channel + ":" + id,
-								Arrays.copyOfRange(buffer.array(), 0, buffer.writerIndex()), getConnection(),
-								System.currentTimeMillis(), player.tickCount);
+						Arrays.copyOfRange(buffer.array(), 0, buffer.writerIndex()), getConnection(),
+						System.currentTimeMillis(), player.tickCount);
 				return;
 			}
 		}
@@ -139,15 +141,18 @@ public class PacketChannelContextClientImplementation extends PacketChannelConte
 	}
 
 	@Override
-	protected AbstractPacketProcessor getProcessor(String id) {
+	protected boolean runProcessor(PacketChannel channel, String id, ByteFlow flow, PrepareCall prepare,
+			ProcessCall process) {
 		for (AbstractPacketProcessor proc : processors) {
-			if (proc.regexId() && id.matches(proc.id())) {
-				return proc;
-			} else if (proc.id().equalsIgnoreCase(id)) {
-				return proc;
+			if (proc.regexId() && id.matches(proc.id()) && prepare.call(channel, proc)) {
+				if (process.call(channel, proc, id, flow))
+					return true;
+			} else if (proc.id().equalsIgnoreCase(id) && prepare.call(channel, proc)) {
+				if (process.call(channel, proc, id, flow))
+					return true;
 			}
 		}
-		return null;
+		return false;
 	}
 
 	@Override

@@ -132,6 +132,12 @@ public class LegacyModKitSupportHook extends ClassLoadHook {
 		types.put(
 				"modkit.events.objects.core.ServerShutdownEventObject",
 				"modkit.events.objects.core.ServerEventObject");
+		types.put(
+				"modkit.advanced.Client",
+				"modkit.events.objects.core.ServerEventObject");
+		types.put("modkit.protocol.ModkitModloader", "modkit.protocol.ModKitModloader");
+		types.put("modkit.protocol.ModkitModloader$ModkitProtocolRules",
+				"modkit.protocol.ModKitModloader$ModKitProtocolRules");
 		remappers.add(new ModKitClassRemapper(packages, types, "1.2"));
 	}
 

@@ -80,7 +80,7 @@ public class ModThreadImplementation extends ModThread {
 			}
 			stopped = true;
 		}, getName());
-		th.setDaemon(false);
+		th.setDaemon(true);
 		th.start();
 
 		while (getStatus() != ThreadStatus.RUNNING) {

@@ -8,7 +8,7 @@ public class HandshakeFinishedPacket extends AbstractPacket<HandshakeFinishedPac
 
 	@Override
 	protected String id() {
-		return "handshake.finish";
+		return "done";
 	}
 
 	@Override

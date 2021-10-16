@@ -6,7 +6,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A50'
+		classpath 'org.asf.cyan.cornflower:Cornflower:1.0.0.A51'
 	}
 }
 
@@ -107,7 +107,7 @@ platforms {
 		version "20210706.113038"
 
 		// Forge version
-		modloader "37.0.84"
+		modloader "37.0.95"
 	}
 
 	// Intermediary Platform, for fabric support
