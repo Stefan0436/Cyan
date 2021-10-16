@@ -291,7 +291,10 @@ public class MsaAuthentication {
 			json = getProfileJson(token);
 			obj = JsonParser.parseString(json).getAsJsonObject();
 			info = AuthenticationInfo.create(obj.get("name").getAsString(), token,
-					UUID.fromString(obj.get("id").getAsString()), MinecraftAccountType.MSA);
+					UUID.fromString(obj.get("id").getAsString().replaceFirst(
+							"(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+							"$1-$2-$3-$4-$5")),
+					MinecraftAccountType.MSA);
 			if (logger != null)
 				logger.accept(null, "");
 		} catch (IOException e) {
