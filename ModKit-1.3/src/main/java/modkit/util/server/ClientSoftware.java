@@ -245,7 +245,7 @@ public abstract class ClientSoftware extends CyanComponent {
 	 * Retrieves a modloader by name
 	 * 
 	 * @param name Modloader name
-	 * @return @{link ServerModloader} instance or null
+	 * @return {@link ServerModloader} instance or null
 	 * @since ModKit 1.3
 	 */
 	public RemoteModloader getModloader(String name) {
@@ -262,7 +262,7 @@ public abstract class ClientSoftware extends CyanComponent {
 	 * Retrieves a modloader by type name
 	 * 
 	 * @param type Modloader type name
-	 * @return @{link ServerModloader} instance or null
+	 * @return {@link ServerModloader} instance or null
 	 * @since ModKit 1.3
 	 */
 	public RemoteModloader getModloaderByTypeName(String type) {
