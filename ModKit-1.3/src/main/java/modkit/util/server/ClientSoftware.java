@@ -245,7 +245,7 @@ public abstract class ClientSoftware extends CyanComponent {
 	 * Retrieves a modloader by name
 	 * 
 	 * @param name Modloader name
-	 * @return {@link ServerModloader} instance or null
+	 * @return {@link RemoteModloader} instance or null
 	 * @since ModKit 1.3
 	 */
 	public RemoteModloader getModloader(String name) {
@@ -262,7 +262,7 @@ public abstract class ClientSoftware extends CyanComponent {
 	 * Retrieves a modloader by type name
 	 * 
 	 * @param type Modloader type name
-	 * @return {@link ServerModloader} instance or null
+	 * @return {@link RemoteModloader} instance or null
 	 * @since ModKit 1.3
 	 */
 	public RemoteModloader getModloaderByTypeName(String type) {
@@ -276,7 +276,7 @@ public abstract class ClientSoftware extends CyanComponent {
 	 * Retrieves a server (core)mod instance
 	 * 
 	 * @param id Mod ID
-	 * @return ServerMod instance or null
+	 * @return RemoteMod instance or null
 	 * @since ModKit 1.3
 	 */
 	public RemoteMod getMod(String id) {
@@ -291,7 +291,7 @@ public abstract class ClientSoftware extends CyanComponent {
 	 * 
 	 * @param group Mod group
 	 * @param id    Mod ID
-	 * @return ServerMod instance or null
+	 * @return RemoteMod instance or null
 	 * @since ModKit 1.3
 	 */
 	public RemoteMod getMod(String group, String id) {
@@ -328,7 +328,7 @@ public abstract class ClientSoftware extends CyanComponent {
 	 * Retrieves a server mod instance
 	 * 
 	 * @param id Mod ID
-	 * @return ServerMod instance or null
+	 * @return RemoteMod instance or null
 	 * @since ModKit 1.3
 	 */
 	public RemoteMod getRegularMod(String id) {
@@ -343,7 +343,7 @@ public abstract class ClientSoftware extends CyanComponent {
 	 * 
 	 * @param group Mod group
 	 * @param id    Mod ID
-	 * @return ServerMod instance or null
+	 * @return RemoteMod instance or null
 	 * @since ModKit 1.3
 	 */
 	public RemoteMod getRegularMod(String group, String id) {
@@ -380,7 +380,7 @@ public abstract class ClientSoftware extends CyanComponent {
 	 * Retrieves a server coremod instance
 	 * 
 	 * @param id Mod ID
-	 * @return ServerMod instance or null
+	 * @return RemoteMod instance or null
 	 * @since ModKit 1.3
 	 */
 	public RemoteMod getCoreMod(String id) {
@@ -395,7 +395,7 @@ public abstract class ClientSoftware extends CyanComponent {
 	 * 
 	 * @param group Mod group
 	 * @param id    Mod ID
-	 * @return ServerMod instance or null
+	 * @return RemoteMod instance or null
 	 * @since ModKit 1.3
 	 */
 	public RemoteMod getCoreMod(String group, String id) {

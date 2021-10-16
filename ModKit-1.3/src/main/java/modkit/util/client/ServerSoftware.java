@@ -89,7 +89,7 @@ public abstract class ServerSoftware extends CyanComponent {
 	 * Retrieves a modloader by name
 	 * 
 	 * @param name Modloader name
-	 * @return {@link ServerModloader} instance or null
+	 * @return {@link RemoteModloader} instance or null
 	 */
 	public RemoteModloader getModloader(String name) {
 		for (RemoteModloader loader : getServerModloaders())
@@ -105,7 +105,7 @@ public abstract class ServerSoftware extends CyanComponent {
 	 * Retrieves a modloader by type name
 	 * 
 	 * @param type Modloader type name
-	 * @return {@link ServerModloader} instance or null
+	 * @return {@link RemoteModloader} instance or null
 	 */
 	public RemoteModloader getModloaderByTypeName(String type) {
 		for (RemoteModloader loader : getServerModloaders())
