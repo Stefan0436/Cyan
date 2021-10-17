@@ -3599,11 +3599,9 @@ task updateServerData() {
 	def coremodkits = []
 	for (def file : files) {
 		if (file.contains("/") && (file.startsWith("modkits/") || file.startsWith("coremodkits/"))) {
-			if (file.startsWith("modkits/")) {
+			if (file.startsWith("modkits/modkit-")) {
 				def path = file
-				def game = file.substring(file.indexOf("/modkit-") + "/modkit-".length());
-				game = game.substring(0, game.indexOf("/"));
-				
+				def game = file.substring(file.indexOf("/modkit-") + "/modkit-".length());				
 				def cyan = game.substring(game.lastIndexOf("-") + 1);
 				game = game.substring(0, game.lastIndexOf("-"));
 				
@@ -3626,11 +3624,9 @@ task updateServerData() {
 					archiveBaseName = 'modkit'
 					archiveVersion = "$game-$cyan"
 				}
-			} else if (file.startsWith("coremodkits/")) {
+			} else if (file.startsWith("coremodkits/coremodkit-")) {
 				def path = file
-				def game = file.substring(file.indexOf("/coremodkit-") + "/coremodkit-".length());
-				game = game.substring(0, game.indexOf("/"));
-				
+				def game = file.substring(file.indexOf("/coremodkit-") + "/coremodkit-".length());				
 				def cyan = game.substring(game.lastIndexOf("-") + 1);
 				game = game.substring(0, game.lastIndexOf("-"));
 				
