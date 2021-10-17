@@ -13,6 +13,9 @@ public class ProjectConfig extends Configuration<ProjectConfig> {
 
 		@Override
 		public String provide() throws IOException {
+			if (getClass().getClassLoader().getResource("project.ccfg") == null) {
+				return "name> unknown";
+			}
 			InputStream strm = getClass().getClassLoader().getResource("project.ccfg").openStream();
 			String content = new String(strm.readAllBytes());
 			strm.close();

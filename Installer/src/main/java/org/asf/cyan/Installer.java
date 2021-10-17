@@ -91,7 +91,7 @@ import javax.swing.JCheckBox;
 
 public class Installer extends CyanComponent {
 
-	private static final String version = "5.10.2";
+	public static final String version = "5.11";
 
 	private static Installer impl;
 
@@ -240,6 +240,17 @@ public class Installer extends CyanComponent {
 			return;
 		}
 		if (args.length >= 1) {
+			try {
+				try {
+					UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+						| UnsupportedLookAndFeelException e1) {
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				}
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+					| UnsupportedLookAndFeelException e1) {
+			}
+
 			String file = args[0];
 			final File install;
 			if (args.length >= 2)
@@ -255,7 +266,7 @@ public class Installer extends CyanComponent {
 						try {
 							ModInstaller window = new ModInstaller();
 							window.mod = new File(file);
-							window.cyanDataDir = install;
+							window.installDir = install;
 							window.load();
 							window.setVisible(true);
 						} catch (Exception e) {
@@ -433,7 +444,12 @@ public class Installer extends CyanComponent {
 
 		if (!cli) {
 			try {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				try {
+					UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+						| UnsupportedLookAndFeelException e1) {
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				}
 			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 					| UnsupportedLookAndFeelException e1) {
 			}

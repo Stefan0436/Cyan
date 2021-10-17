@@ -1,6 +1,7 @@
 package org.asf.cyan;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -13,8 +14,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import org.asf.cyan.KickStartConfig.KickStartInstallation;
 import org.asf.cyan.api.versioning.Version;
+import org.asf.cyan.installations.KickStartConfig;
+import org.asf.cyan.installations.KickStartConfig.KickStartInstallation;
+import org.asf.cyan.installations.KickStartConfig.KickStartInstallation.Loader;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -28,15 +31,17 @@ public class SelectionWindow extends JFrame {
 	private static final long serialVersionUID = 5938796943958873974L;
 	private JPanel contentPane;
 	private boolean closed = false;
-	private File result;
+	private File resultDir;
 	private File file;
 	private JComboBox<InstallItem> comboBox;
 
 	private ProjectConfig config = new ProjectConfig();
+	private CyanModfileManifest mf;
 
 	private class InstallItem {
 		public String dsp;
-		public File dir;
+		public KickStartInstallation installation;
+		public File instdir;
 
 		@Override
 		public String toString() {
@@ -60,16 +65,23 @@ public class SelectionWindow extends JFrame {
 			return;
 		}
 
-		CyanModfileManifest mf = getModManifest(file);
-		KickStartConfig conf = new KickStartConfig().readAll(Files.readString(installs.toPath()));
-		for (KickStartInstallation install : conf.installations) {
+		mf = getModManifest(file);
+		KickStartConfig conf = new KickStartConfig();
+		conf.readAll(new String(Files.readAllBytes(installs.toPath())));
+		if (conf.convert())
+			Files.write(installs.toPath(), conf.toString().getBytes());
+		for (KickStartInstallation install : conf.registry) {
 			if (checkInstall(mf, install)) {
-				File data = new File(install.cyanData);
+				File data = new File(install.installationDirectory);
 				InstallItem inst = new InstallItem();
-				inst.dsp = "[" + install.platform + "] [" + install.side + "] " + data.getParentFile().getName() + " ("
-						+ install.gameVersion + ", " + install.loaderVersion + ")";
-				inst.dir = new File(install.cyanData);
-				if (inst.dir.exists())
+				String name = install.profileName;
+				inst.installation = install;
+				if (name == null)
+					name = data.getName();
+				inst.dsp = "[" + install.platform + "] [" + install.side + "] " + name + " (" + install.gameVersion
+						+ (install.getRootLoader().version != null ? ", " + install.getRootLoader().version : "") + ")";
+				inst.instdir = data;
+				if (inst.instdir.exists())
 					comboBox.addItem(inst);
 			}
 		}
@@ -83,7 +95,7 @@ public class SelectionWindow extends JFrame {
 			dispose();
 			return;
 		} else if (comboBox.getItemCount() == 1) {
-			result = comboBox.getItemAt(0).dir;
+			resultDir = comboBox.getItemAt(0).instdir;
 			closed = true;
 			dispose();
 			return;
@@ -115,12 +127,49 @@ public class SelectionWindow extends JFrame {
 			}
 		}
 
-		return frame.result;
+		return frame.resultDir;
 	}
 
 	public boolean checkInstall(CyanModfileManifest manifest, KickStartInstallation install) {
 		if (manifest.gameVersionRegex != null && !install.gameVersion.matches(manifest.gameVersionRegex))
 			return false;
+
+		boolean coremod = false;
+		if (file.getName().endsWith(".ccmf")) {
+			coremod = true;
+		}
+
+		if (manifest.supportedModLoaders.size() != 0) {
+			boolean compatible = false;
+			for (String loader : manifest.supportedModLoaders.keySet()) {
+				if (install.hasLoader(loader)) {
+					Loader ld = install.getLoader(loader);
+					Version v = Version.fromString(ld.version);
+					if (CheckString.validateCheckString(manifest.supportedModLoaders.get(loader), v)) {
+						compatible = true;
+						break;
+					}
+				}
+			}
+			if (compatible) {
+				for (String loader : manifest.incompatibleLoaderVersions.keySet()) {
+					if (install.hasLoader(loader)) {
+						Version v = Version.fromString(install.getLoader(loader).version);
+						if (CheckString.validateCheckString(manifest.incompatibleLoaderVersions.get(loader), v)) {
+							compatible = false;
+							break;
+						}
+					}
+				}
+			}
+			if (!compatible)
+				return false;
+		} else if (coremod && install.hasLoader("cyanloader")
+				&& Version.fromString(install.getLoader("cyanloader").version)
+						.isGreaterOrEqualTo(Version.fromString("1.0.0.A15"))) {
+			return false;
+		}
+
 		if (install.platform.equals("DEOBFUSCATED")
 				&& manifest.jars.values().stream().anyMatch(t -> t.trim().equals("any")
 						|| (" " + t.trim() + " ").replace("&", " & ").contains(" platform:DEOBFUSCATED "))) {
@@ -177,7 +226,38 @@ public class SelectionWindow extends JFrame {
 		JButton btnNewButton_1 = new JButton("Select");
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				result = ((InstallItem) comboBox.getSelectedItem()).dir;
+				InstallItem inst = ((InstallItem) comboBox.getSelectedItem());
+				resultDir = inst.instdir;
+
+				boolean coremod = false;
+				if (file.getName().endsWith(".ccmf")) {
+					coremod = true;
+				}
+
+				if (mf.supportedModLoaders.size() != 0) {
+					if (mf.supportedModLoaders.containsKey(inst.installation.rootLoader)) {
+						if (coremod)
+							resultDir = new File(resultDir, inst.installation.getRootLoader().coreModInstallDir);
+						else
+							resultDir = new File(resultDir, inst.installation.getRootLoader().modInstallDir);
+					} else {
+						for (String key : mf.supportedModLoaders.keySet()) {
+							if (inst.installation.hasLoader(key)) {
+								if (coremod)
+									resultDir = new File(resultDir, inst.installation.getLoader(key).coreModInstallDir);
+								else
+									resultDir = new File(resultDir, inst.installation.getLoader(key).modInstallDir);
+								break;
+							}
+						}
+					}
+				} else {
+					if (coremod)
+						resultDir = new File(resultDir, inst.installation.getRootLoader().coreModInstallDir);
+					else
+						resultDir = new File(resultDir, inst.installation.getRootLoader().modInstallDir);
+				}
+
 				dispose();
 				closed = true;
 			}
@@ -189,11 +269,12 @@ public class SelectionWindow extends JFrame {
 		panel_1.setLayout(null);
 
 		comboBox = new JComboBox<InstallItem>();
-		comboBox.setBounds(86, 46, 455, 24);
+		comboBox.setBounds(56, 36, 515, 36);
+		comboBox.setFont(new Font("serif", Font.PLAIN, 14));
 		panel_1.add(comboBox);
 
 		JLabel lblNewLabel = new JLabel("Select destination " + config.name.toUpperCase() + " installation...");
-		lblNewLabel.setBounds(86, 30, 455, 15);
+		lblNewLabel.setBounds(56, 18, 455, 15);
 		panel_1.add(lblNewLabel);
 	}
 }

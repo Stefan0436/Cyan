@@ -25,7 +25,7 @@ public class ModInstaller extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	public File mod;
-	public File cyanDataDir;
+	public File installDir;
 
 	private JTextArea textArea;
 	private JLabel lblNewLabel;
@@ -80,16 +80,13 @@ public class ModInstaller extends JFrame {
 					dispose();
 					return;
 				}
-
-				File dest = new File(cyanDataDir,
-						mod.getName().endsWith(".cmf") ? "mods" : mod.getName().endsWith(".ccmf") ? "coremods" : "");
-				File modDest = new File(dest,
+				File modDest = new File(installDir,
 						mf.modGroup + "." + mf.modId + mod.getName().substring(mod.getName().lastIndexOf(".")));
 				if (modDest.exists())
 					modDest.delete();
 
-				if (!dest.exists())
-					dest.mkdirs();
+				if (!installDir.exists())
+					installDir.mkdirs();
 				try {
 					Files.copy(mod.toPath(), modDest.toPath());
 					JOptionPane.showMessageDialog(ModInstaller.this, "Installation completed.", "Install successful",
@@ -118,7 +115,7 @@ public class ModInstaller extends JFrame {
 	public void load() throws IOException {
 		mf = SelectionWindow.getModManifest(mod);
 		textArea.setText((mf.fallbackDescription == null ? "No description" : mf.fallbackDescription.trim())
-				+ "\n\nThis mod will be installed in:\n" + cyanDataDir.getCanonicalPath());
+				+ "\n\nThis mod will be installed in:\n" + installDir.getCanonicalPath());
 		lblNewLabel.setText(mf.displayName);
 		lblNewLabel_1.setText(mf.modGroup + ":" + mf.modId + " V" + mf.version);
 		textArea.setCaretPosition(0);

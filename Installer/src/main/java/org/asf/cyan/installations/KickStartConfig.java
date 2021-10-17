@@ -1,9 +1,10 @@
-package org.asf.cyan.internal;
+package org.asf.cyan.installations;
 
 import java.io.File;
 import java.util.ArrayList;
 
 import org.asf.aos.util.service.extra.slib.util.ArrayUtil;
+import org.asf.cyan.Installer;
 import org.asf.cyan.api.config.Configuration;
 import org.asf.cyan.api.config.annotations.Comment;
 import org.asf.cyan.api.modloader.information.game.GameSide;
@@ -47,7 +48,7 @@ public class KickStartConfig extends Configuration<KickStartConfig> {
 			kickStartVersion = "0.0";
 		}
 
-		if (!kickStartVersion.equals("5.11")) {
+		if (!kickStartVersion.equals(Installer.version)) {
 			while (true) {
 				boolean done = false;
 				switch (formatVersion) {
@@ -86,7 +87,7 @@ public class KickStartConfig extends Configuration<KickStartConfig> {
 					break;
 			}
 
-			kickStartVersion = "5.11";
+			kickStartVersion = Installer.version;
 		}
 
 		ArrayList<KickStartInstallation> installations = new ArrayList<KickStartInstallation>();
@@ -95,7 +96,7 @@ public class KickStartConfig extends Configuration<KickStartConfig> {
 				installations.add(install);
 		}
 		registry = installations.toArray(t -> new KickStartInstallation[t]);
-
+		
 		return changes;
 	}
 

@@ -1,6 +1,7 @@
 package org.asf.cyan;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -8,6 +9,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.text.DefaultCaret;
 
 import org.apache.logging.log4j.Level;
@@ -192,6 +194,7 @@ public class ProgressWindow {
 		textArea.setEditable(false);
 		JScrollPane pane = new JScrollPane(textArea);
 		pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		pane.setBorder(new LineBorder(new Color(0, 0, 0)));
 
 		DefaultCaret caret = (DefaultCaret) textArea.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
