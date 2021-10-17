@@ -3044,7 +3044,7 @@ task updateServerData() {
 		useurl = netTestUrl
 	
 	try {
-		URL u = new URL(useurl + infoPath);
+		URL u = new URL(useurl + infoPath.replace("generic", cyanversion));
 		Scanner sc = new Scanner(u.openStream());
 		while (sc.hasNext())
 			conf.append(sc.nextLine()+System.lineSeparator());
