@@ -3852,11 +3852,6 @@ public class CyanLoader extends ModKitModloader
 		File installs = new File(dir, ".kickstart-installer.ccfg");
 		if (installs.exists()) {
 			info("Adding current installation to manifest...");
-			KickStartConfig conf = new KickStartConfig();
-			if (!cyanDir.exists())
-				cyanDir.mkdirs();
-			conf.readAll(new String(Files.readAllBytes(installs.toPath())));
-
 			ManifestUtils man = ManifestUtils.getDefault();
 
 			String platVer = platformVersion;
