@@ -68,7 +68,9 @@ import org.asf.cyan.fluid.implementation.CyanReportBuilder;
 import org.asf.cyan.fluid.implementation.CyanTransformerMetadata;
 import org.asf.cyan.fluid.remapping.Mapping;
 import org.asf.cyan.internal.KickStartConfig;
+import org.asf.cyan.internal.KickStartConfig.KickStartInstallation;
 import org.asf.cyan.internal.LegacyModKitSupportHook;
+import org.asf.cyan.internal.ManifestUtils;
 import org.asf.cyan.internal.modkitimpl.info.Protocols;
 import org.asf.cyan.internal.modkitimpl.util.EventUtilImpl;
 import org.asf.cyan.loader.configs.ModUpdateChannel;
@@ -3320,30 +3322,25 @@ public class CyanLoader extends ModkitModloader
 		File installs = new File(dir, ".kickstart-installer.ccfg");
 		if (installs.exists()) {
 			info("Adding current installation to manifest...");
-			KickStartConfig conf = new KickStartConfig();
+            ManifestUtils man = ManifestUtils.getDefault();
+
+			String platVer = platformVersion;
+			if (Modloader.getModloaderLaunchPlatform() == LaunchPlatform.VANILLA)
+				platVer = Modloader.getModloaderGameVersion();
+
 			if (!cyanDir.exists())
 				cyanDir.mkdirs();
-			conf.readAll(new String(Files.readAllBytes(installs.toPath())));
-			ArrayList<KickStartConfig.KickStartInstallation> configs = new ArrayList<KickStartConfig.KickStartInstallation>();
-			for (KickStartConfig.KickStartInstallation install : conf.installations) {
-				if (install.cyanData != null && new File(install.cyanData).exists()
-						&& !install.cyanData.equals(cyanDir.getCanonicalPath()))
-					configs.add(install);
+			KickStartInstallation install = man.addInstallation(null, cyanDir.getCanonicalFile().getParentFile(),
+					Modloader.getModloaderGameVersion(), Modloader.getModloaderLaunchPlatform().toString(), platVer);
+			install.rootLoader = getModKitRootModloader().getName().toLowerCase();
+			install.clearLoaders();
+			for (Modloader ld : Modloader.getAllModloaders()) {
+				install.appendLoader(ld.getName().toLowerCase(), ld.getSimpleName(), ld.getVersion().toString());
 			}
-			KickStartConfig.KickStartInstallation install = new KickStartConfig.KickStartInstallation();
-			install.side = Modloader.getModloaderGameSide();
-			install.cyanData = cyanDir.getCanonicalPath();
-			install.gameVersion = Modloader.getModloaderGameVersion();
-			install.platformVersion = platformVersion;
+			install.getLoader("cyanloader").modInstallDir = ".cyan-data/mods";
+			install.getLoader("cyanloader").coreModInstallDir = ".cyan-data/mods";
 
-			if (Modloader.getModloaderLaunchPlatform() == LaunchPlatform.VANILLA)
-				install.platformVersion = install.gameVersion;
-
-			install.platform = Modloader.getModloaderLaunchPlatform().toString();
-			install.loaderVersion = getVersion().toString();
-			configs.add(install);
-			conf.installations = configs.toArray(t -> new KickStartConfig.KickStartInstallation[t]);
-			Files.write(installs.toPath(), conf.toString().getBytes());
+			man.write();
 		}
 		StartupWindow.WindowAppender.increaseProgress();
 
