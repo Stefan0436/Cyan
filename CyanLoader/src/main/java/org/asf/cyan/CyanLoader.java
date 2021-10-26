@@ -69,7 +69,6 @@ import org.asf.cyan.fluid.api.transforming.information.metadata.TransformerMetad
 import org.asf.cyan.fluid.implementation.CyanReportBuilder;
 import org.asf.cyan.fluid.implementation.CyanTransformerMetadata;
 import org.asf.cyan.fluid.remapping.Mapping;
-import org.asf.cyan.internal.KickStartConfig;
 import org.asf.cyan.internal.KickStartConfig.KickStartInstallation;
 import org.asf.cyan.internal.LegacyModKitSupportHook;
 import org.asf.cyan.internal.ManifestUtils;
@@ -3938,7 +3937,7 @@ public class CyanLoader extends ModKitModloader
 			"modkit.protocol.handshake.HandshakeRule", "modkit.protocol.IncompatibleProtocolException",
 			"modkit.protocol.ModKitModloader$ModKitProtocolRules" };
 	static String[] dntPackages = new String[] { "com.google.gson", "org.apache.logging", "com.google.common",
-			"org.asf.cyan.api.packet", "org.asf.cyan.fluid", "org.asf.cyan.internal.modkitimpl.handshake" };
+			"org.asf.cyan.api.packet", "org.asf.cyan.fluid" };
 
 	public static boolean doNotTransform(String name) {
 		if (coremodTypes == null) {
