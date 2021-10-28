@@ -20,8 +20,10 @@ import java.util.function.BiConsumer;
 
 import javax.swing.JOptionPane;
 
+import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.config.Configuration;
 import org.asf.cyan.minecraft.toolkits.mtk.MinecraftInstallationToolkit;
+import org.asf.cyan.minecraft.toolkits.mtk.MinecraftToolkit;
 import org.asf.cyan.minecraft.toolkits.mtk.auth.windowed.MsaAuthWindow;
 import org.asf.cyan.minecraft.toolkits.mtk.auth.windowed.MsaAuthWindow.UserTokens;
 
@@ -37,7 +39,7 @@ import com.google.gson.JsonParser;
  * @author Sky Swimmer - AerialWorks Software Foundation
  *
  */
-public class MsaAuthentication {
+public class MsaAuthentication extends CyanComponent {
 
 	//
 	// Azure client id
@@ -152,6 +154,7 @@ public class MsaAuthentication {
 	private File authDir;
 
 	private void begin() {
+		info("Authenticating the game with Microsoft...");
 		authDir = new File(MinecraftInstallationToolkit.getMinecraftDirectory(), ".msa-auth");
 		if (!authDir.exists())
 			authDir.mkdir();
@@ -171,9 +174,18 @@ public class MsaAuthentication {
 					JsonObject obj = JsonParser.parseString(refreshToken(tokens.refreshToken)).getAsJsonObject();
 					tokens.accessToken = obj.get("access_token").getAsString();
 					tokens.refreshToken = obj.get("refresh_token").getAsString();
-					authenticate(tokens, null);
+					authenticate(tokens, (t1, t2) -> info(t2), false);
 					return;
 				} catch (IOException e) {
+					if (!MinecraftToolkit.hasMinecraftDownloadConnection() && file.uuid != null
+							&& file.playerName != null && file.accessToken != null) {
+						info = AuthenticationInfo.create(file.playerName, file.accessToken,
+								UUID.fromString(file.uuid.replaceFirst(
+										"(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+										"$1-$2-$3-$4-$5")),
+								MinecraftAccountType.MSA);
+						return;
+					}
 				}
 			}
 		}
@@ -181,7 +193,7 @@ public class MsaAuthentication {
 		auth = true;
 		new MsaAuthWindow(this, (t, writeback) -> {
 			try {
-				authenticate(t, writeback);
+				authenticate(t, writeback, true);
 			} catch (IOException e) {
 			}
 		});
@@ -189,7 +201,8 @@ public class MsaAuthentication {
 
 	private static String mcPubKey = "MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAtz7jy4jRH3psj5AbVS6WNHjniqlr/f5JDly2M8OKGK81nPEq765tJuSILOWrC3KQRvHJIhf84+ekMGH7iGlO4DPGDVb6hBGoMMBhCq2jkBjuJ7fVi3oOxy5EsA/IQqa69e55ugM+GJKUndLyHeNnX6RzRzDT4tX/i68WJikwL8rR8Jq49aVJlIEFT6F+1rDQdU2qcpfT04CBYLM5gMxEfWRl6u1PNQixz8vSOv8pA6hB2DU8Y08VvbK7X2ls+BiS3wqqj3nyVWqoxrwVKiXRkIqIyIAedYDFSaIq5vbmnVtIonWQPeug4/0spLQoWnTUpXRZe2/+uAKN1RY9mmaBpRFV/Osz3PDOoICGb5AZ0asLFf/qEvGJ+di6Ltt8/aaoBuVw+7fnTw2BhkhSq1S/va6LxHZGXE9wsLj4CN8mZXHfwVD9QG0VNQTUgEGZ4ngf7+0u30p7mPt5sYy3H+FmsWXqFZn55pecmrgNLqtETPWMNpWc2fJu/qqnxE9o2tBGy/MqJiw3iLYxf7U+4le4jM49AUKrO16bD1rdFwyVuNaTefObKjEMTX9gyVUF6o7oDEItp5NHxFm3CqnQRmchHsMs+NxEnN4E9a8PDB23b4yjKOQ9VHDxBxuaZJU60GBCIOF9tslb7OAkheSJx5XyEYblHbogFGPRFU++NrSQRX0CAwEAAQ==";
 
-	private void authenticate(UserTokens tokens, BiConsumer<String, String> logger) throws IOException {
+	private void authenticate(UserTokens tokens, BiConsumer<String, String> logger, boolean newLogin)
+			throws IOException {
 		TokenFile file = new TokenFile(authDir);
 		file.refreshToken = tokens.refreshToken;
 		try {
@@ -213,14 +226,14 @@ public class MsaAuthentication {
 			obj = JsonParser.parseString(json).getAsJsonObject();
 			if (obj.has("XErr")) {
 				if (obj.get("XErr").getAsLong() == 2148916233l)
-					if (logger != null)
+					if (logger != null && newLogin)
 						logger.accept("Login Failed!",
 								"<br/>Cannot continue with the login process.<br/><br/>Please create an Xbox Live account before using it with the MTK.");
 					else {
 						throw new IOException("Authentication Error");
 					}
 				else if (obj.get("XErr").getAsLong() == 2148916233l)
-					if (logger != null)
+					if (logger != null && newLogin)
 						logger.accept("Login Failed!",
 								"<br/>Cannot continue with the login process.<br/><br/>This account is a child account, someone will need to add it to a Microsoft Family before it can be used with the MTK.");
 					else {
@@ -231,7 +244,7 @@ public class MsaAuthentication {
 			token = obj.get("Token").getAsString();
 
 			if (logger != null)
-				logger.accept("Please wait, logging you in...", "Authenticating with Minecraft...");
+				logger.accept("Please wait, logging you in...", "Logging into Minecraft...");
 			json = getLoginJson(token, uhs);
 			obj = JsonParser.parseString(json).getAsJsonObject();
 			token = obj.get("access_token").getAsString();
@@ -246,7 +259,7 @@ public class MsaAuthentication {
 			try {
 				verifySignature(obj.get("signature").getAsString());
 			} catch (SignatureException e) {
-				if (logger != null) {
+				if (logger != null && newLogin) {
 					logger.accept("Login Failed!",
 							"<br/>Response signature check failed!<br/><br/>This is either an MTK error or the minecraft server URL has been highjacked!");
 				} else {
@@ -269,7 +282,7 @@ public class MsaAuthentication {
 				try {
 					verifySignature(item.get("signature").getAsString());
 				} catch (SignatureException e) {
-					if (logger != null) {
+					if (logger != null && newLogin) {
 						logger.accept("Login Failed!",
 								"<br/>Response signature check failed!<br/><br/>This is either an MTK error or the minecraft server URL has been highjacked!");
 					} else {
@@ -280,7 +293,7 @@ public class MsaAuthentication {
 			}
 
 			if (!found || !foundProduct) {
-				if (logger != null) {
+				if (logger != null && newLogin) {
 					logger.accept("Login Failed!", "<br/>This user does not own a minecraft profile.");
 				} else {
 					throw new IOException("Authentication Error");
@@ -295,10 +308,18 @@ public class MsaAuthentication {
 							"(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
 							"$1-$2-$3-$4-$5")),
 					MinecraftAccountType.MSA);
-			if (logger != null)
+			file.playerName = obj.get("name").getAsString();
+			file.accessToken = token;
+			file.uuid = obj.get("id").getAsString();
+			try {
+				file.writeAll();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			if (logger != null && newLogin)
 				logger.accept(null, "");
 		} catch (IOException e) {
-			if (logger != null) {
+			if (logger != null && newLogin) {
 				JOptionPane.showMessageDialog(null, "Failed to authenticate, closing login window.",
 						"Authentication Error", JOptionPane.ERROR_MESSAGE);
 				logger.accept(null, "");
@@ -448,6 +469,9 @@ public class MsaAuthentication {
 	public class TokenFile extends Configuration<TokenFile> {
 
 		public String refreshToken;
+		public String accessToken;
+		public String uuid;
+		public String playerName;
 
 		public TokenFile(File dir) {
 			super(dir.getAbsolutePath());
