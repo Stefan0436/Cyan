@@ -534,10 +534,10 @@ dependencies {
 	implementation group: 'org.ow2.asm', name: 'asm-analysis', version: '9.1'
 	implementation group: 'org.ow2.asm', name: 'asm-util', version: '9.1'
 
-	wrapper group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
-	wrapper group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
-	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
-	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
+	wrapper group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.2'
+	wrapper group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.2'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.2'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.2'
 	
 	wrapper project(":CCFG")
 	implementation project(":CCFG")
@@ -566,10 +566,10 @@ dependencies {
 	wrapper group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
 	implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
 
-	wrapper group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: '2.14.1'
-	wrapper group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.1'
+	wrapper group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: '2.17.2'
+	wrapper group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.2'
 	wrapper group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4'
-	implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: '2.14.1'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: '2.17.2'
 	implementation group: 'org.fusesource.jansi', name: 'jansi', version: '2.3.2'
 
 	wrapper group: 'org.fusesource.jansi', name: 'jansi', version: '2.3.2'
