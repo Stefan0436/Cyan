@@ -1,6 +1,6 @@
 // Main configuration file, shared across projects
 // After these two comments, the first 10 lines should not contain code, they must be compatible with bash (ext. is stripped)
-ext.minecraft="1.17.1"
+ext.minecraft="1.16.5"
 ext.versionType="release"
 
 ext.minmixin="0.7.10"

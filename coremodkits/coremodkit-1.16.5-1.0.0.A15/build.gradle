@@ -107,7 +107,7 @@ platforms {
 		version "20210115.111550"
 
 		// Forge version
-		modloader "36.2.2"
+		modloader "36.2.35"
 	}
 
 	// Intermediary Platform, for fabric support
