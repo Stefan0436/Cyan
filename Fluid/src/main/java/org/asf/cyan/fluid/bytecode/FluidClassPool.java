@@ -11,11 +11,15 @@ import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import org.asf.cyan.api.common.CyanComponent;
 import org.asf.cyan.api.config.serializing.internal.Splitter;
@@ -60,6 +64,7 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 
 	private ArrayList<IClassSourceProvider<?>> sources = new ArrayList<IClassSourceProvider<?>>();
 	private ArrayList<ClassEntry> classes = new ArrayList<ClassEntry>();
+	private HashMap<String, String> classHashes = new HashMap<String, String>();
 
 	private ByteArrayOutputStream topOutput = new ByteArrayOutputStream();
 	private ZipOutputStream output = new ZipOutputStream(topOutput);
@@ -180,6 +185,7 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 		ClassEntry entry = new ClassEntry();
 		entry.node = node;
 		entry.firstName = name.replace(".", "/");
+		classHashes.put(name, getHash(getByteCode(entry.node)));
 		classes.add(entry);
 		return node;
 	}
@@ -568,6 +574,13 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 	public ClassNode rewriteClass(String name, byte[] bytecode) throws ClassNotFoundException {
 		name = name.replaceAll("\\.", "/");
 		ArrayList<ClassEntry> clsLstBackup = new ArrayList<ClassEntry>(classes);
+		if (classHashes.containsKey(name) && classHashes.get(name).equals(getHash(bytecode))) {
+			for (ClassEntry cls : clsLstBackup) {
+				if (cls.node.name.equals(name)) {
+					return cls.node;
+				}
+			}
+		}
 		for (ClassEntry cls : clsLstBackup) {
 			if (cls.node.name.equals(name)) {
 				cls.node = new ClassNode();
@@ -575,6 +588,7 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 				reader.accept(cls.node, 0);
 				fixLocalVariableNames(cls.node);
 				removeNullable(cls.node);
+				classHashes.put(name, getHash(getByteCode(cls.node)));
 				return cls.node;
 			}
 		}
@@ -711,10 +725,25 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 				reader.accept(cls.node, 0);
 				fixLocalVariableNames(cls.node);
 				removeNullable(cls.node);
+				classHashes.put(name, getHash(getByteCode(cls.node)));
 				return cls.node;
 			}
 		}
 		throw new ClassNotFoundException("Could not find class " + name.replaceAll("/", "."));
 	}
 
+	private String getHash(byte[] data) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-512");
+			byte[] sha = digest.digest(data);
+			StringBuilder result = new StringBuilder();
+			for (byte aByte : sha) {
+				result.append(String.format("%02x", aByte));
+			}
+			return result.toString();
+		} catch (NoSuchAlgorithmException e) {
+		}
+		return null;
+	}
+	
 }
