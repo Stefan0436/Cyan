@@ -50,9 +50,9 @@ dependencies {
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.2'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.2'
 	implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
-	implementation 'org.ow2.asm:asm:9.1'
-	implementation 'org.ow2.asm:asm-tree:9.1'
-	implementation 'org.ow2.asm:asm-commons:9.1'
+	implementation 'org.ow2.asm:asm:9.3'
+	implementation 'org.ow2.asm:asm-tree:9.3'
+	implementation 'org.ow2.asm:asm-commons:9.3'
 	
     implementation 'org.javassist:javassist:3.27.1-ASF-SNAPSHOT-5'
 	implementation 'org.asf.aos.util.service:aosutil-service-SLIB-UTIL:0.0.0.13'

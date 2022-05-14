@@ -70,9 +70,9 @@ dependencies {
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.2'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.2'
 	
-	implementation 'org.ow2.asm:asm:9.1'
-	implementation 'org.ow2.asm:asm-tree:9.1'
-	implementation 'org.ow2.asm:asm-commons:9.1'
+	implementation 'org.ow2.asm:asm:9.3'
+	implementation 'org.ow2.asm:asm-tree:9.3'
+	implementation 'org.ow2.asm:asm-commons:9.3'
 
 	implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
 	testImplementation 'junit:junit:4.12'
