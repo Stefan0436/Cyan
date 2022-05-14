@@ -734,7 +734,7 @@ public class FluidClassPool extends CyanComponent implements Closeable {
 
 	private String getHash(byte[] data) {
 		try {
-			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			MessageDigest digest = MessageDigest.getInstance("MD5");
 			byte[] sha = digest.digest(data);
 			StringBuilder result = new StringBuilder();
 			for (byte aByte : sha) {
