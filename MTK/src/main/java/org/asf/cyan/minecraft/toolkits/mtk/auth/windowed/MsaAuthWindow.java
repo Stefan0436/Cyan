@@ -119,7 +119,7 @@ public class MsaAuthWindow {
 				if (!output.exists())
 					missingLibs.put(baseURL.replace("%proj%", lib).replace("%ver%", jfxVersion).replace("%platform%",
 							OsInfo.getCurrent() == OsInfo.osx ? "mac"
-									: OsInfo.getCurrent() == OsInfo.windows ? "win" : OsInfo.getCurrent().toString()),
+									: OsInfo.getCurrent() == OsInfo.windows ? "win-x86" : OsInfo.getCurrent().toString()),
 							output);
 			}
 
