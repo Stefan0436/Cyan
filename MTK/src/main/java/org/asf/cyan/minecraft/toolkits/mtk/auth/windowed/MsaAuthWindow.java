@@ -73,7 +73,7 @@ public class MsaAuthWindow {
 			"javafx-graphics", "javafx-media" };
 
 	private String baseURL = "https://repo1.maven.org/maven2/org/openjfx/%proj%/%ver%/%proj%-%ver%-%platform%.jar";
-	private String jfxVersion = "17-ea+15";
+	private String jfxVersion = "18-ea+12";
 
 	/**
 	 * @wbp.parser.entryPoint
