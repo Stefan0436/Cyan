@@ -418,48 +418,51 @@ public class DynamicClassLoader extends URLClassLoader {
 		StackTraceElement[] elements = Thread.currentThread().getStackTrace();
 		Class<?> caller = null;
 		int index = 2;
-		try {
-			caller = loadClass(elements[index++].getClassName());
-			while (caller.getTypeName().equals(Class.class.getTypeName())
-					|| caller.getTypeName().equals(DynamicClassLoader.class.getTypeName())) {
+		while (index < elements.length) {
+			try {
 				caller = loadClass(elements[index++].getClassName());
+				while (caller.getTypeName().equals(Class.class.getTypeName())
+						|| caller.getTypeName().equals(DynamicClassLoader.class.getTypeName())) {
+					caller = loadClass(elements[index++].getClassName());
+				}
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
 			}
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		ClassLoader cl = caller.getClassLoader();
-		if (cl == this)
-			cl = Thread.currentThread().getContextClassLoader();
-		if (cl == this)
-			cl = ClassLoader.getSystemClassLoader();
+			ClassLoader cl = caller.getClassLoader();
+			if (cl == this)
+				cl = Thread.currentThread().getContextClassLoader();
+			if (cl == this)
+				cl = ClassLoader.getSystemClassLoader();
 
-		try {
-			URL cSource = caller.getProtectionDomain().getCodeSource().getLocation();
-			String prefix = cSource.toString();
-			if (rewrittenResources.containsKey(caller.getTypeName() + ".source")) {
-				cSource = new File(rewrittenResources.get(caller.getTypeName() + ".source")).toURI().toURL();
-				prefix = cSource.toString();
+			try {
+				URL cSource = caller.getProtectionDomain().getCodeSource().getLocation();
+				String prefix = cSource.toString();
+				if (rewrittenResources.containsKey(caller.getTypeName() + ".source")) {
+					cSource = new File(rewrittenResources.get(caller.getTypeName() + ".source")).toURI().toURL();
+					prefix = cSource.toString();
+				}
+				if (cSource.getProtocol().equals("jar")) {
+					prefix = prefix.substring(0, prefix.lastIndexOf("!"));
+					prefix = prefix + "!/";
+				} else if (cSource.toString().endsWith("jar")) {
+					prefix = "jar:" + prefix + "!/";
+				} else if (!prefix.endsWith("/"))
+					prefix += "/";
+				prefix += name;
+				return new URL(prefix);
+			} catch (NullPointerException e) {
 			}
-			if (cSource.getProtocol().equals("jar")) {
-				prefix = prefix.substring(0, prefix.lastIndexOf("!"));
-				prefix = prefix + "!/";
-			} else if (cSource.toString().endsWith("jar")) {
-				prefix = "jar:" + prefix + "!/";
-			} else if (!prefix.endsWith("/"))
-				prefix += "/";
-			prefix += name;
-			return new URL(prefix);
-		} catch (NullPointerException e) {
-			return null;
 		}
+		return null;
 	}
 
 	@Override
 	public URL getResource(String name) {
 		try {
 			URL resource = getResourceURL(name);
-			if (resource == null)
+			if (resource == null) {
 				return null;
+			}
 			try {
 				resource.openStream().close();
 			} catch (IOException ex) {
@@ -475,8 +478,9 @@ public class DynamicClassLoader extends URLClassLoader {
 	public InputStream getResourceAsStream(String name) {
 		try {
 			URL resource = getResourceURL(name);
-			if (resource == null)
+			if (resource == null) {
 				return null;
+			}
 			return resource.openStream();
 		} catch (IOException e) {
 			return null;
