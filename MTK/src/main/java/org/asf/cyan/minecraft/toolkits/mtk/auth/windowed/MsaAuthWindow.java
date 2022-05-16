@@ -73,7 +73,7 @@ public class MsaAuthWindow {
 			"javafx-graphics", "javafx-media" };
 
 	private String baseURL = "https://repo1.maven.org/maven2/org/openjfx/%proj%/%ver%/%proj%-%ver%-%platform%.jar";
-	private String jfxVersion = "18-ea+12";
+	private String jfxVersion = "17-ea+15";
 
 	/**
 	 * @wbp.parser.entryPoint
@@ -131,116 +131,82 @@ public class MsaAuthWindow {
 						tmpDir.mkdirs();
 
 					if (missingLibs.size() == 0) {
-						ArrayList<URL> urls = new ArrayList<URL>();
-						for (String lib : libs) {
-							File output = new File(jfxDir, lib + ".jar");
-							try {
-								extractNatives(output, tmpDir);
-							} catch (IOException e1) {
-							}
-							try {
-								urls.add(output.toURI().toURL());
-							} catch (MalformedURLException e) {
-							}
-						}
-						urls.add(getClass().getProtectionDomain().getCodeSource().getLocation());
-						@SuppressWarnings("resource")
-						DynamicClassLoader loader = new DynamicClassLoader();
-						loader.addLoadRestriction(str -> {
-							return (str.contains("org.asf") && !str.contains("AuthAdapter")
-									&& !str.contains("SwingFXWebView"));
-						});
-						loader.setOptions(DynamicClassLoader.OPTION_ALLOW_DEFINE);
-						loader.addUrls(urls);
-						System.setProperty("java.library.path", System.getProperty("java.library.path")
-								+ File.pathSeparator + tmpDir.getAbsolutePath());
-						try {
-							Class<?> cls = loader
-									.loadClass("org.asf.cyan.minecraft.toolkits.mtk.auth.windowed.AuthAdapter");
-							Object inst = cls.getConstructor().newInstance();
-							cls.getMethod("load", MsaAuthentication.class, JDialog.class, MsaAuthWindow.class,
-									BiConsumer.class).invoke(inst, auth, frame, MsaAuthWindow.this, callback);
-						} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-								| InvocationTargetException | NoSuchMethodException | SecurityException
-								| ClassNotFoundException e) {
-							throw new RuntimeException(e);
-						}
-					} else {
-						panel.setVisible(true);
-						progressBar.setMaximum(missingLibs.size());
-						new Thread(() -> {
-
-							int i = 0;
-							for (String url : missingLibs.keySet()) {
-								try {
-									URL u = new URL(url);
-									File output = missingLibs.get(url);
-									File outputL = new File(output.getPath() + ".lck");
-									InputStream strm = u.openStream();
-									if (!output.getParentFile().exists())
-										output.getParentFile().mkdirs();
-									outputL.createNewFile();
-									FileOutputStream strm2 = new FileOutputStream(output);
-									strm.transferTo(strm2);
-									strm.close();
-									strm2.close();
-									outputL.delete();
-									i++;
-									int iF = i;
-									SwingUtilities.invokeLater(() -> {
-										progressBar.setValue(iF);
-									});
-								} catch (IOException e) {
-									int iF = i;
-									SwingUtilities.invokeLater(() -> {
-										JOptionPane.showMessageDialog(frame,
-												"Library download failed, cannot continue.\nThe following library failed to download: "
-														+ libs[iF] + "\n\nThe MSA login window will now close...",
-												"Download Failed", JOptionPane.ERROR_MESSAGE);
-										frame.dispose();
-									});
-									return;
-								}
-							}
-							SwingUtilities.invokeLater(() -> {
-								panel.setVisible(false);
-								ArrayList<URL> urls = new ArrayList<URL>();
-								for (String lib : libs) {
-									File output = new File(jfxDir, lib + ".jar");
-									try {
-										extractNatives(output, tmpDir);
-									} catch (IOException e1) {
-									}
-									try {
-										urls.add(output.toURI().toURL());
-									} catch (MalformedURLException e) {
-									}
-								}
-								urls.add(getClass().getProtectionDomain().getCodeSource().getLocation());
-								@SuppressWarnings("resource")
-								DynamicClassLoader loader = new DynamicClassLoader();
-								loader.addLoadRestriction(str -> {
-									return (str.contains("org.asf") && !str.contains("AuthAdapter")
-											&& !str.contains("SwingFXWebView"));
-								});
-								loader.setOptions(DynamicClassLoader.OPTION_ALLOW_DEFINE);
-								loader.addUrls(urls);
-								System.setProperty("java.library.path", System.getProperty("java.library.path")
-										+ File.pathSeparator + tmpDir.getAbsolutePath());
-								try {
-									Class<?> cls = loader
-											.loadClass("org.asf.cyan.minecraft.toolkits.mtk.auth.windowed.AuthAdapter");
-									Object inst = cls.getConstructor().newInstance();
-									cls.getMethod("load", MsaAuthentication.class, JDialog.class, MsaAuthWindow.class,
-											BiConsumer.class).invoke(inst, auth, frame, MsaAuthWindow.this, callback);
-								} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-										| InvocationTargetException | NoSuchMethodException | SecurityException
-										| ClassNotFoundException e) {
-									throw new RuntimeException(e);
-								}
-							});
-						}, "OpenJFX downloader").start();
+						lblNewLabel.setText("Please wait... Preparing libraries...");
 					}
+					panel.setVisible(true);
+					progressBar.setMaximum(missingLibs.size());
+					new Thread(() -> {
+
+						int i = 0;
+						for (String url : missingLibs.keySet()) {
+							try {
+								URL u = new URL(url);
+								File output = missingLibs.get(url);
+								File outputL = new File(output.getPath() + ".lck");
+								InputStream strm = u.openStream();
+								if (!output.getParentFile().exists())
+									output.getParentFile().mkdirs();
+								outputL.createNewFile();
+								FileOutputStream strm2 = new FileOutputStream(output);
+								strm.transferTo(strm2);
+								strm.close();
+								strm2.close();
+								outputL.delete();
+								i++;
+								int iF = i;
+								SwingUtilities.invokeLater(() -> {
+									progressBar.setValue(iF);
+								});
+							} catch (IOException e) {
+								int iF = i;
+								SwingUtilities.invokeLater(() -> {
+									JOptionPane.showMessageDialog(frame,
+											"Library download failed, cannot continue.\nThe following library failed to download: "
+													+ libs[iF] + "\n\nThe MSA login window will now close...",
+											"Download Failed", JOptionPane.ERROR_MESSAGE);
+									frame.dispose();
+								});
+								return;
+							}
+						}
+						SwingUtilities.invokeLater(() -> {
+							panel.setVisible(false);
+							ArrayList<URL> urls = new ArrayList<URL>();
+							for (String lib : libs) {
+								File output = new File(jfxDir, lib + ".jar");
+								try {
+									extractNatives(output, tmpDir);
+								} catch (IOException e1) {
+								}
+								try {
+									urls.add(output.toURI().toURL());
+								} catch (MalformedURLException e) {
+								}
+							}
+							urls.add(getClass().getProtectionDomain().getCodeSource().getLocation());
+							@SuppressWarnings("resource")
+							DynamicClassLoader loader = new DynamicClassLoader();
+							loader.addLoadRestriction(str -> {
+								return str.contains("org.asf") && !str.contains("SwingFXWebView")
+										&& !str.contains("AuthAdapter") || str.contains("javax.swing");
+							});
+							loader.setOptions(DynamicClassLoader.OPTION_ALLOW_DEFINE);
+							loader.addUrls(urls);
+							System.setProperty("java.library.path", System.getProperty("java.library.path")
+									+ File.pathSeparator + tmpDir.getAbsolutePath());
+							try {
+								Class<?> cls = loader
+										.loadClass("org.asf.cyan.minecraft.toolkits.mtk.auth.windowed.AuthAdapter");
+								Object inst = cls.getConstructor().newInstance();
+								cls.getMethod("load", MsaAuthentication.class, JDialog.class, MsaAuthWindow.class,
+										BiConsumer.class).invoke(inst, auth, frame, MsaAuthWindow.this, callback);
+							} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+									| InvocationTargetException | NoSuchMethodException | SecurityException
+									| ClassNotFoundException e) {
+								throw new RuntimeException(e);
+							}
+						});
+					}, "OpenJFX downloader").start();
 				}
 
 				private void extractNatives(File jar, File tmpOut) throws IOException {
