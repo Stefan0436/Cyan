@@ -119,7 +119,8 @@ public class MsaAuthWindow {
 				if (!output.exists())
 					missingLibs.put(baseURL.replace("%proj%", lib).replace("%ver%", jfxVersion).replace("%platform%",
 							OsInfo.getCurrent() == OsInfo.osx ? "mac"
-									: OsInfo.getCurrent() == OsInfo.windows ? "win-x86" : OsInfo.getCurrent().toString()),
+									: OsInfo.getCurrent() == OsInfo.windows ? "win"
+											: OsInfo.getCurrent().toString()),
 							output);
 			}
 
@@ -220,8 +221,8 @@ public class MsaAuthWindow {
 								@SuppressWarnings("resource")
 								DynamicClassLoader loader = new DynamicClassLoader();
 								loader.addLoadRestriction(str -> {
-									return str.contains("org.asf") && !str.contains("SwingFXWebView")
-											&& !str.contains("AuthAdapter") || str.contains("javax.swing");
+									return (str.contains("org.asf") && !str.contains("AuthAdapter"))
+											|| str.contains("SwingFXWebView") || str.contains("javax.swing");
 								});
 								loader.setOptions(DynamicClassLoader.OPTION_ALLOW_DEFINE);
 								loader.addUrls(urls);
