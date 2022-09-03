@@ -1,3 +1,13 @@
+# DISCONTINUED
+I don't know why this notice was lost but...
+Cyan has been discontinued since 1.18's release, it was too hard to maintain with all the minecraft updates that kept releasing.
+If anyone wants to pick up the project feel free to fork it, but please do credit me if you do.
+Sorry about the inconvenience but this project i couldnt keep up with.
+\- Zera
+
+
+
+
 [![Build Status 1.16](https://github.com/Stefan0436/Cyan/actions/workflows/cyan-1.16.5.yml/badge.svg)](https://github.com/Stefan0436/Cyan/actions) [![Build Status 1.17.1](https://github.com/Stefan0436/Cyan/actions/workflows/cyan-1.17.1.yml/badge.svg)](https://github.com/Stefan0436/Cyan/actions) [![Latest Release](https://img.shields.io/badge/Latest%20Release-1.0.0.A14-blueviolet)](https://aerialworks.ddns.net/cyan/releases/1.0.0.A14) [![Development Release](https://img.shields.io/badge/Development%20Version-1.0.0.A15-e22bdf)](https://aerialworks.ddns.net/cyan/releases/1.0.0.A15) [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
 # NOTICE
